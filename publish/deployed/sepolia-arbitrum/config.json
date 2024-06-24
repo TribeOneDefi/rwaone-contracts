@@ -203,31 +203,31 @@
 	"TokenStaterETH": {
 		"deploy": true
 	},
-	"ProxyhJPY": {
+	"ProxyrJPY": {
 		"deploy": true
 	},
-	"TribehJPY": {
+	"TriberJPY": {
 		"deploy": true
 	},
-	"TokenStatehJPY": {
+	"TokenStaterJPY": {
 		"deploy": true
 	},
-	"TokenStatehXAU": {
+	"TokenStaterXAU": {
 		"deploy": true
 	},
-	"ProxyhXAU": {
+	"ProxyrXAU": {
 		"deploy": true
 	},
-	"TribehXAU": {
+	"TriberXAU": {
 		"deploy": true
 	},
-	"TokenStatehNVDA": {
+	"TokenStaterNVDA": {
 		"deploy": true
 	},
-	"ProxyhNVDA": {
+	"ProxyrNVDA": {
 		"deploy": true
 	},
-	"TribehNVDA": {
+	"TriberNVDA": {
 		"deploy": true
 	},
 	"ProxyrETH": {
@@ -359,13 +359,13 @@
 	"PerpsV2MarketViewsBTCPERP": {
 		"deploy": true
 	},
-	"TokenStatehTSLA": {
+	"TokenStaterTSLA": {
 		"deploy": true
 	},
-	"ProxyhTSLA": {
+	"ProxyrTSLA": {
 		"deploy": true
 	},
-	"TribehTSLA": {
+	"TriberTSLA": {
 		"deploy": true
 	},
 	"PerpsV2ProxyTSLAPERP": {
@@ -389,13 +389,13 @@
 	"PerpsV2MarketViewsTSLAPERP": {
 		"deploy": true
 	},
-	"TokenStatehEUR": {
+	"TokenStaterEUR": {
 		"deploy": true
 	},
-	"ProxyhEUR": {
+	"ProxyrEUR": {
 		"deploy": true
 	},
-	"TribehEUR": {
+	"TriberEUR": {
 		"deploy": true
 	},
 	"PerpsV2ProxyEURPERP": {
@@ -419,13 +419,13 @@
 	"PerpsV2MarketViewsEURPERP": {
 		"deploy": true
 	},
-	"TokenStatehPAX": {
+	"TokenStaterPAX": {
 		"deploy": true
 	},
-	"ProxyhPAX": {
+	"ProxyrPAX": {
 		"deploy": true
 	},
-	"TribehPAX": {
+	"TriberPAX": {
 		"deploy": true
 	},
 	"PerpsV2ProxyPAXPERP": {
@@ -449,43 +449,43 @@
 	"PerpsV2MarketViewsPAXPERP": {
 		"deploy": true
 	},
-	"TokenStatehBOSTON": {
+	"TokenStaterWASHINGTON": {
 		"deploy": true
 	},
-	"ProxyhBOSTON": {
+	"ProxyrWASHINGTON": {
 		"deploy": true
 	},
-	"TribehBOSTON": {
+	"TriberWASHINGTON": {
 		"deploy": true
 	},
-	"PerpsV2ProxyBOSTONPERP": {
+	"PerpsV2ProxyWASHINGTONPERP": {
 		"deploy": true
 	},
-	"PerpsV2MarketStateBOSTONPERP": {
+	"PerpsV2MarketStateWASHINGTONPERP": {
 		"deploy": true
 	},
-	"PerpsV2MarketBOSTONPERP": {
+	"PerpsV2MarketWASHINGTONPERP": {
 		"deploy": true
 	},
-	"PerpsV2MarketLiquidateBOSTONPERP": {
+	"PerpsV2MarketLiquidateWASHINGTONPERP": {
 		"deploy": true
 	},
-	"PerpsV2DelayedIntentBOSTONPERP": {
+	"PerpsV2DelayedIntentWASHINGTONPERP": {
 		"deploy": true
 	},
-	"PerpsV2DelayedExecutionBOSTONPERP": {
+	"PerpsV2DelayedExecutionWASHINGTONPERP": {
 		"deploy": true
 	},
-	"PerpsV2MarketViewsBOSTONPERP": {
+	"PerpsV2MarketViewsWASHINGTONPERP": {
 		"deploy": true
 	},
-	"TokenStatehLOSANGLES": {
+	"TokenStaterLOSANGLES": {
 		"deploy": true
 	},
-	"ProxyhLOSANGLES": {
+	"ProxyrLOSANGLES": {
 		"deploy": true
 	},
-	"TribehLOSANGLES": {
+	"TriberLOSANGLES": {
 		"deploy": true
 	},
 	"PerpsV2ProxyLOSANGLESPERP": {
@@ -509,13 +509,13 @@
 	"PerpsV2MarketViewsLOSANGLESPERP": {
 		"deploy": true
 	},
-	"TokenStatehNEWYORK": {
+	"TokenStaterNEWYORK": {
 		"deploy": true
 	},
-	"ProxyhNEWYORK": {
+	"ProxyrNEWYORK": {
 		"deploy": true
 	},
-	"TribehNEWYORK": {
+	"TriberNEWYORK": {
 		"deploy": true
 	},
 	"PerpsV2ProxyNEWYORKPERP": {
@@ -539,13 +539,13 @@
 	"PerpsV2MarketViewsNEWYORKPERP": {
 		"deploy": true
 	},
-	"TribehATLANTA": {
+	"TriberATLANTA": {
 		"deploy": true
 	},
-	"TokenStatehATLANTA": {
+	"TokenStaterATLANTA": {
 		"deploy": true
 	},
-	"ProxyhATLANTA": {
+	"ProxyrATLANTA": {
 		"deploy": true
 	},
 	"PerpsV2ProxyATLANTAPERP": {

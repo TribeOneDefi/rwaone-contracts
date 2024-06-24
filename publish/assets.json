@@ -17,11 +17,11 @@
 		"sign": "",
 		"description": "LosAngles"
 	},
-	"BOSTON": {
-		"asset": "BOSTON",
+	"WASHINGTON": {
+		"asset": "WASHINGTON",
 		"category": "realEstate",
 		"sign": "",
-		"description": "Boston"
+		"description": "Washington"
 	},
 	"NEWYORK": {
 		"asset": "NEWYORK",

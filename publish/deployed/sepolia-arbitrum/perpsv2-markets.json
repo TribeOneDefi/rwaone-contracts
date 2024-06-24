@@ -56,8 +56,8 @@
 		"offchainPaused": false
 	},
 	{
-		"marketKey": "hEURPERP",
-		"asset": "hEUR",
+		"marketKey": "rEURPERP",
+		"asset": "rEUR",
 		"makerFee": "0.0002",
 		"takerFee": "0.0002",
 		"takerFeeDelayedOrder": "0.0002",
@@ -84,8 +84,8 @@
 		"offchainPaused": false
 	},
 	{
-		"marketKey": "hJPYPERP",
-		"asset": "hJPY",
+		"marketKey": "rJPYPERP",
+		"asset": "rJPY",
 		"makerFee": "0.0002",
 		"takerFee": "0.0002",
 		"takerFeeDelayedOrder": "0.0002",
@@ -112,8 +112,8 @@
 		"offchainPaused": false
 	},
 	{
-		"marketKey": "hXAUPERP",
-		"asset": "hXAU",
+		"marketKey": "rXAUPERP",
+		"asset": "rXAU",
 		"makerFee": "0.0002",
 		"takerFee": "0.0002",
 		"takerFeeDelayedOrder": "0.0002",
@@ -140,8 +140,8 @@
 		"offchainPaused": false
 	},
 	{
-		"marketKey": "hNVDAPERP",
-		"asset": "hNVDA",
+		"marketKey": "rNVDAPERP",
+		"asset": "rNVDA",
 		"makerFee": "0.0002",
 		"takerFee": "0.0002",
 		"takerFeeDelayedOrder": "0.0002",
@@ -168,8 +168,8 @@
 		"offchainPaused": false
 	},
 	{
-		"marketKey": "hTSLAPERP",
-		"asset": "hTSLA",
+		"marketKey": "rTSLAPERP",
+		"asset": "rTSLA",
 		"makerFee": "0.0002",
 		"takerFee": "0.0002",
 		"takerFeeDelayedOrder": "0.0002",
@@ -196,8 +196,8 @@
 		"offchainPaused": false
 	},
 	{
-		"marketKey": "hLOSANGLESPERP",
-		"asset": "hLOSANGLES",
+		"marketKey": "rLOSANGLESPERP",
+		"asset": "rLOSANGLES",
 		"makerFee": "0.0002",
 		"takerFee": "0.0002",
 		"takerFeeDelayedOrder": "0.0002",
@@ -224,8 +224,8 @@
 		"offchainPaused": false
 	},
 	{
-		"marketKey": "hNEWYORKPERP",
-		"asset": "hNEWYORK",
+		"marketKey": "rNEWYORKPERP",
+		"asset": "rNEWYORK",
 		"makerFee": "0.0002",
 		"takerFee": "0.0002",
 		"takerFeeDelayedOrder": "0.0002",
@@ -252,8 +252,8 @@
 		"offchainPaused": false
 	},
 	{
-		"marketKey": "hBOSTONPERP",
-		"asset": "hBOSTON",
+		"marketKey": "rWASHINGTONPERP",
+		"asset": "rWASHINGTON",
 		"makerFee": "0.0002",
 		"takerFee": "0.0002",
 		"takerFeeDelayedOrder": "0.0002",
@@ -272,7 +272,7 @@
 		"skewScale": "100000",
 		"offchainPriceDivergence": "0.02",
 		"liquidationPremiumMultiplier": "1.5625",
-		"offchainMarketKey": "ocBOSTONPERP",
+		"offchainMarketKey": "ocWASHINGTONPERP",
 		"liquidationBufferRatio": "0.0075",
 		"maxPD": "0.0016",
 		"maxLiquidationDelta": "0.0008",
@@ -280,8 +280,8 @@
 		"offchainPaused": false
 	},
 	{
-		"marketKey": "hATLANTAPERP",
-		"asset": "hATLANTA",
+		"marketKey": "rATLANTAPERP",
+		"asset": "rATLANTA",
 		"makerFee": "0.0002",
 		"takerFee": "0.0002",
 		"takerFeeDelayedOrder": "0.0002",
@@ -308,8 +308,8 @@
 		"offchainPaused": false
 	},
 	{
-		"marketKey": "hPAXPERP",
-		"asset": "hPAX",
+		"marketKey": "rPAXPERP",
+		"asset": "rPAX",
 		"makerFee": "0.0002",
 		"takerFee": "0.0002",
 		"takerFeeDelayedOrder": "0.0002",

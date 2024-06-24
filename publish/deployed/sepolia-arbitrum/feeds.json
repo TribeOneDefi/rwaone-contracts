@@ -43,8 +43,8 @@
 		"asset": "ATLANTA",
 		"feed": "0x79aB321d1e7a6836962ab247ae5E3EbA843975Cf"
 	},
-	"BOSTON": {
-		"asset": "BOSTON",
+	"WASHINGTON": {
+		"asset": "WASHINGTON",
 		"feed": "0x74E826D6BC543e83CB8799BAAB6Fcfd4CeBfD928"
 	},
 	"LOSANGLES": {
