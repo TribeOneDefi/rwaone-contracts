@@ -19,7 +19,7 @@ contract RewardEscrowV2Frozen is BaseRewardEscrowV2Frozen {
 
     // note that the actual deployed RewardEscrowV2 uses SafeDecimalMath to get this value,
     // and this is different in order to simplify deployment for testing
-    uint public migrateEntriesThresholdAmount = (10 ** 18) * 1000; // Default 1000 wHAKA
+    uint public migrateEntriesThresholdAmount = (10 ** 18) * 1000; // Default 1000 wRWAX
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
     bytes32 private constant CONTRACT_RWAONEETIX_BRIDGE_OPTIMISM = "RwaoneBridgeToOptimism";
@@ -73,7 +73,7 @@ contract RewardEscrowV2Frozen is BaseRewardEscrowV2Frozen {
         require(totalBalancePendingMigration[addressToMigrate] > 0, "No escrow migration pending");
         require(totalEscrowedAccountBalance[addressToMigrate] > 0, "Address escrow balance is 0");
 
-        /* Add a vestable entry for addresses with totalBalancePendingMigration <= migrateEntriesThreshold amount of wHAKA */
+        /* Add a vestable entry for addresses with totalBalancePendingMigration <= migrateEntriesThreshold amount of wRWAX */
         if (totalBalancePendingMigration[addressToMigrate] <= migrateEntriesThresholdAmount) {
             _importVestingEntry(
                 addressToMigrate,
@@ -220,7 +220,7 @@ contract RewardEscrowV2Frozen is BaseRewardEscrowV2Frozen {
 
         /**
          *  update account total escrow balances for migration
-         *  transfer the escrowed wHAKA being migrated to the L2 deposit contract
+         *  transfer the escrowed wRWAX being migrated to the L2 deposit contract
          */
         if (escrowedAccountBalance > 0) {
             _reduceAccountEscrowBalances(account, escrowedAccountBalance);

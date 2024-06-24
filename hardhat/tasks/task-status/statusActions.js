@@ -69,12 +69,12 @@ const actions = {
 			deploymentPath,
 		});
 
-		const anyTribeOrHAKARateIsInvalid = await Rwaone.anyTribeOrHAKARateIsInvalid(blockOptions);
+		const anyTribeOrRWAXRateIsInvalid = await Rwaone.anyTribeOrRWAXRateIsInvalid(blockOptions);
 		logItem(
-			'Rwaone.anyTribeOrHAKARateIsInvalid',
-			anyTribeOrHAKARateIsInvalid,
+			'Rwaone.anyTribeOrRWAXRateIsInvalid',
+			anyTribeOrRWAXRateIsInvalid,
 			1,
-			anyTribeOrHAKARateIsInvalid ? bgRed : undefined
+			anyTribeOrRWAXRateIsInvalid ? bgRed : undefined
 		);
 
 		logItem('Rwaone.totalSupply', (await Rwaone.totalSupply(blockOptions)).toString() / 1e18);
@@ -330,7 +330,7 @@ const actions = {
 		} else {
 			currencyKeys = [
 				...(await Issuer.availableCurrencyKeys()),
-				ethers.utils.formatBytes32String('wHAKA'),
+				ethers.utils.formatBytes32String('wRWAX'),
 			];
 		}
 

@@ -37,7 +37,7 @@ contract('RewardEscrowV2', async accounts => {
 		);
 		await rewardEscrowV2.rebuildCache();
 		await rwaone.rebuildCache();
-		// mint some snx into the contract (the holder of the wHAKA)
+		// mint some snx into the contract (the holder of the wRWAX)
 		await rwaone.mintSecondary(rewardEscrowV2.address, toUnit(100), {
 			from: owner,
 		});

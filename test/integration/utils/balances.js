@@ -23,8 +23,8 @@ async function _readBalance({ ctx, symbol, user }) {
 }
 
 async function _getAmount({ ctx, symbol, user, amount }) {
-	if (symbol === 'wHAKA') {
-		await _getHAKA({ ctx, user, amount });
+	if (symbol === 'wRWAX') {
+		await _getRWAX({ ctx, user, amount });
 	} else if (symbol === 'WETH') {
 		await _getWETH({ ctx, user, amount });
 	} else if (symbol === 'rUSD') {
@@ -88,7 +88,7 @@ async function _getWETH({ ctx, user, amount }) {
 	await tx.wait();
 }
 
-async function _getHAKA({ ctx, user, amount }) {
+async function _getRWAX({ ctx, user, amount }) {
 	const { ProxyRwaone } = ctx.contracts;
 	let { Rwaone } = ctx.contracts;
 
@@ -97,7 +97,7 @@ async function _getHAKA({ ctx, user, amount }) {
 
 	const ownerTransferable = await Rwaone.transferableRwaone(ctx.users.owner.address);
 	if (ownerTransferable.lt(amount)) {
-		await _getHAKAForOwner({ ctx, amount: amount.sub(ownerTransferable) });
+		await _getRWAXForOwner({ ctx, amount: amount.sub(ownerTransferable) });
 	}
 
 	Rwaone = Rwaone.connect(ctx.users.owner);
@@ -105,23 +105,23 @@ async function _getHAKA({ ctx, user, amount }) {
 	await tx.wait();
 }
 
-async function _getHAKAForOwner({ ctx, amount }) {
+async function _getRWAXForOwner({ ctx, amount }) {
 	if (!ctx.useOvm) {
-		throw new Error('There is no more wHAKA!');
+		throw new Error('There is no more wRWAX!');
 	} else {
 		if (ctx.l1) {
-			await _getHAKAForOwnerOnL2ByDepositing({ ctx: ctx.l1, amount });
+			await _getRWAXForOwnerOnL2ByDepositing({ ctx: ctx.l1, amount });
 		} else {
-			await _getHAKAForOwnerOnL2ByHackMinting({ ctx, amount });
+			await _getRWAXForOwnerOnL2ByHackMinting({ ctx, amount });
 		}
 	}
 }
 
-async function _getHAKAForOwnerOnL2ByDepositing({ ctx, amount }) {
+async function _getRWAXForOwnerOnL2ByDepositing({ ctx, amount }) {
 	await deposit({ ctx, from: ctx.users.owner, to: ctx.users.owner, amount });
 }
 
-async function _getHAKAForOwnerOnL2ByHackMinting({ ctx, amount }) {
+async function _getRWAXForOwnerOnL2ByHackMinting({ ctx, amount }) {
 	const owner = ctx.users.owner;
 
 	let { Rwaone, AddressResolver } = ctx.contracts;
@@ -157,8 +157,8 @@ async function _getrUSD({ ctx, user, amount }) {
 
 	let tx;
 
-	const requiredHAKA = await _getHAKAAmountRequiredForrUSDAmount({ ctx, amount });
-	await ensureBalance({ ctx, symbol: 'wHAKA', user, balance: requiredHAKA });
+	const requiredRWAX = await _getRWAXAmountRequiredForrUSDAmount({ ctx, amount });
+	await ensureBalance({ ctx, symbol: 'wRWAX', user, balance: requiredRWAX });
 
 	Rwaone = Rwaone.connect(ctx.users.owner);
 
@@ -171,12 +171,12 @@ async function _getrUSD({ ctx, user, amount }) {
 		amount: ethers.utils.parseEther('1'),
 	});
 
-	const availableOwnerHAKA = await Rwaone.transferableRwaone(ctx.users.owner.address);
-	if (availableOwnerHAKA.lt(requiredHAKA.mul(2))) {
-		await _getHAKAForOwner({ ctx, amount: requiredHAKA.mul(2).sub(availableOwnerHAKA) });
+	const availableOwnerRWAX = await Rwaone.transferableRwaone(ctx.users.owner.address);
+	if (availableOwnerRWAX.lt(requiredRWAX.mul(2))) {
+		await _getRWAXForOwner({ ctx, amount: requiredRWAX.mul(2).sub(availableOwnerRWAX) });
 	}
 
-	tx = await Rwaone.transfer(tmpWallet.address, requiredHAKA.mul(2));
+	tx = await Rwaone.transfer(tmpWallet.address, requiredRWAX.mul(2));
 	await tx.wait();
 
 	tx = await Rwaone.connect(tmpWallet).issueTribes(amount);
@@ -220,7 +220,7 @@ async function _getTribe({ ctx, user, symbol, amount }) {
 	}
 }
 
-async function _getHAKAAmountRequiredForrUSDAmount({ ctx, amount }) {
+async function _getRWAXAmountRequiredForrUSDAmount({ ctx, amount }) {
 	const { Exchanger, SystemSettings } = ctx.contracts;
 
 	const ratio = await SystemSettings.issuanceRatio();
@@ -229,14 +229,14 @@ async function _getHAKAAmountRequiredForrUSDAmount({ ctx, amount }) {
 	const [expectedAmount, ,] = await Exchanger.getAmountsForExchange(
 		collateral,
 		toBytes32('rUSD'),
-		toBytes32('wHAKA')
+		toBytes32('wRWAX')
 	);
 
 	return expectedAmount;
 }
 
 function _getTokenFromSymbol({ ctx, symbol }) {
-	if (symbol === 'wHAKA') {
+	if (symbol === 'wRWAX') {
 		const { ProxyRwaone } = ctx.contracts;
 		let { Rwaone } = ctx.contracts;
 

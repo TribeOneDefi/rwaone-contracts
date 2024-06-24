@@ -19,11 +19,7 @@ contract PublicEST is ExternStateToken {
         return _transferByProxy(messageSender, to, value);
     }
 
-    function transferFrom(
-        address from,
-        address to,
-        uint value
-    ) external optionalProxy returns (bool) {
+    function transferFrom(address from, address to, uint value) external optionalProxy returns (bool) {
         return _transferFromByProxy(messageSender, from, to, value);
     }
 
@@ -35,7 +31,7 @@ contract PublicEST is ExternStateToken {
     }
 
     // SIP-252: allow to call revokeFrom on rewardsEscrow
-    // this is needed here because wHAKA is both the required caller for this method, and needs to be an actual ERC20,
+    // this is needed here because wRWAX is both the required caller for this method, and needs to be an actual ERC20,
     // so using an EOA instead of it doesn't work
     function revokeFrom(
         address rewardEscrowV2,

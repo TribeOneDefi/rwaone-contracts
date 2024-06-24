@@ -51,7 +51,7 @@ const persistTokens = async ({ network, yes, privateKey, assetsVersion }) => {
 
 	const output = {
 		name: 'Rwaone',
-		logoURI: `${baseURI}/snx/wHAKA.svg`,
+		logoURI: `${baseURI}/snx/wRWAX.svg`,
 		keywords: ['rwaone', 'defi', 'derivatives', 'tribes', 'rwaones'],
 		timestamp: new Date().toISOString(),
 		tags: {
@@ -78,10 +78,10 @@ const persistTokens = async ({ network, yes, privateKey, assetsVersion }) => {
 			chainId,
 			address,
 			symbol,
-			name: symbol === 'wHAKA' ? 'Rwaone Network Token' : `Tribe ${name}`,
+			name: symbol === 'wRWAX' ? 'Rwaone Network Token' : `Tribe ${name}`,
 			decimals,
-			logoURI: baseURI + (symbol === 'wHAKA' ? '/snx/wHAKA.svg' : `/tribes/${symbol}.svg`),
-			tags: [].concat(index ? 'index' : []).concat(symbol !== 'wHAKA' ? 'tribe' : []),
+			logoURI: baseURI + (symbol === 'wRWAX' ? '/snx/wRWAX.svg' : `/tribes/${symbol}.svg`),
+			tags: [].concat(index ? 'index' : []).concat(symbol !== 'wRWAX' ? 'tribe' : []),
 		})),
 	};
 

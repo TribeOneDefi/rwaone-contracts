@@ -168,7 +168,7 @@ contract('RwaoneBridgeToBase (unit tests)', accounts => {
 				describe('failure modes', () => {
 					it('does not work when the user has less trasferable snx than the withdrawal amount', async () => {
 						mintableRwaone.transferableRwaone.returns(() => '0');
-						await assert.revert(instance.withdraw('1'), 'Not enough transferable wHAKA');
+						await assert.revert(instance.withdraw('1'), 'Not enough transferable wRWAX');
 					});
 					it('does not work when initiation has been suspended', async () => {
 						await instance.suspendInitiation({ from: owner });
@@ -185,7 +185,7 @@ contract('RwaoneBridgeToBase (unit tests)', accounts => {
 						withdrawalTx = await instance.withdraw(amount, { from: user1 });
 					});
 
-					it('then wHAKA is burned via mintableSyntetix.burnSecondary', async () => {
+					it('then wRWAX is burned via mintableSyntetix.burnSecondary', async () => {
 						expect(mintableRwaone.burnSecondary).to.have.length(0);
 						mintableRwaone.burnSecondary.returnsAtCall(0, user1);
 						mintableRwaone.burnSecondary.returnsAtCall(1, amount);
@@ -219,7 +219,7 @@ contract('RwaoneBridgeToBase (unit tests)', accounts => {
 						mintableRwaone.transferableRwaone.returns(() => '0');
 						await assert.revert(
 							instance.withdrawTo(randomAddress, '1'),
-							'Not enough transferable wHAKA'
+							'Not enough transferable wRWAX'
 						);
 					});
 					it('does not work when initiation has been suspended', async () => {
@@ -237,7 +237,7 @@ contract('RwaoneBridgeToBase (unit tests)', accounts => {
 						withdrawalTx = await instance.withdrawTo(randomAddress, amount, { from: user1 });
 					});
 
-					it('then wHAKA is burned via mintableSyntetix.burnSecondary to the specified address', async () => {
+					it('then wRWAX is burned via mintableSyntetix.burnSecondary to the specified address', async () => {
 						expect(mintableRwaone.burnSecondary).to.have.length(0);
 						mintableRwaone.burnSecondary.returnsAtCall(0, user1);
 						mintableRwaone.burnSecondary.returnsAtCall(1, amount);
@@ -305,7 +305,7 @@ contract('RwaoneBridgeToBase (unit tests)', accounts => {
 						});
 					});
 
-					it('then wHAKA is minted via MintableRwaone.mintSecondary', async () => {
+					it('then wRWAX is minted via MintableRwaone.mintSecondary', async () => {
 						expect(mintableRwaone.mintSecondary).to.have.length(0);
 						mintableRwaone.mintSecondary.returnsAtCall(0, user1);
 						mintableRwaone.mintSecondary.returnsAtCall(1, finalizeDepositAmount);
@@ -356,7 +356,7 @@ contract('RwaoneBridgeToBase (unit tests)', accounts => {
 						});
 					});
 
-					it('then wHAKA is minted via MintbaleRwaone.mintSecondary', async () => {
+					it('then wRWAX is minted via MintbaleRwaone.mintSecondary', async () => {
 						expect(mintableRwaone.mintSecondaryRewards).to.have.length(0);
 						mintableRwaone.mintSecondaryRewards.returnsAtCall(0, finalizeRewardDepositAmount);
 					});
@@ -399,7 +399,7 @@ contract('RwaoneBridgeToBase (unit tests)', accounts => {
 						assert.eventEqual(finalizeTx, 'FeePeriodCloseFinalized', ['1', '2']);
 					});
 
-					it('then wHAKA is minted via MintableRwaone.mintSecondary', async () => {
+					it('then wRWAX is minted via MintableRwaone.mintSecondary', async () => {
 						expect(feePool.closeSecondary).to.have.length(0);
 						feePool.closeSecondary.returnsAtCall(0, '1');
 						feePool.closeSecondary.returnsAtCall(1, '2');

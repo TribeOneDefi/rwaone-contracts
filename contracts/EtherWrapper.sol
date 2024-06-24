@@ -32,7 +32,7 @@ contract EtherWrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IE
     bytes32 internal constant rUSD = "rUSD";
     bytes32 internal constant hETH = "hETH";
     bytes32 internal constant ETH = "ETH";
-    bytes32 internal constant wHAKA = "wHAKA";
+    bytes32 internal constant wRWAX = "wRWAX";
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
     bytes32 private constant CONTRACT_RWAONEHETH = "TribehETH";

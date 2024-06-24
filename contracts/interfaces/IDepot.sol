@@ -22,12 +22,12 @@ interface IDepot {
 
     function withdrawMyDepositedTribes() external;
 
-    // Note: On mainnet no wHAKA has been deposited. The following functions are kept alive for testnet wHAKA faucets.
-    function exchangeEtherForHAKA() external payable returns (uint);
+    // Note: On mainnet no wRWAX has been deposited. The following functions are kept alive for testnet wRWAX faucets.
+    function exchangeEtherForRWAX() external payable returns (uint);
 
-    function exchangeEtherForHAKAAtRate(uint guaranteedRate, uint guaranteedRwaoneRate) external payable returns (uint);
+    function exchangeEtherForRWAXAtRate(uint guaranteedRate, uint guaranteedRwaoneRate) external payable returns (uint);
 
-    function exchangeTribesForHAKA(uint tribeAmount) external returns (uint);
+    function exchangeTribesForRWAX(uint tribeAmount) external returns (uint);
 
     function tribeetixReceivedForEther(uint amount) external view returns (uint);
 

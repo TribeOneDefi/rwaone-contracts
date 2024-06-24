@@ -15,7 +15,7 @@ defaultValue = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 [setting.test_user]
 defaultValue = "0x48914229deDd5A9922f44441ffCCfC2Cb7856Ee9"
 
-# how much should wHAKA be worth (6 decimals)
+# how much should wRWAX be worth (6 decimals)
 [setting.rate_snx]
 defaultValue = "5000000"
 

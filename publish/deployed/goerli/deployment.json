@@ -18659,7 +18659,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "anyTribeOrHAKARateIsInvalid",
+					"name": "anyTribeOrRWAXRateIsInvalid",
 					"outputs": [
 						{
 							"internalType": "bool",
@@ -23456,7 +23456,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "anyTribeOrHAKARateIsInvalid",
+					"name": "anyTribeOrRWAXRateIsInvalid",
 					"outputs": [
 						{
 							"internalType": "bool",
@@ -30038,7 +30038,7 @@
 				{
 					"constant": false,
 					"inputs": [],
-					"name": "exchangeEtherForHAKA",
+					"name": "exchangeEtherForRWAX",
 					"outputs": [
 						{
 							"internalType": "uint256",
@@ -30064,7 +30064,7 @@
 							"type": "uint256"
 						}
 					],
-					"name": "exchangeEtherForHAKAAtRate",
+					"name": "exchangeEtherForRWAXAtRate",
 					"outputs": [
 						{
 							"internalType": "uint256",
@@ -30121,7 +30121,7 @@
 							"type": "uint256"
 						}
 					],
-					"name": "exchangeTribesForHAKA",
+					"name": "exchangeTribesForRWAX",
 					"outputs": [
 						{
 							"internalType": "uint256",
@@ -30147,7 +30147,7 @@
 							"type": "uint256"
 						}
 					],
-					"name": "exchangeTribesForHAKAAtRate",
+					"name": "exchangeTribesForRWAXAtRate",
 					"outputs": [
 						{
 							"internalType": "uint256",

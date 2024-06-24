@@ -56,7 +56,7 @@ async function _isCacheInvalid({ ctx }) {
 async function _areRatesInvalid({ ctx }) {
 	const { Rwaone } = ctx.contracts;
 
-	return Rwaone.anyTribeOrHAKARateIsInvalid();
+	return Rwaone.anyTribeOrRWAXRateIsInvalid();
 }
 
 async function _printCacheInfo({ ctx }) {
@@ -100,7 +100,7 @@ async function _getAvailableCurrencyKeys({ ctx }) {
 
 	return availableCurrencyKeys
 		.filter(key => key !== toBytes32('rUSD'))
-		.concat(['wHAKA', 'ETH'].map(toBytes32));
+		.concat(['wRWAX', 'ETH'].map(toBytes32));
 }
 
 async function _setMissingRates({ ctx }) {

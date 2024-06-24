@@ -18,7 +18,7 @@ describe('withdrawTo() integration tests (L1, L2)', () => {
 
 	let withdrawalReceipt;
 
-	describe('when the owner withdraws wHAKA for a user', () => {
+	describe('when the owner withdraws wRWAX for a user', () => {
 		before('target contracts and users', () => {
 			({ Rwaone, RwaoneBridgeToBase } = ctx.l2.contracts);
 			({ Rwaone: RwaoneL1 } = ctx.l1.contracts);

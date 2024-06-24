@@ -16,7 +16,7 @@ library SystemSettingsLib {
 
     bytes32 public constant SETTINGS_CONTRACT_NAME = "SystemSettings";
 
-    // No more tribes may be issued than the value of wHAKA backing them.
+    // No more tribes may be issued than the value of wRWAX backing them.
     uint public constant MAX_ISSUANCE_RATIO = 1e18;
 
     // The fee period must be between 1 day and 60 days.
@@ -75,11 +75,7 @@ library SystemSettingsLib {
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, gasLimitSettings, crossDomainMessageGasLimit);
     }
 
-    function setIssuanceRatio(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        uint ratio
-    ) external {
+    function setIssuanceRatio(IFlexibleStorage flexibleStorage, bytes32 settingName, uint ratio) external {
         require(ratio <= MAX_ISSUANCE_RATIO, "New issuance ratio cannot exceed MAX_ISSUANCE_RATIO");
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, ratio);
     }
@@ -92,11 +88,7 @@ library SystemSettingsLib {
         flexibleStorage.setBoolValue(SETTINGS_CONTRACT_NAME, settingName, _tradingRewardsEnabled);
     }
 
-    function setWaitingPeriodSecs(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        uint _waitingPeriodSecs
-    ) external {
+    function setWaitingPeriodSecs(IFlexibleStorage flexibleStorage, bytes32 settingName, uint _waitingPeriodSecs) external {
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, _waitingPeriodSecs);
     }
 
@@ -108,11 +100,7 @@ library SystemSettingsLib {
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, _priceDeviationThresholdFactor);
     }
 
-    function setFeePeriodDuration(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        uint _feePeriodDuration
-    ) external {
+    function setFeePeriodDuration(IFlexibleStorage flexibleStorage, bytes32 settingName, uint _feePeriodDuration) external {
         require(_feePeriodDuration >= MIN_FEE_PERIOD_DURATION, "value < MIN_FEE_PERIOD_DURATION");
         require(_feePeriodDuration <= MAX_FEE_PERIOD_DURATION, "value > MAX_FEE_PERIOD_DURATION");
 
@@ -130,11 +118,7 @@ library SystemSettingsLib {
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, threshold);
     }
 
-    function setLiquidationDelay(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        uint time
-    ) external {
+    function setLiquidationDelay(IFlexibleStorage flexibleStorage, bytes32 settingName, uint time) external {
         require(time <= MAX_LIQUIDATION_DELAY, "Must be less than MAX_LIQUIDATION_DELAY");
         require(time >= MIN_LIQUIDATION_DELAY, "Must be greater than MIN_LIQUIDATION_DELAY");
 
@@ -161,66 +145,38 @@ library SystemSettingsLib {
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, _liquidationRatio);
     }
 
-    function setLiquidationEscrowDuration(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        uint duration
-    ) external {
+    function setLiquidationEscrowDuration(IFlexibleStorage flexibleStorage, bytes32 settingName, uint duration) external {
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, duration);
     }
 
-    function setSnxLiquidationPenalty(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        uint penalty
-    ) external {
-        // MAX_LIQUIDATION_PENALTY is enforced on both Collateral and wHAKA liquidations
+    function setSnxLiquidationPenalty(IFlexibleStorage flexibleStorage, bytes32 settingName, uint penalty) external {
+        // MAX_LIQUIDATION_PENALTY is enforced on both Collateral and wRWAX liquidations
         require(penalty <= MAX_LIQUIDATION_PENALTY, "penalty > MAX_LIQUIDATION_PENALTY");
 
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, penalty);
     }
 
-    function setSelfLiquidationPenalty(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        uint penalty
-    ) external {
+    function setSelfLiquidationPenalty(IFlexibleStorage flexibleStorage, bytes32 settingName, uint penalty) external {
         require(penalty <= MAX_LIQUIDATION_PENALTY, "penalty > MAX_LIQUIDATION_PENALTY");
 
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, penalty);
     }
 
-    function setLiquidationPenalty(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        uint penalty
-    ) external {
+    function setLiquidationPenalty(IFlexibleStorage flexibleStorage, bytes32 settingName, uint penalty) external {
         require(penalty <= MAX_LIQUIDATION_PENALTY, "penalty > MAX_LIQUIDATION_PENALTY");
 
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, penalty);
     }
 
-    function setFlagReward(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        uint reward
-    ) external {
+    function setFlagReward(IFlexibleStorage flexibleStorage, bytes32 settingName, uint reward) external {
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, reward);
     }
 
-    function setLiquidateReward(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        uint reward
-    ) external {
+    function setLiquidateReward(IFlexibleStorage flexibleStorage, bytes32 settingName, uint reward) external {
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, reward);
     }
 
-    function setRateStalePeriod(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        uint period
-    ) external {
+    function setRateStalePeriod(IFlexibleStorage flexibleStorage, bytes32 settingName, uint period) external {
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, period);
     }
 
@@ -241,54 +197,30 @@ library SystemSettingsLib {
         }
     }
 
-    function setMinimumStakeTime(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        uint _seconds
-    ) external {
+    function setMinimumStakeTime(IFlexibleStorage flexibleStorage, bytes32 settingName, uint _seconds) external {
         require(_seconds <= MAX_MINIMUM_STAKE_TIME, "stake time exceed maximum 1 week");
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, _seconds);
     }
 
-    function setDebtSnapshotStaleTime(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        uint _seconds
-    ) external {
+    function setDebtSnapshotStaleTime(IFlexibleStorage flexibleStorage, bytes32 settingName, uint _seconds) external {
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, _seconds);
     }
 
-    function setAggregatorWarningFlags(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        address _flags
-    ) external {
+    function setAggregatorWarningFlags(IFlexibleStorage flexibleStorage, bytes32 settingName, address _flags) external {
         require(_flags != address(0), "Valid address must be given");
         flexibleStorage.setAddressValue(SETTINGS_CONTRACT_NAME, settingName, _flags);
     }
 
-    function setEtherWrapperMaxETH(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        uint _maxETH
-    ) external {
+    function setEtherWrapperMaxETH(IFlexibleStorage flexibleStorage, bytes32 settingName, uint _maxETH) external {
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, _maxETH);
     }
 
-    function setEtherWrapperMintFeeRate(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        uint _rate
-    ) external {
+    function setEtherWrapperMintFeeRate(IFlexibleStorage flexibleStorage, bytes32 settingName, uint _rate) external {
         require(_rate <= uint(MAX_WRAPPER_MINT_FEE_RATE), "rate > MAX_WRAPPER_MINT_FEE_RATE");
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, _rate);
     }
 
-    function setEtherWrapperBurnFeeRate(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        uint _rate
-    ) external {
+    function setEtherWrapperBurnFeeRate(IFlexibleStorage flexibleStorage, bytes32 settingName, uint _rate) external {
         require(_rate <= uint(MAX_WRAPPER_BURN_FEE_RATE), "rate > MAX_WRAPPER_BURN_FEE_RATE");
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, _rate);
     }
@@ -371,20 +303,12 @@ library SystemSettingsLib {
         );
     }
 
-    function setAtomicMaxVolumePerBlock(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        uint _maxVolume
-    ) external {
+    function setAtomicMaxVolumePerBlock(IFlexibleStorage flexibleStorage, bytes32 settingName, uint _maxVolume) external {
         require(_maxVolume <= MAX_ATOMIC_VOLUME_PER_BLOCK, "Atomic max volume exceed maximum uint192");
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, _maxVolume);
     }
 
-    function setAtomicTwapWindow(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        uint _window
-    ) external {
+    function setAtomicTwapWindow(IFlexibleStorage flexibleStorage, bytes32 settingName, uint _window) external {
         require(_window >= MIN_ATOMIC_TWAP_WINDOW, "Atomic twap window under minimum 1 min");
         require(_window <= MAX_ATOMIC_TWAP_WINDOW, "Atomic twap window exceed maximum 1 day");
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, _window);
@@ -476,11 +400,7 @@ library SystemSettingsLib {
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, keccak256(abi.encodePacked(settingName, _currencyKey)), _value);
     }
 
-    function setExchangeMaxDynamicFee(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        uint maxFee
-    ) external {
+    function setExchangeMaxDynamicFee(IFlexibleStorage flexibleStorage, bytes32 settingName, uint maxFee) external {
         require(maxFee != 0, "Max dynamic fee cannot be 0");
         require(maxFee <= MAX_EXCHANGE_FEE_RATE, "MAX_EXCHANGE_FEE_RATE exceeded");
 

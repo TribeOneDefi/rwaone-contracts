@@ -66,7 +66,7 @@ contract Migration_NaosOptimism is BaseMigration {
         addressresolver_importAddresses_0();
         // Rebuild the resolver caches in all MixinResolver contracts - batch 1;
         addressresolver_rebuildCaches_1();
-        // Ensure the wHAKA proxy has the correct Rwaone target set;
+        // Ensure the wRWAX proxy has the correct Rwaone target set;
         proxytribeetix_i.setTarget(Proxyable(new_Rwaone_contract));
         // Ensure Issuer contract can suspend issuance - see SIP-165;
         systemstatus_i.updateAccessControl("Issuance", new_Issuer_contract, true, false);

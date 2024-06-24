@@ -80,7 +80,7 @@ describe('depositAndMigrateEscrow() integration tests (L1, L2)', () => {
 			);
 		});
 
-		describe('when the user migrates their escrow and deposit wHAKA', () => {
+		describe('when the user migrates their escrow and deposit wRWAX', () => {
 			let depositAndMigrateEscrowReceipt;
 			let userBalanceL2;
 			let totalSupplyL2;

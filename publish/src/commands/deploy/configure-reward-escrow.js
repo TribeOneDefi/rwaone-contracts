@@ -35,7 +35,7 @@ module.exports = async ({ addressOf, deployer, runStep }) => {
 	// });
 
 	// // set frozen address entry for migrating balances
-	// // this breaks creating entries (since wHAKA cannot be transferred)
+	// // this breaks creating entries (since wRWAX cannot be transferred)
 	// // note that FeePool will still be able to create entries on the old contract up to the point
 	// // its resolver cache is rebuilt (if this is not done atomcally in a migration contract)
 	// await runStep({
@@ -49,7 +49,7 @@ module.exports = async ({ addressOf, deployer, runStep }) => {
 	// 	comment: 'Ensure that RewardEscrowV2Frozen is in the address resolver',
 	// });
 
-	// // move wHAKA balances if needed
+	// // move wRWAX balances if needed
 	// // this breaks vesting
 	// const migratableBalance = await Rwaone.balanceOf(frozenOrPreviousEscrow.address);
 	// if (migratableBalance.gt(0)) {
@@ -57,11 +57,11 @@ module.exports = async ({ addressOf, deployer, runStep }) => {
 	// 		contract: 'Rwaone',
 	// 		target: Rwaone,
 	// 		write: 'migrateEscrowContractBalance',
-	// 		comment: 'Ensure that old escrow wHAKA balance is migrated to new contract',
+	// 		comment: 'Ensure that old escrow wRWAX balance is migrated to new contract',
 	// 	});
 	// } else {
 	// 	console.log(
-	// 		gray('Skipping Rwaone.migrateEscrowContractBalance as frozen contract has no wHAKA balance.')
+	// 		gray('Skipping Rwaone.migrateEscrowContractBalance as frozen contract has no wRWAX balance.')
 	// 	);
 	// }
 

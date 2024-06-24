@@ -63,11 +63,11 @@ const nominate = async ({
 
 	// Contracts maintained by non-pDAO owners
 	// DappMaintenance (UI control)
-	// StakingRewardsHAKAWETHUniswapV3
+	// StakingRewardsRWAXWETHUniswapV3
 	// StakingRewardsrUSDDAIUniswapV3
 	const excludedContracts = [
 		'StakingRewardsrUSDDAIUniswapV3',
-		'StakingRewardsHAKAWETHUniswapV3',
+		'StakingRewardsRWAXWETHUniswapV3',
 		'DappMaintenance',
 	];
 

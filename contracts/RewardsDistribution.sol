@@ -155,10 +155,10 @@ contract RewardsDistribution is Owned, IRewardsDistribution {
             if (distributions[i].destination != address(0) || distributions[i].amount != 0) {
                 remainder = remainder.sub(distributions[i].amount);
 
-                // Transfer the wHAKA
+                // Transfer the wRWAX
                 IERC20(tribeetixProxy).transfer(distributions[i].destination, distributions[i].amount);
 
-                // If the contract implements RewardsDistributionRecipient.sol, inform it how many wHAKA its received.
+                // If the contract implements RewardsDistributionRecipient.sol, inform it how many wRWAX its received.
                 bytes memory payload = abi.encodeWithSignature("notifyRewardAmount(uint256)", distributions[i].amount);
 
                 // solhint-disable avoid-low-level-calls

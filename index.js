@@ -138,10 +138,10 @@ const defaults = {
 		.toString(), // 2/3 = 0.6666666667 // 150% ratio
 	LIQUIDATION_ESCROW_DURATION: (3600 * 24 * 365).toString(), // 1 year
 	LIQUIDATION_PENALTY: w3utils.toWei('0.1'), // 10% penalty (used for Collateral liquidations)
-	HAKA_LIQUIDATION_PENALTY: w3utils.toWei('0.3'), // 30% penalty (used for wHAKA Liquidations)
+	RWAX_LIQUIDATION_PENALTY: w3utils.toWei('0.3'), // 30% penalty (used for wRWAX Liquidations)
 	SELF_LIQUIDATION_PENALTY: w3utils.toWei('0.2'), // 20% penalty
-	FLAG_REWARD: w3utils.toWei('10'), // 10 wHAKA
-	LIQUIDATE_REWARD: w3utils.toWei('20'), // 20 wHAKA
+	FLAG_REWARD: w3utils.toWei('10'), // 10 wRWAX
+	LIQUIDATE_REWARD: w3utils.toWei('20'), // 20 wRWAX
 	RATE_STALE_PERIOD: (3600 * 25).toString(), // 25 hours
 	EXCHANGE_FEE_RATES: {
 		forex: w3utils.toWei('0.003'),
@@ -823,13 +823,13 @@ const getTokens = ({ network = 'mainnet', path, fs, useOvm = false } = {}) => {
 	return [
 		Object.assign(
 			{
-				symbol: 'wHAKA',
-				asset: 'wHAKA',
+				symbol: 'wRWAX',
+				asset: 'wRWAX',
 				name: 'Rwaone',
 				address: targets.ProxyRwaone.address,
 				decimals: 18,
 			},
-			feeds['wHAKA'].feed ? { feed: feeds['wHAKA'].feed } : {}
+			feeds['wRWAX'].feed ? { feed: feeds['wRWAX'].feed } : {}
 		),
 	].concat(
 		tribes

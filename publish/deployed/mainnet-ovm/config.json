@@ -146,7 +146,7 @@
 	"StakingRewardsrUSDDAIUniswapV3": {
 		"deploy": false
 	},
-	"StakingRewardsHAKAWETHUniswapV3": {
+	"StakingRewardsRWAXWETHUniswapV3": {
 		"deploy": false
 	},
 	"SystemSettingsLib": {

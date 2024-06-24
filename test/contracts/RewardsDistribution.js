@@ -267,7 +267,7 @@ contract('RewardsDistribution', async accounts => {
 				from: owner,
 			});
 
-			// Set the wHAKA Token Transfer Address
+			// Set the wRWAX Token Transfer Address
 			await rewardsDistribution.setRwaoneProxy(rwaone.address, {
 				from: owner,
 			});
@@ -315,7 +315,7 @@ contract('RewardsDistribution', async accounts => {
 			const authorityAddress = await rewardsDistribution.authority();
 			assert.equal(authorityAddress, authorityAddress);
 
-			// Transfer wHAKA to the RewardsDistribution contract address
+			// Transfer wRWAX to the RewardsDistribution contract address
 			await rwaone.methods['transfer(address,uint256)'](
 				rewardsDistribution.address,
 				totalToDistribute,
@@ -366,7 +366,7 @@ contract('RewardsDistribution', async accounts => {
 			const distributionsLength = await rewardsDistribution.distributionsLength();
 			assert.equal(distributionsLength, 2);
 
-			// Transfer wHAKA to the RewardsDistribution contract address
+			// Transfer wRWAX to the RewardsDistribution contract address
 			await rwaone.transfer(rewardsDistribution.address, totalToDistribute, { from: owner });
 
 			// Check RewardsDistribution balance

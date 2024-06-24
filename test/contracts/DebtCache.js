@@ -26,16 +26,16 @@ const {
 } = require('../..');
 
 contract('DebtCache', async accounts => {
-	const [rUSD, sAUD, sEUR, wHAKA, hETH, ETH, iETH] = [
+	const [rUSD, sAUD, sEUR, wRWAX, hETH, ETH, iETH] = [
 		'rUSD',
 		'sAUD',
 		'sEUR',
-		'wHAKA',
+		'wRWAX',
 		'hETH',
 		'ETH',
 		'iETH',
 	].map(toBytes32);
-	const tribeKeys = [rUSD, sAUD, sEUR, hETH, wHAKA];
+	const tribeKeys = [rUSD, sAUD, sEUR, hETH, wRWAX];
 
 	const [deployerAccount, owner, , account1] = accounts;
 
@@ -308,7 +308,7 @@ contract('DebtCache', async accounts => {
 		await updateAggregatorRates(
 			exchangeRates,
 			circuitBreaker,
-			[sAUD, sEUR, wHAKA, hETH, ETH, iETH],
+			[sAUD, sEUR, wRWAX, hETH, ETH, iETH],
 			['0.5', '1.25', '10', '200', '200', '200'].map(toUnit)
 		);
 
@@ -543,7 +543,7 @@ contract('DebtCache', async accounts => {
 				await updateAggregatorRates(
 					exchangeRates,
 					circuitBreaker,
-					[sAUD, sEUR, wHAKA, hETH, ETH, iETH],
+					[sAUD, sEUR, wRWAX, hETH, ETH, iETH],
 					['0.5', '2', '100', '200', '200', '200'].map(toUnit)
 				);
 				const tx2 = await debtCache.takeDebtSnapshot();
@@ -630,7 +630,7 @@ contract('DebtCache', async accounts => {
 				});
 
 				it('current debt is correct', async () => {
-					// debt shouldn't have changed since wHAKA holders have not issued any more debt
+					// debt shouldn't have changed since wRWAX holders have not issued any more debt
 					assert.bnEqual(await debtCache.currentDebt(), beforeExcludedDebts);
 				});
 			});
@@ -738,8 +738,8 @@ contract('DebtCache', async accounts => {
 				assert.eventEqual(tx.logs[0], 'DebtCacheUpdated', [toUnit(600)]);
 			});
 
-			it('reverts when attempting to synchronise non-existent tribes or wHAKA', async () => {
-				await assert.revert(debtCache.updateCachedTribeDebts([wHAKA]));
+			it('reverts when attempting to synchronise non-existent tribes or wRWAX', async () => {
+				await assert.revert(debtCache.updateCachedTribeDebts([wRWAX]));
 				const fakeTribe = toBytes32('FAKE');
 				await assert.revert(debtCache.updateCachedTribeDebts([fakeTribe]));
 				await assert.revert(debtCache.updateCachedTribeDebts([rUSD, fakeTribe]));
@@ -1481,7 +1481,7 @@ contract('DebtCache', async accounts => {
 				});
 			});
 
-			it('increases non-wHAKA debt', async () => {
+			it('increases non-wRWAX debt', async () => {
 				assert.bnEqual(
 					totalNonSnxBackedDebt.add(multiplyDecimalRound(oneETH, rate)),
 					await getTotalNonSnxBackedDebt()
@@ -1498,7 +1498,7 @@ contract('DebtCache', async accounts => {
 					tx = await rwaone.exchange(hETH, '5', sAUD, { from: account1 });
 				});
 
-				it('non-wHAKA debt is unchanged', async () => {
+				it('non-wRWAX debt is unchanged', async () => {
 					assert.bnEqual(
 						totalNonSnxBackedDebt.add(multiplyDecimalRound(oneETH, rate)),
 						await getTotalNonSnxBackedDebt()
@@ -1563,7 +1563,7 @@ contract('DebtCache', async accounts => {
 				await short.open(amount, oneETH, hETH, { from: account1 });
 			});
 
-			it('increases non-wHAKA debt', async () => {
+			it('increases non-wRWAX debt', async () => {
 				assert.bnEqual(totalNonSnxBackedDebt.add(rate), await getTotalNonSnxBackedDebt());
 			});
 			it('is excluded from currentDebt', async () => {

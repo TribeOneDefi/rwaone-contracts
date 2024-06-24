@@ -42,7 +42,7 @@ async function fundAccounts({ ctx, accounts }) {
 
 		await ensureBalance({
 			ctx,
-			symbol: 'wHAKA',
+			symbol: 'wRWAX',
 			user: { address: account },
 			balance: ethers.utils.parseEther('100000000'),
 		});
@@ -73,7 +73,7 @@ const defaultAccounts = [
 ];
 
 task('fund-local-accounts')
-	.addParam('targetNetwork', 'The wHAKA network to use', 'local')
+	.addParam('targetNetwork', 'The wRWAX network to use', 'local')
 	.addFlag('useOvm', 'Use an Optimism chain', true)
 	.addOptionalParam(
 		'providerUrl',
@@ -81,7 +81,7 @@ task('fund-local-accounts')
 		'http://localhost:8545'
 	)
 	.addOptionalParam('privateKey', 'Private key to use to sign txs')
-	.addOptionalParam('account', 'The account to fund with ETH, wHAKA, rUSD')
+	.addOptionalParam('account', 'The account to fund with ETH, wRWAX, rUSD')
 	.addOptionalParam('deploymentPath', 'Specify the path to the deployment data directory')
 	.setAction(async (taskArguments, hre, runSuper) => {
 		const { account, providerUrl, targetNetwork, privateKey, deploymentPath } = taskArguments;

@@ -79,7 +79,7 @@ interface IRewardEscrowV2Frozen {
         VestingEntries.VestingEntry[] calldata vestingEntries
     ) external;
 
-    // Return amount of wHAKA transfered to RwaoneBridgeToOptimism deposit contract
+    // Return amount of wRWAX transfered to RwaoneBridgeToOptimism deposit contract
     function burnForMigration(
         address account,
         uint256[] calldata entryIDs

@@ -21,7 +21,7 @@ const {
 		LIQUIDATION_RATIO,
 		LIQUIDATION_ESCROW_DURATION,
 		LIQUIDATION_PENALTY,
-		HAKA_LIQUIDATION_PENALTY,
+		RWAX_LIQUIDATION_PENALTY,
 		SELF_LIQUIDATION_PENALTY,
 		FLAG_REWARD,
 		LIQUIDATE_REWARD,
@@ -531,7 +531,7 @@ const setupContract = async ({
 
 	const postDeployTasks = {
 		async Rwaone() {
-			// first give all wHAKA supply to the owner (using the hack that the deployerAccount was setup as the associatedContract via
+			// first give all wRWAX supply to the owner (using the hack that the deployerAccount was setup as the associatedContract via
 			// the constructor args)
 			await cache['TokenStateRwaone'].setBalanceOf(owner, SUPPLY_100M, {
 				from: deployerAccount,
@@ -589,7 +589,7 @@ const setupContract = async ({
 			);
 		},
 		async BaseRwaone() {
-			// first give all wHAKA supply to the owner (using the hack that the deployerAccount was setup as the associatedContract via
+			// first give all wRWAX supply to the owner (using the hack that the deployerAccount was setup as the associatedContract via
 			// the constructor args)
 			await cache['TokenStateBaseRwaone'].setBalanceOf(owner, SUPPLY_100M, {
 				from: deployerAccount,
@@ -625,7 +625,7 @@ const setupContract = async ({
 			);
 		},
 		async MintableRwaone() {
-			// first give all wHAKA supply to the owner (using the hack that the deployerAccount was setup as the associatedContract via
+			// first give all wRWAX supply to the owner (using the hack that the deployerAccount was setup as the associatedContract via
 			// the constructor args)
 			await cache['TokenStateMintableRwaone'].setBalanceOf(owner, SUPPLY_100M, {
 				from: deployerAccount,
@@ -1871,7 +1871,7 @@ const setupAllContracts = async ({
 			returnObj['SystemSettings'].setLiquidationPenalty(LIQUIDATION_PENALTY, {
 				from: owner,
 			}),
-			returnObj['SystemSettings'].setSnxLiquidationPenalty(HAKA_LIQUIDATION_PENALTY, {
+			returnObj['SystemSettings'].setSnxLiquidationPenalty(RWAX_LIQUIDATION_PENALTY, {
 				from: owner,
 			}),
 			returnObj['SystemSettings'].setSelfLiquidationPenalty(SELF_LIQUIDATION_PENALTY, {
@@ -2075,8 +2075,8 @@ const setupAllContracts = async ({
 	);
 
 	if (returnObj['ExchangeRates']) {
-		// setup wHAKA price feed and any other feeds
-		const keys = ['wHAKA', ...(feeds || [])].map(toBytes32);
+		// setup wRWAX price feed and any other feeds
+		const keys = ['wRWAX', ...(feeds || [])].map(toBytes32);
 		const prices = ['0.2', ...(feeds || []).map(() => '1.0')].map(toUnit);
 		await setupPriceAggregators(returnObj['ExchangeRates'], owner, keys);
 		await updateAggregatorRates(

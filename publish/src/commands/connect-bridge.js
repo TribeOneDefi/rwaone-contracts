@@ -127,7 +127,7 @@ const connectBridge = async ({
 		dryRun,
 	});
 
-	// check approval (bridge needs ERC20 approval to spend bridge escrow's wHAKA for withdrawals)
+	// check approval (bridge needs ERC20 approval to spend bridge escrow's wRWAX for withdrawals)
 	const currentAllowance = await Rwaone.allowance(
 		RwaoneBridgeEscrow.address,
 		RwaoneBridgeToOptimism.address
@@ -135,7 +135,7 @@ const connectBridge = async ({
 
 	console.log(
 		gray(
-			'Current allowance for bridge to spend bridge escrow wHAKA is',
+			'Current allowance for bridge to spend bridge escrow wRWAX is',
 			ethers.utils.formatEther(currentAllowance)
 		)
 	);
@@ -148,7 +148,7 @@ const connectBridge = async ({
 		if (!dryRun) {
 			console.log(
 				yellow.inverse(
-					`  * CALLING RwaoneBridgeEscrow.approveBridge(wHAKA, 'RwaoneBridgeToOptimism', UInt256.MAX))`
+					`  * CALLING RwaoneBridgeEscrow.approveBridge(wRWAX, 'RwaoneBridgeToOptimism', UInt256.MAX))`
 				)
 			);
 			const owner = await RwaoneBridgeEscrow.owner();

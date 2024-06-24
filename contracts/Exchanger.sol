@@ -252,7 +252,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         }
     }
 
-    function _updateHAKAIssuedDebtOnExchange(bytes32[2] memory currencyKeys, uint[2] memory currencyRates) internal {
+    function _updateRWAXIssuedDebtOnExchange(bytes32[2] memory currencyKeys, uint[2] memory currencyRates) internal {
         bool includesRUSD = currencyKeys[0] == rUSD || currencyKeys[1] == rUSD;
         uint numKeys = includesRUSD ? 2 : 3;
 
@@ -398,7 +398,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         // Nothing changes as far as issuance data goes because the total value in the system hasn't changed.
         // But we will update the debt snapshot in case exchange rates have fluctuated since the last exchange
         // in these currencies
-        _updateHAKAIssuedDebtOnExchange(
+        _updateRWAXIssuedDebtOnExchange(
             [sourceSettings.currencyKey, destinationSettings.currencyKey],
             [entry.sourceRate, entry.destinationRate]
         );

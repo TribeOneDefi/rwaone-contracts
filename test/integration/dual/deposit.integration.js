@@ -17,7 +17,7 @@ describe('deposit() integration tests (L1, L2)', () => {
 
 	let depositReceipt;
 
-	describe('when the owner deposits wHAKA', () => {
+	describe('when the owner deposits wRWAX', () => {
 		before('target contracts and users', () => {
 			({ Rwaone, RwaoneBridgeToOptimism, RwaoneBridgeEscrow } = ctx.l1.contracts);
 			({ Rwaone: RwaoneL2 } = ctx.l2.contracts);

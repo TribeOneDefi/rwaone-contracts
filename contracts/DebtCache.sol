@@ -29,7 +29,7 @@ contract DebtCache is BaseDebtCache {
         bytes32[] memory currencyKeys = issuer().availableCurrencyKeys();
         (uint[] memory values, uint futuresDebt, uint excludedDebt, bool isInvalid) = _currentTribeDebts(currencyKeys);
 
-        // The total wHAKA-backed debt is the debt of futures markets plus the debt of circulating tribes.
+        // The total wRWAX-backed debt is the debt of futures markets plus the debt of circulating tribes.
         uint snxCollateralDebt = futuresDebt;
         _cachedTribeDebt[FUTURES_DEBT_KEY] = futuresDebt;
         uint numValues = values.length;
@@ -39,7 +39,7 @@ contract DebtCache is BaseDebtCache {
             _cachedTribeDebt[currencyKeys[i]] = value;
         }
 
-        // Subtract out the excluded non-wHAKA backed debt from our total
+        // Subtract out the excluded non-wRWAX backed debt from our total
         _cachedTribeDebt[EXCLUDED_DEBT_KEY] = excludedDebt;
         uint newDebt = snxCollateralDebt.floorsub(excludedDebt);
         _cachedDebt = newDebt;

@@ -10815,7 +10815,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "anyTribeOrHAKARateIsInvalid",
+					"name": "anyTribeOrRWAXRateIsInvalid",
 					"outputs": [
 						{
 							"internalType": "bool",
@@ -12011,11 +12011,11 @@
 					"inputs": [
 						{
 							"internalType": "address",
-							"name": "_hakaToken",
+							"name": "_rwaxToken",
 							"type": "address"
 						}
 					],
-					"name": "setHakaAddress",
+					"name": "setRwaxAddress",
 					"outputs": [],
 					"payable": false,
 					"stateMutability": "nonpayable",
@@ -26836,7 +26836,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "anyTribeOrHAKARateIsInvalid",
+					"name": "anyTribeOrRWAXRateIsInvalid",
 					"outputs": [
 						{
 							"internalType": "bool",
@@ -33685,7 +33685,7 @@
 				{
 					"constant": false,
 					"inputs": [],
-					"name": "exchangeEtherForHAKA",
+					"name": "exchangeEtherForRWAX",
 					"outputs": [
 						{
 							"indexed": false,
@@ -33712,7 +33712,7 @@
 							"type": "uint256"
 						}
 					],
-					"name": "exchangeEtherForHAKAAtRate",
+					"name": "exchangeEtherForRWAXAtRate",
 					"outputs": [
 						{
 							"internalType": "uint256",
@@ -33770,7 +33770,7 @@
 							"type": "uint256"
 						}
 					],
-					"name": "exchangeTribesForHAKA",
+					"name": "exchangeTribesForRWAX",
 					"outputs": [
 						{
 							"internalType": "uint256",
@@ -33796,7 +33796,7 @@
 							"type": "uint256"
 						}
 					],
-					"name": "exchangeTribesForHAKAAtRate",
+					"name": "exchangeTribesForRWAXAtRate",
 					"outputs": [
 						{
 							"internalType": "uint256",
@@ -34324,7 +34324,7 @@
 							"type": "uint256"
 						}
 					],
-					"name": "exchangeTribesForHAKAAtRate",
+					"name": "exchangeTribesForRWAXAtRate",
 					"outputs": [
 						{
 							"internalType": "uint256",

@@ -40,10 +40,10 @@ const {
 contract('Issuer (via Rwaone)', async accounts => {
 	const WEEK = 604800;
 
-	const [rUSD, sAUD, sEUR, wHAKA, hETH, ETH] = ['rUSD', 'sAUD', 'sEUR', 'wHAKA', 'hETH', 'ETH'].map(
+	const [rUSD, sAUD, sEUR, wRWAX, hETH, ETH] = ['rUSD', 'sAUD', 'sEUR', 'wRWAX', 'hETH', 'ETH'].map(
 		toBytes32
 	);
-	const tribeKeys = [rUSD, sAUD, sEUR, hETH, wHAKA];
+	const tribeKeys = [rUSD, sAUD, sEUR, hETH, wRWAX];
 
 	const [, owner, account1, account2, account3, account6, tribeetixBridgeToOptimism] = accounts;
 
@@ -155,7 +155,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 		await updateAggregatorRates(
 			exchangeRates,
 			circuitBreaker,
-			[sAUD, sEUR, wHAKA, hETH],
+			[sAUD, sEUR, wRWAX, hETH],
 			['0.5', '1.25', '0.1', '200'].map(toUnit)
 		);
 
@@ -334,7 +334,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				let now;
 
 				beforeEach(async () => {
-					// Give some wHAKA to account1
+					// Give some wRWAX to account1
 					await rwaone.transfer(account1, toUnit('1000'), { from: owner });
 
 					now = await currentTime();
@@ -395,7 +395,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 						await updateAggregatorRates(
 							exchangeRates,
 							circuitBreaker,
-							[sAUD, sEUR, hETH, ETH, wHAKA],
+							[sAUD, sEUR, hETH, ETH, wRWAX],
 							['0.5', '1.25', '100', '100', '2'].map(toUnit)
 						);
 					});
@@ -425,7 +425,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 						});
 					});
 
-					describe('when issued through wHAKA staking', () => {
+					describe('when issued through wRWAX staking', () => {
 						beforeEach(async () => {
 							// as our tribes are mocks, let's issue some amount to users
 							const issuedRwaones = web3.utils.toBN('200012');
@@ -477,7 +477,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 						await updateAggregatorRates(
 							exchangeRates,
 							circuitBreaker,
-							[sAUD, sEUR, hETH, ETH, wHAKA],
+							[sAUD, sEUR, hETH, ETH, wRWAX],
 							['0.5', '1.25', '100', '100', '2'].map(toUnit)
 						);
 						await updateDebtMonitors();
@@ -501,8 +501,8 @@ contract('Issuer (via Rwaone)', async accounts => {
 						it('and in another tribe currency', async () => {
 							assert.bnEqual(await rwaone.totalIssuedTribes(sAUD), toUnit('2222'));
 						});
-						it('and in wHAKA', async () => {
-							assert.bnEqual(await rwaone.totalIssuedTribes(wHAKA), divideDecimal('1111', '2'));
+						it('and in wRWAX', async () => {
+							assert.bnEqual(await rwaone.totalIssuedTribes(wRWAX), divideDecimal('1111', '2'));
 						});
 						it('and in a non-tribe currency', async () => {
 							assert.bnEqual(await rwaone.totalIssuedTribes(ETH), divideDecimal('1111', '100'));
@@ -537,8 +537,8 @@ contract('Issuer (via Rwaone)', async accounts => {
 						it('and in another tribe currency', async () => {
 							assert.bnEqual(await rwaone.totalIssuedTribes(sAUD), toUnit('4400', '2'));
 						});
-						it('and in wHAKA', async () => {
-							assert.bnEqual(await rwaone.totalIssuedTribes(wHAKA), divideDecimal('2200', '2'));
+						it('and in wRWAX', async () => {
+							assert.bnEqual(await rwaone.totalIssuedTribes(wRWAX), divideDecimal('2200', '2'));
 						});
 						it('and in a non-tribe currency', async () => {
 							assert.bnEqual(await rwaone.totalIssuedTribes(ETH), divideDecimal('2200', '100'));
@@ -622,7 +622,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 
 				it("should correctly calculate a user's debt balance with prior issuance", async () => {
-					// Give some wHAKA to account1
+					// Give some wRWAX to account1
 					await rwaone.transfer(account1, toUnit('200000'), {
 						from: owner,
 					});
@@ -638,7 +638,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 
 			describe('remainingIssuableTribes()', () => {
 				it("should correctly calculate a user's remaining issuable tribes with prior issuance", async () => {
-					const snx2usdRate = await exchangeRates.rateForCurrency(wHAKA);
+					const snx2usdRate = await exchangeRates.rateForCurrency(wRWAX);
 					const issuanceRatio = await systemSettings.issuanceRatio();
 
 					const issuedRwaones = web3.utils.toBN('200012');
@@ -664,7 +664,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 
 				it("should correctly calculate a user's remaining issuable tribes without prior issuance", async () => {
-					const snx2usdRate = await exchangeRates.rateForCurrency(wHAKA);
+					const snx2usdRate = await exchangeRates.rateForCurrency(wRWAX);
 					const issuanceRatio = await systemSettings.issuanceRatio();
 
 					const issuedRwaones = web3.utils.toBN('20');
@@ -684,7 +684,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 
 			describe('maxIssuableTribes()', () => {
 				it("should correctly calculate a user's maximum issuable tribes without prior issuance", async () => {
-					const rate = await exchangeRates.rateForCurrency(toBytes32('wHAKA'));
+					const rate = await exchangeRates.rateForCurrency(toBytes32('wRWAX'));
 					const issuedRwaones = web3.utils.toBN('200000');
 					await rwaone.transfer(account1, toUnit(issuedRwaones), {
 						from: owner,
@@ -700,13 +700,13 @@ contract('Issuer (via Rwaone)', async accounts => {
 					assert.bnEqual(expectedIssuableTribes, maxIssuableTribes);
 				});
 
-				it("should correctly calculate a user's maximum issuable tribes without any wHAKA", async () => {
+				it("should correctly calculate a user's maximum issuable tribes without any wRWAX", async () => {
 					const maxIssuableTribes = await rwaone.maxIssuableTribes(account1);
 					assert.bnEqual(0, maxIssuableTribes);
 				});
 
 				it("should correctly calculate a user's maximum issuable tribes with prior issuance", async () => {
-					const snx2usdRate = await exchangeRates.rateForCurrency(wHAKA);
+					const snx2usdRate = await exchangeRates.rateForCurrency(wRWAX);
 
 					const issuedRwaones = web3.utils.toBN('320001');
 					await rwaone.transfer(account1, toUnit(issuedRwaones), {
@@ -1167,7 +1167,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 							});
 						});
 					});
-					describe(`when wHAKA is stale`, () => {
+					describe(`when wRWAX is stale`, () => {
 						beforeEach(async () => {
 							await fastForward(
 								(await exchangeRates.rateStalePeriod()).add(web3.utils.toBN('300'))
@@ -1178,13 +1178,13 @@ contract('Issuer (via Rwaone)', async accounts => {
 						it('reverts on issueTribes()', async () => {
 							await assert.revert(
 								rwaone.issueTribes(toUnit('1'), { from: account1 }),
-								'A tribe or wHAKA rate is invalid'
+								'A tribe or wRWAX rate is invalid'
 							);
 						});
 						it('reverts on issueMaxTribes()', async () => {
 							await assert.revert(
 								rwaone.issueMaxTribes({ from: account1 }),
-								'A tribe or wHAKA rate is invalid'
+								'A tribe or wRWAX rate is invalid'
 							);
 						});
 					});
@@ -1197,19 +1197,19 @@ contract('Issuer (via Rwaone)', async accounts => {
 						it('reverts on issueTribes()', async () => {
 							await assert.revert(
 								rwaone.issueTribes(toUnit('1'), { from: account1 }),
-								'A tribe or wHAKA rate is invalid'
+								'A tribe or wRWAX rate is invalid'
 							);
 						});
 						it('reverts on issueMaxTribes()', async () => {
 							await assert.revert(
 								rwaone.issueMaxTribes({ from: account1 }),
-								'A tribe or wHAKA rate is invalid'
+								'A tribe or wRWAX rate is invalid'
 							);
 						});
 					});
 				});
 				it('should allow the issuance of a small amount of tribes', async () => {
-					// Give some wHAKA to account1
+					// Give some wRWAX to account1
 					await rwaone.transfer(account1, toUnit('1000'), { from: owner });
 
 					// account1 should be able to issue
@@ -1221,7 +1221,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 
 				it('should be possible to issue the maximum amount of tribes via issueTribes', async () => {
-					// Give some wHAKA to account1
+					// Give some wRWAX to account1
 					await rwaone.transfer(account1, toUnit('1000'), { from: owner });
 
 					const maxTribes = await rwaone.maxIssuableTribes(account1);
@@ -1231,7 +1231,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 
 				it('should allow an issuer to issue tribes in one flavour', async () => {
-					// Give some wHAKA to account1
+					// Give some wRWAX to account1
 					await rwaone.transfer(account1, toUnit('1000'), { from: owner });
 
 					// account1 should be able to issue
@@ -1247,7 +1247,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 
 				// TODO: Check that the rounding errors are acceptable
 				it('should allow two issuers to issue tribes in one flavour', async () => {
-					// Give some wHAKA to account1 and account2
+					// Give some wRWAX to account1 and account2
 					await rwaone.transfer(account1, toUnit('10000'), {
 						from: owner,
 					});
@@ -1271,7 +1271,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 
 				it('should allow multi-issuance in one flavour', async () => {
-					// Give some wHAKA to account1 and account2
+					// Give some wRWAX to account1 and account2
 					await rwaone.transfer(account1, toUnit('10000'), {
 						from: owner,
 					});
@@ -1343,7 +1343,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 
 				describe('issueMaxTribes', () => {
 					it('should allow an issuer to issue max tribes in one flavour', async () => {
-						// Give some wHAKA to account1
+						// Give some wRWAX to account1
 						await rwaone.transfer(account1, toUnit('10000'), {
 							from: owner,
 						});
@@ -1360,7 +1360,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 
 				it('should allow an issuer to issue max tribes via the standard issue call', async () => {
-					// Give some wHAKA to account1
+					// Give some wRWAX to account1
 					await rwaone.transfer(account1, toUnit('10000'), {
 						from: owner,
 					});
@@ -1379,7 +1379,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 
 				it('should disallow an issuer from issuing tribes beyond their remainingIssuableTribes', async () => {
-					// Give some wHAKA to account1
+					// Give some wRWAX to account1
 					await rwaone.transfer(account1, toUnit('10000'), {
 						from: owner,
 					});
@@ -1507,7 +1507,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 						});
 					});
 
-					describe(`when wHAKA is stale`, () => {
+					describe(`when wRWAX is stale`, () => {
 						beforeEach(async () => {
 							await fastForward(
 								(await exchangeRates.rateStalePeriod()).add(web3.utils.toBN('300'))
@@ -1518,13 +1518,13 @@ contract('Issuer (via Rwaone)', async accounts => {
 						it('then calling burn() reverts', async () => {
 							await assert.revert(
 								rwaone.burnTribes(toUnit('1'), { from: account1 }),
-								'A tribe or wHAKA rate is invalid'
+								'A tribe or wRWAX rate is invalid'
 							);
 						});
 						it('and calling burnTribesToTarget() reverts', async () => {
 							await assert.revert(
 								rwaone.burnTribesToTarget({ from: account1 }),
-								'A tribe or wHAKA rate is invalid'
+								'A tribe or wRWAX rate is invalid'
 							);
 						});
 					});
@@ -1537,20 +1537,20 @@ contract('Issuer (via Rwaone)', async accounts => {
 						it('then calling burn() reverts', async () => {
 							await assert.revert(
 								rwaone.burnTribes(toUnit('1'), { from: account1 }),
-								'A tribe or wHAKA rate is invalid'
+								'A tribe or wRWAX rate is invalid'
 							);
 						});
 						it('and calling burnTribesToTarget() reverts', async () => {
 							await assert.revert(
 								rwaone.burnTribesToTarget({ from: account1 }),
-								'A tribe or wHAKA rate is invalid'
+								'A tribe or wRWAX rate is invalid'
 							);
 						});
 					});
 				});
 
 				it('should allow an issuer with outstanding debt to burn tribes and decrease debt', async () => {
-					// Give some wHAKA to account1
+					// Give some wRWAX to account1
 					await rwaone.transfer(account1, toUnit('10000'), {
 						from: owner,
 					});
@@ -1569,7 +1569,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 
 				it('should disallow an issuer without outstanding debt from burning tribes', async () => {
-					// Give some wHAKA to account1
+					// Give some wRWAX to account1
 					await rwaone.transfer(account1, toUnit('10000'), {
 						from: owner,
 					});
@@ -1595,7 +1595,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 
 				it('should revert when trying to burn tribes that do not exist', async () => {
-					// Give some wHAKA to account1
+					// Give some wRWAX to account1
 					await rwaone.transfer(account1, toUnit('10000'), {
 						from: owner,
 					});
@@ -1620,7 +1620,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 
 				it("should only burn up to a user's actual debt level", async () => {
-					// Give some wHAKA to account1
+					// Give some wRWAX to account1
 					await rwaone.transfer(account1, toUnit('10000'), {
 						from: owner,
 					});
@@ -1654,7 +1654,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 
 				it("should successfully burn all user's tribes @gasprofile", async () => {
-					// Give some wHAKA to account1
+					// Give some wRWAX to account1
 					await rwaone.transfer(account1, toUnit('10000'), {
 						from: owner,
 					});
@@ -1671,7 +1671,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 
 				it('should burn the correct amount of tribes', async () => {
-					// Give some wHAKA to account1
+					// Give some wRWAX to account1
 					await rwaone.transfer(account1, toUnit('200000'), {
 						from: owner,
 					});
@@ -1691,7 +1691,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 
 				it('should burn the correct amount of tribes', async () => {
-					// Give some wHAKA to account1
+					// Give some wRWAX to account1
 					await rwaone.transfer(account1, toUnit('200000'), {
 						from: owner,
 					});
@@ -1712,7 +1712,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 
 				describe('debt calculation in multi-issuance scenarios', () => {
 					it('should correctly calculate debt in a multi-issuance multi-burn scenario @gasprofile', async () => {
-						// Give some wHAKA to account1
+						// Give some wRWAX to account1
 						await rwaone.transfer(account1, toUnit('500000'), {
 							from: owner,
 						});
@@ -1749,7 +1749,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 					});
 
 					it('should allow user to burn all tribes issued even after other users have issued', async () => {
-						// Give some wHAKA to account1
+						// Give some wRWAX to account1
 						await rwaone.transfer(account1, toUnit('500000'), {
 							from: owner,
 						});
@@ -1777,7 +1777,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 					});
 
 					it('should allow a user to burn up to their balance if they try too burn too much', async () => {
-						// Give some wHAKA to account1
+						// Give some wRWAX to account1
 						await rwaone.transfer(account1, toUnit('500000'), {
 							from: owner,
 						});
@@ -1795,7 +1795,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 					});
 
 					it('should allow users to burn their debt and adjust the debtBalanceOf correctly for remaining users', async () => {
-						// Give some wHAKA to account1
+						// Give some wRWAX to account1
 						await rwaone.transfer(account1, toUnit('40000000'), {
 							from: owner,
 						});
@@ -1840,12 +1840,12 @@ contract('Issuer (via Rwaone)', async accounts => {
 
 				describe('burnTribesToTarget', () => {
 					beforeEach(async () => {
-						// Give some wHAKA to account1
+						// Give some wRWAX to account1
 						await rwaone.transfer(account1, toUnit('40000'), {
 							from: owner,
 						});
-						// Set wHAKA price to 1
-						await updateAggregatorRates(exchangeRates, circuitBreaker, [wHAKA], ['1'].map(toUnit));
+						// Set wRWAX price to 1
+						await updateAggregatorRates(exchangeRates, circuitBreaker, [wRWAX], ['1'].map(toUnit));
 						await updateDebtMonitors();
 
 						// Issue
@@ -1856,10 +1856,10 @@ contract('Issuer (via Rwaone)', async accounts => {
 						await systemSettings.setMinimumStakeTime(60 * 60, { from: owner });
 					});
 
-					describe('when the wHAKA price drops 50%', () => {
+					describe('when the wRWAX price drops 50%', () => {
 						let maxIssuableTribes;
 						beforeEach(async () => {
-							await updateAggregatorRates(exchangeRates, circuitBreaker, [wHAKA], ['.5'].map(toUnit));
+							await updateAggregatorRates(exchangeRates, circuitBreaker, [wRWAX], ['.5'].map(toUnit));
 							await updateDebtMonitors();
 
 							maxIssuableTribes = await rwaone.maxIssuableTribes(account1);
@@ -1879,10 +1879,10 @@ contract('Issuer (via Rwaone)', async accounts => {
 						});
 					});
 
-					describe('when the wHAKA price drops 10%', () => {
+					describe('when the wRWAX price drops 10%', () => {
 						let maxIssuableTribes;
 						beforeEach(async () => {
-							await updateAggregatorRates(exchangeRates, circuitBreaker, [wHAKA], ['.9'].map(toUnit));
+							await updateAggregatorRates(exchangeRates, circuitBreaker, [wRWAX], ['.9'].map(toUnit));
 							await updateDebtMonitors();
 
 							maxIssuableTribes = await rwaone.maxIssuableTribes(account1);
@@ -1901,10 +1901,10 @@ contract('Issuer (via Rwaone)', async accounts => {
 						});
 					});
 
-					describe('when the wHAKA price drops 90%', () => {
+					describe('when the wRWAX price drops 90%', () => {
 						let maxIssuableTribes;
 						beforeEach(async () => {
-							await updateAggregatorRates(exchangeRates, circuitBreaker, [wHAKA], ['.1'].map(toUnit));
+							await updateAggregatorRates(exchangeRates, circuitBreaker, [wRWAX], ['.1'].map(toUnit));
 							await updateDebtMonitors();
 
 							maxIssuableTribes = await rwaone.maxIssuableTribes(account1);
@@ -1923,10 +1923,10 @@ contract('Issuer (via Rwaone)', async accounts => {
 						});
 					});
 
-					describe('when the wHAKA price increases 100%', () => {
+					describe('when the wRWAX price increases 100%', () => {
 						let maxIssuableTribes;
 						beforeEach(async () => {
-							await updateAggregatorRates(exchangeRates, circuitBreaker, [wHAKA], ['2'].map(toUnit));
+							await updateAggregatorRates(exchangeRates, circuitBreaker, [wRWAX], ['2'].map(toUnit));
 							await updateDebtMonitors();
 
 							maxIssuableTribes = await rwaone.maxIssuableTribes(account1);
@@ -2108,7 +2108,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 
 			describe('debt calculation in multi-issuance scenarios', () => {
 				it('should correctly calculate debt in a multi-issuance scenario', async () => {
-					// Give some wHAKA to account1
+					// Give some wRWAX to account1
 					await rwaone.transfer(account1, toUnit('200000'), {
 						from: owner,
 					});
@@ -2128,7 +2128,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 
 				it('should correctly calculate debt in a multi-issuance multi-burn scenario', async () => {
-					// Give some wHAKA to account1
+					// Give some wRWAX to account1
 					await rwaone.transfer(account1, toUnit('500000'), {
 						from: owner,
 					});
@@ -2428,7 +2428,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 
 				it("should not include escrowed rwaone when calculating a user's collaterisation ratio", async () => {
-					const snx2usdRate = await exchangeRates.rateForCurrency(wHAKA);
+					const snx2usdRate = await exchangeRates.rateForCurrency(wRWAX);
 					const transferredRwaones = toUnit('60000');
 					await rwaone.transfer(account1, transferredRwaones, {
 						from: owner,
@@ -2465,7 +2465,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 
 				it("should include escrowed reward rwaone when calculating a user's collateralisation ratio", async () => {
-					const snx2usdRate = await exchangeRates.rateForCurrency(wHAKA);
+					const snx2usdRate = await exchangeRates.rateForCurrency(wRWAX);
 					const transferredRwaones = toUnit('60000');
 					await rwaone.transfer(account1, transferredRwaones, {
 						from: owner,
@@ -2492,12 +2492,12 @@ contract('Issuer (via Rwaone)', async accounts => {
 					assert.bnEqual(collaterisationRatio, expectedCollaterisationRatio);
 				});
 
-				it('should permit user to issue rUSD debt with only escrowed wHAKA as collateral (no wHAKA in wallet)', async () => {
+				it('should permit user to issue rUSD debt with only escrowed wRWAX as collateral (no wRWAX in wallet)', async () => {
 					// ensure collateral of account1 is empty
 					let collateral = await rwaone.collateral(account1, { from: account1 });
 					assert.bnEqual(collateral, 0);
 
-					// ensure account1 has no wHAKA balance
+					// ensure account1 has no wRWAX balance
 					const snxBalance = await rwaone.balanceOf(account1);
 					assert.bnEqual(snxBalance, 0);
 
@@ -2521,12 +2521,12 @@ contract('Issuer (via Rwaone)', async accounts => {
 					assert.bnEqual(await rwaone.debtBalanceOf(account1, rUSD), toUnit('300'));
 				});
 
-				it('should permit user to issue rUSD debt with only reward escrow as collateral (no wHAKA in wallet)', async () => {
+				it('should permit user to issue rUSD debt with only reward escrow as collateral (no wRWAX in wallet)', async () => {
 					// ensure collateral of account1 is empty
 					let collateral = await rwaone.collateral(account1, { from: account1 });
 					assert.bnEqual(collateral, 0);
 
-					// ensure account1 has no wHAKA balance
+					// ensure account1 has no wRWAX balance
 					const snxBalance = await rwaone.balanceOf(account1);
 					assert.bnEqual(snxBalance, 0);
 
@@ -2610,7 +2610,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 
 				it("should correctly calculate a user's max issuable tribes with escrowed rwaone", async () => {
-					const snx2usdRate = await exchangeRates.rateForCurrency(wHAKA);
+					const snx2usdRate = await exchangeRates.rateForCurrency(wRWAX);
 					const transferredRwaones = toUnit('60000');
 					await rwaone.transfer(account1, transferredRwaones, {
 						from: owner,
@@ -2643,11 +2643,11 @@ contract('Issuer (via Rwaone)', async accounts => {
 				const delegate = account2;
 
 				beforeEach(async () => {
-					// Assign the authoriser wHAKA
+					// Assign the authoriser wRWAX
 					await rwaone.transfer(authoriser, toUnit('20000'), {
 						from: owner,
 					});
-					await updateAggregatorRates(exchangeRates, circuitBreaker, [wHAKA], [toUnit('1')]);
+					await updateAggregatorRates(exchangeRates, circuitBreaker, [wRWAX], [toUnit('1')]);
 					await updateDebtMonitors();
 				});
 				describe('when not approved it should revert on', async () => {
@@ -2737,7 +2737,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 								await updateAggregatorRates(
 									exchangeRates,
 									circuitBreaker,
-									[wHAKA],
+									[wRWAX],
 									[toUnit('0.001')]
 								);
 								await updateDebtMonitors();
@@ -2790,7 +2790,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 				it('should approveBurnOnBehalf and burnTribesToTarget', async () => {
 					await rwaone.issueMaxTribes({ from: authoriser });
-					await updateAggregatorRates(exchangeRates, circuitBreaker, [wHAKA], [toUnit('0.01')]);
+					await updateAggregatorRates(exchangeRates, circuitBreaker, [wRWAX], [toUnit('0.01')]);
 					await updateDebtMonitors();
 
 					await delegateApprovals.approveBurnOnBehalf(delegate, { from: authoriser });
@@ -3013,7 +3013,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 					const amountToBurn = toUnit(10);
 
 					beforeEach(async () => {
-						// Give some wHAKA to collateralShortMock
+						// Give some wRWAX to collateralShortMock
 						await rwaone.transfer(collateralShortMock, toUnit('1000'), { from: owner });
 
 						// issue max rUSD
@@ -3098,7 +3098,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 							);
 							await issuer.rebuildCache();
 
-							// Give some wHAKA to the mock migrator
+							// Give some wRWAX to the mock migrator
 							await rwaone.transfer(debtMigratorOnEthereumMock, toUnit('1000'), { from: owner });
 
 							// issue max rUSD

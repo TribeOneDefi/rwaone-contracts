@@ -19,8 +19,8 @@ import "./interfaces/IRewardEscrowV2.sol";
 import "./interfaces/IRwaoneDebtShare.sol";
 
 /// @title Liquidator Rewards (SIP-148)
-/// @notice This contract holds wHAKA from liquidated positions.
-/// @dev wHAKA stakers may claim their rewards based on their share of the debt pool.
+/// @notice This contract holds wRWAX from liquidated positions.
+/// @dev wRWAX stakers may claim their rewards based on their share of the debt pool.
 contract LiquidatorRewards is ILiquidatorRewards, Owned, MixinSystemSettings, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeDecimalMath for uint256;
@@ -116,7 +116,7 @@ contract LiquidatorRewards is ILiquidatorRewards, Owned, MixinSystemSettings, Re
 
     /* ========== RESTRICTED FUNCTIONS ========== */
 
-    /// @notice This is called only after an account is liquidated and the wHAKA rewards are sent to this contract.
+    /// @notice This is called only after an account is liquidated and the wRWAX rewards are sent to this contract.
     function notifyRewardAmount(uint256 reward) external onlyRwaone {
         uint sharesSupply = tribeetixDebtShare().totalSupply();
 

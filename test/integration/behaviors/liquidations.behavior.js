@@ -42,60 +42,60 @@ function itCanLiquidate({ ctx }) {
 			await SystemSettings.setLiquidationRatio(ethers.utils.parseEther('0.5')); // 200% c-ratio
 			await SystemSettings.setSnxLiquidationPenalty(ethers.utils.parseEther('0.3')); // 30% penalty
 			await SystemSettings.setSelfLiquidationPenalty(ethers.utils.parseEther('0.2')); // 20% penalty
-			await SystemSettings.setFlagReward(ethers.utils.parseEther('1')); // 1 wHAKA
-			await SystemSettings.setLiquidateReward(ethers.utils.parseEther('2')); // 2 wHAKA
+			await SystemSettings.setFlagReward(ethers.utils.parseEther('1')); // 1 wRWAX
+			await SystemSettings.setLiquidateReward(ethers.utils.parseEther('2')); // 2 wRWAX
 		});
 
-		before('ensure liquidatedUser has wHAKA', async () => {
+		before('ensure liquidatedUser has wRWAX', async () => {
 			await ensureBalance({
 				ctx,
-				symbol: 'wHAKA',
+				symbol: 'wRWAX',
 				user: liquidatedUser,
 				balance: ethers.utils.parseEther('800'),
 			});
 		});
 
-		before('ensure someUser has wHAKA', async () => {
+		before('ensure someUser has wRWAX', async () => {
 			await ensureBalance({
 				ctx,
-				symbol: 'wHAKA',
+				symbol: 'wRWAX',
 				user: someUser,
 				balance: ethers.utils.parseEther('8000'),
 			});
 		});
 
-		before('ensure user7 has wHAKA', async () => {
+		before('ensure user7 has wRWAX', async () => {
 			await ensureBalance({
 				ctx,
-				symbol: 'wHAKA',
+				symbol: 'wRWAX',
 				user: user7,
 				balance: ethers.utils.parseEther('800'),
 			});
 		});
 
-		before('ensure user8 has wHAKA', async () => {
+		before('ensure user8 has wRWAX', async () => {
 			await ensureBalance({
 				ctx,
-				symbol: 'wHAKA',
+				symbol: 'wRWAX',
 				user: user8,
 				balance: ethers.utils.parseEther('800'),
 			});
 		});
 
 		before('exchange rate is set', async () => {
-			exchangeRate = await getRate({ ctx, symbol: 'wHAKA' });
+			exchangeRate = await getRate({ ctx, symbol: 'wRWAX' });
 			await addAggregatorAndSetRate({
 				ctx,
-				currencyKey: toBytes32('wHAKA'),
+				currencyKey: toBytes32('wRWAX'),
 				rate: '6000000000000000000', // $6
 			});
 		});
 
-		before('liquidatedUser stakes their wHAKA', async () => {
+		before('liquidatedUser stakes their wRWAX', async () => {
 			await Rwaone.connect(liquidatedUser).issueMaxTribes();
 		});
 
-		before('someUser stakes their wHAKA', async () => {
+		before('someUser stakes their wRWAX', async () => {
 			await Rwaone.connect(someUser).issueMaxTribes();
 		});
 
@@ -107,7 +107,7 @@ function itCanLiquidate({ ctx }) {
 			before('exchange rate changes to allow liquidation', async () => {
 				await addAggregatorAndSetRate({
 					ctx,
-					currencyKey: toBytes32('wHAKA'),
+					currencyKey: toBytes32('wRWAX'),
 					rate: '2500000000000000000', // $2.50
 				});
 			});
@@ -119,7 +119,7 @@ function itCanLiquidate({ ctx }) {
 			after('restore exchange rate', async () => {
 				await addAggregatorAndSetRate({
 					ctx,
-					currencyKey: toBytes32('wHAKA'),
+					currencyKey: toBytes32('wRWAX'),
 					rate: exchangeRate.toString(),
 				});
 			});
@@ -206,7 +206,7 @@ function itCanLiquidate({ ctx }) {
 						);
 					});
 
-					it('transfers the redeemed wHAKA to LiquidatorRewards', async () => {
+					it('transfers the redeemed wRWAX to LiquidatorRewards', async () => {
 						const { events } = await tx.wait();
 						const liqEvent = events.find(l => l.event === 'AccountLiquidated');
 						const snxRedeemed = liqEvent.args.snxRedeemed;
@@ -239,22 +239,22 @@ function itCanLiquidate({ ctx }) {
 
 		describe('getting marked and completely liquidated', () => {
 			before('exchange rate is set', async () => {
-				exchangeRate = await getRate({ ctx, symbol: 'wHAKA' });
+				exchangeRate = await getRate({ ctx, symbol: 'wRWAX' });
 				await addAggregatorAndSetRate({
 					ctx,
-					currencyKey: toBytes32('wHAKA'),
+					currencyKey: toBytes32('wRWAX'),
 					rate: '6000000000000000000', // $6
 				});
 			});
 
-			before('user7 stakes their wHAKA', async () => {
+			before('user7 stakes their wRWAX', async () => {
 				await Rwaone.connect(user7).issueMaxTribes();
 			});
 
 			before('exchange rate changes to allow liquidation', async () => {
 				await addAggregatorAndSetRate({
 					ctx,
-					currencyKey: toBytes32('wHAKA'),
+					currencyKey: toBytes32('wRWAX'),
 					rate: '1000000000000000000', // $1.00
 				});
 			});
@@ -266,7 +266,7 @@ function itCanLiquidate({ ctx }) {
 			after('restore exchange rate', async () => {
 				await addAggregatorAndSetRate({
 					ctx,
-					currencyKey: toBytes32('wHAKA'),
+					currencyKey: toBytes32('wRWAX'),
 					rate: exchangeRate.toString(),
 				});
 			});
@@ -361,7 +361,7 @@ function itCanLiquidate({ ctx }) {
 						);
 					});
 
-					it('transfers the redeemed wHAKA to LiquidatorRewards', async () => {
+					it('transfers the redeemed wRWAX to LiquidatorRewards', async () => {
 						const { events } = await tx.wait();
 						const liqEvent = events.find(l => l.event === 'AccountLiquidated');
 						const snxRedeemed = liqEvent.args.snxRedeemed;
@@ -400,15 +400,15 @@ function itCanLiquidate({ ctx }) {
 			let beforeSnxBalance, beforeRewardsCredittedSnx;
 
 			before('ensure exchange rate is set', async () => {
-				exchangeRate = await getRate({ ctx, symbol: 'wHAKA' });
+				exchangeRate = await getRate({ ctx, symbol: 'wRWAX' });
 				await addAggregatorAndSetRate({
 					ctx,
-					currencyKey: toBytes32('wHAKA'),
+					currencyKey: toBytes32('wRWAX'),
 					rate: '6000000000000000000', // $6
 				});
 			});
 
-			before('ensure user8 has alot of escrowed wHAKA', async () => {
+			before('ensure user8 has alot of escrowed wRWAX', async () => {
 				flagReward = await Liquidator.flagReward();
 				liquidateReward = await Liquidator.liquidateReward();
 
@@ -425,14 +425,14 @@ function itCanLiquidate({ ctx }) {
 				}
 			});
 
-			before('user8 stakes their wHAKA', async () => {
+			before('user8 stakes their wRWAX', async () => {
 				await Rwaone.connect(user8).issueMaxTribes();
 			});
 
 			before('exchange rate changes to allow liquidation', async () => {
 				await addAggregatorAndSetRate({
 					ctx,
-					currencyKey: toBytes32('wHAKA'),
+					currencyKey: toBytes32('wRWAX'),
 					rate: '300000000000000000', // $0.30
 				});
 			});
@@ -478,7 +478,7 @@ function itCanLiquidate({ ctx }) {
 			after('restore exchange rate', async () => {
 				await addAggregatorAndSetRate({
 					ctx,
-					currencyKey: toBytes32('wHAKA'),
+					currencyKey: toBytes32('wRWAX'),
 					rate: exchangeRate.toString(),
 				});
 			});
@@ -509,7 +509,7 @@ function itCanLiquidate({ ctx }) {
 				assert.bnEqual(viewResults.debtToRemove.toString(), beforeDebtBalance.toString());
 			});
 
-			it('should liquidate all debt and redeem all wHAKA', async () => {
+			it('should liquidate all debt and redeem all wRWAX', async () => {
 				// Get event data.
 				const { events } = await tx.wait();
 				const liqEvent = events.find(l => l.event === 'AccountLiquidated');
@@ -520,7 +520,7 @@ function itCanLiquidate({ ctx }) {
 					snxRedeemed,
 					beforeSnxBalance.add(beforeEscrowBalance).sub(flagReward.add(liquidateReward))
 				);
-				assert.bnEqual(amountLiquidated.toString(), beforeDebtBalance.toString()); // the variance is due to a rounding error as a result of multiplication of the wHAKA rate
+				assert.bnEqual(amountLiquidated.toString(), beforeDebtBalance.toString()); // the variance is due to a rounding error as a result of multiplication of the wRWAX rate
 			});
 
 			it('reduces the total supply of debt shares by the amount of liquidated debt shares', async () => {
@@ -536,7 +536,7 @@ function itCanLiquidate({ ctx }) {
 				assert.bnEqual(await Liquidator.getLiquidationDeadlineForAccount(user8.address), 0);
 			});
 
-			it('transfers the redeemed wHAKA + escrow to LiquidatorRewards', async () => {
+			it('transfers the redeemed wRWAX + escrow to LiquidatorRewards', async () => {
 				const { events } = await tx.wait();
 				const liqEvent = events.find(l => l.event === 'AccountLiquidated');
 				const snxRedeemed = liqEvent.args.snxRedeemed;

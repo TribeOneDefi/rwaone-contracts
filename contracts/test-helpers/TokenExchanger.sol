@@ -32,7 +32,7 @@ contract TokenExchanger is Owned {
         return IERC20(integrationProxy).allowance(tokenOwner, spender);
     }
 
-    function checkBalanceHAKADirect(address account) public view tribeetixProxyIsSet returns (uint) {
+    function checkBalanceRWAXDirect(address account) public view tribeetixProxyIsSet returns (uint) {
         return IERC20(rwaone).balanceOf(account);
     }
 

@@ -156,7 +156,7 @@ contract('FuturesMarketManager', accounts => {
 		});
 
 		it('Adding multiple markets', async () => {
-			const keys = ['sLINK', 'sHAKA'].map(toBytes32);
+			const keys = ['sLINK', 'sRWAX'].map(toBytes32);
 			const markets = await Promise.all(
 				keys.map(k =>
 					setupContract({

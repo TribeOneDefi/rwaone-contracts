@@ -42,7 +42,7 @@ const {
 		TARGET_THRESHOLD,
 		LIQUIDATION_DELAY,
 		LIQUIDATION_RATIO,
-		HAKA_LIQUIDATION_PENALTY,
+		RWAX_LIQUIDATION_PENALTY,
 		RATE_STALE_PERIOD,
 		MINIMUM_STAKE_TIME,
 		TRADING_REWARDS_ENABLED,
@@ -288,7 +288,7 @@ describe('publish scripts', () => {
 					assert.strictEqual((await Liquidator.liquidationRatio()).toString(), LIQUIDATION_RATIO);
 					assert.strictEqual(
 						(await SystemSettings.snxLiquidationPenalty()).toString(),
-						HAKA_LIQUIDATION_PENALTY
+						RWAX_LIQUIDATION_PENALTY
 					);
 					assert.strictEqual((await ExchangeRates.rateStalePeriod()).toString(), RATE_STALE_PERIOD);
 					assert.strictEqual(
@@ -530,7 +530,7 @@ describe('publish scripts', () => {
 						'iETH2',
 						'iETH3',
 						'iBTC',
-						'HAKABalancer',
+						'RWAXBalancer',
 					];
 
 					await commands.deployStakingRewards({
@@ -714,7 +714,7 @@ describe('publish scripts', () => {
 				});
 			});
 
-			describe('when ExchangeRates has prices wHAKA $0.30 and all tribes $1', () => {
+			describe('when ExchangeRates has prices wRWAX $0.30 and all tribes $1', () => {
 				beforeEach(async () => {
 					// set default issuance of 0.2
 					const tx = await SystemSettings.setIssuanceRatio(
@@ -725,7 +725,7 @@ describe('publish scripts', () => {
 
 					// make sure exchange rates has prices for specific assets
 
-					const answersToSet = [{ asset: 'wHAKA', rate: 0.3 }].concat(
+					const answersToSet = [{ asset: 'wRWAX', rate: 0.3 }].concat(
 						tribes.map(({ asset }) => {
 							// as the same assets are used for long and shorts, search by asset rather than
 							// name (currencyKey) here so that we don't accidentially override an inverse with
@@ -769,9 +769,9 @@ describe('publish scripts', () => {
 					}
 				});
 
-				describe('when transferring 100k wHAKA to user1', () => {
+				describe('when transferring 100k wRWAX to user1', () => {
 					beforeEach(async () => {
-						// transfer wHAKA to first account
+						// transfer wRWAX to first account
 						const tx = await Rwaone.transfer(
 							accounts.first.address,
 							ethers.utils.parseEther('100000'),
@@ -967,10 +967,10 @@ describe('publish scripts', () => {
 				beforeEach(async () => {
 					mockAggregator = await createMockAggregator();
 				});
-				describe('when Rwaone.anyTribeOrHAKARateIsInvalid() is invoked', () => {
+				describe('when Rwaone.anyTribeOrRWAXRateIsInvalid() is invoked', () => {
 					it('then it returns true as expected', async () => {
-						const response = await Rwaone.anyTribeOrHAKARateIsInvalid();
-						assert.strictEqual(response, true, 'anyTribeOrHAKARateIsInvalid must be true');
+						const response = await Rwaone.anyTribeOrRWAXRateIsInvalid();
+						assert.strictEqual(response, true, 'anyTribeOrRWAXRateIsInvalid must be true');
 					});
 				});
 				describe('when one tribe is configured to have a pricing aggregator', () => {
@@ -1017,16 +1017,16 @@ describe('publish scripts', () => {
 								// update rates
 								const tribesToUpdate = tribes
 									.filter(({ name }) => name !== 'hBTC')
-									.concat({ asset: 'wHAKA', rate: 1 });
+									.concat({ asset: 'wRWAX', rate: 1 });
 
 								for (const { asset } of tribesToUpdate) {
 									await setAggregatorAnswer({ asset, rate: 1 });
 								}
 							});
-							describe('when Rwaone.anyTribeOrHAKARateIsInvalid() is invoked', () => {
+							describe('when Rwaone.anyTribeOrRWAXRateIsInvalid() is invoked', () => {
 								it('then it returns true as hBTC still is', async () => {
-									const response = await Rwaone.anyTribeOrHAKARateIsInvalid();
-									assert.strictEqual(response, true, 'anyTribeOrHAKARateIsInvalid must be true');
+									const response = await Rwaone.anyTribeOrRWAXRateIsInvalid();
+									assert.strictEqual(response, true, 'anyTribeOrRWAXRateIsInvalid must be true');
 								});
 							});
 
@@ -1051,10 +1051,10 @@ describe('publish scripts', () => {
 									});
 								});
 
-								describe('when Rwaone.anyTribeOrHAKARateIsInvalid() is invoked', () => {
+								describe('when Rwaone.anyTribeOrRWAXRateIsInvalid() is invoked', () => {
 									it('then it returns false as expected', async () => {
-										const response = await Rwaone.anyTribeOrHAKARateIsInvalid();
-										assert.strictEqual(response, false, 'anyTribeOrHAKARateIsInvalid must be false');
+										const response = await Rwaone.anyTribeOrRWAXRateIsInvalid();
+										assert.strictEqual(response, false, 'anyTribeOrRWAXRateIsInvalid must be false');
 									});
 								});
 							});

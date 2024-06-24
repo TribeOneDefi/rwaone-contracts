@@ -24,7 +24,7 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
 
     // Available Tribes which can be used with the system
     string public constant TOKEN_NAME = "Rwaone Network Wrap Token";
-    string public constant TOKEN_SYMBOL = "wHAKA";
+    string public constant TOKEN_SYMBOL = "wRWAX";
     uint8 public constant DECIMALS = 18;
     bytes32 public constant rUSD = "rUSD";
 
@@ -131,8 +131,8 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
         return exchanger().maxSecsLeftInWaitingPeriod(messageSender, currencyKey) > 0;
     }
 
-    function anyTribeOrHAKARateIsInvalid() external view returns (bool anyRateInvalid) {
-        return issuer().anyTribeOrHAKARateIsInvalid();
+    function anyTribeOrRWAXRateIsInvalid() external view returns (bool anyRateInvalid) {
+        return issuer().anyTribeOrRWAXRateIsInvalid();
     }
 
     function maxIssuableTribes(address account) external view returns (uint maxIssuable) {
@@ -187,8 +187,8 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
                 account,
                 tokenState.balanceOf(account)
             );
-            require(value <= transferable, "Cannot transfer staked or escrowed wHAKA");
-            require(!anyRateIsInvalid, "A tribe or wHAKA rate is invalid");
+            require(value <= transferable, "Cannot transfer staked or escrowed wRWAX");
+            require(!anyRateIsInvalid, "A tribe or wRWAX rate is invalid");
         }
 
         return true;
@@ -299,7 +299,7 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
         return _transferFromByProxy(messageSender, from, to, value);
     }
 
-    // SIP-252: migration of wHAKA token balance from old to new escrow rewards contract
+    // SIP-252: migration of wRWAX token balance from old to new escrow rewards contract
     function migrateEscrowContractBalance() external onlyOwner {
         address from = resolver.requireAndGetAddress("RewardEscrowV2Frozen", "Old escrow address unset");
         // technically the below could use `rewardEscrowV2()`, but in the case of a migration it's better to avoid
@@ -346,8 +346,8 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
         return issuer().burnTribesToTargetOnBehalf(burnForAddress, messageSender);
     }
 
-    /// @notice Force liquidate a delinquent account and distribute the redeemed wHAKA rewards amongst the appropriate recipients.
-    /// @dev The wHAKA transfers will revert if the amount to send is more than balanceOf account (i.e. due to escrowed balance).
+    /// @notice Force liquidate a delinquent account and distribute the redeemed wRWAX rewards amongst the appropriate recipients.
+    /// @dev The wRWAX transfers will revert if the amount to send is more than balanceOf account (i.e. due to escrowed balance).
     function liquidateDelinquentAccount(address account) external systemActive optionalProxy returns (bool) {
         return _liquidateDelinquentAccount(account, 0, messageSender);
     }
@@ -361,8 +361,8 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
         return _liquidateDelinquentAccount(account, escrowStartIndex, messageSender);
     }
 
-    /// @notice Force liquidate a delinquent account and distribute the redeemed wHAKA rewards amongst the appropriate recipients.
-    /// @dev The wHAKA transfers will revert if the amount to send is more than balanceOf account (i.e. due to escrowed balance).
+    /// @notice Force liquidate a delinquent account and distribute the redeemed wRWAX rewards amongst the appropriate recipients.
+    /// @dev The wRWAX transfers will revert if the amount to send is more than balanceOf account (i.e. due to escrowed balance).
     function _liquidateDelinquentAccount(
         address account,
         uint escrowStartIndex,
@@ -373,7 +373,7 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
 
         (uint totalRedeemed, uint debtToRemove, uint escrowToLiquidate) = issuer().liquidateAccount(account, false);
 
-        // This transfers the to-be-liquidated part of escrow to the account (!) as liquid wHAKA.
+        // This transfers the to-be-liquidated part of escrow to the account (!) as liquid wRWAX.
         // It is transferred to the account instead of to the rewards because of the liquidator / flagger
         // rewards that may need to be paid (so need to be transferrable, to avoid edge cases)
         if (escrowToLiquidate > 0) {
@@ -396,11 +396,11 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
         require(liquidateRewardTransferSucceeded, "Liquidate reward transfer did not succeed");
 
         if (totalRedeemed > 0) {
-            // Send the remaining wHAKA to the LiquidatorRewards contract.
+            // Send the remaining wRWAX to the LiquidatorRewards contract.
             bool liquidatorRewardTransferSucceeded = _transferByProxy(account, address(liquidatorRewards()), totalRedeemed);
             require(liquidatorRewardTransferSucceeded, "Transfer to LiquidatorRewards failed");
 
-            // Inform the LiquidatorRewards contract about the incoming wHAKA rewards.
+            // Inform the LiquidatorRewards contract about the incoming wRWAX rewards.
             liquidatorRewards().notifyRewardAmount(totalRedeemed);
         }
 
@@ -409,7 +409,7 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
 
     /// @notice Allows an account to self-liquidate anytime its c-ratio is below the target issuance ratio.
     function liquidateSelf() external systemActive optionalProxy returns (bool) {
-        // must store liquidated account address because below functions may attempt to transfer wHAKA which changes messageSender
+        // must store liquidated account address because below functions may attempt to transfer wRWAX which changes messageSender
         address liquidatedAccount = messageSender;
 
         // ensure the user has no liquidation rewards (also counted towards collateral) outstanding
@@ -422,12 +422,12 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
 
         emitAccountLiquidated(liquidatedAccount, totalRedeemed, debtRemoved, liquidatedAccount);
 
-        // Transfer the redeemed wHAKA to the LiquidatorRewards contract.
+        // Transfer the redeemed wRWAX to the LiquidatorRewards contract.
         // Reverts if amount to redeem is more than balanceOf account (i.e. due to escrowed balance).
         bool success = _transferByProxy(liquidatedAccount, address(liquidatorRewards()), totalRedeemed);
         require(success, "Transfer to LiquidatorRewards failed");
 
-        // Inform the LiquidatorRewards contract about the incoming wHAKA rewards.
+        // Inform the LiquidatorRewards contract about the incoming wRWAX rewards.
         liquidatorRewards().notifyRewardAmount(totalRedeemed);
 
         return success;
@@ -448,14 +448,14 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
         address debtMigratorOnEthereum = resolver.getAddress(CONTRACT_DEBT_MIGRATOR_ON_ETHEREUM);
         require(msg.sender == debtMigratorOnEthereum, "Only L1 DebtMigrator");
 
-        // get their liquid wHAKA balance and transfer it to the migrator contract
+        // get their liquid wRWAX balance and transfer it to the migrator contract
         totalLiquidBalance = tokenState.balanceOf(account);
         if (totalLiquidBalance > 0) {
             bool succeeded = _transferByProxy(account, debtMigratorOnEthereum, totalLiquidBalance);
             require(succeeded, "snx transfer failed");
         }
 
-        // get their escrowed wHAKA balance and revoke it all
+        // get their escrowed wRWAX balance and revoke it all
         totalEscrowRevoked = rewardEscrowV2().totalEscrowedAccountBalance(account);
         if (totalEscrowRevoked > 0) {
             rewardEscrowV2().revokeFrom(account, debtMigratorOnEthereum, totalEscrowRevoked, 0);

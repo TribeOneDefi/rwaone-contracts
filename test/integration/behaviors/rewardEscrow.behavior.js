@@ -31,7 +31,7 @@ function itDoesRewardEscrow({ ctx, contract }) {
 				ctx.provider
 			);
 
-			// it should have the correct wHAKA address for attempted transfers
+			// it should have the correct wRWAX address for attempted transfers
 			await RewardEscrowV2Frozen.connect(owner).rebuildCache();
 
 			// allow owner to create entries

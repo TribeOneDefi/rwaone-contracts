@@ -261,7 +261,7 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
         // The debt pool is expected to be deprecated soon, and so we don't bother with being
         // perfect here. For now, an inaccuracy will slowly accrue over time with increasing atomic
         // exchange volume.
-        _updateHAKAIssuedDebtOnExchange(
+        _updateRWAXIssuedDebtOnExchange(
             [sourceCurrencyKey, destinationCurrencyKey],
             [systemSourceRate, systemDestinationRate]
         );

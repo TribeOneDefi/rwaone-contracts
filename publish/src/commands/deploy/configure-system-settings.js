@@ -214,7 +214,7 @@ module.exports = async ({
 		comment: 'Set the penalty amount a liquidator receives from a liquidated Collateral loan',
 	});
 
-	const snxLiquidationPenalty = await getDeployParameter('HAKA_LIQUIDATION_PENALTY');
+	const snxLiquidationPenalty = await getDeployParameter('RWAX_LIQUIDATION_PENALTY');
 	await runStep({
 		contract: 'SystemSettings',
 		target: SystemSettings,
@@ -223,7 +223,7 @@ module.exports = async ({
 		expected: allowZeroOrUpdateIfNonZero(snxLiquidationPenalty),
 		write: 'setSnxLiquidationPenalty',
 		writeArg: snxLiquidationPenalty,
-		comment: 'Set the penalty amount of wHAKA from a liquidated account',
+		comment: 'Set the penalty amount of wRWAX from a liquidated account',
 	});
 
 	if (SystemSettings.selfLiquidationPenalty) {
@@ -303,7 +303,7 @@ module.exports = async ({
 		expected: allowZeroOrUpdateIfNonZero(minimumStakeTime),
 		write: 'setMinimumStakeTime',
 		writeArg: minimumStakeTime,
-		comment: 'Set the minimum amount of time wHAKA can be issued before any is burned (SIP-40)',
+		comment: 'Set the minimum amount of time wRWAX can be issued before any is burned (SIP-40)',
 	});
 
 	const debtSnapshotStaleTime = await getDeployParameter('DEBT_SNAPSHOT_STALE_TIME');
@@ -341,7 +341,7 @@ module.exports = async ({
 		expected: allowZeroOrUpdateIfNonZero(crossDomainEscrowGasLimit),
 		write: 'setCrossDomainMessageGasLimit',
 		writeArg: [1, crossDomainEscrowGasLimit],
-		comment: 'Set the gas limit for migrating escrowed wHAKA to L2',
+		comment: 'Set the gas limit for migrating escrowed wRWAX to L2',
 	});
 
 	const crossDomainRewardGasLimit = await getDeployParameter('CROSS_DOMAIN_REWARD_GAS_LIMIT');

@@ -52,7 +52,7 @@ contract RwaoneBridgeToBase is BaseRwaoneBridge, IRwaoneBridgeToBase, iOVM_L2Dep
     }
 
     function _initiateWithdraw(address to, uint amount) private {
-        require(rwaone().transferableRwaone(msg.sender) >= amount, "Not enough transferable wHAKA");
+        require(rwaone().transferableRwaone(msg.sender) >= amount, "Not enough transferable wRWAX");
 
         // instruct L2 Rwaone to burn this supply
         rwaone().burnSecondary(msg.sender, amount);
@@ -79,7 +79,7 @@ contract RwaoneBridgeToBase is BaseRwaoneBridge, IRwaoneBridgeToBase, iOVM_L2Dep
         VestingEntries.VestingEntry[] calldata vestingEntries
     ) external onlyCounterpart {
         IRewardEscrowV2 rewardEscrow = rewardEscrowV2();
-        // First, mint the escrowed wHAKA that are being migrated
+        // First, mint the escrowed wRWAX that are being migrated
         rwaone().mintSecondary(address(rewardEscrow), escrowedAmount);
         rewardEscrow.importVestingEntries(account, escrowedAmount, vestingEntries);
 

@@ -38,7 +38,7 @@ contract('RewardEscrowV2Storage', async accounts => {
 			[owner, owner, owner],
 			{ from: owner }
 		);
-		// and set RewardEscrowV2 in resolver to allow wHAKA transfers
+		// and set RewardEscrowV2 in resolver to allow wRWAX transfers
 		await resolver.importAddresses(
 			['RewardEscrowV2'].map(toBytes32),
 			[frozenRewardEscrowV2.address],
@@ -63,7 +63,7 @@ contract('RewardEscrowV2Storage', async accounts => {
 		}
 		firstNonFallbackId = await frozenRewardEscrowV2.nextEntryId();
 
-		// set RewardEscrowV2 key to not the frozen rewards to prevent any wHAKA transfers by it
+		// set RewardEscrowV2 key to not the frozen rewards to prevent any wRWAX transfers by it
 		await resolver.importAddresses(['RewardEscrowV2'].map(toBytes32), [writeAccount], {
 			from: owner,
 		});
@@ -151,7 +151,7 @@ contract('RewardEscrowV2Storage', async accounts => {
 		// this is not exactly the right place for these tests (they should be done in integration + fork as well)
 		// but why not check here as well
 
-		it('are broken due to inability to transfer wHAKA', async () => {
+		it('are broken due to inability to transfer wRWAX', async () => {
 			const revertMsg = 'Only the proxy';
 			// vest
 			await assert.revert(frozenRewardEscrowV2.vest([2], { from: user1 }), revertMsg);

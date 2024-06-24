@@ -38,7 +38,7 @@ describe('migrateDebt() integration tests (L1, L2)', () => {
 	const escrowNum = 26;
 	const escrowBatches = 2;
 	const numExtraEntries = 0;
-	const HAKAAmount = ethers.utils.parseEther('1000');
+	const RWAXAmount = ethers.utils.parseEther('1000');
 	const amountToIssue = ethers.utils.parseEther('100');
 
 	addSnapshotBeforeRestoreAfterEach();
@@ -50,8 +50,8 @@ describe('migrateDebt() integration tests (L1, L2)', () => {
 		owner = ctx.l1.users.owner;
 	});
 
-	before('ensure the user has enough wHAKA', async () => {
-		await ensureBalance({ ctx: ctx.l1, symbol: 'wHAKA', user, balance: HAKAAmount });
+	before('ensure the user has enough wRWAX', async () => {
+		await ensureBalance({ ctx: ctx.l1, symbol: 'wRWAX', user, balance: RWAXAmount });
 	});
 
 	before('approve reward escrow if needed', async () => {
@@ -59,7 +59,7 @@ describe('migrateDebt() integration tests (L1, L2)', () => {
 			token: Rwaone,
 			owner: user,
 			beneficiary: RewardEscrowV2,
-			amount: HAKAAmount,
+			amount: RWAXAmount,
 		});
 	});
 
@@ -74,7 +74,7 @@ describe('migrateDebt() integration tests (L1, L2)', () => {
 		});
 	});
 
-	before('stake some wHAKA', async () => {
+	before('stake some wRWAX', async () => {
 		Rwaone = Rwaone.connect(user);
 
 		const tx = await Rwaone.issueTribes(amountToIssue);

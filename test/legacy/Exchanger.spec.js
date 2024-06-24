@@ -51,11 +51,11 @@ const MockDexPriceAggregator = artifacts.require('MockDexPriceAggregator');
 const MockToken = artifacts.require('MockToken');
 
 contract('Exchanger (spec tests)', async accounts => {
-	const [rUSD, sAUD, sEUR, wHAKA, hBTC, iBTC, hETH, iETH] = [
+	const [rUSD, sAUD, sEUR, wRWAX, hBTC, iBTC, hETH, iETH] = [
 		'rUSD',
 		'sAUD',
 		'sEUR',
-		'wHAKA',
+		'wRWAX',
 		'hBTC',
 		'iBTC',
 		'hETH',
@@ -93,7 +93,7 @@ contract('Exchanger (spec tests)', async accounts => {
 	async function changeOneDISetting(
 		index,
 		value,
-		tribes = [rUSD, sAUD, sEUR, wHAKA, hBTC, iBTC, hETH, iETH]
+		tribes = [rUSD, sAUD, sEUR, wRWAX, hBTC, iBTC, hETH, iETH]
 	) {
 		for (const tribe of tribes) {
 			for (const account of [owner, account1, account2]) {
@@ -4250,7 +4250,7 @@ contract('Exchanger (spec tests)', async accounts => {
 		addSnapshotBeforeRestoreAfterEach();
 
 		beforeEach(async () => {
-			const keys = [sAUD, sEUR, wHAKA, hETH, hBTC, iBTC];
+			const keys = [sAUD, sEUR, wRWAX, hETH, hBTC, iBTC];
 			const rates = ['0.5', '2', '1', '100', '5000', '5000'].map(toUnit);
 			await setupPriceAggregators(exchangeRates, owner, keys);
 			await updateRates(keys, rates);
@@ -4348,7 +4348,7 @@ contract('Exchanger (spec tests)', async accounts => {
 		addSnapshotBeforeRestoreAfterEach();
 
 		beforeEach(async () => {
-			const keys = [sAUD, sEUR, wHAKA, hETH, hBTC, iBTC];
+			const keys = [sAUD, sEUR, wRWAX, hETH, hBTC, iBTC];
 			const rates = ['0.5', '2', '1', '100', '5000', '5000'].map(toUnit);
 			await setupPriceAggregators(exchangeRates, owner, keys);
 			await updateRates(keys, rates);
@@ -4465,7 +4465,7 @@ contract('Exchanger (spec tests)', async accounts => {
 			const realExchangeDynamicFeeThreshold = await systemSettings.exchangeDynamicFeeThreshold();
 			const realExchangeDynamicFeeWeightDecay = await systemSettings.exchangeDynamicFeeWeightDecay();
 
-			for (const token of [rUSD, sAUD, sEUR, wHAKA, hBTC, iBTC, hETH, iETH]) {
+			for (const token of [rUSD, sAUD, sEUR, wRWAX, hBTC, iBTC, hETH, iETH]) {
 				const overrideParams = [ethers.utils.formatBytes32String('')];
 				overrideParams.push(realDexPriceAggregator);
 				overrideParams.push(await systemSettings.atomicEquivalentForDexPricing(token));
@@ -4522,7 +4522,7 @@ contract('Exchanger (spec tests)', async accounts => {
 		addSnapshotBeforeRestoreAfterEach();
 
 		beforeEach(async () => {
-			const keys = [sAUD, sEUR, wHAKA, hETH, hBTC, iBTC];
+			const keys = [sAUD, sEUR, wRWAX, hETH, hBTC, iBTC];
 			const rates = ['0.5', '2', '1', '100', '5000', '5000'].map(toUnit);
 			await setupPriceAggregators(exchangeRates, owner, keys);
 			await updateRates(keys, rates);

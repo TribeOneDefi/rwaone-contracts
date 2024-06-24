@@ -8,7 +8,7 @@
 
 Rwaone is a crypto-backed rwaone asset platform.
 
-It is a multi-token system, powered by wHAKA, the Rwaone Network Token. wHAKA holders can stake wHAKA to issue Tribes, on-chain rwaone assets via the [Staking dApp](https://staking.rwaone.io) The network currently supports an ever-growing [list of rwaone assets](https://www.rwaone.io/tribes/). Please see the [list of the deployed contracts on MAIN and TESTNETS](https://docs.rwaone.io/addresses/)
+It is a multi-token system, powered by wRWAX, the Rwaone Network Token. wRWAX holders can stake wRWAX to issue Tribes, on-chain rwaone assets via the [Staking dApp](https://staking.rwaone.io) The network currently supports an ever-growing [list of rwaone assets](https://www.rwaone.io/tribes/). Please see the [list of the deployed contracts on MAIN and TESTNETS](https://docs.rwaone.io/addresses/)
 Tribes can be traded using [Kwenta](https://kwenta.io)
 
 Rwaone uses a proxy system so that upgrades will not be disruptive to the functionality of the contract. This smooths user interaction, since new functionality will become available without any interruption in their experience. It is also transparent to the community at large, since each upgrade is accompanied by events announcing those upgrades. New releases are managed via the [Rwaone Improvement Proposal (SIP)](https://sips.rwaone.io/all-sip) system similar to the [EIPs](https://eips.ethereum.org/all)
@@ -116,7 +116,7 @@ contract MyContract {
 - `getStakingRewards({ network })` Return the list of staking reward contracts available.
 - `getTribes({ network })` Return the list of tribes for a network
 - `getTarget({ network })` Return the information about a contract's `address` and `source` file. The contract names are those specified in [docs.rwaone.io/addresses](https://docs.rwaone.io/addresses)
-- `getTokens({ network })` Return the list of tokens (tribes and `wHAKA`) used in the system, along with their addresses.
+- `getTokens({ network })` Return the list of tokens (tribes and `wRWAX`) used in the system, along with their addresses.
 - `getUsers({ network })` Return the list of user accounts within the Rwaone protocol (e.g. `owner`, `fee`, etc)
 - `getVersions({ network, byContract = false })` Return the list of deployed versions to the network keyed by tagged version. If `byContract` is `true`, it keys by `contract` name.
 - `networks` Return the list of supported networks

@@ -6,7 +6,7 @@ import "./IVirtualTribe.sol";
 // https://docs.rwaone.io/contracts/source/interfaces/itribeetix
 interface IRwaone {
     // Views
-    function anyTribeOrHAKARateIsInvalid() external view returns (bool anyRateInvalid);
+    function anyTribeOrRWAXRateIsInvalid() external view returns (bool anyRateInvalid);
 
     function availableCurrencyKeys() external view returns (bytes32[] memory);
 

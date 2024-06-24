@@ -10,13 +10,9 @@ contract StakingRewardUpdater {
     }
 
     // For all staking reward contracts that have expired,
-    // take ownership, set duration, send wHAKA rewards, notify rewards then return ownership
+    // take ownership, set duration, send wRWAX rewards, notify rewards then return ownership
     // Requires: this contract be the nominated owner of the staking rewards and sufficient rewards tokens given to each contract.
-    function execute(
-        StakingRewards[] calldata rewardContracts,
-        uint rewardsPerContract,
-        uint duration
-    ) external {
+    function execute(StakingRewards[] calldata rewardContracts, uint rewardsPerContract, uint duration) external {
         require(msg.sender == deployer, "Only the deployer can invoke this");
 
         for (uint i = 0; i < rewardContracts.length; i++) {

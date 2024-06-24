@@ -165,13 +165,13 @@ const removeTribes = async ({
 		const { abi: tribeABI } = deployment.sources[tribeSource];
 		const Tribe = new ethers.Contract(tribeAddress, tribeABI, wallet);
 
-		const currentTribeInHAKA = await Rwaone.tribes(toBytes32(currencyKey));
+		const currentTribeInRWAX = await Rwaone.tribes(toBytes32(currencyKey));
 
-		if (tribeAddress !== currentTribeInHAKA) {
+		if (tribeAddress !== currentTribeInRWAX) {
 			console.error(
 				red(
 					`Tribe address in Rwaone for ${currencyKey} is different from what's deployed in Rwaone to the local ${DEPLOYMENT_FILENAME} of ${network} \ndeployed: ${yellow(
-						currentTribeInHAKA
+						currentTribeInRWAX
 					)}\nlocal:    ${yellow(tribeAddress)}`
 				)
 			);

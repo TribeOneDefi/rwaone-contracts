@@ -79,7 +79,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     }
 
     // SIP-251 Differentiate Liquidation Penalties
-    // penalty taken away from target of wHAKA liquidation (with 18 decimals). E.g. 30% is 0.3e18
+    // penalty taken away from target of wRWAX liquidation (with 18 decimals). E.g. 30% is 0.3e18
     function snxLiquidationPenalty() external view returns (uint) {
         return getSnxLiquidationPenalty();
     }
@@ -329,7 +329,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     }
 
     function setSnxLiquidationPenalty(uint penalty) external onlyOwner {
-        flexibleStorage().setSnxLiquidationPenalty(SETTING_HAKA_LIQUIDATION_PENALTY, penalty);
+        flexibleStorage().setSnxLiquidationPenalty(SETTING_RWAX_LIQUIDATION_PENALTY, penalty);
         emit SnxLiquidationPenaltyUpdated(penalty);
     }
 

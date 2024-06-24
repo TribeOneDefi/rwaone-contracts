@@ -16,7 +16,7 @@ const {
 
 const {
 	toBytes32,
-	defaults: { HAKA_LIQUIDATION_PENALTY },
+	defaults: { RWAX_LIQUIDATION_PENALTY },
 } = require('../..');
 
 contract('CollateralUtil', async accounts => {
@@ -203,7 +203,7 @@ contract('CollateralUtil', async accounts => {
 	describe('Default settings', () => {
 		it('snx liquidation penalty', async () => {
 			const snxLiquidationPenalty = await systemSettings.snxLiquidationPenalty();
-			assert.bnEqual(snxLiquidationPenalty, HAKA_LIQUIDATION_PENALTY);
+			assert.bnEqual(snxLiquidationPenalty, RWAX_LIQUIDATION_PENALTY);
 		});
 	});
 

@@ -123,16 +123,16 @@ contract('DebtMigratorOnOptimism', accounts => {
 	describe('when invoked by the L1 Migrator', () => {
 		let migrationFinalizedTx;
 		let expectedDebtData;
-		let liquidHAKABalanceBefore, escrowedHAKABalanceBefore, debtShareBalanceBefore;
-		const liquidHAKAAmount = toUnit('500');
+		let liquidRWAXBalanceBefore, escrowedRWAXBalanceBefore, debtShareBalanceBefore;
+		const liquidRWAXAmount = toUnit('500');
 		const debtShareAmount = toUnit('100');
 		const escrowAmount = toUnit('66.123456789012345678');
 		before(async () => {
-			// Make sure the migrator has enough wHAKA
+			// Make sure the migrator has enough wRWAX
 			await resolver.importAddresses(['Depot'].map(toBytes32), [owner], {
 				from: owner,
 			});
-			await rwaone.transfer(debtMigratorOnOptimism.address, escrowAmount.add(liquidHAKAAmount), {
+			await rwaone.transfer(debtMigratorOnOptimism.address, escrowAmount.add(liquidRWAXAmount), {
 				from: owner,
 			});
 		});
@@ -148,8 +148,8 @@ contract('DebtMigratorOnOptimism', accounts => {
 		});
 
 		before('record balances', async () => {
-			liquidHAKABalanceBefore = await rwaone.balanceOf(user);
-			escrowedHAKABalanceBefore = await rewardEscrowV2.balanceOf(user);
+			liquidRWAXBalanceBefore = await rwaone.balanceOf(user);
+			escrowedRWAXBalanceBefore = await rewardEscrowV2.balanceOf(user);
 			debtShareBalanceBefore = await tribeetixDebtShare.balanceOf(user);
 		});
 
@@ -158,7 +158,7 @@ contract('DebtMigratorOnOptimism', accounts => {
 				user,
 				debtShareAmount,
 				escrowAmount,
-				liquidHAKAAmount,
+				liquidRWAXAmount,
 				expectedDebtData,
 				{ from: mockMessenger }
 			);
@@ -175,18 +175,18 @@ contract('DebtMigratorOnOptimism', accounts => {
 				account: user,
 				totalDebtSharesMigrated: debtShareAmount,
 				totalEscrowMigrated: escrowAmount,
-				totalLiquidBalanceMigrated: liquidHAKAAmount,
+				totalLiquidBalanceMigrated: liquidRWAXAmount,
 			});
 		});
 
 		it('updates the L2 state', async () => {
 			// updates balances
-			const liquidHAKABalanceAfter = await rwaone.balanceOf(user);
-			const escrowedHAKABalanceAfter = await rewardEscrowV2.balanceOf(user);
+			const liquidRWAXBalanceAfter = await rwaone.balanceOf(user);
+			const escrowedRWAXBalanceAfter = await rewardEscrowV2.balanceOf(user);
 			const debtShareBalanceAfter = await tribeetixDebtShare.balanceOf(user);
-			assert.bnEqual(liquidHAKABalanceAfter, liquidHAKABalanceBefore.add(liquidHAKAAmount));
+			assert.bnEqual(liquidRWAXBalanceAfter, liquidRWAXBalanceBefore.add(liquidRWAXAmount));
 			assert.bnEqual(debtShareBalanceAfter, debtShareBalanceBefore.add(debtShareAmount));
-			assert.bnEqual(escrowedHAKABalanceAfter, escrowedHAKABalanceBefore.add(escrowAmount));
+			assert.bnEqual(escrowedRWAXBalanceAfter, escrowedRWAXBalanceBefore.add(escrowAmount));
 
 			// it creates ten escrow entries whose sum equals the total migrated escrow amount
 			const now = await currentTime();

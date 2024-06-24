@@ -7,7 +7,7 @@ const { createMockAggregatorFactory } = require('../../utils/index')();
 
 function itCanStake({ ctx }) {
 	describe('staking and claiming', () => {
-		const HAKAAmount = ethers.utils.parseEther('1000');
+		const RWAXAmount = ethers.utils.parseEther('1000');
 		const amountToIssueAndBurnrUSD = ethers.utils.parseEther('1');
 
 		let tx;
@@ -25,8 +25,8 @@ function itCanStake({ ctx }) {
 			owner = ctx.users.owner;
 		});
 
-		before('ensure the user has enough wHAKA', async () => {
-			await ensureBalance({ ctx, symbol: 'wHAKA', user, balance: HAKAAmount });
+		before('ensure the user has enough wRWAX', async () => {
+			await ensureBalance({ ctx, symbol: 'wRWAX', user, balance: RWAXAmount });
 		});
 
 		before('setup mock debt ratio aggregator', async () => {

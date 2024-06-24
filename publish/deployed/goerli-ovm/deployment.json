@@ -20316,7 +20316,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "anyTribeOrHAKARateIsInvalid",
+					"name": "anyTribeOrRWAXRateIsInvalid",
 					"outputs": [
 						{
 							"internalType": "bool",
@@ -24347,7 +24347,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "anyTribeOrHAKARateIsInvalid",
+					"name": "anyTribeOrRWAXRateIsInvalid",
 					"outputs": [
 						{
 							"internalType": "bool",

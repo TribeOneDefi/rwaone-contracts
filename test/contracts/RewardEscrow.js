@@ -23,8 +23,8 @@ contract('RewardEscrow', async accounts => {
 
 	// Run once at beginning - snapshots will take care of resetting this before each test
 	before(async () => {
-		// Mock wHAKA
-		({ token: rwaone } = await mockToken({ accounts, name: 'Rwaone', symbol: 'wHAKA' }));
+		// Mock wRWAX
+		({ token: rwaone } = await mockToken({ accounts, name: 'Rwaone', symbol: 'wRWAX' }));
 
 		feePool = { address: feePoolAccount }; // mock contract with address
 
@@ -94,7 +94,7 @@ contract('RewardEscrow', async accounts => {
 
 		describe('Vesting Schedule Writes', async () => {
 			it('should not create a vesting entry with a zero amount', async () => {
-				// Transfer of wHAKA to the escrow must occur before creating an entry
+				// Transfer of wRWAX to the escrow must occur before creating an entry
 				await rwaone.transfer(rewardEscrow.address, toUnit('1'), {
 					from: owner,
 				});
@@ -104,8 +104,8 @@ contract('RewardEscrow', async accounts => {
 				);
 			});
 
-			it('should not create a vesting entry if there is not enough wHAKA in the contracts balance', async () => {
-				// Transfer of wHAKA to the escrow must occur before creating an entry
+			it('should not create a vesting entry if there is not enough wRWAX in the contracts balance', async () => {
+				// Transfer of wRWAX to the escrow must occur before creating an entry
 				await rwaone.transfer(rewardEscrow.address, toUnit('1'), {
 					from: owner,
 				});
@@ -117,7 +117,7 @@ contract('RewardEscrow', async accounts => {
 
 		describe('Vesting Schedule Reads ', async () => {
 			beforeEach(async () => {
-				// Transfer of wHAKA to the escrow must occur before creating a vestinng entry
+				// Transfer of wRWAX to the escrow must occur before creating a vestinng entry
 				await rwaone.transfer(rewardEscrow.address, toUnit('6000'), {
 					from: owner,
 				});
@@ -173,7 +173,7 @@ contract('RewardEscrow', async accounts => {
 
 		describe('Partial Vesting', async () => {
 			beforeEach(async () => {
-				// Transfer of wHAKA to the escrow must occur before creating a vestinng entry
+				// Transfer of wRWAX to the escrow must occur before creating a vestinng entry
 				await rwaone.transfer(rewardEscrow.address, toUnit('6000'), {
 					from: owner,
 				});
@@ -214,7 +214,7 @@ contract('RewardEscrow', async accounts => {
 
 		describe('Vesting', async () => {
 			beforeEach(async () => {
-				// Transfer of wHAKA to the escrow must occur before creating a vestinng entry
+				// Transfer of wRWAX to the escrow must occur before creating a vestinng entry
 				await rwaone.transfer(rewardEscrow.address, toUnit('6000'), {
 					from: owner,
 				});
@@ -233,10 +233,10 @@ contract('RewardEscrow', async accounts => {
 			it('should vest and transfer snx from contract to the user', async () => {
 				await rewardEscrow.vest({ from: account1 });
 
-				// Check user has all their vested wHAKA
+				// Check user has all their vested wRWAX
 				assert.bnEqual(await rwaone.balanceOf(account1), toUnit('6000'));
 
-				// Check rewardEscrow does not have any wHAKA
+				// Check rewardEscrow does not have any wRWAX
 				assert.bnEqual(await rwaone.balanceOf(rewardEscrow.address), toUnit('0'));
 			});
 
@@ -288,7 +288,7 @@ contract('RewardEscrow', async accounts => {
 			it('should not create more than MAX_VESTING_ENTRIES vesting entries', async () => {
 				const MAX_VESTING_ENTRIES = 260; // await rewardEscrow.MAX_VESTING_ENTRIES();
 
-				// Transfer of wHAKA to the escrow must occur before creating an entry
+				// Transfer of wRWAX to the escrow must occur before creating an entry
 				await rwaone.transfer(rewardEscrow.address, toUnit('260'), {
 					from: owner,
 				});
@@ -305,7 +305,7 @@ contract('RewardEscrow', async accounts => {
 			}).timeout(60e3);
 
 			it('should be able to vest 52 week * 5 years vesting entries', async () => {
-				// Transfer of wHAKA to the escrow must occur before creating an entry
+				// Transfer of wRWAX to the escrow must occur before creating an entry
 				await rwaone.transfer(rewardEscrow.address, toUnit('260'), {
 					from: owner,
 				});
@@ -324,10 +324,10 @@ contract('RewardEscrow', async accounts => {
 				// Vest
 				await rewardEscrow.vest({ from: account1 });
 
-				// Check user has all their vested wHAKA
+				// Check user has all their vested wRWAX
 				assert.bnEqual(await rwaone.balanceOf(account1), toUnit('260'));
 
-				// Check rewardEscrow does not have any wHAKA
+				// Check rewardEscrow does not have any wRWAX
 				assert.bnEqual(await rwaone.balanceOf(rewardEscrow.address), toUnit('0'));
 
 				// This account should have vested its whole amount
@@ -338,7 +338,7 @@ contract('RewardEscrow', async accounts => {
 			}).timeout(60e3);
 
 			it('should be able to read an accounts schedule of 5 vesting entries', async () => {
-				// Transfer of wHAKA to the escrow must occur before creating an entry
+				// Transfer of wRWAX to the escrow must occur before creating an entry
 				await rwaone.transfer(rewardEscrow.address, toUnit('5'), {
 					from: owner,
 				});
@@ -364,7 +364,7 @@ contract('RewardEscrow', async accounts => {
 			}).timeout(60e3);
 
 			it('should be able to read the full account schedule 52 week * 5 years vesting entries', async () => {
-				// Transfer of wHAKA to the escrow must occur before creating an entry
+				// Transfer of wRWAX to the escrow must occur before creating an entry
 				await rwaone.transfer(rewardEscrow.address, toUnit('260'), {
 					from: owner,
 				});

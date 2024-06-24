@@ -38,7 +38,7 @@ contract('Depot', async accounts => {
 
 	const [, owner, , fundsWallet, address1, address2, address3] = accounts;
 
-	const [wHAKA, ETH] = ['wHAKA', 'ETH'].map(toBytes32);
+	const [wRWAX, ETH] = ['wRWAX', 'ETH'].map(toBytes32);
 
 	const approveAndDepositTribes = async (tribesToDeposit, depositor) => {
 		// Approve Transaction
@@ -94,7 +94,7 @@ contract('Depot', async accounts => {
 	beforeEach(async () => {
 		snxRate = toUnit('0.1');
 		ethRate = toUnit('172');
-		await updateAggregatorRates(exchangeRates, null, [wHAKA, ETH], [snxRate, ethRate]);
+		await updateAggregatorRates(exchangeRates, null, [wRWAX, ETH], [snxRate, ethRate]);
 	});
 
 	it('should set constructor params on deployment', async () => {
@@ -110,12 +110,12 @@ contract('Depot', async accounts => {
 				ignoreParents: ['Pausable', 'ReentrancyGuard', 'MixinResolver'],
 				expected: [
 					'depositTribes',
-					'exchangeEtherForHAKA',
-					'exchangeEtherForHAKAAtRate',
+					'exchangeEtherForRWAX',
+					'exchangeEtherForRWAXAtRate',
 					'exchangeEtherForTribes',
 					'exchangeEtherForTribesAtRate',
-					'exchangeTribesForHAKA',
-					'exchangeTribesForHAKAAtRate',
+					'exchangeTribesForRWAX',
+					'exchangeTribesForRWAXAtRate',
 					'setFundsWallet',
 					'setMaxEthPurchase',
 					'setMinimumDepositAmount',
@@ -789,7 +789,7 @@ contract('Depot', async accounts => {
 					);
 				});
 				it('when the purchaser supplies a rate and the rate is changed in by the oracle', async () => {
-					await updateAggregatorRates(exchangeRates, null, [wHAKA, ETH], ['0.1', '134'].map(toUnit));
+					await updateAggregatorRates(exchangeRates, null, [wRWAX, ETH], ['0.1', '134'].map(toUnit));
 					await assert.revert(
 						depot.exchangeEtherForTribesAtRate(ethRate, payload),
 						'Guaranteed rate would not be received'
@@ -798,7 +798,7 @@ contract('Depot', async accounts => {
 			});
 		});
 
-		describe('exchangeEtherForHAKAAtRate', () => {
+		describe('exchangeEtherForRWAXAtRate', () => {
 			const ethToSend = toUnit('1');
 			const ethToSendFromPurchaser = { from: purchaser, value: ethToSend };
 			let snxToPurchase;
@@ -807,50 +807,50 @@ contract('Depot', async accounts => {
 			beforeEach(async () => {
 				const purchaseValueDollars = multiplyDecimal(ethToSend, ethRate);
 				snxToPurchase = divideDecimal(purchaseValueDollars, snxRate);
-				// Send some wHAKA to the Depot contract
+				// Send some wRWAX to the Depot contract
 				await rwaone.transfer(depot.address, toUnit('1000000'), {
 					from: owner,
 				});
 			});
 
 			describe('when the purchaser supplies a rate', () => {
-				it('when exchangeEtherForHAKAAtRate is invoked, it works as expected', async () => {
-					txn = await depot.exchangeEtherForHAKAAtRate(ethRate, snxRate, ethToSendFromPurchaser);
+				it('when exchangeEtherForRWAXAtRate is invoked, it works as expected', async () => {
+					txn = await depot.exchangeEtherForRWAXAtRate(ethRate, snxRate, ethToSendFromPurchaser);
 					const exchangeEvent = txn.logs.find(log => log.event === 'Exchange');
 
 					assert.eventEqual(exchangeEvent, 'Exchange', {
 						fromCurrency: 'ETH',
 						fromAmount: ethToSend,
-						toCurrency: 'wHAKA',
+						toCurrency: 'wRWAX',
 						toAmount: snxToPurchase,
 					});
 				});
 				it('when purchaser supplies a rate lower than the current rate', async () => {
 					await assert.revert(
-						depot.exchangeEtherForHAKAAtRate(ethRate, '99', ethToSendFromPurchaser),
+						depot.exchangeEtherForRWAXAtRate(ethRate, '99', ethToSendFromPurchaser),
 						'Guaranteed rwaone rate would not be received'
 					);
 				});
 				it('when purchaser supplies a rate higher than the current rate', async () => {
 					await assert.revert(
-						depot.exchangeEtherForHAKAAtRate(ethRate, '9999', ethToSendFromPurchaser),
+						depot.exchangeEtherForRWAXAtRate(ethRate, '9999', ethToSendFromPurchaser),
 						'Guaranteed rwaone rate would not be received'
 					);
 				});
 				it('when the purchaser supplies a rate and the rate is changed in by the oracle', async () => {
-					await updateAggregatorRates(exchangeRates, null, [wHAKA, ETH], ['0.1', '134'].map(toUnit));
+					await updateAggregatorRates(exchangeRates, null, [wRWAX, ETH], ['0.1', '134'].map(toUnit));
 					await assert.revert(
-						depot.exchangeEtherForHAKAAtRate(ethRate, snxRate, ethToSendFromPurchaser),
+						depot.exchangeEtherForRWAXAtRate(ethRate, snxRate, ethToSendFromPurchaser),
 						'Guaranteed ether rate would not be received'
 					);
 				});
 			});
 		});
 
-		describe('exchangeTribesForHAKAAtRate', () => {
+		describe('exchangeTribesForRWAXAtRate', () => {
 			const purchaser = address1;
 			const purchaserTribeAmount = toUnit('2000');
-			const depotHAKAAmount = toUnit('1000000');
+			const depotRWAXAmount = toUnit('1000000');
 			const tribesToSend = toUnit('1');
 			const fromPurchaser = { from: purchaser };
 			let snxToPurchase;
@@ -861,49 +861,49 @@ contract('Depot', async accounts => {
 				await tribe.transfer(purchaser, purchaserTribeAmount, {
 					from: owner,
 				});
-				// Send some wHAKA to the Token Depot contract
-				await rwaone.transfer(depot.address, depotHAKAAmount, {
+				// Send some wRWAX to the Token Depot contract
+				await rwaone.transfer(depot.address, depotRWAXAmount, {
 					from: owner,
 				});
 
 				await tribe.approve(depot.address, tribesToSend, fromPurchaser);
 
-				const depotHAKABalance = await rwaone.balanceOf(depot.address);
-				assert.bnEqual(depotHAKABalance, depotHAKAAmount);
+				const depotRWAXBalance = await rwaone.balanceOf(depot.address);
+				assert.bnEqual(depotRWAXBalance, depotRWAXAmount);
 
 				snxToPurchase = divideDecimal(tribesToSend, snxRate);
 			});
 
 			describe('when the purchaser supplies a rate', () => {
-				it('when exchangeTribesForHAKAAtRate is invoked, it works as expected', async () => {
-					txn = await depot.exchangeTribesForHAKAAtRate(tribesToSend, snxRate, fromPurchaser);
+				it('when exchangeTribesForRWAXAtRate is invoked, it works as expected', async () => {
+					txn = await depot.exchangeTribesForRWAXAtRate(tribesToSend, snxRate, fromPurchaser);
 					const exchangeEvent = txn.logs.find(log => log.event === 'Exchange');
 
 					assert.eventEqual(exchangeEvent, 'Exchange', {
 						fromCurrency: 'rUSD',
 						fromAmount: tribesToSend,
-						toCurrency: 'wHAKA',
+						toCurrency: 'wRWAX',
 						toAmount: snxToPurchase,
 					});
 				});
 				it('when purchaser supplies a rate lower than the current rate', async () => {
 					await assert.revert(
-						depot.exchangeTribesForHAKAAtRate(tribesToSend, '99', fromPurchaser),
+						depot.exchangeTribesForRWAXAtRate(tribesToSend, '99', fromPurchaser),
 						'Guaranteed rate would not be received'
 					);
 				});
 				it('when purchaser supplies a rate higher than the current rate', async () => {
 					await assert.revert(
-						depot.exchangeTribesForHAKAAtRate(tribesToSend, '9999', fromPurchaser),
+						depot.exchangeTribesForRWAXAtRate(tribesToSend, '9999', fromPurchaser),
 						'Guaranteed rate would not be received'
 					);
 				});
 
 				// skipped because depot is deactivated on live networks and will be removed from the repo shortly
 				it.skip('when the purchaser supplies a rate and the rate is changed in by the oracle', async () => {
-					await updateAggregatorRates(exchangeRates, null, [wHAKA], ['0.05'].map(toUnit));
+					await updateAggregatorRates(exchangeRates, null, [wRWAX], ['0.05'].map(toUnit));
 					await assert.revert(
-						depot.exchangeTribesForHAKAAtRate(tribesToSend, snxRate, fromPurchaser),
+						depot.exchangeTribesForRWAXAtRate(tribesToSend, snxRate, fromPurchaser),
 						'Guaranteed rate would not be received'
 					);
 				});
@@ -1110,11 +1110,11 @@ contract('Depot', async accounts => {
 		});
 	});
 
-	describe('Ensure user can exchange ETH for wHAKA', async () => {
+	describe('Ensure user can exchange ETH for wRWAX', async () => {
 		const purchaser = address1;
 
 		beforeEach(async () => {
-			// Send some wHAKA to the Depot contract
+			// Send some wRWAX to the Depot contract
 			await rwaone.transfer(depot.address, toUnit('1000000'), {
 				from: owner,
 			});
@@ -1124,9 +1124,9 @@ contract('Depot', async accounts => {
 			beforeEach(async () => {
 				await setStatus({ owner, systemStatus, section: 'System', suspend: true });
 			});
-			it('when exchangeEtherForHAKA() is invoked, it reverts with operation prohibited', async () => {
+			it('when exchangeEtherForRWAX() is invoked, it reverts with operation prohibited', async () => {
 				await assert.revert(
-					depot.exchangeEtherForHAKA({
+					depot.exchangeEtherForRWAX({
 						from: purchaser,
 						value: toUnit('10'),
 					}),
@@ -1138,8 +1138,8 @@ contract('Depot', async accounts => {
 				beforeEach(async () => {
 					await setStatus({ owner, systemStatus, section: 'System', suspend: false });
 				});
-				it('when exchangeEtherForHAKA() is invoked, it works as expected', async () => {
-					await depot.exchangeEtherForHAKA({
+				it('when exchangeEtherForRWAX() is invoked, it works as expected', async () => {
+					await depot.exchangeEtherForRWAX({
 						from: purchaser,
 						value: toUnit('10'),
 					});
@@ -1147,15 +1147,15 @@ contract('Depot', async accounts => {
 			});
 		});
 
-		it('ensure user get the correct amount of wHAKA after sending ETH', async () => {
+		it('ensure user get the correct amount of wRWAX after sending ETH', async () => {
 			const ethToSend = toUnit('10');
 
-			const purchaserHAKAStartBalance = await rwaone.balanceOf(purchaser);
-			// Purchaser should not have wHAKA yet
-			assert.equal(purchaserHAKAStartBalance, 0);
+			const purchaserRWAXStartBalance = await rwaone.balanceOf(purchaser);
+			// Purchaser should not have wRWAX yet
+			assert.equal(purchaserRWAXStartBalance, 0);
 
 			// Purchaser sends ETH
-			await depot.exchangeEtherForHAKA({
+			await depot.exchangeEtherForRWAX({
 				from: purchaser,
 				value: ethToSend,
 			});
@@ -1163,17 +1163,17 @@ contract('Depot', async accounts => {
 			const purchaseValueInTribes = multiplyDecimal(ethToSend, ethRate);
 			const purchaseValueInRwaone = divideDecimal(purchaseValueInTribes, snxRate);
 
-			const purchaserHAKAEndBalance = await rwaone.balanceOf(purchaser);
+			const purchaserRWAXEndBalance = await rwaone.balanceOf(purchaser);
 
-			// Purchaser wHAKA balance should be equal to the purchase value we calculated above
-			assert.bnEqual(purchaserHAKAEndBalance, purchaseValueInRwaone);
+			// Purchaser wRWAX balance should be equal to the purchase value we calculated above
+			assert.bnEqual(purchaserRWAXEndBalance, purchaseValueInRwaone);
 		});
 	});
 
 	describe('Ensure user can exchange Tribes for Rwaone', async () => {
 		const purchaser = address1;
 		const purchaserTribeAmount = toUnit('2000');
-		const depotHAKAAmount = toUnit('1000000');
+		const depotRWAXAmount = toUnit('1000000');
 		const tribesToSend = toUnit('1');
 
 		beforeEach(async () => {
@@ -1181,16 +1181,16 @@ contract('Depot', async accounts => {
 			await tribe.transfer(purchaser, purchaserTribeAmount, {
 				from: owner,
 			});
-			// We need to send some wHAKA to the Token Depot contract
-			await rwaone.transfer(depot.address, depotHAKAAmount, {
+			// We need to send some wRWAX to the Token Depot contract
+			await rwaone.transfer(depot.address, depotRWAXAmount, {
 				from: owner,
 			});
 
 			await tribe.approve(depot.address, tribesToSend, { from: purchaser });
 
-			const depotHAKABalance = await rwaone.balanceOf(depot.address);
+			const depotRWAXBalance = await rwaone.balanceOf(depot.address);
 			const purchaserTribeBalance = await tribe.balanceOf(purchaser);
-			assert.bnEqual(depotHAKABalance, depotHAKAAmount);
+			assert.bnEqual(depotRWAXBalance, depotRWAXAmount);
 			assert.bnEqual(purchaserTribeBalance, purchaserTribeAmount);
 		});
 
@@ -1198,9 +1198,9 @@ contract('Depot', async accounts => {
 			beforeEach(async () => {
 				await setStatus({ owner, systemStatus, section: 'System', suspend: true });
 			});
-			it('when exchangeTribesForHAKA() is invoked, it reverts with operation prohibited', async () => {
+			it('when exchangeTribesForRWAX() is invoked, it reverts with operation prohibited', async () => {
 				await assert.revert(
-					depot.exchangeTribesForHAKA(tribesToSend, {
+					depot.exchangeTribesForRWAX(tribesToSend, {
 						from: purchaser,
 					}),
 					'Operation prohibited'
@@ -1211,30 +1211,30 @@ contract('Depot', async accounts => {
 				beforeEach(async () => {
 					await setStatus({ owner, systemStatus, section: 'System', suspend: false });
 				});
-				it('when exchangeTribesForHAKA() is invoked, it works as expected', async () => {
-					await depot.exchangeTribesForHAKA(tribesToSend, {
+				it('when exchangeTribesForRWAX() is invoked, it works as expected', async () => {
+					await depot.exchangeTribesForRWAX(tribesToSend, {
 						from: purchaser,
 					});
 				});
 			});
 		});
 
-		it('ensure user gets the correct amount of wHAKA after sending 10 rUSD', async () => {
-			const purchaserHAKAStartBalance = await rwaone.balanceOf(purchaser);
-			// Purchaser should not have wHAKA yet
-			assert.equal(purchaserHAKAStartBalance, 0);
+		it('ensure user gets the correct amount of wRWAX after sending 10 rUSD', async () => {
+			const purchaserRWAXStartBalance = await rwaone.balanceOf(purchaser);
+			// Purchaser should not have wRWAX yet
+			assert.equal(purchaserRWAXStartBalance, 0);
 
 			// Purchaser sends rUSD
-			const txn = await depot.exchangeTribesForHAKA(tribesToSend, {
+			const txn = await depot.exchangeTribesForRWAX(tribesToSend, {
 				from: purchaser,
 			});
 
 			const purchaseValueInRwaone = divideDecimal(tribesToSend, snxRate);
 
-			const purchaserHAKAEndBalance = await rwaone.balanceOf(purchaser);
+			const purchaserRWAXEndBalance = await rwaone.balanceOf(purchaser);
 
-			// Purchaser wHAKA balance should be equal to the purchase value we calculated above
-			assert.bnEqual(purchaserHAKAEndBalance, purchaseValueInRwaone);
+			// Purchaser wRWAX balance should be equal to the purchase value we calculated above
+			assert.bnEqual(purchaserRWAXEndBalance, purchaseValueInRwaone);
 
 			// assert the exchange event
 			const exchangeEvent = txn.logs.find(log => log.event === 'Exchange');
@@ -1242,7 +1242,7 @@ contract('Depot', async accounts => {
 			assert.eventEqual(exchangeEvent, 'Exchange', {
 				fromCurrency: 'rUSD',
 				fromAmount: tribesToSend,
-				toCurrency: 'wHAKA',
+				toCurrency: 'wRWAX',
 				toAmount: purchaseValueInRwaone,
 			});
 		});
@@ -1252,7 +1252,7 @@ contract('Depot', async accounts => {
 		const snxAmount = toUnit('1000000');
 
 		beforeEach(async () => {
-			// Send some wHAKA to the Depot contract
+			// Send some wRWAX to the Depot contract
 			await rwaone.transfer(depot.address, snxAmount, {
 				from: owner,
 			});
@@ -1269,14 +1269,14 @@ contract('Depot', async accounts => {
 		});
 
 		it('when owner calls withdrawRwaone then withdrawRwaone', async () => {
-			const depotHAKABalanceBefore = await rwaone.balanceOf(depot.address);
+			const depotRWAXBalanceBefore = await rwaone.balanceOf(depot.address);
 
-			assert.bnEqual(depotHAKABalanceBefore, snxAmount);
+			assert.bnEqual(depotRWAXBalanceBefore, snxAmount);
 
 			await depot.withdrawRwaone(snxAmount, { from: owner });
 
-			const depotHAKABalanceAfter = await rwaone.balanceOf(depot.address);
-			assert.bnEqual(depotHAKABalanceAfter, toUnit('0'));
+			const depotRWAXBalanceAfter = await rwaone.balanceOf(depot.address);
+			assert.bnEqual(depotRWAXBalanceAfter, toUnit('0'));
 		});
 	});
 });

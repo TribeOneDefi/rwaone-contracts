@@ -145,7 +145,7 @@ contract('DebtMigratorOnEthereum', accounts => {
 	describe('when migrating debt', () => {
 		let migrateTx;
 		let debtTransferSentBefore;
-		let liquidHAKABalance, escrowedHAKABalance, debtShareBalance;
+		let liquidRWAXBalance, escrowedRWAXBalance, debtShareBalance;
 		const amountToIssue = toUnit('100');
 		const entryAmount = toUnit('50');
 
@@ -164,8 +164,8 @@ contract('DebtMigratorOnEthereum', accounts => {
 		});
 
 		before('record balances', async () => {
-			liquidHAKABalance = await rwaone.balanceOf(owner);
-			escrowedHAKABalance = await rewardEscrowV2.balanceOf(owner);
+			liquidRWAXBalance = await rwaone.balanceOf(owner);
+			escrowedRWAXBalance = await rewardEscrowV2.balanceOf(owner);
 			debtShareBalance = await tribeetixDebtShare.balanceOf(owner);
 			debtTransferSentBefore = await debtMigratorOnEthereum.debtTransferSent();
 		});
@@ -208,8 +208,8 @@ contract('DebtMigratorOnEthereum', accounts => {
 				assert.eventEqual(migrateEvent, 'MigrationInitiated', {
 					account: owner,
 					totalDebtSharesMigrated: debtShareBalance,
-					totalEscrowMigrated: escrowedHAKABalance,
-					totalLiquidBalanceMigrated: liquidHAKABalance,
+					totalEscrowMigrated: escrowedRWAXBalance,
+					totalLiquidBalanceMigrated: liquidRWAXBalance,
 				});
 			});
 		});

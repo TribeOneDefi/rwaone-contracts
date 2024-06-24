@@ -99,7 +99,7 @@ module.exports = async ({
 			expected: input => input === addressOf(Rwaone),
 			write: 'setTarget',
 			writeArg: addressOf(Rwaone),
-			comment: 'Ensure the wHAKA proxy has the correct Rwaone target set',
+			comment: 'Ensure the wRWAX proxy has the correct Rwaone target set',
 		});
 		await runStep({
 			contract: 'Rwaone',
@@ -213,7 +213,7 @@ module.exports = async ({
 			expected: input => input === addressOf(ProxyRwaone),
 			write: 'setRwaoneProxy',
 			writeArg: addressOf(ProxyRwaone),
-			comment: 'Ensure the SupplySchedule is connected to the wHAKA proxy for reading',
+			comment: 'Ensure the SupplySchedule is connected to the wRWAX proxy for reading',
 		});
 	}
 

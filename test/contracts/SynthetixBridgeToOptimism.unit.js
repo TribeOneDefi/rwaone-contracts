@@ -321,7 +321,7 @@ contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 							messenger.sendMessage.returnsAtCall(2, (3e6).toString());
 						});
 
-						it('wHAKA is transferred from the user to the deposit contract', async () => {
+						it('wRWAX is transferred from the user to the deposit contract', async () => {
 							rwaone.transferFrom.returnsAtCall(0, user1);
 							rwaone.transferFrom.returnsAtCall(1, RwaoneBridgeEscrow);
 							rwaone.transferFrom.returnsAtCall(2, amount);
@@ -433,7 +433,7 @@ contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 						txn = await instance.depositReward(amount, { from: user1 });
 					});
 
-					it('then wHAKA is transferred from the account to the bridge escrow', async () => {
+					it('then wRWAX is transferred from the account to the bridge escrow', async () => {
 						rwaone.transferFrom.returnsAtCall(0, user1);
 						rwaone.transferFrom.returnsAtCall(1, RwaoneBridgeEscrow);
 						rwaone.transferFrom.returnsAtCall(2, amount);
@@ -534,7 +534,7 @@ contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 						messenger.sendMessage.returnsAtCall(2, (3e6).toString());
 					});
 
-					it('wHAKA is transferred from the bridge to the bridge escrow', async () => {
+					it('wRWAX is transferred from the bridge to the bridge escrow', async () => {
 						rwaone.transfer.returnsAtCall(0, RwaoneBridgeEscrow);
 						rwaone.transfer.returnsAtCall(1, amount);
 					});
@@ -589,7 +589,7 @@ contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 						});
 					});
 
-					it('then wHAKA is minted via MintableRwaone.finalizeWithdrawal', async () => {
+					it('then wRWAX is minted via MintableRwaone.finalizeWithdrawal', async () => {
 						expect(messenger.sendMessage).to.have.length(0);
 						rwaone.transferFrom.returnsAtCall(0, RwaoneBridgeEscrow);
 						rwaone.transferFrom.returnsAtCall(1, user1);

@@ -26,8 +26,8 @@ async function _readBalance({ ctx, symbol, user }) {
 }
 
 async function _getAmount({ ctx, symbol, user, amount }) {
-	if (symbol === 'wHAKA') {
-		await _getHAKA({ ctx, user, amount });
+	if (symbol === 'wRWAX') {
+		await _getRWAX({ ctx, user, amount });
 	} else if (symbol === 'WETH') {
 		await _getWETH({ ctx, user, amount });
 	} else if (symbol === 'rUSD') {
@@ -81,12 +81,12 @@ async function _getWETH({ ctx, user, amount }) {
 	await tx.wait();
 }
 
-async function _getHAKA({ ctx, user, amount }) {
+async function _getRWAX({ ctx, user, amount }) {
 	let { Rwaone } = ctx.contracts;
 
 	const ownerTransferable = await Rwaone.transferableRwaone(ctx.users.owner.address);
 	if (ownerTransferable.lt(amount)) {
-		await _getHAKAForOwner({ ctx, amount: amount.sub(ownerTransferable) });
+		await _getRWAXForOwner({ ctx, amount: amount.sub(ownerTransferable) });
 	}
 
 	Rwaone = Rwaone.connect(ctx.users.owner);
@@ -94,15 +94,15 @@ async function _getHAKA({ ctx, user, amount }) {
 	await tx.wait();
 }
 
-async function _getHAKAForOwner({ ctx, amount }) {
+async function _getRWAXForOwner({ ctx, amount }) {
 	if (!ctx.useOvm) {
-		throw new Error('There is no more wHAKA!');
+		throw new Error('There is no more wRWAX!');
 	} else {
-		await _getHAKAForOwnerOnL2ByHackMinting({ ctx, amount });
+		await _getRWAXForOwnerOnL2ByHackMinting({ ctx, amount });
 	}
 }
 
-async function _getHAKAForOwnerOnL2ByHackMinting({ ctx, amount }) {
+async function _getRWAXForOwnerOnL2ByHackMinting({ ctx, amount }) {
 	const owner = ctx.users.owner;
 
 	let { Rwaone, AddressResolver } = ctx.contracts;
@@ -133,9 +133,9 @@ async function _getrUSD({ ctx, user, amount }) {
 
 	let tx;
 
-	const requiredHAKA = await _getHAKAAmountRequiredForrUSDAmount({ ctx, amount });
+	const requiredRWAX = await _getRWAXAmountRequiredForrUSDAmount({ ctx, amount });
 	// TODO: mul(12) is a temp workaround for "Amount too large" error.
-	await ensureBalance({ ctx, symbol: 'wHAKA', user: ctx.users.owner, balance: requiredHAKA.mul(12) });
+	await ensureBalance({ ctx, symbol: 'wRWAX', user: ctx.users.owner, balance: requiredRWAX.mul(12) });
 
 	Rwaone = Rwaone.connect(ctx.users.owner);
 	tx = await Rwaone.issueTribes(amount);
@@ -146,7 +146,7 @@ async function _getrUSD({ ctx, user, amount }) {
 	await tx.wait();
 }
 
-async function _getHAKAAmountRequiredForrUSDAmount({ ctx, amount }) {
+async function _getRWAXAmountRequiredForrUSDAmount({ ctx, amount }) {
 	const { Exchanger, SystemSettings } = ctx.contracts;
 
 	const ratio = await SystemSettings.issuanceRatio();
@@ -155,14 +155,14 @@ async function _getHAKAAmountRequiredForrUSDAmount({ ctx, amount }) {
 	const [expectedAmount, ,] = await Exchanger.getAmountsForExchange(
 		collateral,
 		toBytes32('rUSD'),
-		toBytes32('wHAKA')
+		toBytes32('wRWAX')
 	);
 
 	return expectedAmount;
 }
 
 function _getTokenFromSymbol({ ctx, symbol }) {
-	if (symbol === 'wHAKA') {
+	if (symbol === 'wRWAX') {
 		return ctx.contracts.Rwaone;
 	} else if (symbol === 'WETH') {
 		return ctx.contracts.WETH;

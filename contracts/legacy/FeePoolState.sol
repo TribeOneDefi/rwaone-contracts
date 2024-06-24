@@ -87,7 +87,7 @@ contract FeePoolState is Owned, LimitedSetup {
      * @param debtRatio Debt of this account as a percentage of the global debt.
      * @param debtEntryIndex The index in the global debt ledger. rwaone.tribeetixState().issuanceData(account)
      * @param currentPeriodStartDebtIndex The startingDebtIndex of the current fee period
-     * @dev onlyFeePool to call me on rwaone.issue() & rwaone.burn() calls to store the locked wHAKA
+     * @dev onlyFeePool to call me on rwaone.issue() & rwaone.burn() calls to store the locked wRWAX
      * per fee period so we know to allocate the correct proportions of fees and rewards per period
       accountIssuanceLedger[account][0] has the latest locked amount for the current period. This can be update as many time
       accountIssuanceLedger[account][1-2] has the last locked amount for a previous period they minted or burned

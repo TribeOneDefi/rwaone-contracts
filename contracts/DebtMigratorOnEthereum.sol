@@ -100,7 +100,7 @@ contract DebtMigratorOnEthereum is BaseDebtMigrator {
         _incrementDebtTransferCounter(DEBT_TRANSFER_SENT, totalDebtShares);
         _issuer().modifyDebtSharesForMigration(_account, totalDebtShares);
 
-        // Deposit all of the liquid & revoked escrowed wHAKA to the migrator on L2
+        // Deposit all of the liquid & revoked escrowed wRWAX to the migrator on L2
         (uint totalEscrowRevoked, uint totalLiquidBalance) = IRwaone(requireAndGetAddress(CONTRACT_RWAONEETIX))
             .migrateAccountBalances(_account);
         uint totalAmountToDeposit = totalLiquidBalance.add(totalEscrowRevoked);
@@ -116,7 +116,7 @@ contract DebtMigratorOnEthereum is BaseDebtMigrator {
 
         // Require all zeroed balances
         require(_tribeetixDebtShare().balanceOf(_account) == 0, "Debt share balance is not zero");
-        require(_tribeetixERC20().balanceOf(_account) == 0, "wHAKA balance is not zero");
+        require(_tribeetixERC20().balanceOf(_account) == 0, "wRWAX balance is not zero");
         require(_rewardEscrowV2().balanceOf(_account) == 0, "Escrow balanace is not zero");
         require(_liquidatorRewards().earned(_account) == 0, "Earned balance is not zero");
 

@@ -19,12 +19,12 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
 
-    bytes32 internal constant wHAKA = "wHAKA";
+    bytes32 internal constant wRWAX = "wRWAX";
     bytes32 internal constant ETH = "ETH";
 
     /* ========== STATE VARIABLES ========== */
 
-    // Address where the ether and Tribes raised for selling wHAKA is transfered to
+    // Address where the ether and Tribes raised for selling wRWAX is transfered to
     // Any ether raised for selling Tribes gets sent back to whoever deposited the Tribes,
     // and doesn't have anything to do with this address.
     address payable public fundsWallet;
@@ -273,67 +273,67 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
         return _exchangeEtherForTribes();
     }
 
-    function _exchangeEtherForHAKA() internal returns (uint) {
-        // How many wHAKA are they going to be receiving?
+    function _exchangeEtherForRWAX() internal returns (uint) {
+        // How many wRWAX are they going to be receiving?
         uint tribeetixToSend = tribeetixReceivedForEther(msg.value);
 
         // Store the ETH in our funds wallet
         fundsWallet.transfer(msg.value);
 
-        // And send them the wHAKA.
+        // And send them the wRWAX.
         rwaone().transfer(msg.sender, tribeetixToSend);
 
-        emit Exchange("ETH", msg.value, "wHAKA", tribeetixToSend);
+        emit Exchange("ETH", msg.value, "wRWAX", tribeetixToSend);
 
         return tribeetixToSend;
     }
 
     /**
-     * @notice Exchange ETH to wHAKA.
+     * @notice Exchange ETH to wRWAX.
      */
-    function exchangeEtherForHAKA()
+    function exchangeEtherForRWAX()
         external
         payable
-        rateNotInvalid(wHAKA)
+        rateNotInvalid(wRWAX)
         rateNotInvalid(ETH)
         notPaused
         returns (
-            uint // Returns the number of wHAKA received
+            uint // Returns the number of wRWAX received
         )
     {
-        return _exchangeEtherForHAKA();
+        return _exchangeEtherForRWAX();
     }
 
     /**
-     * @notice Exchange ETH to wHAKA while insisting on a particular set of rates. This allows a user to
+     * @notice Exchange ETH to wRWAX while insisting on a particular set of rates. This allows a user to
      *         exchange while protecting against frontrunning by the contract owner on the exchange rates.
      * @param guaranteedEtherRate The ether exchange rate which must be honored or the call will revert.
      * @param guaranteedRwaoneRate The rwaone exchange rate which must be honored or the call will revert.
      */
-    function exchangeEtherForHAKAAtRate(
+    function exchangeEtherForRWAXAtRate(
         uint guaranteedEtherRate,
         uint guaranteedRwaoneRate
     )
         external
         payable
-        rateNotInvalid(wHAKA)
+        rateNotInvalid(wRWAX)
         rateNotInvalid(ETH)
         notPaused
         returns (
-            uint // Returns the number of wHAKA received
+            uint // Returns the number of wRWAX received
         )
     {
         require(guaranteedEtherRate == exchangeRates().rateForCurrency(ETH), "Guaranteed ether rate would not be received");
         require(
-            guaranteedRwaoneRate == exchangeRates().rateForCurrency(wHAKA),
+            guaranteedRwaoneRate == exchangeRates().rateForCurrency(wRWAX),
             "Guaranteed rwaone rate would not be received"
         );
 
-        return _exchangeEtherForHAKA();
+        return _exchangeEtherForRWAX();
     }
 
-    function _exchangeTribesForHAKA(uint tribeAmount) internal returns (uint) {
-        // How many wHAKA are they going to be receiving?
+    function _exchangeTribesForRWAX(uint tribeAmount) internal returns (uint) {
+        // How many wRWAX are they going to be receiving?
         uint tribeetixToSend = tribeetixReceivedForTribes(tribeAmount);
 
         // Ok, transfer the Tribes to our funds wallet.
@@ -341,56 +341,56 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
         // they're sent back in from the funds wallet.
         triberUSD().transferFrom(msg.sender, fundsWallet, tribeAmount);
 
-        // And send them the wHAKA.
+        // And send them the wRWAX.
         rwaone().transfer(msg.sender, tribeetixToSend);
 
-        emit Exchange("rUSD", tribeAmount, "wHAKA", tribeetixToSend);
+        emit Exchange("rUSD", tribeAmount, "wRWAX", tribeetixToSend);
 
         return tribeetixToSend;
     }
 
     /**
-     * @notice Exchange rUSD for wHAKA
+     * @notice Exchange rUSD for wRWAX
      * @param tribeAmount The amount of tribes the user wishes to exchange.
      */
-    function exchangeTribesForHAKA(
+    function exchangeTribesForRWAX(
         uint tribeAmount
     )
         external
-        rateNotInvalid(wHAKA)
+        rateNotInvalid(wRWAX)
         notPaused
         returns (
-            uint // Returns the number of wHAKA received
+            uint // Returns the number of wRWAX received
         )
     {
-        return _exchangeTribesForHAKA(tribeAmount);
+        return _exchangeTribesForRWAX(tribeAmount);
     }
 
     /**
-     * @notice Exchange rUSD for wHAKA while insisting on a particular rate. This allows a user to
+     * @notice Exchange rUSD for wRWAX while insisting on a particular rate. This allows a user to
      *         exchange while protecting against frontrunning by the contract owner on the exchange rate.
      * @param tribeAmount The amount of tribes the user wishes to exchange.
      * @param guaranteedRate A rate (rwaone price) the caller wishes to insist upon.
      */
-    function exchangeTribesForHAKAAtRate(
+    function exchangeTribesForRWAXAtRate(
         uint tribeAmount,
         uint guaranteedRate
     )
         external
-        rateNotInvalid(wHAKA)
+        rateNotInvalid(wRWAX)
         notPaused
         returns (
-            uint // Returns the number of wHAKA received
+            uint // Returns the number of wRWAX received
         )
     {
-        require(guaranteedRate == exchangeRates().rateForCurrency(wHAKA), "Guaranteed rate would not be received");
+        require(guaranteedRate == exchangeRates().rateForCurrency(wRWAX), "Guaranteed rate would not be received");
 
-        return _exchangeTribesForHAKA(tribeAmount);
+        return _exchangeTribesForRWAX(tribeAmount);
     }
 
     /**
-     * @notice Allows the owner to withdraw wHAKA from this contract if needed.
-     * @param amount The amount of wHAKA to attempt to withdraw (in 18 decimal places).
+     * @notice Allows the owner to withdraw wRWAX from this contract if needed.
+     * @param amount The amount of wRWAX to attempt to withdraw (in 18 decimal places).
      */
     function withdrawRwaone(uint amount) external onlyOwner {
         rwaone().transfer(owner, amount);
@@ -480,17 +480,17 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
     }
 
     /**
-     * @notice Calculate how many wHAKA you will receive if you transfer
+     * @notice Calculate how many wRWAX you will receive if you transfer
      *         an amount of tribes.
      * @param amount The amount of tribes (in 18 decimal places) you want to ask about
      */
     function tribeetixReceivedForTribes(uint amount) public view returns (uint) {
-        // And what would that be worth in wHAKA based on the current price?
-        return amount.divideDecimal(exchangeRates().rateForCurrency(wHAKA));
+        // And what would that be worth in wRWAX based on the current price?
+        return amount.divideDecimal(exchangeRates().rateForCurrency(wRWAX));
     }
 
     /**
-     * @notice Calculate how many wHAKA you will receive if you transfer
+     * @notice Calculate how many wRWAX you will receive if you transfer
      *         an amount of ether.
      * @param amount The amount of ether (in wei) you want to ask about
      */
@@ -498,7 +498,7 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
         // How much is the ETH they sent us worth in rUSD (ignoring the transfer fee)?
         uint valueSentInTribes = amount.multiplyDecimal(exchangeRates().rateForCurrency(ETH));
 
-        // Now, how many wHAKA will that USD amount buy?
+        // Now, how many wRWAX will that USD amount buy?
         return tribeetixReceivedForTribes(valueSentInTribes);
     }
 

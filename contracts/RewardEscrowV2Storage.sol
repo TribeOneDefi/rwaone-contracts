@@ -39,7 +39,7 @@ contract RewardEscrowV2Storage is IRewardEscrowV2Storage, State {
     // this as an int in order to be able to store ZERO_PLACEHOLDER to only cache once
     mapping(address => int) internal _fallbackCounts;
 
-    // account's total escrow wHAKA balance (still to vest)
+    // account's total escrow wRWAX balance (still to vest)
     // this as an int in order to be able to store ZERO_PLACEHOLDER to prevent reading stale values
     mapping(address => int) internal _totalEscrowedAccountBalance;
 
@@ -92,12 +92,10 @@ contract RewardEscrowV2Storage is IRewardEscrowV2Storage, State {
 
     /* ========== VIEWS ========== */
 
-    function vestingSchedules(address account, uint entryId)
-        public
-        view
-        withFallback
-        returns (VestingEntries.VestingEntry memory entry)
-    {
+    function vestingSchedules(
+        address account,
+        uint entryId
+    ) public view withFallback returns (VestingEntries.VestingEntry memory entry) {
         // read stored entry
         StorageEntry memory stored = _vestingSchedules[account][entryId];
         // convert to previous data size format
@@ -198,16 +196,7 @@ contract RewardEscrowV2Storage is IRewardEscrowV2Storage, State {
         address account,
         uint startIndex,
         uint targetAmount
-    )
-        external
-        withFallback
-        onlyAssociatedContract
-        returns (
-            uint total,
-            uint endIndex,
-            uint lastEntryTime
-        )
-    {
+    ) external withFallback onlyAssociatedContract returns (uint total, uint endIndex, uint lastEntryTime) {
         require(targetAmount > 0, "targetAmount is zero");
 
         // store the count to reduce external calls in accountVestingEntryIDs
@@ -272,12 +261,10 @@ contract RewardEscrowV2Storage is IRewardEscrowV2Storage, State {
     }
 
     /// append entry for an account
-    function addVestingEntry(address account, VestingEntries.VestingEntry calldata entry)
-        external
-        withFallback
-        onlyAssociatedContract
-        returns (uint)
-    {
+    function addVestingEntry(
+        address account,
+        VestingEntries.VestingEntry calldata entry
+    ) external withFallback onlyAssociatedContract returns (uint) {
         // zero time is used as read-miss flag in this contract
         require(entry.endTime != 0, "vesting target time zero");
 
@@ -301,11 +288,7 @@ contract RewardEscrowV2Storage is IRewardEscrowV2Storage, State {
 
     /// zeros out a single entry in local contract with provided time while ensuring
     /// that endTime is not being stored as zero if it passed as zero
-    function _setZeroAmountWithEndTime(
-        address account,
-        uint entryId,
-        uint endTime
-    ) internal {
+    function _setZeroAmountWithEndTime(address account, uint entryId, uint endTime) internal {
         // load storage entry
         StorageEntry storage storedEntry = _vestingSchedules[account][entryId];
         // Impossible edge-case: checking that endTime is not zero (in which case the entry will be

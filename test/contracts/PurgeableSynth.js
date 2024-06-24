@@ -27,7 +27,7 @@ const {
 const { setupAllContracts } = require('./setup');
 
 contract('PurgeableTribe', accounts => {
-	const [rUSD, wHAKA, sAUD, iETH] = ['rUSD', 'wHAKA', 'sAUD', 'iETH'].map(toBytes32);
+	const [rUSD, wRWAX, sAUD, iETH] = ['rUSD', 'wRWAX', 'sAUD', 'iETH'].map(toBytes32);
 	const tribeKeys = [rUSD, sAUD, iETH];
 	const [deployerAccount, owner, , , account1, account2] = accounts;
 
@@ -167,7 +167,7 @@ contract('PurgeableTribe', accounts => {
 				await updateAggregatorRates(
 					exchangeRates,
 					null,
-					[sAUD, wHAKA, iETH],
+					[sAUD, wRWAX, iETH],
 					['0.5', '1', '170'].map(toUnit)
 				);
 				await debtCache.takeDebtSnapshot();

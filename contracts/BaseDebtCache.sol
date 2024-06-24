@@ -226,7 +226,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         }
     }
 
-    // Returns the total rUSD debt backed by non-wHAKA collateral.
+    // Returns the total rUSD debt backed by non-wRWAX collateral.
     function totalNonSnxBackedDebt() external view returns (uint excludedDebt, bool isInvalid) {
         bytes32[] memory currencyKeys = issuer().availableCurrencyKeys();
         (uint[] memory rates, bool ratesAreInvalid) = exchangeRates().ratesAndInvalidForCurrencies(currencyKeys);
@@ -277,7 +277,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         (uint futuresDebt, bool futuresDebtIsInvalid) = futuresMarketManager().totalDebt();
         total = total.add(futuresDebt);
 
-        // Ensure that if the excluded non-wHAKA debt exceeds wHAKA-backed debt, no overflow occurs
+        // Ensure that if the excluded non-wRWAX debt exceeds wRWAX-backed debt, no overflow occurs
         total = total < excludedDebt ? 0 : total.sub(excludedDebt);
 
         return (total, isInvalid || futuresDebtIsInvalid || isAnyNonSnxDebtRateInvalid);

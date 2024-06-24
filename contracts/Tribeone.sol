@@ -16,7 +16,7 @@ contract Rwaone is BaseRwaone {
     // ========== ADDRESS RESOLVER CONFIGURATION ==========
     bytes32 private constant CONTRACT_REWARD_ESCROW = "RewardEscrow";
     bytes32 private constant CONTRACT_SUPPLYSCHEDULE = "SupplySchedule";
-    address private hakaToken;
+    address private rwaxToken;
 
     // ========== CONSTRUCTOR ==========
 
@@ -136,7 +136,7 @@ contract Rwaone is BaseRwaone {
         // // record minting event before mutation to token supply
         // uint minterReward = _supplySchedule.recordMintEvent(supplyToMint);
 
-        // // Set minted wHAKA balance to RewardEscrow's balance
+        // // Set minted wRWAX balance to RewardEscrow's balance
         // // Minus the minterReward and set balance of minter to add reward
         // uint amountToDistribute = supplyToMint.sub(minterReward);
 
@@ -160,7 +160,7 @@ contract Rwaone is BaseRwaone {
         return true;
     }
 
-    /* Once off function for SIP-60 to migrate wHAKA balances in the RewardEscrow contract
+    /* Once off function for SIP-60 to migrate wRWAX balances in the RewardEscrow contract
      * To the new RewardEscrowV2 contract
      */
     function migrateEscrowBalanceToRewardEscrowV2() external onlyOwner {
@@ -203,20 +203,20 @@ contract Rwaone is BaseRwaone {
         );
     }
 
-    function setHakaAddress(address _hakaToken) public onlyOwner {
-        hakaToken = _hakaToken;
+    function setRwaxAddress(address _rwaxToken) public onlyOwner {
+        rwaxToken = _rwaxToken;
     }
 
     function wrap(uint256 amount) public {
         require(amount > 0, "Amount must be greater than 0");
-        require(IERC20(hakaToken).transferFrom(msg.sender, address(this), amount), "Transfer failed");
+        require(IERC20(rwaxToken).transferFrom(msg.sender, address(this), amount), "Transfer failed");
         _mint(msg.sender, amount);
     }
 
     function unwrap(uint256 amount) public {
         require(amount > 0, "Amount must be greater than 0");
         _burn(msg.sender, amount);
-        require(IERC20(hakaToken).transfer(msg.sender, amount), "Transfer failed");
+        require(IERC20(rwaxToken).transfer(msg.sender, amount), "Transfer failed");
     }
 
     function _mint(address to, uint256 amount) private {

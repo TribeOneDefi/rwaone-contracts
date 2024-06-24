@@ -700,8 +700,8 @@
 			"txn": "",
 			"network": "mainnet"
 		},
-		"StakingRewardsHAKAWETHUniswapV3": {
-			"name": "StakingRewardsHAKAWETHUniswapV3",
+		"StakingRewardsRWAXWETHUniswapV3": {
+			"name": "StakingRewardsRWAXWETHUniswapV3",
 			"address": "0xfD49C7EE330fE060ca66feE33d49206eB96F146D",
 			"source": "StakingRewards",
 			"link": "https://explorer.optimism.io/address/0xfD49C7EE330fE060ca66feE33d49206eB96F146D",
@@ -18380,7 +18380,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "anyTribeOrHAKARateIsInvalid",
+					"name": "anyTribeOrRWAXRateIsInvalid",
 					"outputs": [
 						{
 							"internalType": "bool",
@@ -21866,7 +21866,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "anyTribeOrHAKARateIsInvalid",
+					"name": "anyTribeOrRWAXRateIsInvalid",
 					"outputs": [
 						{
 							"internalType": "bool",
@@ -32661,7 +32661,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "anyTribeOrHAKARateIsInvalid",
+					"name": "anyTribeOrRWAXRateIsInvalid",
 					"outputs": [
 						{
 							"internalType": "bool",

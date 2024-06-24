@@ -59,7 +59,7 @@ function bootstrapL2({ ctx }) {
 
 		await ensureBalance({
 			ctx,
-			symbol: 'wHAKA',
+			symbol: 'wRWAX',
 			user: ctx.users.owner,
 			balance: ethers.utils.parseEther('1000000'),
 		});
@@ -105,7 +105,7 @@ function bootstrapDual({ ctx }) {
 
 		await ensureBalance({
 			ctx: ctx.l2,
-			symbol: 'wHAKA',
+			symbol: 'wRWAX',
 			user: ctx.l2.users.owner,
 			balance: ethers.utils.parseEther('1000000'),
 		});

@@ -48,8 +48,8 @@
 		"sign": "$",
 		"description": "US Dollars"
 	},
-	"wHAKA": {
-		"asset": "wHAKA",
+	"wRWAX": {
+		"asset": "wRWAX",
 		"category": "crypto",
 		"sign": "",
 		"description": "Rwaone Network Token"

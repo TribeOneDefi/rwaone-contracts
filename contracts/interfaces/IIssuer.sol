@@ -8,7 +8,7 @@ interface IIssuer {
 
     function allNetworksDebtInfo() external view returns (uint256 debt, uint256 sharesSupply, bool isStale);
 
-    function anyTribeOrHAKARateIsInvalid() external view returns (bool anyRateInvalid);
+    function anyTribeOrRWAXRateIsInvalid() external view returns (bool anyRateInvalid);
 
     function availableCurrencyKeys() external view returns (bytes32[] memory);
 

@@ -53,12 +53,12 @@ contract('Rewards Integration Tests', accounts => {
 	// };
 
 	// CURRENCIES
-	const [rUSD, sAUD, sEUR, hBTC, wHAKA, iBTC, hETH, ETH] = [
+	const [rUSD, sAUD, sEUR, hBTC, wRWAX, iBTC, hETH, ETH] = [
 		'rUSD',
 		'sAUD',
 		'sEUR',
 		'hBTC',
-		'wHAKA',
+		'wRWAX',
 		'iBTC',
 		'hETH',
 		'ETH',
@@ -137,7 +137,7 @@ contract('Rewards Integration Tests', accounts => {
 		rewardEscrow,
 		periodOneMintableSupplyMinusMinterReward,
 		rUSDContract,
-		MINTER_HAKA_REWARD;
+		MINTER_RWAX_REWARD;
 
 	// run this once before all tests to prepare our environment, snapshots on beforeEach will take
 	// care of resetting to this state
@@ -181,7 +181,7 @@ contract('Rewards Integration Tests', accounts => {
 
 		await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, hBTC, iBTC, hETH, ETH]);
 
-		MINTER_HAKA_REWARD = await supplySchedule.minterReward();
+		MINTER_RWAX_REWARD = await supplySchedule.minterReward();
 
 		await setExchangeFeeRateForTribes({
 			owner,
@@ -199,17 +199,17 @@ contract('Rewards Integration Tests', accounts => {
 		await supplySchedule.setInflationAmount(initialInflationAmount, { from: owner });
 		await fastForwardAndUpdateRates(WEEK + DAY);
 
-		// Assign 1/3 of total wHAKA to 3 accounts
+		// Assign 1/3 of total wRWAX to 3 accounts
 		const snxTotalSupply = await rwaone.totalSupply();
-		const thirdOfHAKA = third(snxTotalSupply);
+		const thirdOfRWAX = third(snxTotalSupply);
 
-		await rwaone.transfer(account1, thirdOfHAKA, { from: owner });
-		await rwaone.transfer(account2, thirdOfHAKA, { from: owner });
-		await rwaone.transfer(account3, thirdOfHAKA, { from: owner });
+		await rwaone.transfer(account1, thirdOfRWAX, { from: owner });
+		await rwaone.transfer(account2, thirdOfRWAX, { from: owner });
+		await rwaone.transfer(account3, thirdOfRWAX, { from: owner });
 
-		// Get the wHAKA mintableSupply
+		// Get the wRWAX mintableSupply
 		periodOneMintableSupplyMinusMinterReward = (await supplySchedule.mintableSupply()).sub(
-			MINTER_HAKA_REWARD
+			MINTER_RWAX_REWARD
 		);
 
 		// Mint the staking rewards
@@ -222,7 +222,7 @@ contract('Rewards Integration Tests', accounts => {
 		await systemSettings.setIssuanceRatio(toUnit('0.2'), { from: owner });
 	});
 
-	describe('3 accounts with 33.33% wHAKA all issue MAX and claim rewards', async () => {
+	describe('3 accounts with 33.33% wRWAX all issue MAX and claim rewards', async () => {
 		let FEE_PERIOD_LENGTH;
 		let CLAIMABLE_PERIODS;
 
@@ -287,8 +287,8 @@ contract('Rewards Integration Tests', accounts => {
 				// FastForward a little for minting
 				await fastForwardAndUpdateRates(MINUTE);
 
-				// Get the wHAKA mintableSupply - the minter reward of 200 wHAKA
-				mintedRewardsSupply = (await supplySchedule.mintableSupply()).sub(MINTER_HAKA_REWARD);
+				// Get the wRWAX mintableSupply - the minter reward of 200 wRWAX
+				mintedRewardsSupply = (await supplySchedule.mintableSupply()).sub(MINTER_RWAX_REWARD);
 				// console.log('mintedRewardsSupply', mintedRewardsSupply.toString());
 				// Mint the staking rewards
 				await rwaone.mint({ from: owner });
@@ -314,8 +314,8 @@ contract('Rewards Integration Tests', accounts => {
 				// FastForward a little for minting
 				await fastForwardAndUpdateRates(MINUTE);
 
-				// Get the wHAKA mintableSupply - the minter reward of 200 wHAKA
-				mintedRewardsSupply = (await supplySchedule.mintableSupply()).sub(MINTER_HAKA_REWARD);
+				// Get the wRWAX mintableSupply - the minter reward of 200 wRWAX
+				mintedRewardsSupply = (await supplySchedule.mintableSupply()).sub(MINTER_RWAX_REWARD);
 				// console.log('mintedRewardsSupply', mintedRewardsSupply.toString());
 				// Mint the staking rewards
 				await rwaone.mint({ from: owner });
@@ -337,7 +337,7 @@ contract('Rewards Integration Tests', accounts => {
 			assert.bnClose(totalRewardsAvailable, rewardsLessAccountClaims, '1000000000');
 		});
 
-		it('should mint wHAKA for the all claimable fee periods then all 3 accounts claim at the end of the claimable period', async () => {
+		it('should mint wRWAX for the all claimable fee periods then all 3 accounts claim at the end of the claimable period', async () => {
 			let mintedRewardsSupply;
 			// We are currently in the 2nd week, close it and the next
 			for (let i = 0; i <= CLAIMABLE_PERIODS - 1; i++) {
@@ -347,8 +347,8 @@ contract('Rewards Integration Tests', accounts => {
 				// FastForward a little for minting
 				await fastForwardAndUpdateRates(MINUTE);
 
-				// Get the wHAKA mintableSupply - the minter reward of 200 wHAKA
-				mintedRewardsSupply = (await supplySchedule.mintableSupply()).sub(MINTER_HAKA_REWARD);
+				// Get the wRWAX mintableSupply - the minter reward of 200 wRWAX
+				mintedRewardsSupply = (await supplySchedule.mintableSupply()).sub(MINTER_RWAX_REWARD);
 
 				// Mint the staking rewards
 				await rwaone.mint({ from: owner });
@@ -376,7 +376,7 @@ contract('Rewards Integration Tests', accounts => {
 			assert.bnClose(accThreeEscrowed.escrowAmount, twoWeeksRewards, '1000000000');
 		});
 
-		it('should rollover the unclaimed wHAKA rewards', async () => {
+		it('should rollover the unclaimed wRWAX rewards', async () => {
 			// Close all claimable periods
 			for (let i = 0; i <= CLAIMABLE_PERIODS; i++) {
 				// console.log('Close Fee Period', i);
@@ -412,7 +412,7 @@ contract('Rewards Integration Tests', accounts => {
 			);
 		});
 
-		it('should rollover the unclaimed wHAKA rewards on week over 2 terms', async () => {
+		it('should rollover the unclaimed wRWAX rewards on week over 2 terms', async () => {
 			for (let i = 0; i <= 2; i++) {
 				await fastForwardAndCloseFeePeriod();
 				// FastForward a bit to be able to mint
@@ -441,7 +441,7 @@ contract('Rewards Integration Tests', accounts => {
 			);
 		});
 
-		it('should rollover the partial unclaimed wHAKA rewards', async () => {
+		it('should rollover the partial unclaimed wRWAX rewards', async () => {
 			// await logFeePeriods();
 			for (let i = 0; i <= FEE_PERIOD_LENGTH; i++) {
 				// Get the Rewards to RollOver
@@ -523,7 +523,7 @@ contract('Rewards Integration Tests', accounts => {
 			assert.bnClose(account1EscrowEntry.escrowAmount, rewardsAmount, gweiTolerance);
 		});
 
-		it('should allocate correct wHAKA rewards as others leave the system', async () => {
+		it('should allocate correct wRWAX rewards as others leave the system', async () => {
 			// Close Fee Period
 			// console.log('Close Fee Period');
 			await fastForwardAndCloseFeePeriod();
@@ -546,9 +546,9 @@ contract('Rewards Integration Tests', accounts => {
 			// FastForward into the second mintable week
 			await fastForwardAndUpdateRates(WEEK + MINUTE);
 
-			// Get the wHAKA mintableSupply for period 2
+			// Get the wRWAX mintableSupply for period 2
 			const period2MintedRewardsSupply = (await supplySchedule.mintableSupply()).sub(
-				MINTER_HAKA_REWARD
+				MINTER_RWAX_REWARD
 			);
 
 			// Mint the staking rewards for p2
@@ -649,9 +649,9 @@ contract('Rewards Integration Tests', accounts => {
 			const potentialFee = exchangeFeeIncurred(toUnit('20000'));
 			await rwaone.issueTribes(tenK.sub(half(potentialFee)), { from: account3 });
 
-			// Get the wHAKA mintableSupply for week 2
+			// Get the wRWAX mintableSupply for week 2
 			const periodTwoMintableSupply = (await supplySchedule.mintableSupply()).sub(
-				MINTER_HAKA_REWARD
+				MINTER_RWAX_REWARD
 			);
 
 			// Mint the staking rewards
@@ -749,9 +749,9 @@ contract('Rewards Integration Tests', accounts => {
 
 			// await rwaone.burnTribes(amountAfterExchangeInUSD, { from: account1 });
 
-			// // Get the wHAKA mintableSupply for week 3
+			// // Get the wRWAX mintableSupply for week 3
 			// // const periodThreeMintableSupply = (await supplySchedule.mintableSupply()).sub(
-			// // 	MINTER_HAKA_REWARD
+			// // 	MINTER_RWAX_REWARD
 			// // );
 
 			// // Mint the staking rewards
@@ -795,9 +795,9 @@ contract('Rewards Integration Tests', accounts => {
 			// // Acc1 mints 20K (40%) close p (40,40,20)');
 			// await rwaone.issueTribes(twentyK, { from: account1 });
 
-			// // Get the wHAKA mintableSupply for week 4
+			// // Get the wRWAX mintableSupply for week 4
 			// const periodFourMintableSupply = (await supplySchedule.mintableSupply()).sub(
-			// 	MINTER_HAKA_REWARD
+			// 	MINTER_RWAX_REWARD
 			// );
 
 			// // Mint the staking rewards
@@ -890,9 +890,9 @@ contract('Rewards Integration Tests', accounts => {
 			// Acc 1 Issues 10K rUSD again
 			await rwaone.issueTribes(tenK, { from: account1 });
 
-			// Get the wHAKA mintableSupply for week 2
+			// Get the wRWAX mintableSupply for week 2
 			const periodTwoMintableSupply = (await supplySchedule.mintableSupply()).sub(
-				MINTER_HAKA_REWARD
+				MINTER_RWAX_REWARD
 			);
 
 			// Mint the staking rewards
@@ -954,11 +954,11 @@ contract('Rewards Integration Tests', accounts => {
 		});
 
 		it('should apply no penalty when users claim rewards above the penalty threshold ratio of 1%', async () => {
-			// Decrease wHAKA collateral price by .9%
-			const currentRate = await exchangeRates.rateForCurrency(wHAKA);
+			// Decrease wRWAX collateral price by .9%
+			const currentRate = await exchangeRates.rateForCurrency(wRWAX);
 			const newRate = currentRate.sub(multiplyDecimal(currentRate, toUnit('0.009')));
 
-			await updateAggregatorRates(exchangeRates, null, [wHAKA], [newRate]);
+			await updateAggregatorRates(exchangeRates, null, [wRWAX], [newRate]);
 
 			// we will be able to claim fees
 			assert.equal(await feePool.isFeesClaimable(account1), true);
@@ -978,9 +978,9 @@ contract('Rewards Integration Tests', accounts => {
 			);
 		});
 		it('should block user from claiming fees and rewards when users claim rewards >10% threshold collateralisation ratio', async () => {
-			// But if the price of wHAKA decreases a lot...
-			const newRate = (await exchangeRates.rateForCurrency(wHAKA)).sub(toUnit('0.09'));
-			await updateAggregatorRates(exchangeRates, null, [wHAKA], [newRate]);
+			// But if the price of wRWAX decreases a lot...
+			const newRate = (await exchangeRates.rateForCurrency(wRWAX)).sub(toUnit('0.09'));
+			await updateAggregatorRates(exchangeRates, null, [wRWAX], [newRate]);
 			// we will fall into the >100% bracket
 			assert.equal(await feePool.isFeesClaimable(account1), false);
 
@@ -1021,7 +1021,7 @@ contract('Rewards Integration Tests', accounts => {
 			period.index = 1;
 
 			// Simulate rounding on rUSD leaving fraction less for the last claimer.
-			// No need to simulate for wHAKA as the 1.44M wHAKA has a 1 wei rounding already
+			// No need to simulate for wRWAX as the 1.44M wRWAX has a 1 wei rounding already
 			period.feesClaimed = period.feesClaimed.add(toUnit('0.000000000000000001'));
 			await feePool.importFeePeriod(
 				period.index,
@@ -1037,7 +1037,7 @@ contract('Rewards Integration Tests', accounts => {
 			const feesAvailableUSDAcc1 = await feePool.feesAvailable(account1);
 
 			// last claimer should get the fraction less
-			// is entitled to 721,053.846153846153846154 wHAKA
+			// is entitled to 721,053.846153846153846154 wRWAX
 			// however only   721,053.846153846153846153 Claimable after rounding to 18 decimals
 			const transaction = await feePool.claimFees({ from: account1 });
 			assert.eventEqual(transaction, 'FeesClaimed', {

@@ -14,7 +14,7 @@ describe('staking & claiming integration tests (L1, L2)', () => {
 	bootstrapDual({ ctx });
 
 	describe('staking and claiming', () => {
-		const HAKAAmount = ethers.utils.parseEther('1000');
+		const RWAXAmount = ethers.utils.parseEther('1000');
 		const amountToIssueAndBurnrUSD = ethers.utils.parseEther('1');
 
 		let user;
@@ -27,8 +27,8 @@ describe('staking & claiming integration tests (L1, L2)', () => {
 			user = ctx.l1.users.someUser;
 		});
 
-		before('ensure the user has enough wHAKA', async () => {
-			await ensureBalance({ ctx: ctx.l1, symbol: 'wHAKA', user, balance: HAKAAmount });
+		before('ensure the user has enough wRWAX', async () => {
+			await ensureBalance({ ctx: ctx.l1, symbol: 'wRWAX', user, balance: RWAXAmount });
 		});
 
 		describe('when the user issues rUSD', () => {
