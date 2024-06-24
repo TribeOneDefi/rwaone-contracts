@@ -36,14 +36,14 @@ contract('VirtualTribe (unit tests)', async accounts => {
 		const behaviors = require('./VirtualTribe.behaviors').call(this, { accounts });
 		describe('initialize', () => {
 			const amount = '1001';
-			behaviors.whenInstantiated({ amount, user: owner, tribe: 'hBTC' }, () => {
+			behaviors.whenInstantiated({ amount, user: owner, tribe: 'rBTC' }, () => {
 				it('is initialized', async () => {
 					assert.isTrue(await this.instance.initialized());
 				});
 
 				it('and each initialize arg is set correctly', async () => {
-					assert.equal(trimUtf8EscapeChars(await this.instance.name()), 'Virtual Tribe hBTC');
-					assert.equal(trimUtf8EscapeChars(await this.instance.symbol()), 'vhBTC');
+					assert.equal(trimUtf8EscapeChars(await this.instance.name()), 'Virtual Tribe rBTC');
+					assert.equal(trimUtf8EscapeChars(await this.instance.symbol()), 'vrBTC');
 					assert.equal(await this.instance.decimals(), '18');
 				});
 
@@ -242,7 +242,7 @@ contract('VirtualTribe (unit tests)', async accounts => {
 		});
 
 		describe('secsLeftInWaitingPeriod()', () => {
-			behaviors.whenInstantiated({ amount: '1000', user: owner, tribe: 'hBTC' }, () => {
+			behaviors.whenInstantiated({ amount: '1000', user: owner, tribe: 'rBTC' }, () => {
 				behaviors.whenMockedWithMaxSecsLeft({ maxSecsLeft: 100 }, () => {
 					it('then secs left in waiting period returns 100', async () => {
 						assert.equal(await this.instance.secsLeftInWaitingPeriod(), '100');
@@ -262,7 +262,7 @@ contract('VirtualTribe (unit tests)', async accounts => {
 		});
 
 		describe('readyToSettle()', () => {
-			behaviors.whenInstantiated({ amount: '999', user: owner, tribe: 'hBTC' }, () => {
+			behaviors.whenInstantiated({ amount: '999', user: owner, tribe: 'rBTC' }, () => {
 				behaviors.whenMockedWithMaxSecsLeft({ maxSecsLeft: 100 }, () => {
 					it('then ready to settle is false', async () => {
 						assert.equal(await this.instance.readyToSettle(), false);
@@ -283,7 +283,7 @@ contract('VirtualTribe (unit tests)', async accounts => {
 
 		describe('settlement', () => {
 			const amount = '999';
-			behaviors.whenInstantiated({ amount, user: owner, tribe: 'hBTC' }, () => {
+			behaviors.whenInstantiated({ amount, user: owner, tribe: 'rBTC' }, () => {
 				behaviors.whenMockedTribeBalance({ balanceOf: amount }, () => {
 					describe('settled()', () => {
 						it('is false by default', async () => {
@@ -300,7 +300,7 @@ contract('VirtualTribe (unit tests)', async accounts => {
 							it('then Exchanger.settle() is invoked with the correct params', async () => {
 								expect(this.mocks.Exchanger.settle).to.have.length(0);
 								this.mocks.Exchanger.settle.returnsAtCall(0, this.instance.address);
-								this.mocks.Exchanger.settle.returndAtCall(1, toBytes32('hBTC'));
+								this.mocks.Exchanger.settle.returndAtCall(1, toBytes32('rBTC'));
 							});
 							it('then Exchanger.settle() emits a Settled event with the supply and balance params', () => {
 								assert.eventEqual(this.txn, 'Settled', [amount, amount]);

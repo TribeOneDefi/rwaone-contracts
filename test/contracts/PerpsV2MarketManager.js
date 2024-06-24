@@ -144,7 +144,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 	});
 
 	describe('Market management', () => {
-		const currencyKeys = ['hBTC', 'rETH'].map(toBytes32);
+		const currencyKeys = ['rBTC', 'rETH'].map(toBytes32);
 		let markets, marketProxies, proxyAddresses;
 		beforeEach(async () => {
 			markets = await Promise.all(
@@ -342,7 +342,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 
 			const proxy = await putBehindProxy(market);
 			await futuresMarketManager.addProxiedMarkets([proxy.address], { from: owner });
-			await futuresMarketManager.removeMarketsByKey(['hBTC', 'sLINK'].map(toBytes32), {
+			await futuresMarketManager.removeMarketsByKey(['rBTC', 'sLINK'].map(toBytes32), {
 				from: owner,
 			});
 
@@ -413,7 +413,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 
 			await onlyGivenAddressCanInvoke({
 				fnc: futuresMarketManager.removeMarketsByKey,
-				args: [['rETH', 'hBTC'].map(toBytes32)],
+				args: [['rETH', 'rBTC'].map(toBytes32)],
 				accounts,
 				address: owner,
 				skipPassCheck: false,
@@ -637,7 +637,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 
 		describe('when there are multiple markets', () => {
 			const individualDebt = toUnit('1000');
-			const currencyKeys = ['hBTC', 'rETH', 'sLINK'].map(toBytes32);
+			const currencyKeys = ['rBTC', 'rETH', 'sLINK'].map(toBytes32);
 			let markets, proxies;
 			beforeEach(async () => {
 				markets = await Promise.all(
@@ -1117,7 +1117,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 		it('All summaries', async () => {
 			const summaries = await futuresMarketManager.allMarketSummaries();
 
-			const btcSummary = summaries.find(summary => summary.marketKey === toBytes32('hBTC'));
+			const btcSummary = summaries.find(summary => summary.marketKey === toBytes32('rBTC'));
 			const ethSummary = summaries.find(summary => summary.marketKey === toBytes32('rETH'));
 			const linkSummary = summaries.find(summary => summary.marketKey === toBytes32('sLINK'));
 
@@ -1150,7 +1150,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 	});
 
 	describe('Legacy Markets management', () => {
-		const currencies = ['hBTC', 'rETH'];
+		const currencies = ['rBTC', 'rETH'];
 		const currencyKeys = currencies.map(toBytes32);
 		let legacyMarkets, legacyMarketsAddress, markets, marketProxies, proxyAddresses;
 		beforeEach(async () => {

@@ -8,7 +8,7 @@
 	{
 		"kind": "pyth",
 		"oracle": "0xc74B562Fd95AF1aEaAC0C5E78B5186f1F522587A",
-		"asset": "hBTC",
+		"asset": "rBTC",
 		"feedId": "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43"
 	},
 	{

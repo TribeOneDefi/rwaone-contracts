@@ -28,8 +28,8 @@
 		"offchainPaused": false
 	},
 	{
-		"marketKey": "hBTCPERP",
-		"asset": "hBTC",
+		"marketKey": "rBTCPERP",
+		"asset": "rBTC",
 		"makerFee": "0.3",
 		"takerFee": "0.3",
 		"takerFeeDelayedOrder": "0.3",

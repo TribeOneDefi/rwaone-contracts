@@ -75,8 +75,8 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 
 	const marketKeySuffix = '-perp';
 
-	const marketKey = toBytes32('hBTC' + marketKeySuffix);
-	const baseAsset = toBytes32('hBTC');
+	const marketKey = toBytes32('rBTC' + marketKeySuffix);
+	const baseAsset = toBytes32('rBTC');
 	const takerFee = toUnit('0.003');
 	const makerFee = toUnit('0.001');
 	const takerFeeDelayedOrder = toUnit('0.0005');
@@ -110,7 +110,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 	}
 
 	const feeds = [
-		{ assetId: baseAsset, feedId: toBytes32('feed-hBTC') },
+		{ assetId: baseAsset, feedId: toBytes32('feed-rBTC') },
 		{ assetId: toBytes32('rETH'), feedId: toBytes32('feed-rETH') },
 	];
 
@@ -190,7 +190,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			PerpsV2MarketStateBTC: perpsV2MarketState,
 			PerpsV2MarketBTC: perpsV2MarketImpl,
 			PerpsV2MarketLiquidateBTC: perpsV2MarketLiquidate,
-			PerpsV2MarketViewhBTC: perpsV2MarketViewsImpl,
+			PerpsV2MarketViewrBTC: perpsV2MarketViewsImpl,
 			PerpsV2MarketDelayedIntentBTC: perpsV2MarketDelayedIntent,
 			PerpsV2MarketDelayedExecutionBTC: perpsV2MarketDelayedExecution,
 			ProxyPerpsV2MarketBTC: perpsV2MarketProxy,
@@ -208,11 +208,11 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'hBTC', 'rETH'],
+			tribes: ['rUSD', 'rBTC', 'rETH'],
 			contracts: [
 				'FuturesMarketManager',
 				{ contract: 'PerpsV2MarketStateBTC', properties: { perpSuffix: marketKeySuffix } },
-				'PerpsV2MarketViewhBTC',
+				'PerpsV2MarketViewrBTC',
 				'PerpsV2MarketBTC',
 				'PerpsV2MarketSettings',
 				'TestablePerpsV2MarketBTC',

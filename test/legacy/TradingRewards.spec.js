@@ -21,12 +21,12 @@ const { toBytes32 } = require('../..');
 contract('TradingRewards', accounts => {
 	const [, owner, account1] = accounts;
 
-	const tribes = ['rUSD', 'rETH', 'hBTC', 'wRWAX'];
+	const tribes = ['rUSD', 'rETH', 'rBTC', 'wRWAX'];
 	const tribeKeys = tribes.map(toBytes32);
-	const [rUSD, rETH, hBTC, wRWAX] = tribeKeys;
+	const [rUSD, rETH, rBTC, wRWAX] = tribeKeys;
 
 	let rwaone, exchanger, exchangeRates, rewards, resolver, systemSettings;
-	let rUSDContract, rETHContract, hBTCContract;
+	let rUSDContract, rETHContract, rBTCContract;
 
 	let exchangeLogs;
 
@@ -36,7 +36,7 @@ contract('TradingRewards', accounts => {
 	const allExchangeFeeRates = toUnit('0.001');
 	const rates = {
 		[rETH]: toUnit('100'),
-		[hBTC]: toUnit('12000'),
+		[rBTC]: toUnit('12000'),
 		[wRWAX]: toUnit('0.2'),
 	};
 
@@ -83,7 +83,7 @@ contract('TradingRewards', accounts => {
 				ExchangeRates: exchangeRates,
 				TriberUSD: rUSDContract,
 				TriberETH: rETHContract,
-				TribehBTC: hBTCContract,
+				TriberBTC: rBTCContract,
 				SystemSettings: systemSettings,
 			} = await setupAllContracts({
 				accounts,
@@ -99,17 +99,17 @@ contract('TradingRewards', accounts => {
 				],
 			}));
 
-			await setupPriceAggregators(exchangeRates, owner, [rETH, hBTC]);
+			await setupPriceAggregators(exchangeRates, owner, [rETH, rBTC]);
 		});
 
 		before('BRRRRRR', async () => {
 			await rUSDContract.issue(account1, amountIssued);
 			await rETHContract.issue(account1, amountIssued);
-			await hBTCContract.issue(account1, amountIssued);
+			await rBTCContract.issue(account1, amountIssued);
 		});
 
 		before('set exchange rates', async () => {
-			await updateAggregatorRates(exchangeRates, null, [rETH, hBTC, wRWAX], Object.values(rates));
+			await updateAggregatorRates(exchangeRates, null, [rETH, rBTC, wRWAX], Object.values(rates));
 
 			await setExchangeFeeRateForTribes({
 				owner,
@@ -122,7 +122,7 @@ contract('TradingRewards', accounts => {
 		it('has expected balances for accounts', async () => {
 			assert.bnEqual(amountIssued, await rUSDContract.balanceOf(account1));
 			assert.bnEqual(amountIssued, await rETHContract.balanceOf(account1));
-			assert.bnEqual(amountIssued, await hBTCContract.balanceOf(account1));
+			assert.bnEqual(amountIssued, await rBTCContract.balanceOf(account1));
 		});
 
 		it('has expected parameters', async () => {
@@ -228,19 +228,19 @@ contract('TradingRewards', accounts => {
 				account: account1,
 				fromCurrencyKey: rUSD,
 				fromCurrencyAmount: toUnit('100'),
-				toCurrencyKey: hBTC,
+				toCurrencyKey: rBTC,
 			});
 
 			itCorrectlyPerformsAnExchange({
 				account: account1,
 				fromCurrencyKey: rETH,
 				fromCurrencyAmount: toUnit('10'),
-				toCurrencyKey: hBTC,
+				toCurrencyKey: rBTC,
 			});
 
 			itCorrectlyPerformsAnExchange({
 				account: account1,
-				fromCurrencyKey: hBTC,
+				fromCurrencyKey: rBTC,
 				fromCurrencyAmount: toUnit('1'),
 				toCurrencyKey: rETH,
 			});

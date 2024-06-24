@@ -53,18 +53,18 @@ contract('Rewards Integration Tests', accounts => {
 	// };
 
 	// CURRENCIES
-	const [rUSD, sAUD, sEUR, hBTC, wRWAX, iBTC, rETH, ETH] = [
+	const [rUSD, sAUD, sEUR, rBTC, wRWAX, iBTC, rETH, ETH] = [
 		'rUSD',
 		'sAUD',
 		'sEUR',
-		'hBTC',
+		'rBTC',
 		'wRWAX',
 		'iBTC',
 		'rETH',
 		'ETH',
 	].map(toBytes32);
 
-	const tribeKeys = [rUSD, sAUD, sEUR, hBTC, iBTC, rETH, ETH];
+	const tribeKeys = [rUSD, sAUD, sEUR, rBTC, iBTC, rETH, ETH];
 
 	const initialInflationAmount = toUnit(800000);
 
@@ -158,7 +158,7 @@ contract('Rewards Integration Tests', accounts => {
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'sAUD', 'sEUR', 'hBTC', 'iBTC', 'rETH'],
+			tribes: ['rUSD', 'sAUD', 'sEUR', 'rBTC', 'iBTC', 'rETH'],
 			contracts: [
 				'AddressResolver',
 				'Exchanger', // necessary for burnTribes to check settlement of rUSD
@@ -179,7 +179,7 @@ contract('Rewards Integration Tests', accounts => {
 		// use implementation ABI on the proxy address to simplify calling
 		rwaone = await artifacts.require('Rwaone').at(tribeetixProxy.address);
 
-		await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, hBTC, iBTC, rETH, ETH]);
+		await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, rBTC, iBTC, rETH, ETH]);
 
 		MINTER_RWAX_REWARD = await supplySchedule.minterReward();
 
@@ -598,12 +598,12 @@ contract('Rewards Integration Tests', accounts => {
 
 	describe('Exchange Rate Shift tests', async () => {
 		it('should assign accounts (1,2,3) to have (40%,40%,20%) of the debt/rewards', async () => {
-			// Account 1&2 issue 10K USD and exchange in hBTC each, holding 50% of the total debt.
+			// Account 1&2 issue 10K USD and exchange in rBTC each, holding 50% of the total debt.
 			await rwaone.issueTribes(tenK, { from: account1 });
 			await rwaone.issueTribes(tenK, { from: account2 });
 
-			await rwaone.exchange(rUSD, tenK, hBTC, { from: account1 });
-			await rwaone.exchange(rUSD, tenK, hBTC, { from: account2 });
+			await rwaone.exchange(rUSD, tenK, rBTC, { from: account1 });
+			await rwaone.exchange(rUSD, tenK, rBTC, { from: account2 });
 
 			await fastForwardAndCloseFeePeriod();
 			// //////////////////////////////////////////////
@@ -640,12 +640,12 @@ contract('Rewards Integration Tests', accounts => {
 				gweiTolerance
 			);
 
-			// Increase hBTC price by 100%
-			await updateAggregatorRates(exchangeRates, null, [hBTC], ['10000'].map(toUnit));
+			// Increase rBTC price by 100%
+			await updateAggregatorRates(exchangeRates, null, [rBTC], ['10000'].map(toUnit));
 			await debtCache.takeDebtSnapshot();
 
 			// Account 3 (enters the system and) mints 10K rUSD (minus half of an exchange fee - to balance the fact
-			// that the other two holders have doubled their hBTC holdings) and should have 20% of the debt not 33.33%
+			// that the other two holders have doubled their rBTC holdings) and should have 20% of the debt not 33.33%
 			const potentialFee = exchangeFeeIncurred(toUnit('20000'));
 			await rwaone.issueTribes(tenK.sub(half(potentialFee)), { from: account3 });
 
@@ -661,9 +661,9 @@ contract('Rewards Integration Tests', accounts => {
 			// disable dynamic fee here otherwise it will flag rates as too volatile
 			await systemSettings.setExchangeDynamicFeeRounds('0', { from: owner });
 
-			const { amountReceived } = await exchanger.getAmountsForExchange(tenK, rUSD, hBTC);
-			await rwaone.exchange(hBTC, amountReceived, rUSD, { from: account1 });
-			await rwaone.exchange(hBTC, amountReceived, rUSD, { from: account2 });
+			const { amountReceived } = await exchanger.getAmountsForExchange(tenK, rUSD, rBTC);
+			await rwaone.exchange(rBTC, amountReceived, rUSD, { from: account1 });
+			await rwaone.exchange(rBTC, amountReceived, rUSD, { from: account2 });
 
 			// Close so we can claim
 			await fastForwardAndCloseFeePeriod();
@@ -737,12 +737,12 @@ contract('Rewards Integration Tests', accounts => {
 			// Commenting out this logic for now (v2.14.x) - needs to be relooked at -JJ
 
 			// // now in p3 Acc1 burns all and leaves (-40%) and Acc2 has 67% and Acc3 33% rewards allocated as such
-			// // Account 1 exchanges all hBTC back to rUSD
-			// const acc1hBTCBalance = await hBTCContract.balanceOf(account1, { from: account1 });
-			// await rwaone.exchange(hBTC, acc1hBTCBalance, rUSD, { from: account1 });
-			// const amountAfterExchange = await feePool.amountReceivedFromExchange(acc1hBTCBalance);
+			// // Account 1 exchanges all rBTC back to rUSD
+			// const acc1rBTCBalance = await rBTCContract.balanceOf(account1, { from: account1 });
+			// await rwaone.exchange(rBTC, acc1rBTCBalance, rUSD, { from: account1 });
+			// const amountAfterExchange = await feePool.amountReceivedFromExchange(acc1rBTCBalance);
 			// const amountAfterExchangeInUSD = await exchangeRates.effectiveValue(
-			// 	hBTC,
+			// 	rBTC,
 			// 	amountAfterExchange,
 			// 	rUSD
 			// );

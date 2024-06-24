@@ -115,7 +115,7 @@ module.exports = async ({ account, addressOf, deployer, getDeployParameter, netw
 			account,
 			addressOf(collateralManager),
 			addressOf(ReadProxyAddressResolver),
-			toBytes32('hBTC'),
+			toBytes32('rBTC'),
 			(await getDeployParameter('COLLATERAL_RENBTC'))['MIN_CRATIO'],
 			(await getDeployParameter('COLLATERAL_RENBTC'))['MIN_COLLATERAL'],
 			RENBTC_ADDRESS, // if undefined then this will error as expected.

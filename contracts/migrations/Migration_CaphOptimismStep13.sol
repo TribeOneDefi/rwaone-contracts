@@ -193,9 +193,9 @@ contract Migration_CaphOptimismStep13 is BaseMigration {
         perpsv2proxybtcperp_i.addRoute(0x9cfbf4e4, 0xE662e0aF5fCaBe78aaaF4cFF0a13ca69512Fc481, true);
         perpsv2proxybtcperp_i.addRoute(0x917e77f5, 0xE662e0aF5fCaBe78aaaF4cFF0a13ca69512Fc481, true);
         futuresmarketmanager_updateMarketsImplementations_117();
-        perpsv2marketsettings_i.setMaxLiquidationDelta("hBTCPERP", 1500000000000000);
-        perpsv2marketsettings_i.setLiquidationBufferRatio("hBTCPERP", 10000000000000000);
-        perpsv2marketsettings_i.setMaxPD("hBTCPERP", 3000000000000000);
+        perpsv2marketsettings_i.setMaxLiquidationDelta("rBTCPERP", 1500000000000000);
+        perpsv2marketsettings_i.setLiquidationBufferRatio("rBTCPERP", 10000000000000000);
+        perpsv2marketsettings_i.setMaxPD("rBTCPERP", 3000000000000000);
         systemstatus_i.updateAccessControl("Futures", address(this), false, false);
 
         // NOMINATE OWNERSHIP back to owner for aforementioned contracts

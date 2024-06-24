@@ -25,7 +25,7 @@ contract('CollateralEth', async accounts => {
 
 	const rUSD = toBytes32('rUSD');
 	const rETH = toBytes32('rETH');
-	const hBTC = toBytes32('hBTC');
+	const rBTC = toBytes32('rBTC');
 
 	const oneETH = toUnit(1);
 	const twoETH = toUnit(2);
@@ -107,7 +107,7 @@ contract('CollateralEth', async accounts => {
 			],
 		}));
 
-		await setupPriceAggregators(exchangeRates, owner, [hBTC, rETH]);
+		await setupPriceAggregators(exchangeRates, owner, [rBTC, rETH]);
 
 		await managerState.setAssociatedContract(manager.address, { from: owner });
 
@@ -147,7 +147,7 @@ contract('CollateralEth', async accounts => {
 	};
 
 	const updateRatesWithDefaults = async () => {
-		await updateAggregatorRates(exchangeRates, null, [rETH, hBTC], [100, 10000].map(toUnit));
+		await updateAggregatorRates(exchangeRates, null, [rETH, rBTC], [100, 10000].map(toUnit));
 	};
 
 	const fastForwardAndUpdateRates = async seconds => {
@@ -264,10 +264,10 @@ contract('CollateralEth', async accounts => {
 
 			assert.bnClose(rUSDAmount, toUnit('200'), '100');
 
-			// $270 worth of eth should allow $200 (0.02) of hBTC to be issued.
-			const hBTCAmount = await ceth.maxLoan(toUnit('2.6'), hBTC);
+			// $270 worth of eth should allow $200 (0.02) of rBTC to be issued.
+			const rBTCAmount = await ceth.maxLoan(toUnit('2.6'), rBTC);
 
-			assert.bnEqual(hBTCAmount, toUnit('0.02'));
+			assert.bnEqual(rBTCAmount, toUnit('0.02'));
 		});
 	});
 

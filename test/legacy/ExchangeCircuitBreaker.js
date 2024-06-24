@@ -17,18 +17,18 @@ const {
 const { toBytes32 } = require('../..');
 
 contract('ExchangeCircuitBreaker tests', async accounts => {
-	const [rUSD, sAUD, sEUR, wRWAX, hBTC, iBTC, rETH, iETH] = [
+	const [rUSD, sAUD, sEUR, wRWAX, rBTC, iBTC, rETH, iETH] = [
 		'rUSD',
 		'sAUD',
 		'sEUR',
 		'wRWAX',
-		'hBTC',
+		'rBTC',
 		'iBTC',
 		'rETH',
 		'iETH',
 	].map(toBytes32);
 
-	const tribeKeys = [rUSD, sAUD, sEUR, hBTC, iBTC, rETH, iETH];
+	const tribeKeys = [rUSD, sAUD, sEUR, rBTC, iBTC, rETH, iETH];
 
 	const [, owner, account1, account2] = accounts;
 
@@ -131,7 +131,7 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 				SystemSettings: systemSettings,
 			} = await setupAllContracts({
 				accounts,
-				tribes: ['rUSD', 'rETH', 'sEUR', 'sAUD', 'hBTC', 'iBTC', 'sTRX'],
+				tribes: ['rUSD', 'rETH', 'sEUR', 'sAUD', 'rBTC', 'iBTC', 'sTRX'],
 				contracts: [
 					'Exchanger',
 					'ExchangeCircuitBreaker',
@@ -165,9 +165,9 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 		addSnapshotBeforeRestoreAfterEach();
 
 		beforeEach(async () => {
-			await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, wRWAX, rETH, hBTC, iBTC]);
+			await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, wRWAX, rETH, rBTC, iBTC]);
 			await updateRates(
-				[sAUD, sEUR, wRWAX, rETH, hBTC, iBTC],
+				[sAUD, sEUR, wRWAX, rETH, rBTC, iBTC],
 				['0.5', '2', '1', '100', '5000', '5000'].map(toUnit)
 			);
 

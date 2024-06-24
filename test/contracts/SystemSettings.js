@@ -25,7 +25,7 @@ contract('SystemSettings', async accounts => {
 	let short, tribes, systemSettings;
 
 	const setupSettings = async () => {
-		tribes = ['rUSD', 'hBTC', 'rETH'];
+		tribes = ['rUSD', 'rBTC', 'rETH'];
 		({ SystemSettings: systemSettings, CollateralShort: short } = await setupAllContracts({
 			accounts,
 			tribes,
@@ -851,7 +851,7 @@ contract('SystemSettings', async accounts => {
 
 	describe('setExchangeFeeRateForTribes()', () => {
 		describe('Given tribe exchange fee rates to set', async () => {
-			const [rUSD, rETH, sAUD, hBTC] = ['rUSD', 'rETH', 'sAUD', 'hBTC'].map(toBytes32);
+			const [rUSD, rETH, sAUD, rBTC] = ['rUSD', 'rETH', 'sAUD', 'rBTC'].map(toBytes32);
 			const fxBIPS = toUnit('0.01');
 			const cryptoBIPS = toUnit('0.03');
 
@@ -904,7 +904,7 @@ contract('SystemSettings', async accounts => {
 				it('when multiple exchange rates then store them to be readable', async () => {
 					// Store multiple rates
 					await systemSettings.setExchangeFeeRateForTribes(
-						[rUSD, sAUD, hBTC, rETH],
+						[rUSD, sAUD, rBTC, rETH],
 						[fxBIPS, fxBIPS, cryptoBIPS, cryptoBIPS],
 						{
 							from: owner,
@@ -915,15 +915,15 @@ contract('SystemSettings', async accounts => {
 					assert.bnEqual(sAUDRate, fxBIPS);
 					const rUSDRate = await systemSettings.exchangeFeeRate(rUSD);
 					assert.bnEqual(rUSDRate, fxBIPS);
-					const hBTCRate = await systemSettings.exchangeFeeRate(hBTC);
-					assert.bnEqual(hBTCRate, cryptoBIPS);
+					const rBTCRate = await systemSettings.exchangeFeeRate(rBTC);
+					assert.bnEqual(rBTCRate, cryptoBIPS);
 					const rETHRate = await systemSettings.exchangeFeeRate(rETH);
 					assert.bnEqual(rETHRate, cryptoBIPS);
 				});
 				it('when multiple exchange rates then each update event is emitted', async () => {
 					// Update multiple rates
 					const transaction = await systemSettings.setExchangeFeeRateForTribes(
-						[rUSD, sAUD, hBTC, rETH],
+						[rUSD, sAUD, rBTC, rETH],
 						[fxBIPS, fxBIPS, cryptoBIPS, cryptoBIPS],
 						{
 							from: owner,
@@ -944,7 +944,7 @@ contract('SystemSettings', async accounts => {
 						},
 						'ExchangeFeeUpdated',
 						{
-							tribeKey: hBTC,
+							tribeKey: rBTC,
 							newExchangeFeeRate: cryptoBIPS,
 						},
 						'ExchangeFeeUpdated',

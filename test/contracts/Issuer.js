@@ -818,7 +818,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 					let currencyKey, tribe, tribeProxy;
 
 					beforeEach(async () => {
-						const symbol = 'hBTC';
+						const symbol = 'rBTC';
 						currencyKey = toBytes32(symbol);
 
 						({ token: tribe, proxy: tribeProxy } = await mockToken({
@@ -958,7 +958,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 									it('issues the equivalent amount of rUSD', async () => {
 										const amountOfrUSDIssued = await rUSDContract.balanceOf(tribeRedeemer.address);
 
-										// 100 units of hBTC at a rate of 2:1
+										// 100 units of rBTC at a rate of 2:1
 										assert.bnEqual(amountOfrUSDIssued, toUnit('200'));
 									});
 									it('it invokes deprecate on the redeemer via the proxy', async () => {
@@ -979,7 +979,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 					let currencyKey, tribe;
 
 					beforeEach(async () => {
-						const symbol = 'hBTC';
+						const symbol = 'rBTC';
 						currencyKey = toBytes32(symbol);
 
 						({ token: tribe } = await mockToken({

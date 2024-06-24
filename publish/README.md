@@ -150,7 +150,7 @@ node publish deploy-staking-rewards # "--help" for options
 ### Examples
 
 ```bash
-node publish deploy-staking-rewards -n goerli -d publish/deployed/goerli -t hBTC --dry-run
+node publish deploy-staking-rewards -n goerli -d publish/deployed/goerli -t rBTC --dry-run
 node publish deploy-staking-rewards -n local -d publish/deployed/local
 
 ```

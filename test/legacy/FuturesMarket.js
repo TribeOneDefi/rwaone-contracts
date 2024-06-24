@@ -56,8 +56,8 @@ contract('FuturesMarket', accounts => {
 
 	const marketKeySuffix = '-perp';
 
-	const marketKey = toBytes32('hBTC' + marketKeySuffix);
-	const baseAsset = toBytes32('hBTC');
+	const marketKey = toBytes32('rBTC' + marketKeySuffix);
+	const baseAsset = toBytes32('rBTC');
 	const takerFee = toUnit('0.003');
 	const makerFee = toUnit('0.001');
 	const takerFeeNextPrice = toUnit('0.0005');
@@ -118,7 +118,7 @@ contract('FuturesMarket', accounts => {
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'hBTC', 'rETH'],
+			tribes: ['rUSD', 'rBTC', 'rETH'],
 			contracts: [
 				'FuturesMarketManager',
 				'FuturesMarketSettings',

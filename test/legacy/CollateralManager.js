@@ -25,7 +25,7 @@ contract('CollateralManager', async accounts => {
 
 	const rETH = toBytes32('rETH');
 	const rUSD = toBytes32('rUSD');
-	const hBTC = toBytes32('hBTC');
+	const rBTC = toBytes32('rBTC');
 
 	const name = 'Some name';
 	const symbol = 'TOKEN';
@@ -45,7 +45,7 @@ contract('CollateralManager', async accounts => {
 		feePool,
 		rUSDTribe,
 		rETHTribe,
-		hBTCTribe,
+		rBTCTribe,
 		tribes,
 		maxDebt,
 		short,
@@ -63,7 +63,7 @@ contract('CollateralManager', async accounts => {
 	};
 
 	const updateRatesWithDefaults = async () => {
-		await updateAggregatorRates(exchangeRates, null, [rETH, hBTC], [100, 10000].map(toUnit));
+		await updateAggregatorRates(exchangeRates, null, [rETH, rBTC], [100, 10000].map(toUnit));
 	};
 
 	const fastForwardAndUpdateRates = async seconds => {
@@ -89,12 +89,12 @@ contract('CollateralManager', async accounts => {
 	};
 
 	const setupManager = async () => {
-		tribes = ['rUSD', 'hBTC', 'rETH', 'iBTC', 'iETH'];
+		tribes = ['rUSD', 'rBTC', 'rETH', 'iBTC', 'iETH'];
 		({
 			ExchangeRates: exchangeRates,
 			TriberUSD: rUSDTribe,
 			TriberETH: rETHTribe,
-			TribehBTC: hBTCTribe,
+			TriberBTC: rBTCTribe,
 			FeePool: feePool,
 			AddressResolver: addressResolver,
 			Issuer: issuer,
@@ -122,7 +122,7 @@ contract('CollateralManager', async accounts => {
 			],
 		}));
 
-		await setupPriceAggregators(exchangeRates, owner, [hBTC, rETH]);
+		await setupPriceAggregators(exchangeRates, owner, [rBTC, rETH]);
 
 		maxDebt = toUnit(50000000);
 
@@ -139,7 +139,7 @@ contract('CollateralManager', async accounts => {
 			owner: owner,
 			manager: manager.address,
 			resolver: addressResolver.address,
-			collatKey: hBTC,
+			collatKey: rBTC,
 			minColat: toUnit(1.5),
 			minSize: toUnit(0.1),
 			underCon: renBTC.address,
@@ -178,27 +178,27 @@ contract('CollateralManager', async accounts => {
 			{ from: owner }
 		);
 		await cerc20.addTribes(
-			['TriberUSD', 'TribehBTC'].map(toBytes32),
-			['rUSD', 'hBTC'].map(toBytes32),
+			['TriberUSD', 'TriberBTC'].map(toBytes32),
+			['rUSD', 'rBTC'].map(toBytes32),
 			{ from: owner }
 		);
 		await short.addTribes(
-			['TribehBTC', 'TriberETH'].map(toBytes32),
-			['hBTC', 'rETH'].map(toBytes32),
+			['TriberBTC', 'TriberETH'].map(toBytes32),
+			['rBTC', 'rETH'].map(toBytes32),
 			{ from: owner }
 		);
 
 		await manager.addTribes(
-			[toBytes32('TriberUSD'), toBytes32('TribehBTC'), toBytes32('TriberETH')],
-			[toBytes32('rUSD'), toBytes32('hBTC'), toBytes32('rETH')],
+			[toBytes32('TriberUSD'), toBytes32('TriberBTC'), toBytes32('TriberETH')],
+			[toBytes32('rUSD'), toBytes32('rBTC'), toBytes32('rETH')],
 			{
 				from: owner,
 			}
 		);
 
 		await manager.addShortableTribes(
-			[toBytes32('TriberETH'), toBytes32('TribehBTC')],
-			[rETH, hBTC],
+			[toBytes32('TriberETH'), toBytes32('TriberBTC')],
+			[rETH, rBTC],
 			{
 				from: owner,
 			}
@@ -207,15 +207,15 @@ contract('CollateralManager', async accounts => {
 		// check tribes, currencies, and shortable tribes are set
 		assert.isTrue(
 			await manager.areTribesAndCurrenciesSet(
-				['TriberUSD', 'TribehBTC', 'TriberETH'].map(toBytes32),
-				['rUSD', 'hBTC', 'rETH'].map(toBytes32)
+				['TriberUSD', 'TriberBTC', 'TriberETH'].map(toBytes32),
+				['rUSD', 'rBTC', 'rETH'].map(toBytes32)
 			)
 		);
 
 		assert.isTrue(
 			await manager.areShortableTribesSet(
-				['TribehBTC', 'TriberETH'].map(toBytes32),
-				['hBTC', 'rETH'].map(toBytes32)
+				['TriberBTC', 'TriberETH'].map(toBytes32),
+				['rBTC', 'rETH'].map(toBytes32)
 			)
 		);
 
@@ -234,7 +234,7 @@ contract('CollateralManager', async accounts => {
 
 		await issue(rUSDTribe, toUnit(1000), owner);
 		await issue(rETHTribe, toUnit(10), owner);
-		await issue(hBTCTribe, toUnit(0.1), owner);
+		await issue(rBTCTribe, toUnit(0.1), owner);
 		await debtCache.takeDebtSnapshot();
 	});
 
@@ -293,7 +293,7 @@ contract('CollateralManager', async accounts => {
 	describe('adding tribes', async () => {
 		it('should add the tribes during construction', async () => {
 			assert.isTrue(await manager.isTribeManaged(rUSD));
-			assert.isTrue(await manager.isTribeManaged(hBTC));
+			assert.isTrue(await manager.isTribeManaged(rBTC));
 			assert.isTrue(await manager.isTribeManaged(rETH));
 		});
 		it('should not allow duplicate tribes to be added', async () => {
@@ -302,14 +302,14 @@ contract('CollateralManager', async accounts => {
 			});
 			assert.isTrue(
 				await manager.areTribesAndCurrenciesSet(
-					['TriberUSD', 'TribehBTC', 'TriberETH'].map(toBytes32),
-					['rUSD', 'hBTC', 'rETH'].map(toBytes32)
+					['TriberUSD', 'TriberBTC', 'TriberETH'].map(toBytes32),
+					['rUSD', 'rBTC', 'rETH'].map(toBytes32)
 				)
 			);
 		});
 		it('should revert when input array lengths dont match', async () => {
 			await assert.revert(
-				manager.addTribes([toBytes32('TriberUSD'), toBytes32('TribehBTC')], [toBytes32('rUSD')], {
+				manager.addTribes([toBytes32('TriberUSD'), toBytes32('TriberBTC')], [toBytes32('rUSD')], {
 					from: owner,
 				}),
 				'Input array length mismatch'
@@ -324,8 +324,8 @@ contract('CollateralManager', async accounts => {
 			});
 			assert.isTrue(
 				await manager.areTribesAndCurrenciesSet(
-					['TriberUSD', 'TribehBTC', 'TriberETH'].map(toBytes32),
-					['rUSD', 'hBTC', 'rETH'].map(toBytes32)
+					['TriberUSD', 'TriberBTC', 'TriberETH'].map(toBytes32),
+					['rUSD', 'rBTC', 'rETH'].map(toBytes32)
 				)
 			);
 		});
@@ -335,15 +335,15 @@ contract('CollateralManager', async accounts => {
 			});
 			assert.isTrue(
 				await manager.areTribesAndCurrenciesSet(
-					['TriberUSD', 'TribehBTC'].map(toBytes32),
-					['rUSD', 'hBTC'].map(toBytes32)
+					['TriberUSD', 'TriberBTC'].map(toBytes32),
+					['rUSD', 'rBTC'].map(toBytes32)
 				)
 			);
 		});
 		it('should revert when input array lengths dont match', async () => {
 			await assert.revert(
 				manager.removeTribes(
-					[toBytes32('TriberUSD'), toBytes32('TribehBTC')],
+					[toBytes32('TriberUSD'), toBytes32('TriberBTC')],
 					[toBytes32('rUSD')],
 					{
 						from: owner,
@@ -384,7 +384,7 @@ contract('CollateralManager', async accounts => {
 			tx = await ceth.open(toUnit(100), rUSD, { value: toUnit(2), from: account1 });
 			await ceth.open(toUnit(1), rETH, { value: toUnit(2), from: account1 });
 			await cerc20.open(oneRenBTC, toUnit(100), rUSD, { from: account1 });
-			await cerc20.open(oneRenBTC, toUnit(0.01), hBTC, { from: account1 });
+			await cerc20.open(oneRenBTC, toUnit(0.01), rBTC, { from: account1 });
 			await short.open(toUnit(200), toUnit(1), rETH, { from: account1 });
 
 			id = getid(tx);
@@ -398,8 +398,8 @@ contract('CollateralManager', async accounts => {
 			assert.bnEqual(await manager.long(rETH), toUnit(1));
 		});
 
-		it('should correctly get the total hBTC balance', async () => {
-			assert.bnEqual(await manager.long(hBTC), toUnit(0.01));
+		it('should correctly get the total rBTC balance', async () => {
+			assert.bnEqual(await manager.long(rBTC), toUnit(0.01));
 		});
 
 		it('should correctly get the total short ETTH balance', async () => {
@@ -657,7 +657,7 @@ contract('CollateralManager', async accounts => {
 		describe('revert conditions', async () => {
 			it('should revert if the caller is not the owner', async () => {
 				await assert.revert(
-					manager.removeCollaterals([hBTCTribe.address], { from: account1 }),
+					manager.removeCollaterals([rBTCTribe.address], { from: account1 }),
 					'Only the contract owner may perform this action'
 				);
 			});
@@ -665,11 +665,11 @@ contract('CollateralManager', async accounts => {
 
 		describe('when a collateral is removed', async () => {
 			beforeEach(async () => {
-				await manager.removeCollaterals([hBTCTribe.address], { from: owner });
+				await manager.removeCollaterals([rBTCTribe.address], { from: owner });
 			});
 
 			it('should not have the collateral', async () => {
-				assert.isFalse(await manager.hasCollateral(hBTCTribe.address));
+				assert.isFalse(await manager.hasCollateral(rBTCTribe.address));
 			});
 		});
 	});
@@ -678,7 +678,7 @@ contract('CollateralManager', async accounts => {
 		describe('revert conditions', async () => {
 			it('should revert if the caller is not the owner', async () => {
 				await assert.revert(
-					manager.removeTribes([toBytes32('TribehBTC')], [toBytes32('hBTC')], { from: account1 }),
+					manager.removeTribes([toBytes32('TriberBTC')], [toBytes32('rBTC')], { from: account1 }),
 					'Only the contract owner may perform this action'
 				);
 			});
@@ -686,7 +686,7 @@ contract('CollateralManager', async accounts => {
 
 		describe('it should remove a tribe', async () => {
 			beforeEach(async () => {
-				await manager.removeTribes([toBytes32('TribehBTC')], [toBytes32('hBTC')], { from: owner });
+				await manager.removeTribes([toBytes32('TriberBTC')], [toBytes32('rBTC')], { from: owner });
 			});
 		});
 	});
@@ -695,7 +695,7 @@ contract('CollateralManager', async accounts => {
 		describe('revert conditions', async () => {
 			it('should revert if the caller is not the owner', async () => {
 				await assert.revert(
-					manager.removeShortableTribes([toBytes32('TribehBTC')], { from: account1 }),
+					manager.removeShortableTribes([toBytes32('TriberBTC')], { from: account1 }),
 					'Only the contract owner may perform this action'
 				);
 			});
@@ -703,10 +703,10 @@ contract('CollateralManager', async accounts => {
 
 		describe('when a shortable tribe is removed', async () => {
 			it('should emit the ShortableTribeRemoved event', async () => {
-				const txn = await manager.removeShortableTribes([toBytes32('TribehBTC')], { from: owner });
+				const txn = await manager.removeShortableTribes([toBytes32('TriberBTC')], { from: owner });
 
 				assert.eventEqual(txn, 'ShortableTribeRemoved', {
-					tribe: toBytes32('TribehBTC'),
+					tribe: toBytes32('TriberBTC'),
 				});
 			});
 		});

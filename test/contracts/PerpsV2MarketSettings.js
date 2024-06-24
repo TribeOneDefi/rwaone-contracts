@@ -27,7 +27,7 @@ contract('PerpsV2MarketSettings', accounts => {
 
 	const owner = accounts[1];
 
-	const marketKey = toBytes32('hBTC');
+	const marketKey = toBytes32('rBTC');
 	const takerFee = toUnit('0.003');
 	const makerFee = toUnit('0.001');
 	const takerFeeDelayedOrder = toUnit('0.0005');
@@ -46,7 +46,7 @@ contract('PerpsV2MarketSettings', accounts => {
 	const offchainDelayedOrderMinAge = toBN('15');
 	const offchainDelayedOrderMaxAge = toBN('60');
 
-	const offchainMarketKey = toBytes32('ochBTC');
+	const offchainMarketKey = toBytes32('ocrBTC');
 	const offchainPriceDivergence = toUnit('0.05');
 
 	const liquidationPremiumMultiplier = toUnit('1');
@@ -104,14 +104,14 @@ contract('PerpsV2MarketSettings', accounts => {
 			instance: mockPerpsV2MarketBTCImpl,
 			mock: 'PerpsV2MarketViews',
 			fncName: 'baseAsset',
-			returns: [toBytes32('hBTC')],
+			returns: [toBytes32('rBTC')],
 		});
 
 		await mockGenericContractFnc({
 			instance: mockPerpsV2MarketBTCImpl,
 			mock: 'PerpsV2MarketViews',
 			fncName: 'marketKey',
-			returns: [toBytes32('hBTC')],
+			returns: [toBytes32('rBTC')],
 		});
 
 		mockPerpsV2MarketBTC = await setupContract({
@@ -533,7 +533,7 @@ contract('PerpsV2MarketSettings', accounts => {
 	});
 
 	describe('migration scenario: different parameters for two markets for same asset', () => {
-		const firstMarketKey = toBytes32('hBTC');
+		const firstMarketKey = toBytes32('rBTC');
 		const secondMarketKey = toBytes32('SomethingElse');
 
 		let secondBTCMarket, secondBTCMarketImpl;
@@ -560,7 +560,7 @@ contract('PerpsV2MarketSettings', accounts => {
 				instance: secondBTCMarketImpl,
 				mock: 'PerpsV2MarketViews',
 				fncName: 'baseAsset',
-				returns: [toBytes32('hBTC')],
+				returns: [toBytes32('rBTC')],
 			});
 
 			await mockGenericContractFnc({

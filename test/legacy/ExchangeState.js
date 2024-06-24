@@ -24,7 +24,7 @@ contract('ExchangeState', accounts => {
 		account1,
 		account2,
 	] = accounts;
-	const [rUSD, hBTC, sAUD] = ['rUSD', 'hBTC', 'sAUD'].map(toBytes32);
+	const [rUSD, rBTC, sAUD] = ['rUSD', 'rBTC', 'sAUD'].map(toBytes32);
 
 	let exchangeState;
 	beforeEach(async () => {
@@ -38,7 +38,7 @@ contract('ExchangeState', accounts => {
 		user = account1,
 		src = rUSD,
 		amount = toUnit('100'),
-		dest = hBTC,
+		dest = rBTC,
 		amountReceived = toUnit('99'),
 		exchangeFeeRate = toUnit('0.01'),
 		timestamp = '0',
@@ -91,13 +91,13 @@ contract('ExchangeState', accounts => {
 
 	describe('adding, removing, selecting and length of entries', () => {
 		it('the length is 0 by default', async () => {
-			const length = await exchangeState.getLengthOfEntries(account1, hBTC);
+			const length = await exchangeState.getLengthOfEntries(account1, rBTC);
 			assert.equal(length, '0');
 		});
 		it('only the associated contract can invoke appendExchangeEntry()', async () => {
 			await onlyGivenAddressCanInvoke({
 				fnc: exchangeState.appendExchangeEntry,
-				args: [account1, rUSD, toUnit('1'), hBTC, toUnit('1'), toUnit('0.01'), '0', '0', '0'],
+				args: [account1, rUSD, toUnit('1'), rBTC, toUnit('1'), toUnit('0.01'), '0', '0', '0'],
 				address: simulatedAssociatedContract,
 				accounts,
 			});
@@ -110,14 +110,14 @@ contract('ExchangeState', accounts => {
 				accounts,
 			});
 		});
-		describe('when an entry is added to hBTC for the first user', () => {
+		describe('when an entry is added to rBTC for the first user', () => {
 			let expectedFirstEntryAdded;
 			beforeEach(async () => {
 				expectedFirstEntryAdded = {
 					user: account1,
 					src: sAUD,
 					amount: toUnit('50'),
-					dest: hBTC,
+					dest: rBTC,
 					amountReceived: toUnit('40'),
 					exchangeFeeRate: toUnit('0.01'),
 					roundIdForSrc: '5',
@@ -126,16 +126,16 @@ contract('ExchangeState', accounts => {
 				await addExchangeEntry(expectedFirstEntryAdded);
 			});
 			it('then the length is 1 for that user and tribe', async () => {
-				assert.equal((await exchangeState.getLengthOfEntries(account1, hBTC)).toString(), '1');
+				assert.equal((await exchangeState.getLengthOfEntries(account1, rBTC)).toString(), '1');
 			});
 			it('and the length is 0 for other conditions', async () => {
 				assert.equal((await exchangeState.getLengthOfEntries(account1, rUSD)).toString(), '0');
-				assert.equal((await exchangeState.getLengthOfEntries(account2, hBTC)).toString(), '0');
+				assert.equal((await exchangeState.getLengthOfEntries(account2, rBTC)).toString(), '0');
 			});
 			describe('when the entry is fetch by index 0', () => {
 				let result;
 				beforeEach(async () => {
-					result = await exchangeState.getEntryAt(account1, hBTC, '0');
+					result = await exchangeState.getEntryAt(account1, rBTC, '0');
 				});
 				it('then it returns as expected', () => {
 					Object.entries(expectedFirstEntryAdded)
@@ -152,7 +152,7 @@ contract('ExchangeState', accounts => {
 						user: account1,
 						src: rUSD,
 						amount: toUnit('5'),
-						dest: hBTC,
+						dest: rBTC,
 						amountReceived: toUnit('4'),
 						exchangeFeeRate: toUnit('0.01'),
 						roundIdForSrc: '3',
@@ -161,12 +161,12 @@ contract('ExchangeState', accounts => {
 					await addExchangeEntry(expectedSecondEntryAdded);
 				});
 				it('then the length is 2 for that user and tribe', async () => {
-					assert.equal((await exchangeState.getLengthOfEntries(account1, hBTC)).toString(), '2');
+					assert.equal((await exchangeState.getLengthOfEntries(account1, rBTC)).toString(), '2');
 				});
 				describe('when the entry is fetch by index 0 again', () => {
 					let result;
 					beforeEach(async () => {
-						result = await exchangeState.getEntryAt(account1, hBTC, '0');
+						result = await exchangeState.getEntryAt(account1, rBTC, '0');
 					});
 					it('then it returns as expected', () => {
 						Object.entries(expectedFirstEntryAdded)
@@ -179,7 +179,7 @@ contract('ExchangeState', accounts => {
 				describe('when the entry is fetch by index 1', () => {
 					let result;
 					beforeEach(async () => {
-						result = await exchangeState.getEntryAt(account1, hBTC, '1');
+						result = await exchangeState.getEntryAt(account1, rBTC, '1');
 					});
 					it('then it returns the new entry as expected', () => {
 						Object.entries(expectedSecondEntryAdded)
@@ -191,12 +191,12 @@ contract('ExchangeState', accounts => {
 				});
 				describe('when all entries are removed for that user and tribe', () => {
 					beforeEach(async () => {
-						await exchangeState.removeEntries(account1, hBTC, {
+						await exchangeState.removeEntries(account1, rBTC, {
 							from: simulatedAssociatedContract,
 						});
 					});
 					it('then the length is 0 for that user and tribe', async () => {
-						assert.equal((await exchangeState.getLengthOfEntries(account1, hBTC)).toString(), '0');
+						assert.equal((await exchangeState.getLengthOfEntries(account1, rBTC)).toString(), '0');
 					});
 				});
 			});
@@ -216,7 +216,7 @@ contract('ExchangeState', accounts => {
 			});
 			describe('when there is another entry with a different src and with timestamp 101', () => {
 				beforeEach(async () => {
-					await addExchangeEntry({ user: account1, src: hBTC, dest: sAUD, timestamp: '101' });
+					await addExchangeEntry({ user: account1, src: rBTC, dest: sAUD, timestamp: '101' });
 				});
 				it('then getMaxTimestamp() must return 101', async () => {
 					assert.equal((await exchangeState.getMaxTimestamp(account1, sAUD)).toString(), '101');
@@ -230,7 +230,7 @@ contract('ExchangeState', accounts => {
 					});
 					describe('when there are unrelated entries at higher timestamps than 101', () => {
 						beforeEach(async () => {
-							await addExchangeEntry({ user: account1, dest: hBTC, timestamp: '500' });
+							await addExchangeEntry({ user: account1, dest: rBTC, timestamp: '500' });
 							await addExchangeEntry({ user: account2, dest: sAUD, timestamp: '600' });
 						});
 						it('then getMaxTimestamp() must still return 101', async () => {

@@ -65,12 +65,12 @@ contract('PerpsV2MarketData', accounts => {
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'hBTC', 'rETH', 'sLINK'],
+			tribes: ['rUSD', 'rBTC', 'rETH', 'sLINK'],
 			contracts: [
 				'FuturesMarketManager',
 				'PerpsV2MarketSettings',
 				'PerpsV2MarketStateBTC',
-				'PerpsV2MarketViewhBTC',
+				'PerpsV2MarketViewrBTC',
 				'TestablePerpsV2MarketBTC',
 				'PerpsV2MarketBTC',
 				'PerpsV2MarketData',
@@ -465,7 +465,7 @@ contract('PerpsV2MarketData', accounts => {
 				hethMarket.address,
 			]);
 			const summariesForAsset = await perpsV2MarketData.marketSummariesForKeys(
-				['hBTC', 'rETH' + keySuffix].map(toBytes32)
+				['rBTC', 'rETH' + keySuffix].map(toBytes32)
 			);
 			assert.equal(JSON.stringify(summaries), JSON.stringify(summariesForAsset));
 		});
@@ -473,7 +473,7 @@ contract('PerpsV2MarketData', accounts => {
 		it('All summaries', async () => {
 			const summaries = await perpsV2MarketData.allMarketSummaries();
 
-			const hBTCSummary = summaries.find(summary => summary.key === toBytes32('hBTC'));
+			const rBTCSummary = summaries.find(summary => summary.key === toBytes32('rBTC'));
 			const rETHSummary = summaries.find(summary => summary.key === toBytes32('rETH' + keySuffix));
 			const sLINKSummary = summaries.find(
 				summary => summary.key === toBytes32('sLINK' + keySuffix)
@@ -481,28 +481,28 @@ contract('PerpsV2MarketData', accounts => {
 
 			const fmParams = await perpsV2MarketData.parameters(marketKey);
 
-			assert.equal(hBTCSummary.market, perpsV2Market.address);
-			assert.equal(hBTCSummary.asset, baseAsset);
-			assert.equal(hBTCSummary.maxLeverage, fmParams.maxLeverage);
+			assert.equal(rBTCSummary.market, perpsV2Market.address);
+			assert.equal(rBTCSummary.asset, baseAsset);
+			assert.equal(rBTCSummary.maxLeverage, fmParams.maxLeverage);
 			let price = await perpsV2Market.assetPrice();
-			assert.equal(hBTCSummary.price, price.price);
-			assert.equal(hBTCSummary.marketSize, await perpsV2Market.marketSize());
-			assert.equal(hBTCSummary.marketSkew, await perpsV2Market.marketSkew());
-			assert.equal(hBTCSummary.currentFundingRate, await perpsV2Market.currentFundingRate());
+			assert.equal(rBTCSummary.price, price.price);
+			assert.equal(rBTCSummary.marketSize, await perpsV2Market.marketSize());
+			assert.equal(rBTCSummary.marketSkew, await perpsV2Market.marketSkew());
+			assert.equal(rBTCSummary.currentFundingRate, await perpsV2Market.currentFundingRate());
 			assert.equal(
-				hBTCSummary.currentFundingVelocity,
+				rBTCSummary.currentFundingVelocity,
 				await perpsV2Market.currentFundingVelocity()
 			);
-			assert.equal(hBTCSummary.feeRates.takerFee, fmParams.takerFee);
-			assert.equal(hBTCSummary.feeRates.makerFee, fmParams.makerFee);
-			assert.equal(hBTCSummary.feeRates.takerFeeDelayedOrder, fmParams.takerFeeDelayedOrder);
-			assert.equal(hBTCSummary.feeRates.makerFeeDelayedOrder, fmParams.makerFeeDelayedOrder);
+			assert.equal(rBTCSummary.feeRates.takerFee, fmParams.takerFee);
+			assert.equal(rBTCSummary.feeRates.makerFee, fmParams.makerFee);
+			assert.equal(rBTCSummary.feeRates.takerFeeDelayedOrder, fmParams.takerFeeDelayedOrder);
+			assert.equal(rBTCSummary.feeRates.makerFeeDelayedOrder, fmParams.makerFeeDelayedOrder);
 			assert.equal(
-				hBTCSummary.feeRates.takerFeeOffchainDelayedOrder,
+				rBTCSummary.feeRates.takerFeeOffchainDelayedOrder,
 				fmParams.takerFeeOffchainDelayedOrder
 			);
 			assert.equal(
-				hBTCSummary.feeRates.makerFeeOffchainDelayedOrder,
+				rBTCSummary.feeRates.makerFeeOffchainDelayedOrder,
 				fmParams.makerFeeOffchainDelayedOrder
 			);
 
@@ -551,12 +551,12 @@ contract('PerpsV2MarketData', accounts => {
 		it('All proxied market summaries', async () => {
 			const summaries = await perpsV2MarketData.allProxiedMarketSummaries();
 
-			const hBTCSummary = summaries.find(summary => summary.asset === toBytes32('hBTC'));
+			const rBTCSummary = summaries.find(summary => summary.asset === toBytes32('rBTC'));
 			const rETHSummary = summaries.find(summary => summary.asset === toBytes32('rETH'));
 			const sLINKSummary = summaries.find(summary => summary.asset === toBytes32('sLINK'));
 
 			// A simplified version of allMarketSummaries test. All markets are considered proxied here.
-			assert.equal(hBTCSummary.market, perpsV2Market.address);
+			assert.equal(rBTCSummary.market, perpsV2Market.address);
 			assert.equal(rETHSummary.market, hethMarket.address);
 			assert.equal(
 				sLINKSummary.market,

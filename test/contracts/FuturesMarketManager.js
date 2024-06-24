@@ -107,7 +107,7 @@ contract('FuturesMarketManager', accounts => {
 	});
 
 	describe('Market management', () => {
-		const currencyKeys = ['hBTC', 'rETH'].map(toBytes32);
+		const currencyKeys = ['rBTC', 'rETH'].map(toBytes32);
 		let markets, addresses;
 		beforeEach(async () => {
 			markets = await Promise.all(
@@ -292,7 +292,7 @@ contract('FuturesMarketManager', accounts => {
 				skipPostDeploy: true,
 			});
 			await futuresMarketManager.addMarkets([market.address], { from: owner });
-			await futuresMarketManager.removeMarketsByKey(['hBTC', 'sLINK'].map(toBytes32), {
+			await futuresMarketManager.removeMarketsByKey(['rBTC', 'sLINK'].map(toBytes32), {
 				from: owner,
 			});
 
@@ -362,7 +362,7 @@ contract('FuturesMarketManager', accounts => {
 
 			await onlyGivenAddressCanInvoke({
 				fnc: futuresMarketManager.removeMarketsByKey,
-				args: [['rETH', 'hBTC'].map(toBytes32)],
+				args: [['rETH', 'rBTC'].map(toBytes32)],
 				accounts,
 				address: owner,
 				skipPassCheck: false,
@@ -455,7 +455,7 @@ contract('FuturesMarketManager', accounts => {
 
 		describe('when there are multiple markets', () => {
 			const individualDebt = toUnit('1000');
-			const currencyKeys = ['hBTC', 'rETH', 'sLINK'].map(toBytes32);
+			const currencyKeys = ['rBTC', 'rETH', 'sLINK'].map(toBytes32);
 			let markets;
 			beforeEach(async () => {
 				markets = await Promise.all(
@@ -627,7 +627,7 @@ contract('FuturesMarketManager', accounts => {
 		it('All summaries', async () => {
 			const summaries = await futuresMarketManager.allMarketSummaries();
 
-			const btcSummary = summaries.find(summary => summary.marketKey === toBytes32('hBTC'));
+			const btcSummary = summaries.find(summary => summary.marketKey === toBytes32('rBTC'));
 			const ethSummary = summaries.find(summary => summary.marketKey === toBytes32('rETH'));
 			const linkSummary = summaries.find(summary => summary.marketKey === toBytes32('sLINK'));
 

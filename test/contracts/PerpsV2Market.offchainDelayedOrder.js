@@ -34,8 +34,8 @@ contract('PerpsV2Market PerpsV2MarketOffchainOrders', accounts => {
 
 	const marketKeySuffix = '-perp';
 
-	const marketKey = toBytes32('hBTC' + marketKeySuffix);
-	const baseAsset = toBytes32('hBTC');
+	const marketKey = toBytes32('rBTC' + marketKeySuffix);
+	const baseAsset = toBytes32('rBTC');
 	const takerFeeOffchainDelayedOrder = toUnit('0.00005');
 	const makerFeeOffchainDelayedOrder = toUnit('0.00001');
 	const initialPrice = toUnit('100');
@@ -46,7 +46,7 @@ contract('PerpsV2Market PerpsV2MarketOffchainOrders', accounts => {
 	const offchainDelayedOrderMaxAge = 60;
 
 	const feeds = [
-		{ assetId: baseAsset, feedId: toBytes32('feed-hBTC') },
+		{ assetId: baseAsset, feedId: toBytes32('feed-rBTC') },
 		{ assetId: toBytes32('rETH'), feedId: toBytes32('feed-rETH') },
 	];
 
@@ -117,7 +117,7 @@ contract('PerpsV2Market PerpsV2MarketOffchainOrders', accounts => {
 			DebtCache: debtCache,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'hBTC', 'rETH'],
+			tribes: ['rUSD', 'rBTC', 'rETH'],
 			contracts: [
 				'FuturesMarketManager',
 				'PerpsV2MarketSettings',

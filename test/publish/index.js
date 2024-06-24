@@ -90,7 +90,7 @@ describe('publish scripts', () => {
 	let gasPrice;
 	let accounts;
 	let rUSD;
-	let hBTC;
+	let rBTC;
 	let rETH;
 	let provider;
 	let overrides;
@@ -154,7 +154,7 @@ describe('publish scripts', () => {
 
 		MockAggregatorFactory = await createMockAggregatorFactory(accounts.deployer);
 
-		[rUSD, hBTC, rETH] = ['rUSD', 'hBTC', 'rETH'].map(toBytes32);
+		[rUSD, rBTC, rETH] = ['rUSD', 'rBTC', 'rETH'].map(toBytes32);
 
 		gasLimit = 8000000;
 		gasPrice = ethers.utils.parseUnits('5', 'gwei');
@@ -176,7 +176,7 @@ describe('publish scripts', () => {
 			let Rwaone;
 			let timestamp;
 			let rUSDContract;
-			let hBTCContract;
+			let rBTCContract;
 			let rETHContract;
 			let FeePool;
 			let DebtCache;
@@ -256,7 +256,7 @@ describe('publish scripts', () => {
 
 				rUSDContract = getContract({ target: 'ProxyrUSD', source: 'Tribe' });
 
-				hBTCContract = getContract({ target: 'ProxyhBTC', source: 'Tribe' });
+				rBTCContract = getContract({ target: 'ProxyrBTC', source: 'Tribe' });
 				rETHContract = getContract({ target: 'ProxyrETH', source: 'Tribe' });
 				SystemSettings = getContract({ target: 'SystemSettings' });
 
@@ -581,7 +581,7 @@ describe('publish scripts', () => {
 
 			describe('deploy-shorting-rewards', () => {
 				beforeEach(async () => {
-					const rewardsToDeploy = ['hBTC', 'rETH'];
+					const rewardsToDeploy = ['rBTC', 'rETH'];
 
 					await commands.deployShortingRewards({
 						network,
@@ -850,18 +850,18 @@ describe('publish scripts', () => {
 								});
 							});
 						});
-						describe('when user1 exchange 1000 rUSD for hBTC', () => {
-							let hBTCBalanceAfterExchange;
+						describe('when user1 exchange 1000 rUSD for rBTC', () => {
+							let rBTCBalanceAfterExchange;
 							beforeEach(async () => {
 								const tx = await Rwaone.exchange(
 									rUSD,
 									ethers.utils.parseEther('1000'),
-									hBTC,
+									rBTC,
 									overrides
 								);
 								await tx.wait();
-								hBTCBalanceAfterExchange = await callMethodWithRetry(
-									hBTCContract.balanceOf(accounts.first.address)
+								rBTCBalanceAfterExchange = await callMethodWithRetry(
+									rBTCContract.balanceOf(accounts.first.address)
 								);
 							});
 							it('then their rUSD balance is 5000', async () => {
@@ -874,12 +874,12 @@ describe('publish scripts', () => {
 									'Balance should match'
 								);
 							});
-							it('and their hBTC balance is 1000 - the fee', async () => {
+							it('and their rBTC balance is 1000 - the fee', async () => {
 								const { amountReceived } = await callMethodWithRetry(
-									Exchanger.getAmountsForExchange(ethers.utils.parseEther('1000'), rUSD, hBTC)
+									Exchanger.getAmountsForExchange(ethers.utils.parseEther('1000'), rUSD, rBTC)
 								);
 								assert.strictEqual(
-									ethers.utils.formatEther(hBTCBalanceAfterExchange.toString()),
+									ethers.utils.formatEther(rBTCBalanceAfterExchange.toString()),
 									ethers.utils.formatEther(amountReceived.toString()),
 									'Balance should match'
 								);
@@ -907,14 +907,14 @@ describe('publish scripts', () => {
 									);
 								});
 
-								describe('when deployer replaces hBTC with PurgeableTribe', () => {
+								describe('when deployer replaces rBTC with PurgeableTribe', () => {
 									beforeEach(async () => {
 										await commands.replaceTribes({
 											network,
 											yes: true,
 											privateKey: accounts.deployer.privateKey,
 											subclass: 'PurgeableTribe',
-											tribesToReplace: ['hBTC'],
+											tribesToReplace: ['rBTC'],
 											methodCallGasLimit: gasLimit,
 										});
 									});
@@ -927,16 +927,16 @@ describe('publish scripts', () => {
 												yes: true,
 												privateKey: accounts.deployer.privateKey,
 												addresses: [accounts.first.address],
-												tribesToPurge: ['hBTC'],
+												tribesToPurge: ['rBTC'],
 												gasLimit,
 											});
 										});
-										it('then their rUSD balance is 4990 + hBTCBalanceAfterExchange', async () => {
+										it('then their rUSD balance is 4990 + rBTCBalanceAfterExchange', async () => {
 											const balance = await callMethodWithRetry(
 												rUSDContract.balanceOf(accounts.first.address)
 											);
 											const [amountReceived] = await callMethodWithRetry(
-												Exchanger.getAmountsForExchange(hBTCBalanceAfterExchange, hBTC, rUSD)
+												Exchanger.getAmountsForExchange(rBTCBalanceAfterExchange, rBTC, rUSD)
 											);
 											assert.strictEqual(
 												ethers.utils.formatEther(balance.toString()),
@@ -944,9 +944,9 @@ describe('publish scripts', () => {
 												'Balance should match'
 											);
 										});
-										it('and their hBTC balance is 0', async () => {
+										it('and their rBTC balance is 0', async () => {
 											const balance = await callMethodWithRetry(
-												hBTCContract.balanceOf(accounts.first.address)
+												rBTCContract.balanceOf(accounts.first.address)
 											);
 											assert.strictEqual(
 												ethers.utils.formatEther(balance.toString()),
@@ -1005,18 +1005,18 @@ describe('publish scripts', () => {
 
 							ExchangeRates = getContract({ target: 'ExchangeRates' });
 						});
-						it('then the aggregator must be set for the hBTC price', async () => {
+						it('then the aggregator must be set for the rBTC price', async () => {
 							const aggregator = await callMethodWithRetry(
-								ExchangeRates.aggregators(toBytes32('hBTC'))
+								ExchangeRates.aggregators(toBytes32('rBTC'))
 							);
 							assert.strictEqual(aggregator, mockAggregator.address);
 						});
 
-						describe('when ExchangeRates has rates for all tribes except the aggregated tribe hBTC', () => {
+						describe('when ExchangeRates has rates for all tribes except the aggregated tribe rBTC', () => {
 							beforeEach(async () => {
 								// update rates
 								const tribesToUpdate = tribes
-									.filter(({ name }) => name !== 'hBTC')
+									.filter(({ name }) => name !== 'rBTC')
 									.concat({ asset: 'wRWAX', rate: 1 });
 
 								for (const { asset } of tribesToUpdate) {
@@ -1024,7 +1024,7 @@ describe('publish scripts', () => {
 								}
 							});
 							describe('when Rwaone.anyTribeOrRWAXRateIsInvalid() is invoked', () => {
-								it('then it returns true as hBTC still is', async () => {
+								it('then it returns true as rBTC still is', async () => {
 									const response = await Rwaone.anyTribeOrRWAXRateIsInvalid();
 									assert.strictEqual(response, true, 'anyTribeOrRWAXRateIsInvalid must be true');
 								});
@@ -1045,7 +1045,7 @@ describe('publish scripts', () => {
 								describe('then the price from exchange rates for that currency key uses the aggregator', () => {
 									it('correctly returns the rate', async () => {
 										const response = await callMethodWithRetry(
-											ExchangeRates.rateForCurrency(toBytes32('hBTC'))
+											ExchangeRates.rateForCurrency(toBytes32('rBTC'))
 										);
 										assert.strictEqual(ethers.utils.formatEther(response.toString()), rate);
 									});

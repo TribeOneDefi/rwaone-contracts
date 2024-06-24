@@ -17,7 +17,7 @@ function itCanRedeem({ ctx }) {
 		let tribe;
 
 		before('target contracts and users', () => {
-			// rETH and hBTC can't be removed because the debt may be too large for removeTribe to not underflow
+			// rETH and rBTC can't be removed because the debt may be too large for removeTribe to not underflow
 			// during debt update, so rETHBTC is used here
 			tribe = 'rETHBTC';
 

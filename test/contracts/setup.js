@@ -401,8 +401,8 @@ const setupContract = async ({
 		FuturesMarketSettings: [owner, tryGetAddressOf('AddressResolver')],
 		FuturesMarketBTC: [
 			tryGetAddressOf('AddressResolver'),
-			toBytes32('hBTC'), // base asset
-			toBytes32('hBTC' + perpSuffix), // market key
+			toBytes32('rBTC'), // base asset
+			toBytes32('rBTC' + perpSuffix), // market key
 		],
 		FuturesMarketETH: [
 			tryGetAddressOf('AddressResolver'),
@@ -418,8 +418,8 @@ const setupContract = async ({
 		PerpsV2MarketStateBTC: [
 			owner,
 			[deployerAccount],
-			toBytes32('hBTC'), // base asset
-			toBytes32('hBTC' + perpSuffix), // market key
+			toBytes32('rBTC'), // base asset
+			toBytes32('rBTC' + perpSuffix), // market key
 			ethers.constants.AddressZero,
 		],
 		PerpsV2MarketStateETH: [
@@ -431,7 +431,7 @@ const setupContract = async ({
 		],
 		ProxyPerpsV2MarketBTC: [owner],
 		ProxyPerpsV2MarketETH: [owner],
-		PerpsV2MarketViewhBTC: [
+		PerpsV2MarketViewrBTC: [
 			tryGetAddressOf('PerpsV2MarketStateBTC'),
 			owner,
 			tryGetAddressOf('AddressResolver'),
@@ -786,7 +786,7 @@ const setupContract = async ({
 				cache['FuturesMarketManager'].addMarkets([instance.address], { from: owner }),
 			]);
 		},
-		async PerpsV2MarketViewhBTC() {
+		async PerpsV2MarketViewrBTC() {
 			const filteredFunctions = getFunctionSignatures(instance, excludedFunctions);
 
 			await Promise.all(
@@ -1506,7 +1506,7 @@ const setupAllContracts = async ({
 		{ contract: 'PerpsV2MarketData', deps: ['PerpsV2MarketSettings'] },
 		// PerpsV2 BTC
 		{
-			contract: 'PerpsV2MarketViewhBTC',
+			contract: 'PerpsV2MarketViewrBTC',
 			source: 'PerpsV2MarketViews',
 			deps: [
 				'ProxyPerpsV2MarketBTC',
@@ -1563,7 +1563,7 @@ const setupAllContracts = async ({
 			deps: [
 				'ProxyPerpsV2MarketBTC',
 				'PerpsV2MarketStateBTC',
-				'PerpsV2MarketViewhBTC',
+				'PerpsV2MarketViewrBTC',
 				'PerpsV2MarketLiquidateBTC',
 				'PerpsV2MarketDelayedIntentBTC',
 				'PerpsV2MarketDelayedExecutionBTC',

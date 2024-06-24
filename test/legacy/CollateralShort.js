@@ -32,7 +32,7 @@ contract('CollateralShort', async accounts => {
 
 	const rUSD = toBytes32('rUSD');
 	const rETH = toBytes32('rETH');
-	const hBTC = toBytes32('hBTC');
+	const rBTC = toBytes32('rBTC');
 
 	const [, owner, , , account1, account2] = accounts;
 
@@ -43,7 +43,7 @@ contract('CollateralShort', async accounts => {
 		exchangeRates,
 		addressResolver,
 		rUSDTribe,
-		hBTCTribe,
+		rBTCTribe,
 		rETHTribe,
 		tribes,
 		manager,
@@ -69,18 +69,18 @@ contract('CollateralShort', async accounts => {
 	};
 
 	const updateRatesWithDefaults = async () => {
-		const hBTC = toBytes32('hBTC');
+		const rBTC = toBytes32('rBTC');
 
-		await updateAggregatorRates(exchangeRates, null, [rETH, hBTC], [100, 10000].map(toUnit));
+		await updateAggregatorRates(exchangeRates, null, [rETH, rBTC], [100, 10000].map(toUnit));
 	};
 
 	const setupShort = async () => {
-		tribes = ['rUSD', 'hBTC', 'rETH'];
+		tribes = ['rUSD', 'rBTC', 'rETH'];
 		({
 			ExchangeRates: exchangeRates,
 			Exchanger: exchanger,
 			TriberUSD: rUSDTribe,
-			TribehBTC: hBTCTribe,
+			TriberBTC: rBTCTribe,
 			TriberETH: rETHTribe,
 			FeePool: feePool,
 			AddressResolver: addressResolver,
@@ -110,7 +110,7 @@ contract('CollateralShort', async accounts => {
 			],
 		}));
 
-		await setupPriceAggregators(exchangeRates, owner, [hBTC, rETH]);
+		await setupPriceAggregators(exchangeRates, owner, [rBTC, rETH]);
 
 		await managerState.setAssociatedContract(manager.address, { from: owner });
 
@@ -132,43 +132,43 @@ contract('CollateralShort', async accounts => {
 		await manager.addCollaterals([short.address], { from: owner });
 
 		await short.addTribes(
-			['TribehBTC', 'TriberETH'].map(toBytes32),
-			['hBTC', 'rETH'].map(toBytes32),
+			['TriberBTC', 'TriberETH'].map(toBytes32),
+			['rBTC', 'rETH'].map(toBytes32),
 			{ from: owner }
 		);
 
 		await manager.addTribes(
-			[toBytes32('TriberUSD'), toBytes32('TribehBTC'), toBytes32('TriberETH')],
-			[toBytes32('rUSD'), toBytes32('hBTC'), toBytes32('rETH')],
+			[toBytes32('TriberUSD'), toBytes32('TriberBTC'), toBytes32('TriberETH')],
+			[toBytes32('rUSD'), toBytes32('rBTC'), toBytes32('rETH')],
 			{
 				from: owner,
 			}
 		);
 
 		await manager.addShortableTribes(
-			['TribehBTC', 'TriberETH'].map(toBytes32),
-			['hBTC', 'rETH'].map(toBytes32),
+			['TriberBTC', 'TriberETH'].map(toBytes32),
+			['rBTC', 'rETH'].map(toBytes32),
 			{ from: owner }
 		);
 
 		// check tribes are set and currencyKeys set
 		assert.isTrue(
 			await manager.areTribesAndCurrenciesSet(
-				['TriberUSD', 'TribehBTC', 'TriberETH'].map(toBytes32),
-				['rUSD', 'hBTC', 'rETH'].map(toBytes32)
+				['TriberUSD', 'TriberBTC', 'TriberETH'].map(toBytes32),
+				['rUSD', 'rBTC', 'rETH'].map(toBytes32)
 			)
 		);
 
 		assert.isTrue(
 			await short.areTribesAndCurrenciesSet(
-				['TribehBTC', 'TriberETH'].map(toBytes32),
-				['hBTC', 'rETH'].map(toBytes32)
+				['TriberBTC', 'TriberETH'].map(toBytes32),
+				['rBTC', 'rETH'].map(toBytes32)
 			)
 		);
 
 		assert.isTrue(await manager.isTribeManaged(rUSD));
 		assert.isTrue(await manager.isTribeManaged(rETH));
-		assert.isTrue(await manager.isTribeManaged(hBTC));
+		assert.isTrue(await manager.isTribeManaged(rBTC));
 
 		assert.isTrue(await manager.hasAllCollaterals([short.address]));
 
@@ -190,7 +190,7 @@ contract('CollateralShort', async accounts => {
 		});
 
 		await issue(rUSDTribe, toUnit(100000), owner);
-		await issue(hBTCTribe, toUnit(1), owner);
+		await issue(rBTCTribe, toUnit(1), owner);
 		await issue(rETHTribe, toUnit(1), owner);
 		await debtCache.takeDebtSnapshot();
 	});
@@ -220,7 +220,7 @@ contract('CollateralShort', async accounts => {
 			assert.equal(await short.owner(), owner);
 			assert.equal(await short.resolver(), addressResolver.address);
 			assert.equal(await short.collateralKey(), rUSD);
-			assert.equal(await short.tribes(0), toBytes32('TribehBTC'));
+			assert.equal(await short.tribes(0), toBytes32('TriberBTC'));
 			assert.equal(await short.tribes(1), toBytes32('TriberETH'));
 			assert.bnEqual(await short.minCratio(), toUnit(1.2));
 			assert.bnEqual(await systemSettings.liquidationPenalty(), LIQUIDATION_PENALTY); // 10% penalty
@@ -243,7 +243,7 @@ contract('CollateralShort', async accounts => {
 				beforeEach(async () => {
 					await issue(rUSDTribe, rusdCollateral, account1);
 
-					tx = await short.open(rusdCollateral, oneBTC, hBTC, { from: account1 });
+					tx = await short.open(rusdCollateral, oneBTC, rBTC, { from: account1 });
 
 					id = getid(tx);
 					loan = await short.loans(id);
@@ -255,14 +255,14 @@ contract('CollateralShort', async accounts => {
 						id: id,
 						amount: oneBTC,
 						collateral: rusdCollateral,
-						currency: hBTC,
+						currency: rBTC,
 					});
 				});
 
 				it('should create the short correctly', async () => {
 					assert.equal(loan.account, account1);
 					assert.equal(loan.collateral, rusdCollateral.toString());
-					assert.equal(loan.currency, hBTC);
+					assert.equal(loan.currency, rBTC);
 					assert.equal(loan.short, true);
 					assert.equal(loan.amount, oneBTC.toString());
 					assert.bnEqual(loan.accruedInterest, toUnit(0));
@@ -275,7 +275,7 @@ contract('CollateralShort', async accounts => {
 				});
 
 				it('should tell the manager about the short', async () => {
-					assert.bnEqual(await manager.short(hBTC), oneBTC);
+					assert.bnEqual(await manager.short(rBTC), oneBTC);
 				});
 
 				it('should transfer the rUSD to the contract', async () => {
@@ -1155,7 +1155,7 @@ contract('CollateralShort', async accounts => {
 
 				await issue(rUSDTribe, rusdCollateral, account1);
 
-				await short.open(rusdCollateral, oneBTC, hBTC, { from: account1 });
+				await short.open(rusdCollateral, oneBTC, rBTC, { from: account1 });
 			});
 
 			it('should correctly determine the interest on a short', async () => {
@@ -1164,7 +1164,7 @@ contract('CollateralShort', async accounts => {
 
 				await issue(rUSDTribe, rusdCollateral, account1);
 
-				tx = await short.open(rusdCollateral, oneBTC, hBTC, { from: account1 });
+				tx = await short.open(rusdCollateral, oneBTC, rBTC, { from: account1 });
 				id = getid(tx);
 
 				// after a year we should have accrued 6.67%.

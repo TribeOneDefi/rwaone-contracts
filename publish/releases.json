@@ -155,7 +155,7 @@
 				"DebtCache",
 				"FeePool",
 				"Issuer",
-				"TribehBTC",
+				"TriberBTC",
 				"TriberETH",
 				"TriberUSD"
 			]
@@ -341,7 +341,7 @@
 				"CollateralManagerState",
 				"CollateralShort",
 				"CollateralUtil",
-				"TribehBTC",
+				"TriberBTC",
 				"TriberETH",
 				"TribesLINK",
 				"TriberUSD",
@@ -384,7 +384,7 @@
 				"Rwaone",
 				"TriberETH",
 				"TriberUSD",
-				"TribehBTC"
+				"TriberBTC"
 			]
 		},
 		{

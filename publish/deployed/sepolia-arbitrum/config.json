@@ -236,13 +236,13 @@
 	"TriberETH": {
 		"deploy": true
 	},
-	"TokenStatehBTC": {
+	"TokenStaterBTC": {
 		"deploy": true
 	},
-	"ProxyhBTC": {
+	"ProxyrBTC": {
 		"deploy": true
 	},
-	"TribehBTC": {
+	"TriberBTC": {
 		"deploy": true
 	},
 	"PerpsV2MarketSettings": {
