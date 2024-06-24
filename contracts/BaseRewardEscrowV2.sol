@@ -384,14 +384,14 @@ contract BaseRewardEscrowV2 is Owned, IRewardEscrowV2, LimitedSetup(8 weeks), Mi
     function nominateAccountToMerge(address account) external {
         require(account != msg.sender, "Cannot nominate own account to merge");
         require(accountMergingIsOpen(), "Account merging has ended");
-        require(issuer().debtBalanceOf(msg.sender, "hUSD") == 0, "Cannot merge accounts with debt");
+        require(issuer().debtBalanceOf(msg.sender, "rUSD") == 0, "Cannot merge accounts with debt");
         nominatedReceiver[msg.sender] = account;
         emit NominateAccountToMerge(msg.sender, account);
     }
 
     function mergeAccount(address from, uint256[] calldata entryIDs) external {
         require(accountMergingIsOpen(), "Account merging has ended");
-        require(issuer().debtBalanceOf(from, "hUSD") == 0, "Cannot merge accounts with debt");
+        require(issuer().debtBalanceOf(from, "rUSD") == 0, "Cannot merge accounts with debt");
         require(nominatedReceiver[from] == msg.sender, "Address is not nominated to merge");
         address to = msg.sender;
 

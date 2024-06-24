@@ -8,12 +8,12 @@ async function exchangeSomething({ ctx }) {
 	let { Rwaone } = ctx.contracts;
 	Rwaone = Rwaone.connect(ctx.users.owner);
 
-	const hUSDAmount = ethers.utils.parseEther('10');
-	await ensureBalance({ ctx, symbol: 'hUSD', user: ctx.users.owner, balance: hUSDAmount });
+	const rUSDAmount = ethers.utils.parseEther('10');
+	await ensureBalance({ ctx, symbol: 'rUSD', user: ctx.users.owner, balance: rUSDAmount });
 
 	await updateCache({ ctx });
 
-	const tx = await Rwaone.exchange(toBytes32('hUSD'), hUSDAmount, toBytes32('hETH'));
+	const tx = await Rwaone.exchange(toBytes32('rUSD'), rUSDAmount, toBytes32('hETH'));
 	await tx.wait();
 }
 

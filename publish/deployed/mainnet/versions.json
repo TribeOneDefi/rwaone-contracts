@@ -59,11 +59,11 @@
 				"status": "current",
 				"keccak256": "0xa4731706c3292ed368ded616be2fcf28877d8a853cbce27be7d78e6a57636e9f"
 			},
-			"ProxyhUSD": {
+			"ProxyrUSD": {
 				"address": "0x57Ab1ec28D129707052df4dF418D58a2D46d5f51",
 				"status": "current"
 			},
-			"ProxyERC20hUSD": {
+			"ProxyERC20rUSD": {
 				"address": "0x57Ab1ec28D129707052df4dF418D58a2D46d5f51",
 				"status": "current",
 				"keccak256": "0xa4731706c3292ed368ded616be2fcf28877d8a853cbce27be7d78e6a57636e9f"
@@ -119,7 +119,7 @@
 				"status": "current",
 				"keccak256": "0x548d16dab51321918778c500b04c32240f3d720f19d48533e0db9c2b9b722ebe"
 			},
-			"TribehUSD": {
+			"TriberUSD": {
 				"address": "0x10A5F7D9D65bCc2734763444D4940a31b109275f",
 				"status": "current",
 				"keccak256": "0x548d16dab51321918778c500b04c32240f3d720f19d48533e0db9c2b9b722ebe"
@@ -154,7 +154,7 @@
 				"status": "current",
 				"keccak256": "0x10a63d041fa9899b429b12dddcf047b55c23fe62019c08abbba9fa1f603738d3"
 			},
-			"TokenStatehUSD": {
+			"TokenStaterUSD": {
 				"address": "0x05a9CBe762B36632b3594DA4F082340E0e5343e8",
 				"status": "current",
 				"keccak256": "0x10a63d041fa9899b429b12dddcf047b55c23fe62019c08abbba9fa1f603738d3"
@@ -296,7 +296,7 @@
 				"address": "0x13C1542A468319688B89E323fe9A3Be3A90EBb27",
 				"status": "current"
 			},
-			"StakingRewardshUSDCurve": {
+			"StakingRewardsrUSDCurve": {
 				"address": "0xDCB6A51eA3CA5d3Fd898Fd6564757c7aAeC3ca92",
 				"status": "current"
 			},

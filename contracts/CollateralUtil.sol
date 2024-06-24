@@ -18,7 +18,7 @@ contract CollateralUtil is ICollateralUtil, ICollateralLoan, MixinSystemSettings
 
     /* ========== CONSTANTS ========== */
 
-    bytes32 private constant hUSD = "hUSD";
+    bytes32 private constant rUSD = "rUSD";
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
@@ -42,25 +42,20 @@ contract CollateralUtil is ICollateralUtil, ICollateralLoan, MixinSystemSettings
     /* ========== UTILITY VIEW FUNCS ========== */
 
     function getCollateralRatio(Loan calldata loan, bytes32 collateralKey) external view returns (uint cratio) {
-        uint cvalue = _exchangeRates().effectiveValue(collateralKey, loan.collateral, hUSD);
-        uint dvalue = _exchangeRates().effectiveValue(loan.currency, loan.amount.add(loan.accruedInterest), hUSD);
+        uint cvalue = _exchangeRates().effectiveValue(collateralKey, loan.collateral, rUSD);
+        uint dvalue = _exchangeRates().effectiveValue(loan.currency, loan.amount.add(loan.accruedInterest), rUSD);
         return cvalue.divideDecimal(dvalue);
     }
 
-    function maxLoan(
-        uint amount,
-        bytes32 currency,
-        uint minCratio,
-        bytes32 collateralKey
-    ) external view returns (uint max) {
+    function maxLoan(uint amount, bytes32 currency, uint minCratio, bytes32 collateralKey) external view returns (uint max) {
         uint ratio = SafeDecimalMath.unit().divideDecimalRound(minCratio);
         return ratio.multiplyDecimal(_exchangeRates().effectiveValue(collateralKey, amount, currency));
     }
 
     /**
      * r = target issuance ratio
-     * D = debt value in hUSD
-     * V = collateral value in hUSD
+     * D = debt value in rUSD
+     * V = collateral value in rUSD
      * P = liquidation penalty
      * Calculates amount of tribes = (D - V * r) / (1 - (1 + P) * r)
      * Note: if you pass a loan in here that is not eligible for liquidation it will revert.
@@ -72,16 +67,16 @@ contract CollateralUtil is ICollateralUtil, ICollateralLoan, MixinSystemSettings
         bytes32 collateralKey
     ) external view returns (uint amount) {
         uint liquidationPenalty = getLiquidationPenalty();
-        uint debtValue = _exchangeRates().effectiveValue(loan.currency, loan.amount.add(loan.accruedInterest), hUSD);
-        uint collateralValue = _exchangeRates().effectiveValue(collateralKey, loan.collateral, hUSD);
+        uint debtValue = _exchangeRates().effectiveValue(loan.currency, loan.amount.add(loan.accruedInterest), rUSD);
+        uint collateralValue = _exchangeRates().effectiveValue(collateralKey, loan.collateral, rUSD);
         uint unit = SafeDecimalMath.unit();
 
         uint dividend = debtValue.sub(collateralValue.divideDecimal(minCratio));
         uint divisor = unit.sub(unit.add(liquidationPenalty).divideDecimal(minCratio));
 
-        uint hUSDamount = dividend.divideDecimal(divisor);
+        uint rUSDamount = dividend.divideDecimal(divisor);
 
-        return _exchangeRates().effectiveValue(hUSD, hUSDamount, loan.currency);
+        return _exchangeRates().effectiveValue(rUSD, rUSDamount, loan.currency);
     }
 
     function collateralRedeemed(

@@ -35,13 +35,13 @@ const MockAggregator = artifacts.require('MockAggregatorV2V3');
 
 contract('Exchange Rates', async accounts => {
 	const [deployerAccount, owner, oracle, dexPriceAggregator, accountOne, accountTwo] = accounts;
-	const [wHAKA, sJPY, hETH, sXTZ, sBNB, hUSD, sEUR, sAUD, GOLD, fastGasPrice, debtRatio] = [
+	const [wHAKA, sJPY, hETH, sXTZ, sBNB, rUSD, sEUR, sAUD, GOLD, fastGasPrice, debtRatio] = [
 		'wHAKA',
 		'sJPY',
 		'hETH',
 		'sXTZ',
 		'sBNB',
-		'hUSD',
+		'rUSD',
 		'sEUR',
 		'sAUD',
 		'GOLD',
@@ -77,9 +77,9 @@ contract('Exchange Rates', async accounts => {
 				assert.equal(await instance.owner(), owner);
 			});
 
-			it('returns correct values for hUSD after deployment ', async () => {
-				assert.bnEqual(await instance.rateForCurrency(hUSD), toUnit('1'));
-				assert.equal(await instance.lastRateUpdateTimes(hUSD), 0);
+			it('returns correct values for rUSD after deployment ', async () => {
+				assert.bnEqual(await instance.rateForCurrency(rUSD), toUnit('1'));
+				assert.equal(await instance.lastRateUpdateTimes(rUSD), 0);
 			});
 		});
 	};
@@ -101,9 +101,9 @@ contract('Exchange Rates', async accounts => {
 		});
 
 		describe('rateIsStale()', () => {
-			it('should never allow hUSD to go stale via rateIsStale', async () => {
+			it('should never allow rUSD to go stale via rateIsStale', async () => {
 				await fastForward(await instance.rateStalePeriod());
-				const rateIsStale = await instance.rateIsStale(hUSD);
+				const rateIsStale = await instance.rateIsStale(rUSD);
 				assert.equal(rateIsStale, false);
 			});
 
@@ -114,11 +114,11 @@ contract('Exchange Rates', async accounts => {
 			});
 
 			it('make sure anyone can check if rate is stale', async () => {
-				await instance.rateIsStale(hUSD, { from: oracle });
-				await instance.rateIsStale(hUSD, { from: owner });
-				await instance.rateIsStale(hUSD, { from: deployerAccount });
-				await instance.rateIsStale(hUSD, { from: accountOne });
-				await instance.rateIsStale(hUSD, { from: accountTwo });
+				await instance.rateIsStale(rUSD, { from: oracle });
+				await instance.rateIsStale(rUSD, { from: owner });
+				await instance.rateIsStale(rUSD, { from: deployerAccount });
+				await instance.rateIsStale(rUSD, { from: accountOne });
+				await instance.rateIsStale(rUSD, { from: accountTwo });
 			});
 		});
 	};
@@ -302,7 +302,7 @@ contract('Exchange Rates', async accounts => {
 							await aggregatorJPY.setLatestAnswer(convertToDecimals(100, 8), timestamp);
 						});
 						it('then rateIsInvalid is false', async () => {
-							const rateIsInvalid = await instance.anyRateIsInvalid([sJPY, hUSD]);
+							const rateIsInvalid = await instance.anyRateIsInvalid([sJPY, rUSD]);
 							assert.equal(rateIsInvalid, false);
 						});
 
@@ -317,7 +317,7 @@ contract('Exchange Rates', async accounts => {
 							});
 
 							it('then rateIsInvalid is still false', async () => {
-								const rateIsInvalid = await instance.anyRateIsInvalid([sJPY, hUSD]);
+								const rateIsInvalid = await instance.anyRateIsInvalid([sJPY, rUSD]);
 								assert.equal(rateIsInvalid, false);
 							});
 
@@ -326,7 +326,7 @@ contract('Exchange Rates', async accounts => {
 									await mockFlagsInterface.flagAggregator(aggregatorJPY.address);
 								});
 								it('then rateIsInvalid is true', async () => {
-									const rateIsInvalid = await instance.anyRateIsInvalid([sJPY, hUSD]);
+									const rateIsInvalid = await instance.anyRateIsInvalid([sJPY, rUSD]);
 									assert.equal(rateIsInvalid, true);
 								});
 							});
@@ -393,21 +393,21 @@ contract('Exchange Rates', async accounts => {
 				});
 
 				it('should correctly calculate an exchange rate in effectiveValue()', async () => {
-					// 1 hUSD should be worth 2 sAUD.
-					assert.bnEqual(await instance.effectiveValue(hUSD, toUnit('1'), sAUD), toUnit('2'));
+					// 1 rUSD should be worth 2 sAUD.
+					assert.bnEqual(await instance.effectiveValue(rUSD, toUnit('1'), sAUD), toUnit('2'));
 
-					// 10 wHAKA should be worth 1 hUSD.
-					assert.bnEqual(await instance.effectiveValue(wHAKA, toUnit('10'), hUSD), toUnit('1'));
+					// 10 wHAKA should be worth 1 rUSD.
+					assert.bnEqual(await instance.effectiveValue(wHAKA, toUnit('10'), rUSD), toUnit('1'));
 
-					// 2 sEUR should be worth 2.50 hUSD
-					assert.bnEqual(await instance.effectiveValue(sEUR, toUnit('2'), hUSD), toUnit('2.5'));
+					// 2 sEUR should be worth 2.50 rUSD
+					assert.bnEqual(await instance.effectiveValue(sEUR, toUnit('2'), rUSD), toUnit('2.5'));
 				});
 
 				it('should calculate updated rates in effectiveValue()', async () => {
 					// Add stale period to the time to ensure we go stale.
 					await fastForward((await instance.rateStalePeriod()) + 1);
 
-					// Update all rates except hUSD.
+					// Update all rates except rUSD.
 					await updateRates([sEUR, wHAKA], ['1.25', '0.1'].map(toUnit));
 
 					const amountOfRwaones = toUnit('10');
@@ -425,9 +425,9 @@ contract('Exchange Rates', async accounts => {
 					assert.equal(await instance.effectiveValue(toBytes32('XYZ'), toUnit('10'), wHAKA), 0);
 				});
 
-				it('effectiveValueAndRates() should return rates as well with hUSD on one side', async () => {
+				it('effectiveValueAndRates() should return rates as well with rUSD on one side', async () => {
 					const { value, sourceRate, destinationRate } = await instance.effectiveValueAndRates(
-						hUSD,
+						rUSD,
 						toUnit('1'),
 						sAUD
 					);
@@ -437,11 +437,11 @@ contract('Exchange Rates', async accounts => {
 					assert.bnEqual(destinationRate, toUnit('0.5'));
 				});
 
-				it('effectiveValueAndRates() should return rates as well with hUSD on the other side', async () => {
+				it('effectiveValueAndRates() should return rates as well with rUSD on the other side', async () => {
 					const { value, sourceRate, destinationRate } = await instance.effectiveValueAndRates(
 						sAUD,
 						toUnit('1'),
-						hUSD
+						rUSD
 					);
 
 					assert.bnEqual(value, toUnit('0.5'));
@@ -744,7 +744,7 @@ contract('Exchange Rates', async accounts => {
 								describe('when the ratesAndInvalidForCurrencies is queried', () => {
 									let response;
 									beforeEach(async () => {
-										response = await instance.ratesAndInvalidForCurrencies([sJPY, sXTZ, hUSD]);
+										response = await instance.ratesAndInvalidForCurrencies([sJPY, sXTZ, rUSD]);
 									});
 
 									it('then the rates are no longer invalid', () => {
@@ -765,7 +765,7 @@ contract('Exchange Rates', async accounts => {
 									beforeEach(async () => {
 										responseJPY = await instance.rateAndInvalid(sJPY);
 										responseXTZ = await instance.rateAndInvalid(sXTZ);
-										responseUSD = await instance.rateAndInvalid(hUSD);
+										responseUSD = await instance.rateAndInvalid(rUSD);
 									});
 
 									it('then both rates are valid', () => {
@@ -788,7 +788,7 @@ contract('Exchange Rates', async accounts => {
 									describe('when the ratesAndInvalidForCurrencies is queried', () => {
 										let response;
 										beforeEach(async () => {
-											response = await instance.ratesAndInvalidForCurrencies([sJPY, sXTZ, hUSD]);
+											response = await instance.ratesAndInvalidForCurrencies([sJPY, sXTZ, rUSD]);
 										});
 
 										it('then the rates are invalid', () => {
@@ -826,7 +826,7 @@ contract('Exchange Rates', async accounts => {
 									});
 									it('when the ratesAndInvalidForCurrencies is queried it returns 0', async () => {
 										assert.deepEqual(
-											await instance.ratesAndInvalidForCurrencies([sJPY, sXTZ, hUSD]),
+											await instance.ratesAndInvalidForCurrencies([sJPY, sXTZ, rUSD]),
 											[[0, toUnit(newRateXTZ), toUnit(1)], true]
 										);
 									});
@@ -837,7 +837,7 @@ contract('Exchange Rates', async accounts => {
 
 										it('other rates are fine', async () => {
 											const responseXTZ = await instance.rateAndInvalid(sXTZ);
-											const responseUSD = await instance.rateAndInvalid(hUSD);
+											const responseUSD = await instance.rateAndInvalid(rUSD);
 
 											assert.equal(responseXTZ[1], false);
 											assert.equal(responseUSD[1], false);
@@ -908,9 +908,9 @@ contract('Exchange Rates', async accounts => {
 				});
 
 				describe('warning flags and invalid rates', () => {
-					it('hUSD is never flagged / invalid.', async () => {
-						assert.isFalse(await instance.rateIsFlagged(hUSD));
-						assert.isFalse(await instance.rateIsInvalid(hUSD));
+					it('rUSD is never flagged / invalid.', async () => {
+						assert.isFalse(await instance.rateIsFlagged(rUSD));
+						assert.isFalse(await instance.rateIsInvalid(rUSD));
 					});
 					describe('when JPY is aggregated', () => {
 						beforeEach(async () => {
@@ -979,12 +979,12 @@ contract('Exchange Rates', async accounts => {
 				assert.equal(await instance.getCurrentRoundId(sBNB), 0);
 			});
 
-			it('getCurrentRoundId() is 0 for hUSD', async () => {
-				assert.equal(await instance.getCurrentRoundId(hUSD), 0);
+			it('getCurrentRoundId() is 0 for rUSD', async () => {
+				assert.equal(await instance.getCurrentRoundId(rUSD), 0);
 			});
 
-			it('ratesAndUpdatedTimeForCurrencyLastNRounds() shows first entry for hUSD', async () => {
-				assert.deepEqual(await instance.ratesAndUpdatedTimeForCurrencyLastNRounds(hUSD, '3', '0'), [
+			it('ratesAndUpdatedTimeForCurrencyLastNRounds() shows first entry for rUSD', async () => {
+				assert.deepEqual(await instance.ratesAndUpdatedTimeForCurrencyLastNRounds(rUSD, '3', '0'), [
 					[toUnit('1'), '0', '0'],
 					[0, 0, 0],
 				]);
@@ -1263,7 +1263,7 @@ contract('Exchange Rates', async accounts => {
 			beforeEach(async () => {
 				const MockToken = artifacts.require('MockToken');
 				const hethDexEquivalentToken = await MockToken.new('ehETH equivalent', 'ehETH', '18');
-				// set hETH equivalent but don't set hUSD equivalent
+				// set hETH equivalent but don't set rUSD equivalent
 				await systemSettings.setAtomicEquivalentForDexPricing(
 					hETH,
 					hethDexEquivalentToken.address,
@@ -1273,13 +1273,13 @@ contract('Exchange Rates', async accounts => {
 
 			it('reverts on src not having equivalent', async () => {
 				await assert.revert(
-					instance.effectiveAtomicValueAndRates(hUSD, toUnit('1'), hETH),
+					instance.effectiveAtomicValueAndRates(rUSD, toUnit('1'), hETH),
 					'No atomic equivalent for source'
 				);
 			});
 			it('reverts on dest not having equivalent', async () => {
 				await assert.revert(
-					instance.effectiveAtomicValueAndRates(hETH, toUnit('1'), hUSD),
+					instance.effectiveAtomicValueAndRates(hETH, toUnit('1'), rUSD),
 					'No atomic equivalent for dest'
 				);
 			});
@@ -1291,7 +1291,7 @@ contract('Exchange Rates', async accounts => {
 			const unitIn8 = convertToDecimals(1, 8);
 
 			let dexPriceAggregator, ethAggregator;
-			let husdDexEquivalentToken, hethDexEquivalentToken;
+			let rusdDexEquivalentToken, hethDexEquivalentToken;
 
 			function itGivesTheCorrectRates({
 				inputs: { amountIn, srcToken, destToken },
@@ -1315,14 +1315,14 @@ contract('Exchange Rates', async accounts => {
 					// For simplicity and to align it with pDex, the given pCl rate is priced on the dest token.
 					// Internally, however, the CL aggregators are expected to be priced in USD and with 8 decimals.
 					// So if the source token is USD, we need to inverse the given CL rate for the CL aggregator.
-					const pClInUsdIn8 = srcToken === hUSD ? divideDecimal(unitIn8, pClIn8, unitIn8) : pClIn8;
+					const pClInUsdIn8 = srcToken === rUSD ? divideDecimal(unitIn8, pClIn8, unitIn8) : pClIn8;
 					const pClInUsdIn18 = divideDecimal(pClInUsdIn8, unitIn8); // divides with decimal base of 18
 
 					// Get potential outputs based on given rates
 					// Due to the 8-decimal precision limitation with chainlink, cl rates are calculated in a
 					// manner mimicing the internal math to obtain the same results
 					const pClOut =
-						srcToken === hUSD
+						srcToken === rUSD
 							? divideDecimal(amountIn, pClInUsdIn8, unitIn8) // x usd / rate (usd/dest)
 							: multiplyDecimal(amountIn, pClIn18); // x dest * rate (usd/dest)
 					const potentialOutputs = {
@@ -1331,7 +1331,7 @@ contract('Exchange Rates', async accounts => {
 					};
 
 					beforeEach(async () => {
-						await dexPriceAggregator.setAssetToAssetRate(husdDexEquivalentToken.address, one);
+						await dexPriceAggregator.setAssetToAssetRate(rusdDexEquivalentToken.address, one);
 						await dexPriceAggregator.setAssetToAssetRate(hethDexEquivalentToken.address, pDex);
 
 						await ethAggregator.setLatestAnswer(pClInUsdIn8, await currentTime());
@@ -1355,16 +1355,16 @@ contract('Exchange Rates', async accounts => {
 					});
 
 					it('provides the correct system source rate', () => {
-						if (srcToken === hUSD) {
-							assert.bnEqual(rates.systemSourceRate, one); // hUSD is always one
+						if (srcToken === rUSD) {
+							assert.bnEqual(rates.systemSourceRate, one); // rUSD is always one
 						} else {
 							assert.bnEqual(rates.systemSourceRate, pClInUsdIn18); // system reports prices in 18 decimals
 						}
 					});
 
 					it('provides the correct system destination rate', () => {
-						if (destToken === hUSD) {
-							assert.bnEqual(rates.systemDestinationRate, one); // hUSD is always one
+						if (destToken === rUSD) {
+							assert.bnEqual(rates.systemDestinationRate, one); // rUSD is always one
 						} else {
 							assert.bnEqual(rates.systemDestinationRate, pClInUsdIn18); // system reports prices in 18 decimals
 						}
@@ -1378,7 +1378,7 @@ contract('Exchange Rates', async accounts => {
 				const MockDexPriceAggregator = artifacts.require('MockDexPriceAggregator');
 				dexPriceAggregator = await MockDexPriceAggregator.new();
 
-				husdDexEquivalentToken = await MockToken.new('ehUSD equivalent', 'ehUSD', '18');
+				rusdDexEquivalentToken = await MockToken.new('erUSD equivalent', 'erUSD', '18');
 				hethDexEquivalentToken = await MockToken.new('ehETH equivalent', 'ehETH', '18');
 			});
 
@@ -1392,8 +1392,8 @@ contract('Exchange Rates', async accounts => {
 					from: owner,
 				});
 				await systemSettings.setAtomicEquivalentForDexPricing(
-					hUSD,
-					husdDexEquivalentToken.address,
+					rUSD,
+					rusdDexEquivalentToken.address,
 					{
 						from: owner,
 					}
@@ -1422,15 +1422,15 @@ contract('Exchange Rates', async accounts => {
 				});
 				it('reverts', async () => {
 					await assert.revert(
-						instance.effectiveAtomicValueAndRates(hUSD, one, hETH),
+						instance.effectiveAtomicValueAndRates(rUSD, one, hETH),
 						'mock assetToAsset() reverted'
 					);
 				});
 			});
 
-			describe('trades hUSD -> hETH', () => {
+			describe('trades rUSD -> hETH', () => {
 				const amountIn = toUnit('1000');
-				const srcToken = hUSD;
+				const srcToken = rUSD;
 				const destToken = hETH;
 
 				// P_DEX of 0.01, P_CL of 0.011
@@ -1512,10 +1512,10 @@ contract('Exchange Rates', async accounts => {
 				});
 			});
 
-			describe('trades hETH -> hUSD', () => {
+			describe('trades hETH -> rUSD', () => {
 				const amountIn = toUnit('10');
 				const srcToken = hETH;
-				const destToken = hUSD;
+				const destToken = rUSD;
 
 				// P_DEX of 100, P_CL of 110
 				itGivesTheCorrectRates({
@@ -1598,11 +1598,11 @@ contract('Exchange Rates', async accounts => {
 
 			describe('when tokens use non-18 decimals', () => {
 				beforeEach('set up non-18 decimal tokens', async () => {
-					husdDexEquivalentToken = await MockToken.new('hUSD equivalent', 'ehUSD', '6'); // mimic USDC and USDT
+					rusdDexEquivalentToken = await MockToken.new('rUSD equivalent', 'erUSD', '6'); // mimic USDC and USDT
 					hethDexEquivalentToken = await MockToken.new('hETH equivalent', 'ehETH', '8'); // mimic WBTC
 					await systemSettings.setAtomicEquivalentForDexPricing(
-						hUSD,
-						husdDexEquivalentToken.address,
+						rUSD,
+						rusdDexEquivalentToken.address,
 						{
 							from: owner,
 						}
@@ -1616,7 +1616,7 @@ contract('Exchange Rates', async accounts => {
 					);
 				});
 
-				describe('hUSD -> hETH', () => {
+				describe('rUSD -> hETH', () => {
 					const rate = '100';
 					// ehETH has 8 decimals
 					const rateIn8 = convertToDecimals(rate, 8);
@@ -1625,7 +1625,7 @@ contract('Exchange Rates', async accounts => {
 					const amountIn6 = convertToDecimals(1000, 6); // in input token's decimals
 
 					beforeEach('set up rates', async () => {
-						await dexPriceAggregator.setAssetToAssetRate(husdDexEquivalentToken.address, toUnit(1));
+						await dexPriceAggregator.setAssetToAssetRate(rusdDexEquivalentToken.address, toUnit(1));
 						await dexPriceAggregator.setAssetToAssetRate(
 							hethDexEquivalentToken.address,
 							toUnit(rate)
@@ -1635,7 +1635,7 @@ contract('Exchange Rates', async accounts => {
 
 					it('dex aggregator mock provides expected results', async () => {
 						const twapOutput = await dexPriceAggregator.assetToAsset(
-							husdDexEquivalentToken.address,
+							rusdDexEquivalentToken.address,
 							amountIn6,
 							hethDexEquivalentToken.address,
 							'2'
@@ -1647,15 +1647,15 @@ contract('Exchange Rates', async accounts => {
 
 					// TODO: update decimals test
 					xit('still provides results in 18 decimals', async () => {
-						const rates = await instance.effectiveAtomicValueAndRates(hUSD, amountIn, hETH);
+						const rates = await instance.effectiveAtomicValueAndRates(rUSD, amountIn, hETH);
 						const expectedOutput = multiplyDecimal(amountIn, rateIn8, unitIn8); // use 8 as decimal base to get 18 decimals
 						assert.bnEqual(rates.value, expectedOutput);
 					});
 				});
 
-				describe('hETH -> hUSD', () => {
+				describe('hETH -> rUSD', () => {
 					const rate = '100';
-					// ehUSD has 6 decimals
+					// erUSD has 6 decimals
 					const rateIn6 = convertToDecimals(rate, 6);
 					const rateIn8 = convertToDecimals(rate, 8);
 
@@ -1665,7 +1665,7 @@ contract('Exchange Rates', async accounts => {
 					const unitIn6 = convertToDecimals(1, 6);
 
 					beforeEach('set up rates', async () => {
-						await dexPriceAggregator.setAssetToAssetRate(husdDexEquivalentToken.address, toUnit(1));
+						await dexPriceAggregator.setAssetToAssetRate(rusdDexEquivalentToken.address, toUnit(1));
 						await dexPriceAggregator.setAssetToAssetRate(
 							hethDexEquivalentToken.address,
 							toUnit(rate)
@@ -1677,7 +1677,7 @@ contract('Exchange Rates', async accounts => {
 						const twapOutput = await dexPriceAggregator.assetToAsset(
 							hethDexEquivalentToken.address,
 							amountIn8,
-							husdDexEquivalentToken.address,
+							rusdDexEquivalentToken.address,
 							'2'
 						);
 						const expectedOutput = multiplyDecimal(amountIn, rateIn6); // uses UNIT as decimal base to get 6 decimals (output token's decimals)
@@ -1685,7 +1685,7 @@ contract('Exchange Rates', async accounts => {
 					});
 
 					it('still provides results in 18 decimals', async () => {
-						const rates = await instance.effectiveAtomicValueAndRates(hETH, amountIn, hUSD);
+						const rates = await instance.effectiveAtomicValueAndRates(hETH, amountIn, rUSD);
 						const expectedOutput = multiplyDecimal(amountIn, rateIn6, unitIn6); // use 6 as decimal base to get 18 decimals
 						assert.bnEqual(rates.value, expectedOutput);
 					});
@@ -1698,7 +1698,7 @@ contract('Exchange Rates', async accounts => {
 		describe('Atomic exchange pricing', () => {
 			it('errors with not implemented when attempting to fetch atomic rate', async () => {
 				await assert.revert(
-					instance.effectiveAtomicValueAndRates(hETH, toUnit('10'), hUSD),
+					instance.effectiveAtomicValueAndRates(hETH, toUnit('10'), rUSD),
 					'Cannot be run on this layer'
 				);
 			});

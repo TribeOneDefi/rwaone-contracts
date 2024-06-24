@@ -71,7 +71,7 @@
 	"DappMaintenance": {
 		"deploy": false
 	},
-	"TribehUSD": {
+	"TriberUSD": {
 		"deploy": false
 	},
 	"ProxyFeePool": {
@@ -80,7 +80,7 @@
 	"ProxyRwaone": {
 		"deploy": false
 	},
-	"ProxyhUSD": {
+	"ProxyrUSD": {
 		"deploy": false
 	},
 	"SafeDecimalMath": {
@@ -92,7 +92,7 @@
 	"TokenStateRwaone": {
 		"deploy": false
 	},
-	"TokenStatehUSD": {
+	"TokenStaterUSD": {
 		"deploy": false
 	},
 	"CollateralManager": {
@@ -143,7 +143,7 @@
 	"CollateralEth": {
 		"deploy": false
 	},
-	"StakingRewardshUSDDAIUniswapV3": {
+	"StakingRewardsrUSDDAIUniswapV3": {
 		"deploy": false
 	},
 	"StakingRewardsHAKAWETHUniswapV3": {

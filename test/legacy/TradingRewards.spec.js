@@ -21,12 +21,12 @@ const { toBytes32 } = require('../..');
 contract('TradingRewards', accounts => {
 	const [, owner, account1] = accounts;
 
-	const tribes = ['hUSD', 'hETH', 'hBTC', 'wHAKA'];
+	const tribes = ['rUSD', 'hETH', 'hBTC', 'wHAKA'];
 	const tribeKeys = tribes.map(toBytes32);
-	const [hUSD, hETH, hBTC, wHAKA] = tribeKeys;
+	const [rUSD, hETH, hBTC, wHAKA] = tribeKeys;
 
 	let rwaone, exchanger, exchangeRates, rewards, resolver, systemSettings;
-	let hUSDContract, hETHContract, hBTCContract;
+	let rUSDContract, hETHContract, hBTCContract;
 
 	let exchangeLogs;
 
@@ -81,7 +81,7 @@ contract('TradingRewards', accounts => {
 				AddressResolver: resolver,
 				Exchanger: exchanger,
 				ExchangeRates: exchangeRates,
-				TribehUSD: hUSDContract,
+				TriberUSD: rUSDContract,
 				TribehETH: hETHContract,
 				TribehBTC: hBTCContract,
 				SystemSettings: systemSettings,
@@ -103,7 +103,7 @@ contract('TradingRewards', accounts => {
 		});
 
 		before('BRRRRRR', async () => {
-			await hUSDContract.issue(account1, amountIssued);
+			await rUSDContract.issue(account1, amountIssued);
 			await hETHContract.issue(account1, amountIssued);
 			await hBTCContract.issue(account1, amountIssued);
 		});
@@ -120,7 +120,7 @@ contract('TradingRewards', accounts => {
 		});
 
 		it('has expected balances for accounts', async () => {
-			assert.bnEqual(amountIssued, await hUSDContract.balanceOf(account1));
+			assert.bnEqual(amountIssued, await rUSDContract.balanceOf(account1));
 			assert.bnEqual(amountIssued, await hETHContract.balanceOf(account1));
 			assert.bnEqual(amountIssued, await hBTCContract.balanceOf(account1));
 		});
@@ -144,7 +144,7 @@ contract('TradingRewards', accounts => {
 				before('perform an exchange and get tx logs', async () => {
 					await executeTrade({
 						account: account1,
-						fromCurrencyKey: hUSD,
+						fromCurrencyKey: rUSD,
 						fromCurrencyAmount: toUnit('100'),
 						toCurrencyKey: hETH,
 					});
@@ -219,14 +219,14 @@ contract('TradingRewards', accounts => {
 
 			itCorrectlyPerformsAnExchange({
 				account: account1,
-				fromCurrencyKey: hUSD,
+				fromCurrencyKey: rUSD,
 				fromCurrencyAmount: toUnit('100'),
 				toCurrencyKey: hETH,
 			});
 
 			itCorrectlyPerformsAnExchange({
 				account: account1,
-				fromCurrencyKey: hUSD,
+				fromCurrencyKey: rUSD,
 				fromCurrencyAmount: toUnit('100'),
 				toCurrencyKey: hBTC,
 			});
@@ -263,7 +263,7 @@ contract('TradingRewards', accounts => {
 					before('perform an exchange and get tx logs', async () => {
 						await executeTrade({
 							account: account1,
-							fromCurrencyKey: hUSD,
+							fromCurrencyKey: rUSD,
 							fromCurrencyAmount: toUnit('100'),
 							toCurrencyKey: hETH,
 						});
@@ -285,7 +285,7 @@ contract('TradingRewards', accounts => {
 				describe('when a valid reward address is passed', () => {
 					before('execute exchange with tracking', async () => {
 						const exchangeTx = await rwaone.exchangeWithTracking(
-							hUSD,
+							rUSD,
 							toUnit('100'),
 							hETH,
 							account1,
@@ -310,7 +310,7 @@ contract('TradingRewards', accounts => {
 				describe('when no valid reward address is passed', () => {
 					before('execute exchange with tracking', async () => {
 						const exchangeTx = await rwaone.exchangeWithTracking(
-							hUSD,
+							rUSD,
 							toUnit('100'),
 							hETH,
 							zeroAddress, // No reward address = 0x0

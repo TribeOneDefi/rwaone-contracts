@@ -23,7 +23,7 @@ const {
 } = require('../..');
 
 contract('Rwaone', async accounts => {
-	const [sAUD, sEUR, hUSD, hETH] = ['sAUD', 'sEUR', 'hUSD', 'hETH'].map(toBytes32);
+	const [sAUD, sEUR, rUSD, hETH] = ['sAUD', 'sEUR', 'rUSD', 'hETH'].map(toBytes32);
 
 	const [, owner, account1, account2, account3] = accounts;
 
@@ -36,7 +36,7 @@ contract('Rwaone', async accounts => {
 		rewardEscrowV2,
 		addressResolver,
 		systemStatus,
-		hUSDContract,
+		rUSDContract,
 		hETHContract;
 
 	before(async () => {
@@ -50,11 +50,11 @@ contract('Rwaone', async accounts => {
 			RewardEscrow: rewardEscrow,
 			RewardEscrowV2: rewardEscrowV2,
 			SupplySchedule: supplySchedule,
-			TribehUSD: hUSDContract,
+			TriberUSD: rUSDContract,
 			TribehETH: hETHContract,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['hUSD', 'hETH', 'sEUR', 'sAUD'],
+			tribes: ['rUSD', 'hETH', 'sEUR', 'sAUD'],
 			contracts: [
 				'Rwaone',
 				'SupplySchedule',
@@ -288,9 +288,9 @@ contract('Rwaone', async accounts => {
 	describe('Using a contract to invoke exchangeWithTrackingForInitiator', () => {
 		describe('when a third party contract is setup to exchange tribes', () => {
 			let contractExample;
-			let amountOfhUSD;
+			let amountOfrUSD;
 			beforeEach(async () => {
-				amountOfhUSD = toUnit('100');
+				amountOfrUSD = toUnit('100');
 
 				const MockThirdPartyExchangeContract = artifacts.require('MockThirdPartyExchangeContract');
 
@@ -300,11 +300,11 @@ contract('Rwaone', async accounts => {
 				// ensure rates are set
 				await updateRatesWithDefaults({ exchangeRates, owner, debtCache });
 
-				// issue hUSD from the owner
-				await rwaone.issueTribes(amountOfhUSD, { from: owner });
+				// issue rUSD from the owner
+				await rwaone.issueTribes(amountOfrUSD, { from: owner });
 
-				// transfer the hUSD to the contract
-				await hUSDContract.transfer(contractExample.address, toUnit('100'), { from: owner });
+				// transfer the rUSD to the contract
+				await rUSDContract.transfer(contractExample.address, toUnit('100'), { from: owner });
 			});
 
 			describe('when Barrie invokes the exchange function on the contract', () => {
@@ -313,7 +313,7 @@ contract('Rwaone', async accounts => {
 					// Barrie has no hETH to start
 					assert.equal(await hETHContract.balanceOf(account3), '0');
 
-					txn = await contractExample.exchange(hUSD, amountOfhUSD, hETH, { from: account3 });
+					txn = await contractExample.exchange(rUSD, amountOfrUSD, hETH, { from: account3 });
 				});
 				it('then Barrie has the tribes in her account', async () => {
 					assert.bnGt(await hETHContract.balanceOf(account3), toUnit('0.01'));
@@ -328,8 +328,8 @@ contract('Rwaone', async accounts => {
 						'TribeExchange',
 						{
 							account: contractExample.address,
-							fromCurrencyKey: hUSD,
-							fromAmount: amountOfhUSD,
+							fromCurrencyKey: rUSD,
+							fromAmount: amountOfrUSD,
 							toCurrencyKey: hETH,
 							toAddress: account3,
 						}

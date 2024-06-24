@@ -253,7 +253,7 @@ contract PerpsV2MarketDelayedExecution is IPerpsV2MarketDelayedExecution, PerpsV
             );
         } else {
             // send keeper fee to keeper
-            _manager().issueHUSD(messageSender, order.keeperDeposit);
+            _manager().issueRUSD(messageSender, order.keeperDeposit);
         }
 
         // note: pay debt pool in the event there is any commitFee
@@ -287,7 +287,7 @@ contract PerpsV2MarketDelayedExecution is IPerpsV2MarketDelayedExecution, PerpsV
         if (messageSender == account) {
             toRefund += order.keeperDeposit;
         } else {
-            _manager().issueHUSD(messageSender, order.keeperDeposit);
+            _manager().issueRUSD(messageSender, order.keeperDeposit);
         }
 
         Position memory position = marketState.positions(account);

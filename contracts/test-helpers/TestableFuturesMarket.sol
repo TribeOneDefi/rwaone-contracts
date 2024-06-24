@@ -25,15 +25,7 @@ contract TestableFuturesMarket is FuturesMarket {
     /*
      * The maximum size in base units of an order on each side of the market that will not exceed the max market value.
      */
-    function maxOrderSizes()
-        external
-        view
-        returns (
-            uint long,
-            uint short,
-            bool invalid
-        )
-    {
+    function maxOrderSizes() external view returns (uint long, uint short, bool invalid) {
         uint price;
         (price, invalid) = assetPrice();
         int sizeLimit = int(_maxMarketValueUSD(marketKey)).divideDecimal(int(price));
@@ -47,7 +39,7 @@ contract TestableFuturesMarket is FuturesMarket {
      * The minimal margin at which liquidation can happen. Is the sum of liquidationBuffer and liquidationFee.
      * Reverts if position size is 0.
      * @param account address of the position account
-     * @return lMargin liquidation margin to maintain in hUSD fixed point decimal units
+     * @return lMargin liquidation margin to maintain in rUSD fixed point decimal units
      */
     function liquidationMargin(address account) external view returns (uint lMargin) {
         require(positions[account].size != 0, "0 size position"); // reverts because otherwise minKeeperFee is returned

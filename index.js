@@ -184,21 +184,21 @@ const defaults = {
 	CROSS_DOMAIN_FEE_PERIOD_CLOSE_GAS_LIMIT: `${8e6}`,
 
 	COLLATERAL_MANAGER: {
-		TRIBES: ['hUSD', 'hBTC', 'hETH'],
+		TRIBES: ['rUSD', 'hBTC', 'hETH'],
 		SHORTS: ['hBTC', 'hETH'],
-		MAX_DEBT: w3utils.toWei('75000000'), // 75 million hUSD
+		MAX_DEBT: w3utils.toWei('75000000'), // 75 million rUSD
 		MAX_SKEW_RATE: w3utils.toWei('0.2'),
 		BASE_BORROW_RATE: Math.round((0.005 * 1e18) / 31556926).toString(), // 31556926 is CollateralManager seconds per year
 		BASE_SHORT_RATE: Math.round((0.005 * 1e18) / 31556926).toString(),
 	},
 	COLLATERAL_ETH: {
-		TRIBES: ['hUSD', 'hETH'],
+		TRIBES: ['rUSD', 'hETH'],
 		MIN_CRATIO: w3utils.toWei('1.3'),
 		MIN_COLLATERAL: w3utils.toWei('2'),
 		ISSUE_FEE_RATE: w3utils.toWei('0.001'),
 	},
 	COLLATERAL_RENBTC: {
-		TRIBES: ['hUSD', 'hBTC'],
+		TRIBES: ['rUSD', 'hBTC'],
 		MIN_CRATIO: w3utils.toWei('1.3'),
 		MIN_COLLATERAL: w3utils.toWei('0.05'),
 		ISSUE_FEE_RATE: w3utils.toWei('0.001'),
@@ -216,12 +216,12 @@ const defaults = {
 	ETHER_WRAPPER_MINT_FEE_RATE: w3utils.toWei('0.005'), // 5 bps
 	ETHER_WRAPPER_BURN_FEE_RATE: '0',
 
-	FUTURES_MIN_KEEPER_FEE: w3utils.toWei('1'), // 1 hUSD min keeper fee
-	FUTURES_MAX_KEEPER_FEE: w3utils.toWei('1000'), // 1000 hUSD min keeper fee
+	FUTURES_MIN_KEEPER_FEE: w3utils.toWei('1'), // 1 rUSD min keeper fee
+	FUTURES_MAX_KEEPER_FEE: w3utils.toWei('1000'), // 1000 rUSD min keeper fee
 	FUTURES_LIQUIDATION_FEE_RATIO: w3utils.toWei('0.0035'), // 35 basis points liquidation incentive
 	FUTURES_LIQUIDATION_BUFFER_RATIO: w3utils.toWei('0.0025'), // 25 basis points liquidation buffer
 	FUTURES_MIN_INITIAL_MARGIN: w3utils.toWei('40'), // minimum initial margin for all markets
-	PERPSV2_KEEPER_LIQUIDATION_FEE: w3utils.toWei('2'), // 2 hUSD keeper liquidation fee (not flagger)
+	PERPSV2_KEEPER_LIQUIDATION_FEE: w3utils.toWei('2'), // 2 rUSD keeper liquidation fee (not flagger)
 	// SIP-120
 	ATOMIC_MAX_VOLUME_PER_BLOCK: w3utils.toWei(`${2e5}`), // 200k
 	ATOMIC_TWAP_WINDOW: '1800', // 30 mins

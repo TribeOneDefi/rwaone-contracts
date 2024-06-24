@@ -6,11 +6,11 @@ interface ITribeRedeemer {
     // Rate of redemption - 0 for none
     function redemptions(address tribeProxy) external view returns (uint redeemRate);
 
-    // hUSD balance of deprecated token holder
-    function balanceOf(IERC20 tribeProxy, address account) external view returns (uint balanceOfInhUSD);
+    // rUSD balance of deprecated token holder
+    function balanceOf(IERC20 tribeProxy, address account) external view returns (uint balanceOfInrUSD);
 
-    // Full hUSD supply of token
-    function totalSupply(IERC20 tribeProxy) external view returns (uint totalSupplyInhUSD);
+    // Full rUSD supply of token
+    function totalSupply(IERC20 tribeProxy) external view returns (uint totalSupplyInrUSD);
 
     function redeem(IERC20 tribeProxy) external;
 

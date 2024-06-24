@@ -177,11 +177,10 @@ const owner = async ({
 			} else {
 				await confirmAction(
 					message +
-						cyan(
-							`\nPlease type "y" to ${
-								safeBatchSubmitter ? 'stage' : 'submit'
-							} transaction, or enter "n" to cancel and resume this later? (y/n) `
-						)
+					cyan(
+						`\nPlease type "y" to ${safeBatchSubmitter ? 'stage' : 'submit'
+						} transaction, or enter "n" to cancel and resume this later? (y/n) `
+					)
 				);
 			}
 		} catch (err) {
@@ -247,7 +246,7 @@ const owner = async ({
 	const warnings = [];
 	if (!skipAcceptance) {
 		console.log(gray('Looking for contracts whose ownership we should accept'));
-		// prevent dupes if some contracts are in there twice (looking at you ProxyERC20 and ProxyERC20hUSD)
+		// prevent dupes if some contracts are in there twice (looking at you ProxyERC20 and ProxyERC20rUSD)
 		const appendedOwnerCache = {};
 		for (const contract of Object.keys(config)) {
 			if (!deployment.targets[contract]) {

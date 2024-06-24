@@ -52,13 +52,13 @@ const persistTokens = async ({ network, yes, privateKey, assetsVersion }) => {
 	const output = {
 		name: 'Rwaone',
 		logoURI: `${baseURI}/snx/wHAKA.svg`,
-		keywords: ['rwaone', 'defi', 'derivatives', 'tribes', 'tribeetics'],
+		keywords: ['rwaone', 'defi', 'derivatives', 'tribes', 'rwaones'],
 		timestamp: new Date().toISOString(),
 		tags: {
 			tribe: {
 				name: 'Tribe',
 				description:
-					'A tribeetic asset within the Rwaone protocol which can at any time ' +
+					'A rwaone asset within the Rwaone protocol which can at any time ' +
 					'be exchanged in its entirety into any other tribe within Rwaone.',
 			},
 			index: {

@@ -89,7 +89,7 @@ describe('publish scripts', () => {
 	let gasLimit;
 	let gasPrice;
 	let accounts;
-	let hUSD;
+	let rUSD;
 	let hBTC;
 	let hETH;
 	let provider;
@@ -154,7 +154,7 @@ describe('publish scripts', () => {
 
 		MockAggregatorFactory = await createMockAggregatorFactory(accounts.deployer);
 
-		[hUSD, hBTC, hETH] = ['hUSD', 'hBTC', 'hETH'].map(toBytes32);
+		[rUSD, hBTC, hETH] = ['rUSD', 'hBTC', 'hETH'].map(toBytes32);
 
 		gasLimit = 8000000;
 		gasPrice = ethers.utils.parseUnits('5', 'gwei');
@@ -175,7 +175,7 @@ describe('publish scripts', () => {
 			let tribes;
 			let Rwaone;
 			let timestamp;
-			let hUSDContract;
+			let rUSDContract;
 			let hBTCContract;
 			let hETHContract;
 			let FeePool;
@@ -245,7 +245,7 @@ describe('publish scripts', () => {
 
 				sources = getSource();
 				targets = getTarget();
-				tribes = getTribes().filter(({ name }) => name !== 'hUSD');
+				tribes = getTribes().filter(({ name }) => name !== 'rUSD');
 
 				Rwaone = getContract({ target: 'ProxyRwaone', source: 'Rwaone' });
 				FeePool = getContract({ target: 'ProxyFeePool', source: 'FeePool' });
@@ -254,7 +254,7 @@ describe('publish scripts', () => {
 
 				Issuer = getContract({ target: 'Issuer' });
 
-				hUSDContract = getContract({ target: 'ProxyhUSD', source: 'Tribe' });
+				rUSDContract = getContract({ target: 'ProxyrUSD', source: 'Tribe' });
 
 				hBTCContract = getContract({ target: 'ProxyhBTC', source: 'Tribe' });
 				hETHContract = getContract({ target: 'ProxyhETH', source: 'Tribe' });
@@ -315,7 +315,7 @@ describe('publish scripts', () => {
 					let newSnxLiquidationsPenalty;
 					let newRateStalePeriod;
 					let newAtomicTwapWindow;
-					let newRateForhUSD;
+					let newRateForrUSD;
 					let newMinimumStakeTime;
 					let newDebtSnapshotStaleTime;
 
@@ -332,7 +332,7 @@ describe('publish scripts', () => {
 						newSnxLiquidationsPenalty = ethers.utils.parseEther('0.25').toString();
 						newRateStalePeriod = '3400';
 						newAtomicTwapWindow = '1800';
-						newRateForhUSD = ethers.utils.parseEther('0.1').toString();
+						newRateForrUSD = ethers.utils.parseEther('0.1').toString();
 						newMinimumStakeTime = '3999';
 						newDebtSnapshotStaleTime = '43200'; // Half a day
 
@@ -390,8 +390,8 @@ describe('publish scripts', () => {
 						await tx.wait();
 
 						tx = await SystemSettings.setExchangeFeeRateForTribes(
-							[toBytes32('hUSD')],
-							[newRateForhUSD],
+							[toBytes32('rUSD')],
+							[newRateForrUSD],
 							overrides
 						);
 						await tx.wait();
@@ -462,9 +462,9 @@ describe('publish scripts', () => {
 							assert.strictEqual((await Issuer.minimumStakeTime()).toString(), newMinimumStakeTime);
 							assert.strictEqual(
 								(
-									await Exchanger.feeRateForExchange(toBytes32('(ignored)'), toBytes32('hUSD'))
+									await Exchanger.feeRateForExchange(toBytes32('(ignored)'), toBytes32('rUSD'))
 								).toString(),
-								newRateForhUSD
+								newRateForrUSD
 							);
 						});
 					});
@@ -481,12 +481,12 @@ describe('publish scripts', () => {
 						JSON.parse(tribesJSON).map(({ name }) => name)
 					);
 				});
-				describe('when only hUSD and hETH is chosen as a tribe', () => {
+				describe('when only rUSD and hETH is chosen as a tribe', () => {
 					beforeEach(async () => {
 						fs.writeFileSync(
 							tribesJSONPath,
 							JSON.stringify([
-								{ name: 'hUSD', asset: 'USD' },
+								{ name: 'rUSD', asset: 'USD' },
 								{ name: 'hETH', asset: 'ETH' },
 							])
 						);
@@ -513,9 +513,9 @@ describe('publish scripts', () => {
 							targets = getTarget();
 							Issuer = getContract({ target: 'Issuer' });
 						});
-						it('then only hUSD is added to the issuer', async () => {
+						it('then only rUSD is added to the issuer', async () => {
 							const keys = await Issuer.availableCurrencyKeys();
-							assert.deepStrictEqual(keys.map(hexToString), ['hUSD', 'hETH']);
+							assert.deepStrictEqual(keys.map(hexToString), ['rUSD', 'hETH']);
 						});
 					});
 				});
@@ -525,7 +525,7 @@ describe('publish scripts', () => {
 					const rewardsToDeploy = [
 						'hETHUniswapV1',
 						'sXAUUniswapV2',
-						'hUSDCurve',
+						'rUSDCurve',
 						'iETH',
 						'iETH2',
 						'iETH3',
@@ -780,16 +780,16 @@ describe('publish scripts', () => {
 						await tx.wait();
 					});
 
-					describe('when user1 issues all possible hUSD', () => {
+					describe('when user1 issues all possible rUSD', () => {
 						beforeEach(async () => {
 							Rwaone = Rwaone.connect(accounts.first);
 
 							const tx = await Rwaone.issueMaxTribes(overrides);
 							await tx.wait();
 						});
-						it('then the hUSD balanced must be 100k * 0.3 * 0.2 (default SystemSettings.issuanceRatio) = 6000', async () => {
+						it('then the rUSD balanced must be 100k * 0.3 * 0.2 (default SystemSettings.issuanceRatio) = 6000', async () => {
 							const balance = await callMethodWithRetry(
-								hUSDContract.balanceOf(accounts.first.address)
+								rUSDContract.balanceOf(accounts.first.address)
 							);
 							assert.strictEqual(
 								ethers.utils.formatEther(balance.toString()),
@@ -797,17 +797,17 @@ describe('publish scripts', () => {
 								'Balance should match'
 							);
 						});
-						describe('when user1 exchange 1000 hUSD for hETH (the MultiCollateralTribe)', () => {
+						describe('when user1 exchange 1000 rUSD for hETH (the MultiCollateralTribe)', () => {
 							let hETHBalanceAfterExchange;
 							beforeEach(async () => {
-								await Rwaone.exchange(hUSD, ethers.utils.parseEther('1000'), hETH, overrides);
+								await Rwaone.exchange(rUSD, ethers.utils.parseEther('1000'), hETH, overrides);
 								hETHBalanceAfterExchange = await callMethodWithRetry(
 									hETHContract.balanceOf(accounts.first.address)
 								);
 							});
-							it('then their hUSD balance is 5000', async () => {
+							it('then their rUSD balance is 5000', async () => {
 								const balance = await callMethodWithRetry(
-									hUSDContract.balanceOf(accounts.first.address)
+									rUSDContract.balanceOf(accounts.first.address)
 								);
 								assert.strictEqual(
 									ethers.utils.formatEther(balance.toString()),
@@ -817,7 +817,7 @@ describe('publish scripts', () => {
 							});
 							it('and their hETH balance is 1000 - the fee', async () => {
 								const { amountReceived } = await callMethodWithRetry(
-									Exchanger.getAmountsForExchange(ethers.utils.parseEther('1000'), hUSD, hETH)
+									Exchanger.getAmountsForExchange(ethers.utils.parseEther('1000'), rUSD, hETH)
 								);
 								assert.strictEqual(
 									ethers.utils.formatEther(hETHBalanceAfterExchange.toString()),
@@ -835,7 +835,7 @@ describe('publish scripts', () => {
 									});
 									it('when exchange occurs into that tribe, the tribe is suspended', async () => {
 										const tx = await Rwaone.exchange(
-											hUSD,
+											rUSD,
 											ethers.utils.parseEther('1'),
 											hETH,
 											overrides
@@ -850,11 +850,11 @@ describe('publish scripts', () => {
 								});
 							});
 						});
-						describe('when user1 exchange 1000 hUSD for hBTC', () => {
+						describe('when user1 exchange 1000 rUSD for hBTC', () => {
 							let hBTCBalanceAfterExchange;
 							beforeEach(async () => {
 								const tx = await Rwaone.exchange(
-									hUSD,
+									rUSD,
 									ethers.utils.parseEther('1000'),
 									hBTC,
 									overrides
@@ -864,9 +864,9 @@ describe('publish scripts', () => {
 									hBTCContract.balanceOf(accounts.first.address)
 								);
 							});
-							it('then their hUSD balance is 5000', async () => {
+							it('then their rUSD balance is 5000', async () => {
 								const balance = await callMethodWithRetry(
-									hUSDContract.balanceOf(accounts.first.address)
+									rUSDContract.balanceOf(accounts.first.address)
 								);
 								assert.strictEqual(
 									ethers.utils.formatEther(balance.toString()),
@@ -876,7 +876,7 @@ describe('publish scripts', () => {
 							});
 							it('and their hBTC balance is 1000 - the fee', async () => {
 								const { amountReceived } = await callMethodWithRetry(
-									Exchanger.getAmountsForExchange(ethers.utils.parseEther('1000'), hUSD, hBTC)
+									Exchanger.getAmountsForExchange(ethers.utils.parseEther('1000'), rUSD, hBTC)
 								);
 								assert.strictEqual(
 									ethers.utils.formatEther(hBTCBalanceAfterExchange.toString()),
@@ -884,7 +884,7 @@ describe('publish scripts', () => {
 									'Balance should match'
 								);
 							});
-							describe('when user1 burns 10 hUSD', () => {
+							describe('when user1 burns 10 rUSD', () => {
 								beforeEach(async () => {
 									let tx;
 
@@ -896,9 +896,9 @@ describe('publish scripts', () => {
 									tx = await Rwaone.burnTribes(ethers.utils.parseEther('10'), overrides);
 									await tx.wait();
 								});
-								it('then their hUSD balance is 4990', async () => {
+								it('then their rUSD balance is 4990', async () => {
 									const balance = await callMethodWithRetry(
-										hUSDContract.balanceOf(accounts.first.address)
+										rUSDContract.balanceOf(accounts.first.address)
 									);
 									assert.strictEqual(
 										ethers.utils.formatEther(balance.toString()),
@@ -931,12 +931,12 @@ describe('publish scripts', () => {
 												gasLimit,
 											});
 										});
-										it('then their hUSD balance is 4990 + hBTCBalanceAfterExchange', async () => {
+										it('then their rUSD balance is 4990 + hBTCBalanceAfterExchange', async () => {
 											const balance = await callMethodWithRetry(
-												hUSDContract.balanceOf(accounts.first.address)
+												rUSDContract.balanceOf(accounts.first.address)
 											);
 											const [amountReceived] = await callMethodWithRetry(
-												Exchanger.getAmountsForExchange(hBTCBalanceAfterExchange, hBTC, hUSD)
+												Exchanger.getAmountsForExchange(hBTCBalanceAfterExchange, hBTC, rUSD)
 											);
 											assert.strictEqual(
 												ethers.utils.formatEther(balance.toString()),
@@ -1118,7 +1118,7 @@ describe('publish scripts', () => {
 									'RwaoneDebtShare',
 									'RwaoneEscrow',
 									'TribehETH',
-									'TribehUSD',
+									'TriberUSD',
 									'SystemStatus',
 								].map(contractName =>
 									callMethodWithRetry(

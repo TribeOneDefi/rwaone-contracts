@@ -5,7 +5,7 @@ import "../PerpsV2MarketProxyable.sol";
 import "../interfaces/IPerpsV2MarketBaseTypes.sol";
 
 contract TestablePerpsV2Market is PerpsV2MarketProxyable {
-    int private constant _UNIT = int(10**uint(18));
+    int private constant _UNIT = int(10 ** uint(18));
 
     constructor(
         address payable _proxy,
@@ -25,15 +25,7 @@ contract TestablePerpsV2Market is PerpsV2MarketProxyable {
     /*
      * The maximum size in base units of an order on each side of the market that will not exceed the max market value.
      */
-    function maxOrderSizes()
-        external
-        view
-        returns (
-            uint long,
-            uint short,
-            bool invalid
-        )
-    {
+    function maxOrderSizes() external view returns (uint long, uint short, bool invalid) {
         (, invalid) = _assetPrice();
         int sizeLimit = int(_maxMarketValue(_marketKey()));
 
@@ -50,7 +42,7 @@ contract TestablePerpsV2Market is PerpsV2MarketProxyable {
      * The minimal margin at which liquidation can happen. Is the sum of liquidationBuffer and liquidationFee.
      * Reverts if position size is 0.
      * @param account address of the position account
-     * @return lMargin liquidation margin to maintain in hUSD fixed point decimal units
+     * @return lMargin liquidation margin to maintain in rUSD fixed point decimal units
      */
     function liquidationMargin(address account) external view returns (uint lMargin) {
         (uint price, ) = _assetPrice();
@@ -79,15 +71,7 @@ contract TestablePerpsV2Market is PerpsV2MarketProxyable {
         int sizeDelta,
         uint priceImpactDelta,
         uint assetPrice
-    )
-        external
-        view
-        returns (
-            uint,
-            uint,
-            bool
-        )
-    {
+    ) external view returns (uint, uint, bool) {
         uint price = assetPrice;
         bool invalid;
         if (assetPrice == 0) {
@@ -95,8 +79,9 @@ contract TestablePerpsV2Market is PerpsV2MarketProxyable {
         }
 
         uint fillPrice = _fillPrice(sizeDelta, price);
-        uint desiredFillPrice =
-            fillPrice.multiplyDecimal(sizeDelta > 0 ? uint(_UNIT) + priceImpactDelta : uint(_UNIT) - priceImpactDelta);
+        uint desiredFillPrice = fillPrice.multiplyDecimal(
+            sizeDelta > 0 ? uint(_UNIT) + priceImpactDelta : uint(_UNIT) - priceImpactDelta
+        );
         return (fillPrice, desiredFillPrice, invalid);
     }
 

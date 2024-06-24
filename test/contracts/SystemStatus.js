@@ -845,7 +845,7 @@ contract('SystemStatus', async accounts => {
 						);
 						await systemStatus.requireExchangeBetweenTribesAllowed(
 							toBytes32('hETH'),
-							toBytes32('hUSD')
+							toBytes32('rUSD')
 						); // no issues
 						await systemStatus.requireExchangeBetweenTribesAllowed(
 							toBytes32('iTRX'),
@@ -1630,7 +1630,7 @@ contract('SystemStatus', async accounts => {
 						const reason = 'Tribe is suspended. Operation prohibited';
 						await assert.revert(systemStatus.requireTribesActive(toBytes32('hETH'), hBTC), reason);
 						await assert.revert(systemStatus.requireTribesActive(hBTC, toBytes32('sTRX')), reason);
-						await systemStatus.requireTribesActive(toBytes32('hETH'), toBytes32('hUSD')); // no issues
+						await systemStatus.requireTribesActive(toBytes32('hETH'), toBytes32('rUSD')); // no issues
 						await systemStatus.requireTribesActive(toBytes32('iTRX'), toBytes32('iBTC')); // no issues
 					});
 					it('and requireExchangeBetweenTribesAllowed() reverts if one is the given tribe', async () => {
@@ -1645,7 +1645,7 @@ contract('SystemStatus', async accounts => {
 						);
 						await systemStatus.requireExchangeBetweenTribesAllowed(
 							toBytes32('hETH'),
-							toBytes32('hUSD')
+							toBytes32('rUSD')
 						); // no issues
 						await systemStatus.requireExchangeBetweenTribesAllowed(
 							toBytes32('iTRX'),

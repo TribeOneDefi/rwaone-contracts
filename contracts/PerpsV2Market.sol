@@ -6,7 +6,7 @@ import "./PerpsV2MarketProxyable.sol";
 import "./interfaces/IPerpsV2Market.sol";
 
 /*
- * Tribeetic PerpsV2
+ * RwaOne PerpsV2
  * =================
  *
  * PerpsV2 markets allow users leveraged exposure to an asset, long or short.
@@ -15,8 +15,8 @@ import "./interfaces/IPerpsV2Market.sol";
  * by a liquidation keeper, which is rewarded with a flat fee extracted from the margin.
  *
  * The Rwaone debt pool is effectively the counterparty to each trade, so if a particular position
- * is in profit, then the debt pool pays by issuing hUSD into their margin account,
- * while if the position makes a loss then the debt pool burns hUSD from the margin, reducing the
+ * is in profit, then the debt pool pays by issuing rUSD into their margin account,
+ * while if the position makes a loss then the debt pool burns rUSD from the margin, reducing the
  * debt load in the system.
  *
  * As the debt pool underwrites all positions, the debt-inflation risk to the system is proportional to the
@@ -32,7 +32,7 @@ import "./interfaces/IPerpsV2Market.sol";
  *
  *     - FuturesMarketManager.sol:  the manager keeps track of which markets exist, and is the main window between
  *                                  futures and perpsV2 markets and the rest of the system. It accumulates the total debt
- *                                  over all markets, and issues and burns hUSD on each market's behalf.
+ *                                  over all markets, and issues and burns rUSD on each market's behalf.
  *
  *     - PerpsV2MarketSettings.sol: Holds the settings for each market in the global FlexibleStorage instance used
  *                                  by SystemSettings, and provides an interface to modify these values. Other than
@@ -132,18 +132,18 @@ contract PerpsV2Market is IPerpsV2Market, PerpsV2MarketProxyable {
         uint absDelta = _abs(marginDelta);
         if (marginDelta > 0) {
             // A positive margin delta corresponds to a deposit, which will be burnt from their
-            // hUSD balance and credited to their margin account.
+            // rUSD balance and credited to their margin account.
 
             // Ensure we handle reclamation when burning tokens.
-            uint postReclamationAmount = _manager().burnHUSD(sender, absDelta);
+            uint postReclamationAmount = _manager().burnRUSD(sender, absDelta);
             if (postReclamationAmount != absDelta) {
                 // If balance was insufficient, the actual delta will be smaller
                 marginDelta = int(postReclamationAmount);
             }
         } else if (marginDelta < 0) {
             // A negative margin delta corresponds to a withdrawal, which will be minted into
-            // their hUSD balance, and debited from their margin account.
-            _manager().issueHUSD(sender, absDelta);
+            // their rUSD balance, and debited from their margin account.
+            _manager().issueRUSD(sender, absDelta);
         } else {
             // Zero delta is a no-op
             return;
@@ -170,8 +170,8 @@ contract PerpsV2Market is IPerpsV2Market, PerpsV2MarketProxyable {
 
     /*
      * Alter the amount of margin in a position. A positive input triggers a deposit; a negative one, a
-     * withdrawal. The margin will be burnt or issued directly into/out of the caller's hUSD wallet.
-     * Reverts on deposit if the caller lacks a sufficient hUSD balance.
+     * withdrawal. The margin will be burnt or issued directly into/out of the caller's rUSD wallet.
+     * Reverts on deposit if the caller lacks a sufficient rUSD balance.
      * Reverts on withdrawal if the amount to be withdrawn would expose an open position to liquidation.
      */
     function transferMargin(int marginDelta) external onlyProxy {

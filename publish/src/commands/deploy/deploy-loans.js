@@ -10,7 +10,7 @@ module.exports = async ({ account, addressOf, deployer, getDeployParameter, netw
 
 	await deployer.deployContract({
 		name: 'Depot',
-		deps: ['ProxyRwaone', 'TribehUSD', 'FeePool'],
+		deps: ['ProxyRwaone', 'TriberUSD', 'FeePool'],
 		args: [account, account, addressOf(ReadProxyAddressResolver)],
 	});
 
@@ -129,7 +129,7 @@ module.exports = async ({ account, addressOf, deployer, getDeployParameter, netw
 			account,
 			addressOf(collateralManager),
 			addressOf(ReadProxyAddressResolver),
-			toBytes32('hUSD'),
+			toBytes32('rUSD'),
 			(await getDeployParameter('COLLATERAL_SHORT'))['MIN_CRATIO'],
 			(await getDeployParameter('COLLATERAL_SHORT'))['MIN_COLLATERAL'],
 		],

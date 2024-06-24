@@ -157,16 +157,16 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
     /// @param account The account to be liquidated
     /// @param isSelfLiquidation boolean to determine if this is a forced or self-invoked liquidation
     /// @return totalRedeemed the total amount of collateral (wHAKA) to redeem (liquid and escrow)
-    /// @return debtToRemove the amount of debt (hUSD) to burn in order to fix the account's c-ratio
+    /// @return debtToRemove the amount of debt (rUSD) to burn in order to fix the account's c-ratio
     /// @return escrowToLiquidate the amount of escrow wHAKA that will be revoked during liquidation
-    /// @return initialDebtBalance the amount of initial (hUSD) debt the account has
+    /// @return initialDebtBalance the amount of initial (rUSD) debt the account has
     function liquidationAmounts(
         address account,
         bool isSelfLiquidation
     ) external view returns (uint totalRedeemed, uint debtToRemove, uint escrowToLiquidate, uint initialDebtBalance) {
         // return zeroes otherwise calculateAmountToFixCollateral reverts with unhelpful underflow error
         if (!this.isLiquidationOpen(account, isSelfLiquidation)) {
-            return (0, 0, 0, issuer().debtBalanceOf(account, "hUSD"));
+            return (0, 0, 0, issuer().debtBalanceOf(account, "rUSD"));
         }
 
         return issuer().liquidationAmounts(account, isSelfLiquidation);

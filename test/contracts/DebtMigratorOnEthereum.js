@@ -6,14 +6,14 @@ const { toUnit } = require('../utils')();
 const { toBytes32 } = require('../..');
 
 contract('DebtMigratorOnEthereum', accounts => {
-	const [hUSD] = ['hUSD'].map(toBytes32);
+	const [rUSD] = ['rUSD'].map(toBytes32);
 	const owner = accounts[1];
 	const user = accounts[2];
 
 	let debtMigratorOnEthereum, resolver, rewardEscrowV2, tribes, rwaone, tribeetixDebtShare;
 
 	before(async () => {
-		tribes = ['hUSD', 'hETH'];
+		tribes = ['rUSD', 'hETH'];
 		({
 			AddressResolver: resolver,
 			DebtMigratorOnEthereum: debtMigratorOnEthereum,
@@ -198,7 +198,7 @@ contract('DebtMigratorOnEthereum', accounts => {
 			it('zeroes the balances on L1', async () => {
 				assert.bnEqual(await rwaone.collateral(owner), 0);
 				assert.bnEqual(await rwaone.balanceOf(owner), 0);
-				assert.bnEqual(await rwaone.debtBalanceOf(owner, hUSD), 0);
+				assert.bnEqual(await rwaone.debtBalanceOf(owner, rUSD), 0);
 				assert.bnEqual(await rewardEscrowV2.balanceOf(owner), 0);
 				assert.bnEqual(await tribeetixDebtShare.balanceOf(owner), 0);
 			});

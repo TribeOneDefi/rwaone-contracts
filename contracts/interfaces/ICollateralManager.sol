@@ -11,45 +11,34 @@ interface ICollateralManager {
 
     function short(bytes32 tribe) external view returns (uint amount);
 
-    function totalLong() external view returns (uint husdValue, bool anyRateIsInvalid);
+    function totalLong() external view returns (uint rusdValue, bool anyRateIsInvalid);
 
-    function totalShort() external view returns (uint husdValue, bool anyRateIsInvalid);
+    function totalShort() external view returns (uint rusdValue, bool anyRateIsInvalid);
 
     function getBorrowRate() external view returns (uint borrowRate, bool anyRateIsInvalid);
 
     function getShortRate(bytes32 tribe) external view returns (uint shortRate, bool rateIsInvalid);
 
-    function getRatesAndTime(uint index)
-        external
-        view
-        returns (
-            uint entryRate,
-            uint lastRate,
-            uint lastUpdated,
-            uint newIndex
-        );
+    function getRatesAndTime(
+        uint index
+    ) external view returns (uint entryRate, uint lastRate, uint lastUpdated, uint newIndex);
 
-    function getShortRatesAndTime(bytes32 currency, uint index)
-        external
-        view
-        returns (
-            uint entryRate,
-            uint lastRate,
-            uint lastUpdated,
-            uint newIndex
-        );
+    function getShortRatesAndTime(
+        bytes32 currency,
+        uint index
+    ) external view returns (uint entryRate, uint lastRate, uint lastUpdated, uint newIndex);
 
     function exceedsDebtLimit(uint amount, bytes32 currency) external view returns (bool canIssue, bool anyRateIsInvalid);
 
-    function areTribesAndCurrenciesSet(bytes32[] calldata requiredTribeNamesInResolver, bytes32[] calldata tribeKeys)
-        external
-        view
-        returns (bool);
+    function areTribesAndCurrenciesSet(
+        bytes32[] calldata requiredTribeNamesInResolver,
+        bytes32[] calldata tribeKeys
+    ) external view returns (bool);
 
-    function areShortableTribesSet(bytes32[] calldata requiredTribeNamesInResolver, bytes32[] calldata tribeKeys)
-        external
-        view
-        returns (bool);
+    function areShortableTribesSet(
+        bytes32[] calldata requiredTribeNamesInResolver,
+        bytes32[] calldata tribeKeys
+    ) external view returns (bool);
 
     // Loans
     function getNewLoanId() external returns (uint id);

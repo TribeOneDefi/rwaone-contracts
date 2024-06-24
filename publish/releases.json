@@ -103,7 +103,7 @@
 			"sip": 85,
 			"layer": "base",
 			"released": "base",
-			"sources": ["EtherCollateralhUSD", "FeePool", "Issuer", "TribehUSD"]
+			"sources": ["EtherCollateralrUSD", "FeePool", "Issuer", "TriberUSD"]
 		},
 		{
 			"sip": 86,
@@ -157,7 +157,7 @@
 				"Issuer",
 				"TribehBTC",
 				"TribehETH",
-				"TribehUSD"
+				"TriberUSD"
 			]
 		},
 		{
@@ -200,7 +200,7 @@
 					"DebtCache",
 					"EscrowChecker",
 					"EtherCollateral",
-					"EtherCollateralhUSD",
+					"EtherCollateralrUSD",
 					"Exchanger",
 					"ExchangeRates",
 					"ExchangeState",
@@ -210,9 +210,9 @@
 					"Issuer",
 					"Math",
 					"ProxyERC20",
-					"ProxyERC20hUSD",
+					"ProxyERC20rUSD",
 					"ProxyFeePool",
-					"ProxyhUSD",
+					"ProxyrUSD",
 					"ProxyRwaone",
 					"ReadProxyAddressResolver",
 					"RewardEscrow",
@@ -223,11 +223,11 @@
 					"RwaoneBridgeToBase",
 					"RwaoneEscrow",
 					"RwaoneState",
-					"TribehUSD",
+					"TriberUSD",
 					"TribeUtil",
 					"SystemSettings",
 					"SystemStatus",
-					"TokenStatehUSD",
+					"TokenStaterUSD",
 					"TokenStateRwaone",
 					"TradingRewards"
 				]
@@ -237,7 +237,7 @@
 			"sip": 103,
 			"layer": "base",
 			"released": "base",
-			"sources": ["CollateralStateShort", "CollateralShort", "TribehUSD"]
+			"sources": ["CollateralStateShort", "CollateralShort", "TriberUSD"]
 		},
 		{
 			"sip": 105,
@@ -274,7 +274,7 @@
 				"FeePool",
 				"NativeEtherWrapper",
 				"TribehETH",
-				"TribehUSD",
+				"TriberUSD",
 				"SystemSettings"
 			]
 		},
@@ -344,7 +344,7 @@
 				"TribehBTC",
 				"TribehETH",
 				"TribesLINK",
-				"TribehUSD",
+				"TriberUSD",
 				"SystemSettings"
 			],
 			"released": "ovm"
@@ -383,7 +383,7 @@
 				"Issuer",
 				"Rwaone",
 				"TribehETH",
-				"TribehUSD",
+				"TriberUSD",
 				"TribehBTC"
 			]
 		},

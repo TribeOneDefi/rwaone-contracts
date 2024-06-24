@@ -11,7 +11,7 @@ defaultValue = "local-ovm"
 [setting.owner]
 defaultValue = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 
-# some snx and hUSD will be minted by this address
+# some snx and rUSD will be minted by this address
 [setting.test_user]
 defaultValue = "0x48914229deDd5A9922f44441ffCCfC2Cb7856Ee9"
 
@@ -139,7 +139,7 @@ target = [
     "OneNetAggregatorIssuedTribes",
     "ProxyFeePool",
     "ProxyRwaone",
-    "ProxyhUSD",
+    "ProxyrUSD",
     "ProxyhETH",
     "ProxyhBTC",
     "RewardEscrow",
@@ -148,12 +148,12 @@ target = [
     "RwaoneBridgeToBase",
     "RwaoneDebtShare",
     "RwaoneEscrow",
-    "TribehUSD",
+    "TriberUSD",
     "TribehETH",
     "TribehBTC",
     "SystemSettings",
     "SystemStatus",
-    "TokenStatehUSD",
+    "TokenStaterUSD",
     "TokenStatehETH",
     "TokenStatehBTC",
     "TradingRewards",
@@ -198,7 +198,7 @@ target = [
     "OwnerRelayOnOptimism",
     "ProxyFeePool",
     "ProxyRwaone",
-    "ProxyhUSD",
+    "ProxyrUSD",
     "ProxyhETH",
     "ProxyhBTC",
     "RewardEscrow",
@@ -207,12 +207,12 @@ target = [
     "RwaoneBridgeToBase",
     "RwaoneDebtShare",
     "RwaoneEscrow",
-    "TribehUSD",
+    "TriberUSD",
     "TribehETH",
     "TribehBTC",
     "SystemSettings",
     "SystemStatus",
-    "TokenStatehUSD",
+    "TokenStaterUSD",
     "TokenStatehETH",
     "TokenStatehBTC",
     "TradingRewards",

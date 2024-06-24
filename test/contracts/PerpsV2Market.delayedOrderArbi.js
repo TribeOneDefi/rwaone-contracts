@@ -19,7 +19,7 @@ contract('PerpsV2Market PerpsV2MarketDelayedOrders', accounts => {
 		perpsV2MarketState,
 		exchangeRates,
 		circuitBreaker,
-		hUSD,
+		rUSD,
 		systemSettings,
 		systemStatus;
 
@@ -75,12 +75,12 @@ contract('PerpsV2Market PerpsV2MarketDelayedOrders', accounts => {
 			TestablePerpsV2MarketBTC: perpsV2MarketHelper,
 			ExchangeRates: exchangeRates,
 			CircuitBreaker: circuitBreaker,
-			TribehUSD: hUSD,
+			TriberUSD: rUSD,
 			SystemSettings: systemSettings,
 			SystemStatus: systemStatus,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['hUSD', 'hBTC', 'hETH'],
+			tribes: ['rUSD', 'hBTC', 'hETH'],
 			contracts: [
 				'PerpsV2MarketSettings',
 				{ contract: 'PerpsV2MarketStateBTC', properties: { perpSuffix: marketKeySuffix } },
@@ -104,16 +104,16 @@ contract('PerpsV2Market PerpsV2MarketDelayedOrders', accounts => {
 		perpsV2MarketHelper = await PerpsV2MarketHelper.at(perpsV2Market.address);
 
 		// Update the rate so that it is not invalid
-		// await setupPriceAggregators(exchangeRates, owner, ['hUSD', 'hBTC', 'hETH'].map(toBytes32));
+		// await setupPriceAggregators(exchangeRates, owner, ['rUSD', 'hBTC', 'hETH'].map(toBytes32));
 		await setPrice(baseAsset, initialPrice);
 
 		// disable dynamic fee for most tests
 		// it will be enabled for specific tests
 		await systemSettings.setExchangeDynamicFeeRounds('0', { from: owner });
 
-		// Issue the trader some hUSD
+		// Issue the trader some rUSD
 		for (const t of [trader, trader2, trader3]) {
-			await hUSD.issue(t, traderInitialBalance);
+			await rUSD.issue(t, traderInitialBalance);
 		}
 	});
 
@@ -490,7 +490,7 @@ contract('PerpsV2Market PerpsV2MarketDelayedOrders', accounts => {
 
 			const decodedLogs = await getDecodedLogs({
 				hash: tx.tx,
-				contracts: [hUSD, perpsV2Market, perpsV2MarketDelayedIntent],
+				contracts: [rUSD, perpsV2Market, perpsV2MarketDelayedIntent],
 			});
 
 			// DelayedOrderSubmitted
@@ -534,7 +534,7 @@ contract('PerpsV2Market PerpsV2MarketDelayedOrders', accounts => {
 
 			const decodedLogs = await getDecodedLogs({
 				hash: tx.tx,
-				contracts: [hUSD, perpsV2Market, perpsV2MarketDelayedIntent],
+				contracts: [rUSD, perpsV2Market, perpsV2MarketDelayedIntent],
 			});
 
 			decodedEventEqual({
@@ -684,7 +684,7 @@ contract('PerpsV2Market PerpsV2MarketDelayedOrders', accounts => {
 				// The relevant events are properly emitted
 				const decodedLogs = await getDecodedLogs({
 					hash: tx.tx,
-					contracts: [hUSD, perpsV2Market, perpsV2MarketDelayedIntent],
+					contracts: [rUSD, perpsV2Market, perpsV2MarketDelayedIntent],
 				});
 				const decodedLogNames = decodedLogs.map(({ name }) => name);
 
@@ -716,7 +716,7 @@ contract('PerpsV2Market PerpsV2MarketDelayedOrders', accounts => {
 					assert.deepEqual(decodedLogNames, ['Issued', 'DelayedOrderRemoved']);
 					decodedEventEqual({
 						event: 'Issued',
-						emittedFrom: hUSD.address,
+						emittedFrom: rUSD.address,
 						args: [from, keeperFee],
 						log: decodedLogs[0],
 					});
@@ -1087,7 +1087,7 @@ contract('PerpsV2Market PerpsV2MarketDelayedOrders', accounts => {
 				// The relevant events are properly emitted
 				const decodedLogs = await getDecodedLogs({
 					hash: tx.tx,
-					contracts: [hUSD, perpsV2Market, perpsV2MarketDelayedIntent],
+					contracts: [rUSD, perpsV2Market, perpsV2MarketDelayedIntent],
 				});
 
 				let expectedRefund = toUnit('0'); // $0 refund because we don't take a commitFee.
@@ -1116,7 +1116,7 @@ contract('PerpsV2Market PerpsV2MarketDelayedOrders', accounts => {
 					// keeper fee, funding, position(refund), issued (exchange fee), position(trade), order removed
 					decodedEventEqual({
 						event: 'Issued',
-						emittedFrom: hUSD.address,
+						emittedFrom: rUSD.address,
 						args: [from, keeperFee],
 						log: decodedLogs[0],
 					});

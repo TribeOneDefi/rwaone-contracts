@@ -11,7 +11,7 @@ const {
 	constants: { ZERO_ADDRESS },
 } = require('../..');
 
-const [hUSD, hETH] = ['hUSD', 'hETH'].map(toBytes32);
+const [rUSD, hETH] = ['rUSD', 'hETH'].map(toBytes32);
 
 let ExchangerWithFeeRecAlternatives;
 let DirectIntegrationManager;
@@ -291,7 +291,7 @@ module.exports = function ({ accounts }) {
 			});
 		},
 		whenMockedSusdAndSethSeparatelyToIssueAndBurn: cb => {
-			describe(`when mocked hUSD and hETH`, () => {
+			describe(`when mocked rUSD and hETH`, () => {
 				async function mockTribe(currencyKey) {
 					const tribe = await smock.fake('Tribe');
 					tribe.currencyKey.returns(currencyKey);
@@ -300,11 +300,11 @@ module.exports = function ({ accounts }) {
 				}
 
 				beforeEach(async () => {
-					this.mocks.hUSD = await mockTribe(hUSD);
+					this.mocks.rUSD = await mockTribe(rUSD);
 					this.mocks.hETH = await mockTribe(hETH);
 					this.mocks.Issuer.tribes.returns(currencyKey => {
-						if (currencyKey === hUSD) {
-							return this.mocks.hUSD.address;
+						if (currencyKey === rUSD) {
+							return this.mocks.rUSD.address;
 						} else if (currencyKey === hETH) {
 							return this.mocks.hETH.address;
 						}

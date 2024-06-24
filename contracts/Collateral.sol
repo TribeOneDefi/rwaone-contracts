@@ -31,7 +31,7 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
 
     /* ========== CONSTANTS ========== */
 
-    bytes32 internal constant hUSD = "hUSD";
+    bytes32 internal constant rUSD = "rUSD";
 
     // ========== STATE VARIABLES ==========
 
@@ -71,7 +71,7 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
     bytes32 private constant CONTRACT_EXCHANGER = "Exchanger";
     bytes32 private constant CONTRACT_FEEPOOL = "FeePool";
-    bytes32 private constant CONTRACT_RWAONEHUSD = "TribehUSD";
+    bytes32 private constant CONTRACT_RWAONERUSD = "TriberUSD";
     bytes32 private constant CONTRACT_COLLATERALUTIL = "CollateralUtil";
 
     /* ========== CONSTRUCTOR ========== */
@@ -99,7 +99,7 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         newAddresses[1] = CONTRACT_EXRATES;
         newAddresses[2] = CONTRACT_EXCHANGER;
         newAddresses[3] = CONTRACT_SYSTEMSTATUS;
-        newAddresses[4] = CONTRACT_RWAONEHUSD;
+        newAddresses[4] = CONTRACT_RWAONERUSD;
         newAddresses[5] = CONTRACT_COLLATERALUTIL;
 
         bytes32[] memory combined = combineArrays(existingAddresses, newAddresses);
@@ -117,8 +117,8 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         return ITribe(requireAndGetAddress(tribeName));
     }
 
-    function _tribehUSD() internal view returns (ITribe) {
-        return ITribe(requireAndGetAddress(CONTRACT_RWAONEHUSD));
+    function _triberUSD() internal view returns (ITribe) {
+        return ITribe(requireAndGetAddress(CONTRACT_RWAONERUSD));
     }
 
     function _exchangeRates() internal view returns (IExchangeRates) {
@@ -289,9 +289,9 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         // 12. Pay the minting fees to the fee pool.
         _payFees(issueFee, currency);
 
-        // 13. If its short, convert back to hUSD, otherwise issue the loan.
+        // 13. If its short, convert back to rUSD, otherwise issue the loan.
         if (short) {
-            _tribehUSD().issue(msg.sender, _exchangeRates().effectiveValue(currency, loanAmountMinusFee, hUSD));
+            _triberUSD().issue(msg.sender, _exchangeRates().effectiveValue(currency, loanAmountMinusFee, rUSD));
             manager.incrementShorts(currency, amount);
 
             if (shortingRewards[currency] != address(0)) {
@@ -514,7 +514,7 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         // 6. If its short, issue the tribes.
         if (loan.short) {
             manager.incrementShorts(loan.currency, amount);
-            _tribehUSD().issue(msg.sender, _exchangeRates().effectiveValue(loan.currency, amountMinusFee, hUSD));
+            _triberUSD().issue(msg.sender, _exchangeRates().effectiveValue(loan.currency, amountMinusFee, rUSD));
 
             if (shortingRewards[loan.currency] != address(0)) {
                 IShortingRewards(shortingRewards[loan.currency]).enrol(msg.sender, amount);
@@ -577,13 +577,13 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         }
     }
 
-    // Take an amount of fees in a certain tribe and convert it to hUSD before paying the fee pool.
+    // Take an amount of fees in a certain tribe and convert it to rUSD before paying the fee pool.
     function _payFees(uint amount, bytes32 tribe) internal {
         if (amount > 0) {
-            if (tribe != hUSD) {
-                amount = _exchangeRates().effectiveValue(tribe, amount, hUSD);
+            if (tribe != rUSD) {
+                amount = _exchangeRates().effectiveValue(tribe, amount, rUSD);
             }
-            _tribehUSD().issue(_feePool().FEE_ADDRESS(), amount);
+            _triberUSD().issue(_feePool().FEE_ADDRESS(), amount);
             _feePool().recordFeePaid(amount);
         }
     }

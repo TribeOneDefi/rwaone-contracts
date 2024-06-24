@@ -14,18 +14,18 @@ const { skipWaitingPeriod } = require('../utils/skip');
 
 function itCanOpenAndCloseShort({ ctx }) {
 	describe('shorting', () => {
-		const amountOfhUSDRequired = parseEther('5000'); // hUSD
-		const amountToDeposit = parseEther('1000'); // hUSD
+		const amountOfrUSDRequired = parseEther('5000'); // rUSD
+		const amountToDeposit = parseEther('1000'); // rUSD
 		const amountToBorrow = parseEther('0.00000000001'); // hETH
-		const amountToExchange = parseEther('100'); // hUSD
+		const amountToExchange = parseEther('100'); // rUSD
 
 		const shortableTribe = toBytes32('hETH');
 
 		let user, owner;
-		let CollateralShort, CollateralManager, Rwaone, TribehUSD, interactionDelay;
+		let CollateralShort, CollateralManager, Rwaone, TriberUSD, interactionDelay;
 
 		before('target contracts and users', () => {
-			({ CollateralShort, CollateralManager, Rwaone, TribehUSD } = ctx.contracts);
+			({ CollateralShort, CollateralManager, Rwaone, TriberUSD } = ctx.contracts);
 
 			user = ctx.users.someUser;
 			owner = ctx.users.owner;
@@ -45,15 +45,15 @@ function itCanOpenAndCloseShort({ ctx }) {
 		});
 
 		describe('when opening is enabled', () => {
-			before('ensure user should have hUSD', async () => {
-				await ensureBalance({ ctx, symbol: 'hUSD', user, balance: amountOfhUSDRequired });
+			before('ensure user should have rUSD', async () => {
+				await ensureBalance({ ctx, symbol: 'rUSD', user, balance: amountOfrUSDRequired });
 			});
 
 			before('ensure hETH supply exists', async () => {
 				// CollateralManager.getShortRate requires existing hETH else div by zero
 				await exchangeTribes({
 					ctx,
-					src: 'hUSD',
+					src: 'rUSD',
 					dest: 'hETH',
 					amount: parseEther('1'),
 					user: ctx.users.otherUser,
@@ -104,10 +104,10 @@ function itCanOpenAndCloseShort({ ctx }) {
 
 					before('approve the tribes for collateral short', async () => {
 						await approveIfNeeded({
-							token: TribehUSD,
+							token: TriberUSD,
 							owner: user,
 							beneficiary: CollateralShort,
-							amount: amountOfhUSDRequired,
+							amount: amountOfrUSDRequired,
 						});
 					});
 
@@ -171,7 +171,7 @@ function itCanOpenAndCloseShort({ ctx }) {
 
 							await exchangeTribes({
 								ctx,
-								src: 'hUSD',
+								src: 'rUSD',
 								dest: 'hETH',
 								amount: amountToExchange,
 								user,
@@ -179,7 +179,7 @@ function itCanOpenAndCloseShort({ ctx }) {
 						});
 
 						before('skip waiting period', async () => {
-							// Ignore settlement period for hUSD --> hETH closing the loan
+							// Ignore settlement period for rUSD --> hETH closing the loan
 							await skipWaitingPeriod({ ctx });
 						});
 

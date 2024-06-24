@@ -12,7 +12,7 @@ function itCanRedeem({ ctx }) {
 	describe('redemption of deprecated tribes', () => {
 		let owner;
 		let someUser;
-		let Rwaone, Issuer, TribeToRedeem, TribehUSD, TribeToRedeemProxy, TribeRedeemer;
+		let Rwaone, Issuer, TribeToRedeem, TriberUSD, TribeToRedeemProxy, TribeRedeemer;
 		let totalDebtBeforeRemoval;
 		let tribe;
 
@@ -26,17 +26,17 @@ function itCanRedeem({ ctx }) {
 				Issuer,
 				[`Tribe${tribe}`]: TribeToRedeem,
 				[`Proxy${tribe}`]: TribeToRedeemProxy,
-				TribehUSD,
+				TriberUSD,
 				TribeRedeemer,
 			} = ctx.contracts);
 
 			({ owner, someUser } = ctx.users);
 		});
 
-		before('ensure the user has hUSD', async () => {
+		before('ensure the user has rUSD', async () => {
 			await ensureBalance({
 				ctx,
-				symbol: 'hUSD',
+				symbol: 'rUSD',
 				user: someUser,
 				balance: ethers.utils.parseEther('100'),
 			});
@@ -60,7 +60,7 @@ function itCanRedeem({ ctx }) {
 		});
 
 		before('record total system debt', async () => {
-			totalDebtBeforeRemoval = await Issuer.totalIssuedTribes(toBytes32('hUSD'), true);
+			totalDebtBeforeRemoval = await Issuer.totalIssuedTribes(toBytes32('rUSD'), true);
 		});
 
 		describe(`deprecating the tribe`, () => {
@@ -74,7 +74,7 @@ function itCanRedeem({ ctx }) {
 
 			it('then the total system debt is unchanged', async () => {
 				assert.bnEqual(
-					await Issuer.totalIssuedTribes(toBytes32('hUSD'), true),
+					await Issuer.totalIssuedTribes(toBytes32('rUSD'), true),
 					totalDebtBeforeRemoval
 				);
 			});
@@ -82,9 +82,9 @@ function itCanRedeem({ ctx }) {
 				assert.equal(await Rwaone.tribes(toBytes32(tribe)), ZERO_ADDRESS);
 			});
 			describe('user redemption', () => {
-				let hUSDBeforeRedemption;
+				let rUSDBeforeRedemption;
 				before(async () => {
-					hUSDBeforeRedemption = await TribehUSD.balanceOf(someUser.address);
+					rUSDBeforeRedemption = await TriberUSD.balanceOf(someUser.address);
 				});
 
 				before(`when the user redeems their tribe`, async () => {
@@ -97,8 +97,8 @@ function itCanRedeem({ ctx }) {
 					assert.equal(await TribeToRedeem.balanceOf(someUser.address), '0');
 				});
 
-				it('and they have more hUSD again', async () => {
-					assert.bnGt(await TribehUSD.balanceOf(someUser.address), hUSDBeforeRedemption);
+				it('and they have more rUSD again', async () => {
+					assert.bnGt(await TriberUSD.balanceOf(someUser.address), rUSDBeforeRedemption);
 				});
 			});
 		});

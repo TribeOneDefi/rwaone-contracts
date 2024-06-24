@@ -14,16 +14,16 @@ const { setupAllContracts } = require('./setup');
 
 contract('TribeUtil', accounts => {
 	const [, ownerAccount, , account2] = accounts;
-	let tribeUtil, hUSDContract, rwaone, exchangeRates, systemSettings, debtCache, circuitBreaker;
+	let tribeUtil, rUSDContract, rwaone, exchangeRates, systemSettings, debtCache, circuitBreaker;
 
-	const [hUSD, hBTC, iBTC, wHAKA] = ['hUSD', 'hBTC', 'iBTC', 'wHAKA'].map(toBytes32);
-	const tribeKeys = [hUSD, hBTC, iBTC];
+	const [rUSD, hBTC, iBTC, wHAKA] = ['rUSD', 'hBTC', 'iBTC', 'wHAKA'].map(toBytes32);
+	const tribeKeys = [rUSD, hBTC, iBTC];
 	const tribePrices = [toUnit('1'), toUnit('5000'), toUnit('5000')];
 
 	before(async () => {
 		({
 			TribeUtil: tribeUtil,
-			TribehUSD: hUSDContract,
+			TriberUSD: rUSDContract,
 			Rwaone: rwaone,
 			ExchangeRates: exchangeRates,
 			SystemSettings: systemSettings,
@@ -31,7 +31,7 @@ contract('TribeUtil', accounts => {
 			DebtCache: debtCache,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['hUSD', 'hBTC', 'iBTC'],
+			tribes: ['rUSD', 'hBTC', 'iBTC'],
 			contracts: [
 				'TribeUtil',
 				'Rwaone',
@@ -74,26 +74,26 @@ contract('TribeUtil', accounts => {
 	});
 
 	describe('given an instance', () => {
-		const hUSDMinted = toUnit('10000');
+		const rUSDMinted = toUnit('10000');
 		const amountToExchange = toUnit('50');
-		const hUSDAmount = toUnit('100');
+		const rUSDAmount = toUnit('100');
 		beforeEach(async () => {
-			await rwaone.issueTribes(hUSDMinted, {
+			await rwaone.issueTribes(rUSDMinted, {
 				from: ownerAccount,
 			});
-			await hUSDContract.transfer(account2, hUSDAmount, { from: ownerAccount });
-			await rwaone.exchange(hUSD, amountToExchange, hBTC, { from: account2 });
+			await rUSDContract.transfer(account2, rUSDAmount, { from: ownerAccount });
+			await rwaone.exchange(rUSD, amountToExchange, hBTC, { from: account2 });
 		});
 		describe('totalTribesInKey', () => {
 			it('should return the total balance of tribes into the specified currency key', async () => {
-				assert.bnEqual(await tribeUtil.totalTribesInKey(account2, hUSD), hUSDAmount);
+				assert.bnEqual(await tribeUtil.totalTribesInKey(account2, rUSD), rUSDAmount);
 			});
 		});
 		describe('tribesBalances', () => {
-			it('should return the balance and its value in hUSD for every tribe in the wallet', async () => {
-				const effectiveValue = await exchangeRates.effectiveValue(hUSD, amountToExchange, hBTC);
+			it('should return the balance and its value in rUSD for every tribe in the wallet', async () => {
+				const effectiveValue = await exchangeRates.effectiveValue(rUSD, amountToExchange, hBTC);
 				assert.deepEqual(await tribeUtil.tribesBalances(account2), [
-					[hUSD, hBTC, iBTC],
+					[rUSD, hBTC, iBTC],
 					[toUnit('50'), effectiveValue, 0],
 					[toUnit('50'), toUnit('50'), 0],
 				]);
@@ -106,11 +106,11 @@ contract('TribeUtil', accounts => {
 		});
 		describe('tribesTotalSupplies', () => {
 			it('should return the correct tribe total supplies', async () => {
-				const effectiveValue = await exchangeRates.effectiveValue(hUSD, amountToExchange, hBTC);
+				const effectiveValue = await exchangeRates.effectiveValue(rUSD, amountToExchange, hBTC);
 				assert.deepEqual(await tribeUtil.tribesTotalSupplies(), [
 					tribeKeys,
-					[hUSDMinted.sub(amountToExchange), effectiveValue, 0],
-					[hUSDMinted.sub(amountToExchange), amountToExchange, 0],
+					[rUSDMinted.sub(amountToExchange), effectiveValue, 0],
+					[rUSDMinted.sub(amountToExchange), amountToExchange, 0],
 				]);
 			});
 		});

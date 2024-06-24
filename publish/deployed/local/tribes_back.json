@@ -4,7 +4,7 @@
 		"category": "forex",
 		"sign": "$",
 		"description": "US Dollars",
-		"name": "hUSD",
+		"name": "rUSD",
 		"subclass": "MultiCollateralTribe"
 	},
 	{
@@ -44,4 +44,3 @@
 		"subclass": "MultiCollateralTribe"
 	}
 ]
-

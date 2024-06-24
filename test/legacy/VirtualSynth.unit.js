@@ -68,7 +68,7 @@ contract('VirtualTribe (unit tests)', async accounts => {
 							this.resolver.address,
 							owner,
 							amount,
-							toBytes32('hUSD')
+							toBytes32('rUSD')
 						),
 						'vTribe already initialized'
 					);

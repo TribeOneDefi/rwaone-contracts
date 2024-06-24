@@ -79,7 +79,7 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
             msg.sender,
             destinationCurrencyKey
         );
-        IDirectIntegrationManager.ParameterIntegrationSettings memory usdSettings = _exchangeSettings(msg.sender, hUSD);
+        IDirectIntegrationManager.ParameterIntegrationSettings memory usdSettings = _exchangeSettings(msg.sender, rUSD);
 
         (amountReceived, fee, exchangeFeeRate, , , ) = _getAmountsForAtomicExchangeMinusFees(
             sourceAmount,
@@ -179,7 +179,7 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
             }
 
             // sometimes we need parameters for USD and USD has parameters which could be overridden
-            IDirectIntegrationManager.ParameterIntegrationSettings memory usdSettings = _exchangeSettings(from, hUSD);
+            IDirectIntegrationManager.ParameterIntegrationSettings memory usdSettings = _exchangeSettings(from, rUSD);
 
             uint systemConvertedAmount;
 
@@ -204,16 +204,16 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
                 "Atomic rate deviates too much"
             );
 
-            // Determine hUSD value of exchange
+            // Determine rUSD value of exchange
             uint sourceSusdValue;
-            if (sourceCurrencyKey == hUSD) {
+            if (sourceCurrencyKey == rUSD) {
                 // Use after-settled amount as this is amount converted (not sourceAmount)
                 sourceSusdValue = sourceAmountAfterSettlement;
-            } else if (destinationCurrencyKey == hUSD) {
-                // In this case the systemConvertedAmount would be the fee-free hUSD value of the source tribe
+            } else if (destinationCurrencyKey == rUSD) {
+                // In this case the systemConvertedAmount would be the fee-free rUSD value of the source tribe
                 sourceSusdValue = systemConvertedAmount;
             } else {
-                // Otherwise, convert source to hUSD value
+                // Otherwise, convert source to rUSD value
                 (uint amountReceivedInUSD, uint sUsdFee, , , , ) = _getAmountsForAtomicExchangeMinusFees(
                     sourceAmountAfterSettlement,
                     sourceSettings,
@@ -242,18 +242,18 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
 
         // Remit the fee if required
         if (fee > 0) {
-            // Normalize fee to hUSD
+            // Normalize fee to rUSD
             // Note: `fee` is being reused to avoid stack too deep errors.
-            fee = exchangeRates().effectiveValue(destinationCurrencyKey, fee, hUSD);
+            fee = exchangeRates().effectiveValue(destinationCurrencyKey, fee, rUSD);
 
-            // Remit the fee in hUSDs
-            issuer().tribes(hUSD).issue(feePool().FEE_ADDRESS(), fee);
+            // Remit the fee in rUSDs
+            issuer().tribes(rUSD).issue(feePool().FEE_ADDRESS(), fee);
 
             // Tell the fee pool about this
             feePool().recordFeePaid(fee);
         }
 
-        // Note: As of this point, `fee` is denominated in hUSD.
+        // Note: As of this point, `fee` is denominated in rUSD.
 
         // Note: this update of the debt snapshot will not be accurate because the atomic exchange
         // was executed with a different rate than the system rate. To be perfect, issuance data,

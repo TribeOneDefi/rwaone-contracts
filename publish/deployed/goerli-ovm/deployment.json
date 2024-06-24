@@ -461,8 +461,8 @@
 				"0x9Fc84992dF5496797784374B810E04238728743d"
 			]
 		},
-		"TokenStatehUSD": {
-			"name": "TokenStatehUSD",
+		"TokenStaterUSD": {
+			"name": "TokenStaterUSD",
 			"address": "0x43CA5848a2957C0718D240c02A4381A90111591e",
 			"source": "TokenState",
 			"link": "https://goerli-explorer.optimism.io/address/0x43CA5848a2957C0718D240c02A4381A90111591e",
@@ -474,8 +474,8 @@
 				"0x0000000000000000000000000000000000000000"
 			]
 		},
-		"ProxyhUSD": {
-			"name": "ProxyhUSD",
+		"ProxyrUSD": {
+			"name": "ProxyrUSD",
 			"address": "0xeBaEAAD9236615542844adC5c149F86C36aD1136",
 			"source": "ProxyERC20",
 			"link": "https://goerli-explorer.optimism.io/address/0xeBaEAAD9236615542844adC5c149F86C36aD1136",
@@ -484,8 +484,8 @@
 			"network": "goerli",
 			"constructorArgs": ["0x48914229deDd5A9922f44441ffCCfC2Cb7856Ee9"]
 		},
-		"TribehUSD": {
-			"name": "TribehUSD",
+		"TriberUSD": {
+			"name": "TriberUSD",
 			"address": "0xfDa54191F3C0999dbf4c193dEF1B83EDD3e3Ba39",
 			"source": "MultiCollateralTribe",
 			"link": "https://goerli-explorer.optimism.io/address/0xfDa54191F3C0999dbf4c193dEF1B83EDD3e3Ba39",
@@ -495,8 +495,8 @@
 			"constructorArgs": [
 				"0xeBaEAAD9236615542844adC5c149F86C36aD1136",
 				"0x43CA5848a2957C0718D240c02A4381A90111591e",
-				"Tribe hUSD",
-				"hUSD",
+				"Tribe rUSD",
+				"rUSD",
 				"0x48914229deDd5A9922f44441ffCCfC2Cb7856Ee9",
 				"0x7355534400000000000000000000000000000000000000000000000000000000",
 				0,
@@ -17525,7 +17525,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "hUSDAmount",
+							"name": "rUSDAmount",
 							"type": "uint256"
 						},
 						{
@@ -21447,7 +21447,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "hUSD",
+					"name": "rUSD",
 					"outputs": [
 						{
 							"internalType": "bytes32",
@@ -22399,7 +22399,7 @@
 							"type": "int256"
 						}
 					],
-					"name": "updateCachedhUSDDebt",
+					"name": "updateCachedrUSDDebt",
 					"outputs": [],
 					"payable": false,
 					"stateMutability": "nonpayable",
@@ -27300,7 +27300,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "supplyInhUSD",
+							"name": "supplyInrUSD",
 							"type": "uint256"
 						}
 					],
@@ -27331,7 +27331,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "amountInhUSD",
+							"name": "amountInrUSD",
 							"type": "uint256"
 						}
 					],
@@ -27371,7 +27371,7 @@
 					"outputs": [
 						{
 							"internalType": "uint256",
-							"name": "balanceInhUSD",
+							"name": "balanceInrUSD",
 							"type": "uint256"
 						}
 					],
@@ -27537,7 +27537,7 @@
 					"outputs": [
 						{
 							"internalType": "uint256",
-							"name": "supplyInhUSD",
+							"name": "supplyInrUSD",
 							"type": "uint256"
 						}
 					],
@@ -32116,7 +32116,7 @@
 					"outputs": [
 						{
 							"internalType": "uint256",
-							"name": "husdValue",
+							"name": "rusdValue",
 							"type": "uint256"
 						},
 						{
@@ -32136,7 +32136,7 @@
 					"outputs": [
 						{
 							"internalType": "uint256",
-							"name": "husdValue",
+							"name": "rusdValue",
 							"type": "uint256"
 						},
 						{
@@ -32156,7 +32156,7 @@
 					"outputs": [
 						{
 							"internalType": "uint256",
-							"name": "husdValue",
+							"name": "rusdValue",
 							"type": "uint256"
 						},
 						{
@@ -35073,7 +35073,7 @@
 							"type": "uint256"
 						}
 					],
-					"name": "burnHUSD",
+					"name": "burnRUSD",
 					"outputs": [
 						{
 							"internalType": "uint256",
@@ -35135,7 +35135,7 @@
 							"type": "uint256"
 						}
 					],
-					"name": "issueHUSD",
+					"name": "issueRUSD",
 					"outputs": [],
 					"payable": false,
 					"stateMutability": "nonpayable",
@@ -36703,7 +36703,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "hUSD",
+							"name": "rUSD",
 							"type": "uint256"
 						}
 					],
@@ -37272,7 +37272,7 @@
 					"inputs": [
 						{
 							"internalType": "uint256",
-							"name": "_hUSD",
+							"name": "_rUSD",
 							"type": "uint256"
 						}
 					],
@@ -42217,7 +42217,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "hUSD",
+							"name": "rUSD",
 							"type": "uint256"
 						}
 					],
@@ -42243,7 +42243,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "hUSD",
+							"name": "rUSD",
 							"type": "uint256"
 						}
 					],
@@ -43236,7 +43236,7 @@
 					"inputs": [
 						{
 							"internalType": "uint256",
-							"name": "_hUSD",
+							"name": "_rUSD",
 							"type": "uint256"
 						}
 					],
@@ -43366,7 +43366,7 @@
 					"inputs": [
 						{
 							"internalType": "uint256",
-							"name": "_hUSD",
+							"name": "_rUSD",
 							"type": "uint256"
 						}
 					],

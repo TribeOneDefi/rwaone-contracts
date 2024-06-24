@@ -18,22 +18,22 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 
 	const amountToDeposit = ethers.utils.parseEther('10');
 
-	const [hUSD, hETH] = [toBytes32('hUSD'), toBytes32('hETH')];
+	const [rUSD, hETH] = [toBytes32('rUSD'), toBytes32('hETH')];
 
 	let owner, ownerL2, user, userL2;
-	let TribehUSD, TribehETH, RwaoneBridgeToOptimism, SystemSettings;
+	let TriberUSD, TribehETH, RwaoneBridgeToOptimism, SystemSettings;
 
-	let TribehUSDL2, TribehETHL2, RwaoneBridgeToBase, SystemSettingsL2, SystemStatusL2;
+	let TriberUSDL2, TribehETHL2, RwaoneBridgeToBase, SystemSettingsL2, SystemStatusL2;
 
 	let userBalance, userL2Balance;
 
 	let depositReceipt;
 
-	describe('when the owner sends hUSD and hETH', () => {
+	describe('when the owner sends rUSD and hETH', () => {
 		before('target contracts and users', () => {
-			({ TribehUSD, TribehETH, RwaoneBridgeToOptimism, SystemSettings } = ctx.l1.contracts);
+			({ TriberUSD, TribehETH, RwaoneBridgeToOptimism, SystemSettings } = ctx.l1.contracts);
 			({
-				TribehUSD: TribehUSDL2,
+				TriberUSD: TriberUSDL2,
 				TribehETH: TribehETHL2,
 				RwaoneBridgeToBase,
 				SystemSettings: SystemSettingsL2,
@@ -48,11 +48,11 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 
 		before('set system settings', async () => {
 			let tx;
-			tx = await SystemSettings.connect(owner).setCrossChainTribeTransferEnabled(hUSD, 1);
+			tx = await SystemSettings.connect(owner).setCrossChainTribeTransferEnabled(rUSD, 1);
 			await tx.wait();
 			tx = await SystemSettings.connect(owner).setCrossChainTribeTransferEnabled(hETH, 1);
 			await tx.wait();
-			tx = await SystemSettingsL2.connect(ownerL2).setCrossChainTribeTransferEnabled(hUSD, 1);
+			tx = await SystemSettingsL2.connect(ownerL2).setCrossChainTribeTransferEnabled(rUSD, 1);
 			await tx.wait();
 			tx = await SystemSettingsL2.connect(ownerL2).setCrossChainTribeTransferEnabled(hETH, 1);
 			await tx.wait();
@@ -88,7 +88,7 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 
 			await ensureBalance({
 				ctx: ctx.l1,
-				symbol: 'hUSD',
+				symbol: 'rUSD',
 				user: user,
 				balance: amountToDeposit.mul(2),
 			});
@@ -104,8 +104,8 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 		});
 
 		before('record balances', async () => {
-			userBalance = await TribehUSD.balanceOf(user.address);
-			userL2Balance = await TribehUSDL2.balanceOf(user.address);
+			userBalance = await TriberUSD.balanceOf(user.address);
+			userL2Balance = await TriberUSDL2.balanceOf(user.address);
 		});
 
 		before('approve if needed', async () => {
@@ -117,7 +117,7 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 			});
 
 			await approveIfNeeded({
-				token: TribehUSD,
+				token: TriberUSD,
 				owner: user,
 				beneficiary: RwaoneBridgeToOptimism,
 				amount: amountToDeposit,
@@ -132,7 +132,7 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 			RwaoneBridgeToOptimism = RwaoneBridgeToOptimism.connect(user);
 
 			const tx = await RwaoneBridgeToOptimism.initiateTribeTransfer(
-				hUSD,
+				rUSD,
 				user.address,
 				amountToDeposit
 			);
@@ -147,7 +147,7 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 		});
 
 		it('decreases the owner balance', async () => {
-			const newOwnerBalance = await TribehUSD.balanceOf(user.address);
+			const newOwnerBalance = await TriberUSD.balanceOf(user.address);
 
 			assert.bnEqual(newOwnerBalance, userBalance.sub(amountToDeposit));
 		});
@@ -171,7 +171,7 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 
 			it('increases the owner balance', async () => {
 				assert.bnEqual(
-					await TribehUSDL2.balanceOf(user.address),
+					await TriberUSDL2.balanceOf(user.address),
 					userL2Balance.add(amountToDeposit)
 				);
 
@@ -200,7 +200,7 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 					RwaoneBridgeToBase = RwaoneBridgeToBase.connect(userL2);
 
 					const tx = await RwaoneBridgeToBase.initiateTribeTransfer(
-						hUSD,
+						rUSD,
 						user.address,
 						amountToDeposit
 					);
@@ -208,7 +208,7 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 				});
 
 				it('decreases the owner balance', async () => {
-					const newBalance = await TribehUSDL2.balanceOf(user.address);
+					const newBalance = await TriberUSDL2.balanceOf(user.address);
 
 					assert.bnEqual(newBalance, userL2Balance);
 				});
@@ -228,7 +228,7 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 					});
 
 					it('increases the owner balance', async () => {
-						assert.bnEqual(await TribehUSD.balanceOf(user.address), userBalance);
+						assert.bnEqual(await TriberUSD.balanceOf(user.address), userBalance);
 					});
 				});
 			});

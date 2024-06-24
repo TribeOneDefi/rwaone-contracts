@@ -33,7 +33,7 @@ contract('MultiCollateralTribe', accounts => {
 		exchangeRates,
 		managerState,
 		debtCache,
-		hUSDTribe,
+		rUSDTribe,
 		feePool,
 		tribes;
 
@@ -42,9 +42,9 @@ contract('MultiCollateralTribe', accounts => {
 		return event.args.id;
 	};
 
-	const issuehUSDToAccount = async (issueAmount, receiver) => {
+	const issuerUSDToAccount = async (issueAmount, receiver) => {
 		// Set up the depositor with an amount of tribes to deposit.
-		await hUSDTribe.issue(receiver, issueAmount, {
+		await rUSDTribe.issue(receiver, issueAmount, {
 			from: owner,
 		});
 	};
@@ -56,11 +56,11 @@ contract('MultiCollateralTribe', accounts => {
 	const onlyInternalString = 'Only internal contracts allowed';
 
 	before(async () => {
-		tribes = ['hUSD'];
+		tribes = ['rUSD'];
 		({
 			AddressResolver: resolver,
 			Issuer: issuer,
-			TribehUSD: hUSDTribe,
+			TriberUSD: rUSDTribe,
 			ExchangeRates: exchangeRates,
 			DebtCache: debtCache,
 			FeePool: feePool,
@@ -97,7 +97,7 @@ contract('MultiCollateralTribe', accounts => {
 
 		await manager.addCollaterals([ceth.address], { from: owner });
 
-		await issuehUSDToAccount(toUnit(1000), owner);
+		await issuerUSDToAccount(toUnit(1000), owner);
 		await debtCache.takeDebtSnapshot();
 	});
 

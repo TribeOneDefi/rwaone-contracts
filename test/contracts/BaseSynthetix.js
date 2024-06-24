@@ -27,7 +27,7 @@ const {
 } = require('../..');
 
 contract('BaseRwaone', async accounts => {
-	const [hUSD, sAUD, sEUR, wHAKA, hETH] = ['hUSD', 'sAUD', 'sEUR', 'wHAKA', 'hETH'].map(toBytes32);
+	const [rUSD, sAUD, sEUR, wHAKA, hETH] = ['rUSD', 'sAUD', 'sEUR', 'wHAKA', 'hETH'].map(toBytes32);
 
 	const [, owner, account1, account2, account3] = accounts;
 
@@ -58,7 +58,7 @@ contract('BaseRwaone', async accounts => {
 			'ext:AggregatorDebtRatio': aggregatorDebtRatio,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['hUSD', 'hETH', 'sEUR', 'sAUD'],
+			tribes: ['rUSD', 'hETH', 'sEUR', 'sAUD'],
 			contracts: [
 				'BaseRwaone',
 				'SupplySchedule',
@@ -172,7 +172,7 @@ contract('BaseRwaone', async accounts => {
 			await onlyGivenAddressCanInvoke({
 				fnc: baseRwaoneImpl.exchangeWithVirtual,
 				accounts,
-				args: [hUSD, amount, sAUD, toBytes32('AGGREGATOR')],
+				args: [rUSD, amount, sAUD, toBytes32('AGGREGATOR')],
 				reason: 'Cannot be run on this layer',
 			});
 		});
@@ -181,7 +181,7 @@ contract('BaseRwaone', async accounts => {
 			await onlyGivenAddressCanInvoke({
 				fnc: baseRwaoneImpl.exchangeWithTrackingForInitiator,
 				accounts,
-				args: [hUSD, amount, sAUD, owner, toBytes32('AGGREGATOR')],
+				args: [rUSD, amount, sAUD, owner, toBytes32('AGGREGATOR')],
 				reason: 'Cannot be run on this layer',
 			});
 		});
@@ -190,7 +190,7 @@ contract('BaseRwaone', async accounts => {
 			await onlyGivenAddressCanInvoke({
 				fnc: baseRwaoneImpl.exchangeAtomically,
 				accounts,
-				args: [hUSD, amount, hETH, toBytes32('AGGREGATOR'), 0],
+				args: [rUSD, amount, hETH, toBytes32('AGGREGATOR'), 0],
 				reason: 'Cannot be run on this layer',
 			});
 		});
@@ -430,7 +430,7 @@ contract('BaseRwaone', async accounts => {
 				await updateRatesWithDefaults({ exchangeRates, owner, debtCache });
 
 				await baseRwaoneImpl.issueTribes(toUnit('100'), { from: owner });
-				await baseRwaoneImpl.exchange(hUSD, toUnit('10'), hETH, { from: owner });
+				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), hETH, { from: owner });
 			});
 			it('then waiting period is true', async () => {
 				assert.isTrue(await baseRwaoneImpl.isWaitingPeriod(hETH));
@@ -496,7 +496,7 @@ contract('BaseRwaone', async accounts => {
 
 	describe('availableCurrencyKeys()', () => {
 		it('returns all currency keys by default', async () => {
-			assert.deepEqual(await baseRwaoneImpl.availableCurrencyKeys(), [hUSD, hETH, sEUR, sAUD]);
+			assert.deepEqual(await baseRwaoneImpl.availableCurrencyKeys(), [rUSD, hETH, sEUR, sAUD]);
 		});
 	});
 
@@ -781,12 +781,12 @@ contract('BaseRwaone', async accounts => {
 			);
 		});
 
-		describe('when the user has issued some hUSD and exchanged for other tribes', () => {
+		describe('when the user has issued some rUSD and exchanged for other tribes', () => {
 			beforeEach(async () => {
 				await baseRwaoneImpl.issueTribes(toUnit('100'), { from: owner });
-				await baseRwaoneImpl.exchange(hUSD, toUnit('10'), hETH, { from: owner });
-				await baseRwaoneImpl.exchange(hUSD, toUnit('10'), sAUD, { from: owner });
-				await baseRwaoneImpl.exchange(hUSD, toUnit('10'), sEUR, { from: owner });
+				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), hETH, { from: owner });
+				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), sAUD, { from: owner });
+				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), sEUR, { from: owner });
 			});
 			it('should transfer using the ERC20 transfer function @gasprofile', async () => {
 				await baseRwaoneProxy.transfer(account1, toUnit('10'), { from: owner });
@@ -1016,7 +1016,7 @@ contract('BaseRwaone', async accounts => {
 			await baseRwaoneImpl.issueTribes(maxIssuableTribes, { from: account1 });
 
 			// Exchange into sEUR
-			await baseRwaoneImpl.exchange(hUSD, maxIssuableTribes, sEUR, { from: account1 });
+			await baseRwaoneImpl.exchange(rUSD, maxIssuableTribes, sEUR, { from: account1 });
 
 			// Ensure that we can transfer in and out of the account successfully
 			await baseRwaoneProxy.transfer(account1, toUnit('10000'), {
@@ -1068,7 +1068,7 @@ contract('BaseRwaone', async accounts => {
 			assert.bnEqual(transferable1, '0');
 
 			// Exchange into sAUD
-			await baseRwaoneImpl.exchange(hUSD, issuedTribes, sAUD, { from: account1 });
+			await baseRwaoneImpl.exchange(rUSD, issuedTribes, sAUD, { from: account1 });
 
 			// Increase the value of sAUD relative to rwaone
 			const newAUDExchangeRate = toUnit('1');
@@ -1079,12 +1079,12 @@ contract('BaseRwaone', async accounts => {
 			assert.equal(transferable2.gt(toUnit('1000')), true);
 		});
 
-		describe('when the user has issued some hUSD and exchanged for other tribes', () => {
+		describe('when the user has issued some rUSD and exchanged for other tribes', () => {
 			beforeEach(async () => {
 				await baseRwaoneImpl.issueTribes(toUnit('100'), { from: owner });
-				await baseRwaoneImpl.exchange(hUSD, toUnit('10'), hETH, { from: owner });
-				await baseRwaoneImpl.exchange(hUSD, toUnit('10'), sAUD, { from: owner });
-				await baseRwaoneImpl.exchange(hUSD, toUnit('10'), sEUR, { from: owner });
+				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), hETH, { from: owner });
+				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), sAUD, { from: owner });
+				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), sEUR, { from: owner });
 			});
 			it('should transfer using the ERC20 transfer function @gasprofile', async () => {
 				await baseRwaoneProxy.transfer(account1, toUnit('10'), { from: owner });

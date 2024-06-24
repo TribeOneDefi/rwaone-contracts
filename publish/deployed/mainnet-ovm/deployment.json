@@ -341,8 +341,8 @@
 			"network": "mainnet",
 			"constructorArgs": ["0x06C6D063896ac733673c4474E44d9268f2402A55"]
 		},
-		"TokenStatehUSD": {
-			"name": "TokenStatehUSD",
+		"TokenStaterUSD": {
+			"name": "TokenStaterUSD",
 			"address": "0x92bAc115d89cA17fd02Ed9357CEcA32842ACB4c2",
 			"source": "TokenState",
 			"link": "https://explorer.optimism.io/address/0x92bAc115d89cA17fd02Ed9357CEcA32842ACB4c2",
@@ -354,8 +354,8 @@
 				"0x0000000000000000000000000000000000000000"
 			]
 		},
-		"ProxyhUSD": {
-			"name": "ProxyhUSD",
+		"ProxyrUSD": {
+			"name": "ProxyrUSD",
 			"address": "0x8c6f28f2F1A3C87F0f938b96d27520d9751ec8d9",
 			"source": "ProxyERC20",
 			"link": "https://explorer.optimism.io/address/0x8c6f28f2F1A3C87F0f938b96d27520d9751ec8d9",
@@ -364,8 +364,8 @@
 			"network": "mainnet",
 			"constructorArgs": ["0x6d4a64C57612841c2C6745dB2a4E4db34F002D20"]
 		},
-		"ProxyERC20hUSD": {
-			"name": "ProxyERC20hUSD",
+		"ProxyERC20rUSD": {
+			"name": "ProxyERC20rUSD",
 			"address": "0x8c6f28f2F1A3C87F0f938b96d27520d9751ec8d9",
 			"source": "ProxyERC20",
 			"link": "https://explorer.optimism.io/address/0x8c6f28f2F1A3C87F0f938b96d27520d9751ec8d9",
@@ -373,8 +373,8 @@
 			"txn": "",
 			"network": "mainnet"
 		},
-		"TribehUSD": {
-			"name": "TribehUSD",
+		"TriberUSD": {
+			"name": "TriberUSD",
 			"address": "0xDfA2d3a0d32F870D87f8A0d7AA6b9CdEB7bc5AdB",
 			"source": "MultiCollateralTribe",
 			"link": "https://explorer.optimism.io/address/0xDfA2d3a0d32F870D87f8A0d7AA6b9CdEB7bc5AdB",
@@ -384,8 +384,8 @@
 			"constructorArgs": [
 				"0x8c6f28f2F1A3C87F0f938b96d27520d9751ec8d9",
 				"0x92bAc115d89cA17fd02Ed9357CEcA32842ACB4c2",
-				"Tribe hUSD",
-				"hUSD",
+				"Tribe rUSD",
+				"rUSD",
 				"0x6d4a64C57612841c2C6745dB2a4E4db34F002D20",
 				"0x7355534400000000000000000000000000000000000000000000000000000000",
 				0,
@@ -401,8 +401,8 @@
 			"txn": "",
 			"network": "mainnet"
 		},
-		"EtherCollateralhUSD": {
-			"name": "EtherCollateralhUSD",
+		"EtherCollateralrUSD": {
+			"name": "EtherCollateralrUSD",
 			"address": "0xC0c66470E766AE2026E6695966C56C90741811AA",
 			"source": "EmptyEtherCollateral",
 			"link": "https://explorer.optimism.io/address/0xC0c66470E766AE2026E6695966C56C90741811AA",
@@ -691,8 +691,8 @@
 				null
 			]
 		},
-		"StakingRewardshUSDDAIUniswapV3": {
-			"name": "StakingRewardshUSDDAIUniswapV3",
+		"StakingRewardsrUSDDAIUniswapV3": {
+			"name": "StakingRewardsrUSDDAIUniswapV3",
 			"address": "0x7E11c004d20b502729918687E6E6777b28499085",
 			"source": "StakingRewards",
 			"link": "https://explorer.optimism.io/address/0x7E11c004d20b502729918687E6E6777b28499085",
@@ -15589,7 +15589,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "hUSDAmount",
+							"name": "rUSDAmount",
 							"type": "uint256"
 						},
 						{
@@ -19511,7 +19511,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "hUSD",
+					"name": "rUSD",
 					"outputs": [
 						{
 							"internalType": "bytes32",
@@ -22311,7 +22311,7 @@
 						},
 						{
 							"internalType": "uint256",
-							"name": "husdAmount",
+							"name": "rusdAmount",
 							"type": "uint256"
 						},
 						{
@@ -25638,7 +25638,7 @@
 					"outputs": [
 						{
 							"internalType": "uint256",
-							"name": "husdValue",
+							"name": "rusdValue",
 							"type": "uint256"
 						},
 						{
@@ -25658,7 +25658,7 @@
 					"outputs": [
 						{
 							"internalType": "uint256",
-							"name": "husdValue",
+							"name": "rusdValue",
 							"type": "uint256"
 						},
 						{
@@ -26389,7 +26389,7 @@
 						},
 						{
 							"internalType": "uint256[]",
-							"name": "hUSDAmounts",
+							"name": "rUSDAmounts",
 							"type": "uint256[]"
 						}
 					],
@@ -27246,7 +27246,7 @@
 							"type": "int256"
 						}
 					],
-					"name": "updateCachedhUSDDebt",
+					"name": "updateCachedrUSDDebt",
 					"outputs": [],
 					"payable": false,
 					"stateMutability": "nonpayable",
@@ -27432,7 +27432,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "supplyInhUSD",
+							"name": "supplyInrUSD",
 							"type": "uint256"
 						}
 					],
@@ -27463,7 +27463,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "amountInhUSD",
+							"name": "amountInrUSD",
 							"type": "uint256"
 						}
 					],
@@ -27503,7 +27503,7 @@
 					"outputs": [
 						{
 							"internalType": "uint256",
-							"name": "balanceInhUSD",
+							"name": "balanceInrUSD",
 							"type": "uint256"
 						}
 					],
@@ -27669,7 +27669,7 @@
 					"outputs": [
 						{
 							"internalType": "uint256",
-							"name": "supplyInhUSD",
+							"name": "supplyInrUSD",
 							"type": "uint256"
 						}
 					],
@@ -30730,7 +30730,7 @@
 					"outputs": [
 						{
 							"internalType": "uint256",
-							"name": "husdValue",
+							"name": "rusdValue",
 							"type": "uint256"
 						},
 						{
@@ -30750,7 +30750,7 @@
 					"outputs": [
 						{
 							"internalType": "uint256",
-							"name": "husdValue",
+							"name": "rusdValue",
 							"type": "uint256"
 						},
 						{
@@ -30770,7 +30770,7 @@
 					"outputs": [
 						{
 							"internalType": "uint256",
-							"name": "husdValue",
+							"name": "rusdValue",
 							"type": "uint256"
 						},
 						{
@@ -40090,7 +40090,7 @@
 							"type": "uint256"
 						}
 					],
-					"name": "burnHUSD",
+					"name": "burnRUSD",
 					"outputs": [
 						{
 							"internalType": "uint256",
@@ -40152,7 +40152,7 @@
 							"type": "uint256"
 						}
 					],
-					"name": "issueHUSD",
+					"name": "issueRUSD",
 					"outputs": [],
 					"payable": false,
 					"stateMutability": "nonpayable",
@@ -41720,7 +41720,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "hUSD",
+							"name": "rUSD",
 							"type": "uint256"
 						}
 					],
@@ -42289,7 +42289,7 @@
 					"inputs": [
 						{
 							"internalType": "uint256",
-							"name": "_hUSD",
+							"name": "_rUSD",
 							"type": "uint256"
 						}
 					],
@@ -47844,7 +47844,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "hUSD",
+							"name": "rUSD",
 							"type": "uint256"
 						}
 					],
@@ -47870,7 +47870,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "hUSD",
+							"name": "rUSD",
 							"type": "uint256"
 						}
 					],
@@ -48863,7 +48863,7 @@
 					"inputs": [
 						{
 							"internalType": "uint256",
-							"name": "_hUSD",
+							"name": "_rUSD",
 							"type": "uint256"
 						}
 					],
@@ -48993,7 +48993,7 @@
 					"inputs": [
 						{
 							"internalType": "uint256",
-							"name": "_hUSD",
+							"name": "_rUSD",
 							"type": "uint256"
 						}
 					],

@@ -15,14 +15,14 @@ describe('staking & claiming integration tests (L1, L2)', () => {
 
 	describe('staking and claiming', () => {
 		const HAKAAmount = ethers.utils.parseEther('1000');
-		const amountToIssueAndBurnhUSD = ethers.utils.parseEther('1');
+		const amountToIssueAndBurnrUSD = ethers.utils.parseEther('1');
 
 		let user;
-		let Rwaone, TribehUSD, FeePool;
-		let balancehUSD, debthUSD;
+		let Rwaone, TriberUSD, FeePool;
+		let balancerUSD, debtrUSD;
 
 		before('target contracts and users', () => {
-			({ Rwaone, TribehUSD, FeePool } = ctx.l1.contracts);
+			({ Rwaone, TriberUSD, FeePool } = ctx.l1.contracts);
 
 			user = ctx.l1.users.someUser;
 		});
@@ -31,23 +31,23 @@ describe('staking & claiming integration tests (L1, L2)', () => {
 			await ensureBalance({ ctx: ctx.l1, symbol: 'wHAKA', user, balance: HAKAAmount });
 		});
 
-		describe('when the user issues hUSD', () => {
+		describe('when the user issues rUSD', () => {
 			before('record balances', async () => {
-				balancehUSD = await TribehUSD.balanceOf(user.address);
+				balancerUSD = await TriberUSD.balanceOf(user.address);
 			});
 
-			before('issue hUSD', async () => {
+			before('issue rUSD', async () => {
 				Rwaone = Rwaone.connect(user);
 
-				const tx = await Rwaone.issueTribes(amountToIssueAndBurnhUSD);
+				const tx = await Rwaone.issueTribes(amountToIssueAndBurnrUSD);
 				const { gasUsed } = await tx.wait();
 				console.log(`issueTribes() gas used: ${Math.round(gasUsed / 1000).toString()}k`);
 			});
 
-			it('issues the expected amount of hUSD', async () => {
+			it('issues the expected amount of rUSD', async () => {
 				assert.bnEqual(
-					await TribehUSD.balanceOf(user.address),
-					balancehUSD.add(amountToIssueAndBurnhUSD)
+					await TriberUSD.balanceOf(user.address),
+					balancerUSD.add(amountToIssueAndBurnrUSD)
 				);
 			});
 
@@ -70,7 +70,7 @@ describe('staking & claiming integration tests (L1, L2)', () => {
 
 					describe('when the user claims rewards', () => {
 						before('record balances', async () => {
-							balancehUSD = await TribehUSD.balanceOf(user.address);
+							balancerUSD = await TriberUSD.balanceOf(user.address);
 						});
 
 						before('claim', async () => {
@@ -81,38 +81,38 @@ describe('staking & claiming integration tests (L1, L2)', () => {
 							console.log(`claimFees() gas used: ${Math.round(gasUsed / 1000).toString()}k`);
 						});
 
-						it('shows no change in the users hUSD balance', async () => {
-							assert.bnEqual(await TribehUSD.balanceOf(user.address), balancehUSD);
+						it('shows no change in the users rUSD balance', async () => {
+							assert.bnEqual(await TriberUSD.balanceOf(user.address), balancerUSD);
 						});
 					});
 				});
 			});
 
-			describe('when the user burns hUSD', () => {
+			describe('when the user burns rUSD', () => {
 				before('skip min stake time', async () => {
 					await skipMinimumStakeTime({ ctx: ctx.l1 });
 				});
 
 				before('record debt', async () => {
-					debthUSD = await Rwaone.debtBalanceOf(user.address, toBytes32('hUSD'));
+					debtrUSD = await Rwaone.debtBalanceOf(user.address, toBytes32('rUSD'));
 				});
 
-				before('burn hUSD', async () => {
+				before('burn rUSD', async () => {
 					Rwaone = Rwaone.connect(user);
 
-					const tx = await Rwaone.burnTribes(amountToIssueAndBurnhUSD);
+					const tx = await Rwaone.burnTribes(amountToIssueAndBurnrUSD);
 					const { gasUsed } = await tx.wait();
 					console.log(`burnTribes() gas used: ${Math.round(gasUsed / 1000).toString()}k`);
 				});
 
 				it('reduced the expected amount of debt', async () => {
-					const newDebthUSD = await Rwaone.debtBalanceOf(user.address, toBytes32('hUSD'));
-					const debtReduction = debthUSD.sub(newDebthUSD);
+					const newDebtrUSD = await Rwaone.debtBalanceOf(user.address, toBytes32('rUSD'));
+					const debtReduction = debtrUSD.sub(newDebtrUSD);
 
 					const tolerance = ethers.utils.parseUnits('0.01', 'ether');
 					assert.bnClose(
 						debtReduction.toString(),
-						amountToIssueAndBurnhUSD.toString(),
+						amountToIssueAndBurnrUSD.toString(),
 						tolerance.toString()
 					);
 				});

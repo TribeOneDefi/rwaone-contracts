@@ -54,7 +54,7 @@ contract RwaoneBridgeToOptimism is BaseRwaoneBridge, IRwaoneBridgeToOptimism, iO
     }
 
     function hasZeroDebt() internal view {
-        require(issuer().debtBalanceOf(msg.sender, "hUSD") == 0, "Cannot deposit or migrate with debt");
+        require(issuer().debtBalanceOf(msg.sender, "rUSD") == 0, "Cannot deposit or migrate with debt");
     }
 
     function counterpart() internal view returns (address) {

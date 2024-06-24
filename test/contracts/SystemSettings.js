@@ -25,7 +25,7 @@ contract('SystemSettings', async accounts => {
 	let short, tribes, systemSettings;
 
 	const setupSettings = async () => {
-		tribes = ['hUSD', 'hBTC', 'hETH'];
+		tribes = ['rUSD', 'hBTC', 'hETH'];
 		({ SystemSettings: systemSettings, CollateralShort: short } = await setupAllContracts({
 			accounts,
 			tribes,
@@ -851,14 +851,14 @@ contract('SystemSettings', async accounts => {
 
 	describe('setExchangeFeeRateForTribes()', () => {
 		describe('Given tribe exchange fee rates to set', async () => {
-			const [hUSD, hETH, sAUD, hBTC] = ['hUSD', 'hETH', 'sAUD', 'hBTC'].map(toBytes32);
+			const [rUSD, hETH, sAUD, hBTC] = ['rUSD', 'hETH', 'sAUD', 'hBTC'].map(toBytes32);
 			const fxBIPS = toUnit('0.01');
 			const cryptoBIPS = toUnit('0.03');
 
 			it('when a non owner calls then revert', async () => {
 				await onlyGivenAddressCanInvoke({
 					fnc: systemSettings.setExchangeFeeRateForTribes,
-					args: [[hUSD], [toUnit('0.1')]],
+					args: [[rUSD], [toUnit('0.1')]],
 					accounts,
 					address: owner,
 					reason: 'Only the contract owner may perform this action',
@@ -866,7 +866,7 @@ contract('SystemSettings', async accounts => {
 			});
 			it('when input array lengths dont match then revert ', async () => {
 				await assert.revert(
-					systemSettings.setExchangeFeeRateForTribes([hUSD, sAUD], [toUnit('0.1')], {
+					systemSettings.setExchangeFeeRateForTribes([rUSD, sAUD], [toUnit('0.1')], {
 						from: owner,
 					}),
 					'Array lengths dont match'
@@ -874,7 +874,7 @@ contract('SystemSettings', async accounts => {
 			});
 			it('when owner sets an exchange fee rate larger than MAX_EXCHANGE_FEE_RATE then revert', async () => {
 				await assert.revert(
-					systemSettings.setExchangeFeeRateForTribes([hUSD], [toUnit('11')], {
+					systemSettings.setExchangeFeeRateForTribes([rUSD], [toUnit('11')], {
 						from: owner,
 					}),
 					'MAX_EXCHANGE_FEE_RATE exceeded'
@@ -883,28 +883,28 @@ contract('SystemSettings', async accounts => {
 
 			describe('Given new tribe exchange fee rates to store', async () => {
 				it('when 1 exchange rate then store it to be readable', async () => {
-					await systemSettings.setExchangeFeeRateForTribes([hUSD], [fxBIPS], {
+					await systemSettings.setExchangeFeeRateForTribes([rUSD], [fxBIPS], {
 						from: owner,
 					});
-					let hUSDRate = await systemSettings.exchangeFeeRate(hUSD);
-					assert.bnEqual(hUSDRate, fxBIPS);
+					let rUSDRate = await systemSettings.exchangeFeeRate(rUSD);
+					assert.bnEqual(rUSDRate, fxBIPS);
 
-					hUSDRate = await systemSettings.exchangeFeeRate(hUSD);
-					assert.bnEqual(hUSDRate, fxBIPS);
+					rUSDRate = await systemSettings.exchangeFeeRate(rUSD);
+					assert.bnEqual(rUSDRate, fxBIPS);
 				});
 				it('when 1 exchange rate then emits update event', async () => {
-					const transaction = await systemSettings.setExchangeFeeRateForTribes([hUSD], [fxBIPS], {
+					const transaction = await systemSettings.setExchangeFeeRateForTribes([rUSD], [fxBIPS], {
 						from: owner,
 					});
 					assert.eventEqual(transaction, 'ExchangeFeeUpdated', {
-						tribeKey: hUSD,
+						tribeKey: rUSD,
 						newExchangeFeeRate: fxBIPS,
 					});
 				});
 				it('when multiple exchange rates then store them to be readable', async () => {
 					// Store multiple rates
 					await systemSettings.setExchangeFeeRateForTribes(
-						[hUSD, sAUD, hBTC, hETH],
+						[rUSD, sAUD, hBTC, hETH],
 						[fxBIPS, fxBIPS, cryptoBIPS, cryptoBIPS],
 						{
 							from: owner,
@@ -913,8 +913,8 @@ contract('SystemSettings', async accounts => {
 					// Read all rates
 					const sAUDRate = await systemSettings.exchangeFeeRate(sAUD);
 					assert.bnEqual(sAUDRate, fxBIPS);
-					const hUSDRate = await systemSettings.exchangeFeeRate(hUSD);
-					assert.bnEqual(hUSDRate, fxBIPS);
+					const rUSDRate = await systemSettings.exchangeFeeRate(rUSD);
+					assert.bnEqual(rUSDRate, fxBIPS);
 					const hBTCRate = await systemSettings.exchangeFeeRate(hBTC);
 					assert.bnEqual(hBTCRate, cryptoBIPS);
 					const hETHRate = await systemSettings.exchangeFeeRate(hETH);
@@ -923,7 +923,7 @@ contract('SystemSettings', async accounts => {
 				it('when multiple exchange rates then each update event is emitted', async () => {
 					// Update multiple rates
 					const transaction = await systemSettings.setExchangeFeeRateForTribes(
-						[hUSD, sAUD, hBTC, hETH],
+						[rUSD, sAUD, hBTC, hETH],
 						[fxBIPS, fxBIPS, cryptoBIPS, cryptoBIPS],
 						{
 							from: owner,
@@ -934,7 +934,7 @@ contract('SystemSettings', async accounts => {
 						transaction,
 						'ExchangeFeeUpdated',
 						{
-							tribeKey: hUSD,
+							tribeKey: rUSD,
 							newExchangeFeeRate: fxBIPS,
 						},
 						'ExchangeFeeUpdated',
@@ -1736,7 +1736,7 @@ contract('SystemSettings', async accounts => {
 	});
 
 	describe('setPureChainlinkPriceForAtomicSwapsEnabled()', () => {
-		const currencyKey = toBytes32('hUSD');
+		const currencyKey = toBytes32('rUSD');
 		it('only owner can invoke', async () => {
 			await onlyGivenAddressCanInvoke({
 				fnc: systemSettings.setPureChainlinkPriceForAtomicSwapsEnabled,

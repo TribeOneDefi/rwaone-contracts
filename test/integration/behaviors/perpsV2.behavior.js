@@ -59,10 +59,10 @@ const unifyAbis = implementations => {
 };
 
 function itCanTrade({ ctx }) {
-	describe('opening positions', function() {
+	describe('opening positions', function () {
 		this.retries(0);
 
-		const hUSDAmount = ethers.utils.parseEther('100000');
+		const rUSDAmount = ethers.utils.parseEther('100000');
 
 		let owner, someUser, otherUser;
 		let FuturesMarketManager,
@@ -81,7 +81,7 @@ function itCanTrade({ ctx }) {
 			FuturesMarketBTC,
 			ExchangeRates,
 			AddressResolver,
-			TribehUSD;
+			TriberUSD;
 
 		before('target contracts and users', async () => {
 			({
@@ -100,7 +100,7 @@ function itCanTrade({ ctx }) {
 				FuturesMarketBTC,
 				ExchangeRates,
 				AddressResolver,
-				TribehUSD,
+				TriberUSD,
 			} = ctx.contracts);
 
 			owner = ctx.users.owner;
@@ -133,12 +133,12 @@ function itCanTrade({ ctx }) {
 			}
 		});
 
-		before('ensure users have hUSD ', async () => {
-			await ensureBalance({ ctx, symbol: 'hUSD', user: someUser, balance: hUSDAmount });
+		before('ensure users have rUSD ', async () => {
+			await ensureBalance({ ctx, symbol: 'rUSD', user: someUser, balance: rUSDAmount });
 		});
 
-		after('reset the hUSD balance', async () => {
-			await ensureBalance({ ctx, symbol: 'hUSD', user: someUser, balance: toBN(0) });
+		after('reset the rUSD balance', async () => {
+			await ensureBalance({ ctx, symbol: 'rUSD', user: someUser, balance: toBN(0) });
 		});
 
 		describe('position management', () => {
@@ -167,14 +167,14 @@ function itCanTrade({ ctx }) {
 				// Cleanup any outstanding margin (flaky)
 				await (await market.withdrawAllMargin()).wait();
 
-				const balance = await TribehUSD.balanceOf(someUser.address);
+				const balance = await TriberUSD.balanceOf(someUser.address);
 				// transfer
 				await market.transferMargin(margin);
-				assert.bnEqual(await TribehUSD.balanceOf(someUser.address), balance.sub(margin));
+				assert.bnEqual(await TriberUSD.balanceOf(someUser.address), balance.sub(margin));
 
 				// withdraw
 				await (await market.withdrawAllMargin()).wait();
-				const withdrawBalance = await TribehUSD.balanceOf(someUser.address);
+				const withdrawBalance = await TriberUSD.balanceOf(someUser.address);
 				assert.bnEqual(withdrawBalance, balance);
 			});
 

@@ -19,7 +19,7 @@ contract('Collateral', async accounts => {
 	const [, owner] = accounts;
 
 	before(async () => {
-		tribes = ['hUSD', 'hBTC', 'hETH'];
+		tribes = ['rUSD', 'hBTC', 'hETH'];
 		({ Collateral: collateral } = await setupAllContracts({
 			accounts,
 			tribes,

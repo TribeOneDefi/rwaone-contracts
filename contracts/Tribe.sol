@@ -25,7 +25,7 @@ contract Tribe is Owned, IERC20, ExternStateToken, MixinResolver, ITribe {
 
     uint8 public constant DECIMALS = 18;
 
-    // Where fees are pooled in hUSD
+    // Where fees are pooled in rUSD
     address public constant FEE_ADDRESS = 0xfeEFEEfeefEeFeefEEFEEfEeFeefEEFeeFEEFEeF;
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
@@ -63,7 +63,7 @@ contract Tribe is Owned, IERC20, ExternStateToken, MixinResolver, ITribe {
     function transfer(address to, uint value) public onlyProxyOrInternal returns (bool) {
         _ensureCanTransfer(messageSender, value);
 
-        // transfers to FEE_ADDRESS will be exchanged into hUSD and recorded as fee
+        // transfers to FEE_ADDRESS will be exchanged into rUSD and recorded as fee
         if (to == FEE_ADDRESS) {
             return _transferToFeeAddress(to, value);
         }
@@ -118,23 +118,23 @@ contract Tribe is Owned, IERC20, ExternStateToken, MixinResolver, ITribe {
 
     /**
      * @notice _transferToFeeAddress function
-     * non-hUSD tribes are exchanged into hUSD via tribeInitiatedExchange
+     * non-rUSD tribes are exchanged into rUSD via tribeInitiatedExchange
      * notify feePool to record amount as fee paid to feePool */
     function _transferToFeeAddress(address to, uint value) internal returns (bool) {
         uint amountInUSD;
 
-        // hUSD can be transferred to FEE_ADDRESS directly
-        if (currencyKey == "hUSD") {
+        // rUSD can be transferred to FEE_ADDRESS directly
+        if (currencyKey == "rUSD") {
             amountInUSD = value;
             super._internalTransfer(messageSender, to, value);
         } else {
-            // else exchange tribe into hUSD and send to FEE_ADDRESS
+            // else exchange tribe into rUSD and send to FEE_ADDRESS
             (amountInUSD, ) = exchanger().exchange(
                 messageSender,
                 messageSender,
                 currencyKey,
                 value,
-                "hUSD",
+                "rUSD",
                 FEE_ADDRESS,
                 false,
                 address(0),
@@ -142,7 +142,7 @@ contract Tribe is Owned, IERC20, ExternStateToken, MixinResolver, ITribe {
             );
         }
 
-        // Notify feePool to record hUSD to distribute as fees
+        // Notify feePool to record rUSD to distribute as fees
         feePool().recordFeePaid(amountInUSD);
 
         return true;

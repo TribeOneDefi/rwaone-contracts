@@ -531,8 +531,8 @@
 				"0x58719E8Ef4d201541e44505a2ACB3424481d6681"
 			]
 		},
-		"TokenStatehUSD": {
-			"name": "TokenStatehUSD",
+		"TokenStaterUSD": {
+			"name": "TokenStaterUSD",
 			"address": "0x5F0CCaBe97bF838c777F08702E17EC300FF78cD0",
 			"source": "TokenState",
 			"link": "https://goerli.etherscan.io/address/0x5F0CCaBe97bF838c777F08702E17EC300FF78cD0",
@@ -544,8 +544,8 @@
 				"0x0000000000000000000000000000000000000000"
 			]
 		},
-		"ProxyhUSD": {
-			"name": "ProxyhUSD",
+		"ProxyrUSD": {
+			"name": "ProxyrUSD",
 			"address": "0xB1f664162c0269A469a699709D37cc5739379dD1",
 			"source": "ProxyERC20",
 			"link": "https://goerli.etherscan.io/address/0xB1f664162c0269A469a699709D37cc5739379dD1",
@@ -554,8 +554,8 @@
 			"network": "goerli",
 			"constructorArgs": ["0x48914229deDd5A9922f44441ffCCfC2Cb7856Ee9"]
 		},
-		"TribehUSD": {
-			"name": "TribehUSD",
+		"TriberUSD": {
+			"name": "TriberUSD",
 			"address": "0x8f01E7815583C5Be70e4608Fde3DdE7DcC29592f",
 			"source": "MultiCollateralTribe",
 			"link": "https://goerli.etherscan.io/address/0x8f01E7815583C5Be70e4608Fde3DdE7DcC29592f",
@@ -565,8 +565,8 @@
 			"constructorArgs": [
 				"0xB1f664162c0269A469a699709D37cc5739379dD1",
 				"0x5F0CCaBe97bF838c777F08702E17EC300FF78cD0",
-				"Tribe hUSD",
-				"hUSD",
+				"Tribe rUSD",
+				"rUSD",
 				"0x48914229deDd5A9922f44441ffCCfC2Cb7856Ee9",
 				"0x7355534400000000000000000000000000000000000000000000000000000000",
 				0,
@@ -15810,7 +15810,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "hUSDAmount",
+							"name": "rUSDAmount",
 							"type": "uint256"
 						},
 						{
@@ -19839,7 +19839,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "hUSD",
+					"name": "rUSD",
 					"outputs": [
 						{
 							"internalType": "bytes32",
@@ -20791,7 +20791,7 @@
 							"type": "int256"
 						}
 					],
-					"name": "updateCachedhUSDDebt",
+					"name": "updateCachedrUSDDebt",
 					"outputs": [],
 					"payable": false,
 					"stateMutability": "nonpayable",
@@ -27078,7 +27078,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "supplyInhUSD",
+							"name": "supplyInrUSD",
 							"type": "uint256"
 						}
 					],
@@ -27109,7 +27109,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "amountInhUSD",
+							"name": "amountInrUSD",
 							"type": "uint256"
 						}
 					],
@@ -27149,7 +27149,7 @@
 					"outputs": [
 						{
 							"internalType": "uint256",
-							"name": "balanceInhUSD",
+							"name": "balanceInrUSD",
 							"type": "uint256"
 						}
 					],
@@ -27315,7 +27315,7 @@
 					"outputs": [
 						{
 							"internalType": "uint256",
-							"name": "supplyInhUSD",
+							"name": "supplyInrUSD",
 							"type": "uint256"
 						}
 					],
@@ -31036,7 +31036,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "hUSDIssued",
+					"name": "rUSDIssued",
 					"outputs": [
 						{
 							"internalType": "uint256",
@@ -33596,7 +33596,7 @@
 					"outputs": [
 						{
 							"internalType": "uint256",
-							"name": "husdValue",
+							"name": "rusdValue",
 							"type": "uint256"
 						},
 						{
@@ -33616,7 +33616,7 @@
 					"outputs": [
 						{
 							"internalType": "uint256",
-							"name": "husdValue",
+							"name": "rusdValue",
 							"type": "uint256"
 						},
 						{
@@ -33636,7 +33636,7 @@
 					"outputs": [
 						{
 							"internalType": "uint256",
-							"name": "husdValue",
+							"name": "rusdValue",
 							"type": "uint256"
 						},
 						{

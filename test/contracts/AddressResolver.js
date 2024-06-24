@@ -160,25 +160,25 @@ contract('AddressResolver', accounts => {
 			});
 
 			it('when getTribe() is invoked', async () => {
-				const tribe = await resolver.getTribe(toBytes32('hUSD'));
+				const tribe = await resolver.getTribe(toBytes32('rUSD'));
 				assert.equal(tribe, account4);
 			});
 		});
 		describe('when a Rwaone is created with a few added tribes', () => {
 			let hETHContract;
-			let hUSDContract;
+			let rUSDContract;
 			beforeEach(async () => {
-				({ TribehETH: hETHContract, TribehUSD: hUSDContract } = await setupAllContracts({
+				({ TribehETH: hETHContract, TriberUSD: rUSDContract } = await setupAllContracts({
 					accounts,
 					existing: {
 						AddressResolver: resolver,
 					},
-					tribes: ['hUSD', 'hETH', 'sEUR', 'sAUD'],
+					tribes: ['rUSD', 'hETH', 'sEUR', 'sAUD'],
 					contracts: ['Rwaone'],
 				}));
 			});
 			it('when getTribe() is invoked with these tribe keys, they are returned correctly', async () => {
-				assert.equal(await resolver.getTribe(toBytes32('hUSD')), hUSDContract.address);
+				assert.equal(await resolver.getTribe(toBytes32('rUSD')), rUSDContract.address);
 				assert.equal(await resolver.getTribe(toBytes32('hETH')), hETHContract.address);
 			});
 		});

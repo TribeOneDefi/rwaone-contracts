@@ -29,14 +29,14 @@ contract EtherWrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IE
 
     /* ========== ENCODED NAMES ========== */
 
-    bytes32 internal constant hUSD = "hUSD";
+    bytes32 internal constant rUSD = "rUSD";
     bytes32 internal constant hETH = "hETH";
     bytes32 internal constant ETH = "ETH";
     bytes32 internal constant wHAKA = "wHAKA";
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
     bytes32 private constant CONTRACT_RWAONEHETH = "TribehETH";
-    bytes32 private constant CONTRACT_RWAONEHUSD = "TribehUSD";
+    bytes32 private constant CONTRACT_RWAONERUSD = "TriberUSD";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
     bytes32 private constant CONTRACT_FEEPOOL = "FeePool";
@@ -45,7 +45,7 @@ contract EtherWrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IE
     IWETH internal _weth;
 
     uint public hETHIssued = 0;
-    uint public hUSDIssued = 0;
+    uint public rUSDIssued = 0;
     uint public feesEscrowed = 0;
 
     constructor(
@@ -61,7 +61,7 @@ contract EtherWrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IE
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](5);
         newAddresses[0] = CONTRACT_RWAONEHETH;
-        newAddresses[1] = CONTRACT_RWAONEHUSD;
+        newAddresses[1] = CONTRACT_RWAONERUSD;
         newAddresses[2] = CONTRACT_EXRATES;
         newAddresses[3] = CONTRACT_ISSUER;
         newAddresses[4] = CONTRACT_FEEPOOL;
@@ -70,8 +70,8 @@ contract EtherWrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IE
     }
 
     /* ========== INTERNAL VIEWS ========== */
-    function tribehUSD() internal view returns (ITribe) {
-        return ITribe(requireAndGetAddress(CONTRACT_RWAONEHUSD));
+    function triberUSD() internal view returns (ITribe) {
+        return ITribe(requireAndGetAddress(CONTRACT_RWAONERUSD));
     }
 
     function tribehETH() internal view returns (ITribe) {
@@ -110,11 +110,11 @@ contract EtherWrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IE
     function totalIssuedTribes() public view returns (uint) {
         // This contract issues two different tribes:
         // 1. hETH
-        // 2. hUSD
+        // 2. rUSD
         //
         // The hETH is always backed 1:1 with WETH.
-        // The hUSD fees are backed by hETH that is withheld during minting and burning.
-        return exchangeRates().effectiveValue(hETH, hETHIssued, hUSD).add(hUSDIssued);
+        // The rUSD fees are backed by hETH that is withheld during minting and burning.
+        return exchangeRates().effectiveValue(hETH, hETHIssued, rUSD).add(rUSDIssued);
     }
 
     function calculateMintFee(uint amount) public view returns (uint) {
@@ -176,21 +176,21 @@ contract EtherWrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IE
     }
 
     function distributeFees() external {
-        // Normalize fee to hUSD
+        // Normalize fee to rUSD
         require(!exchangeRates().rateIsInvalid(hETH), "Currency rate is invalid");
-        uint amountHUSD = exchangeRates().effectiveValue(hETH, feesEscrowed, hUSD);
+        uint amountRUSD = exchangeRates().effectiveValue(hETH, feesEscrowed, rUSD);
 
         // Burn hETH.
         tribehETH().burn(address(this), feesEscrowed);
         // Pay down as much hETH debt as we burn. Any other debt is taken on by the stakers.
         hETHIssued = hETHIssued < feesEscrowed ? 0 : hETHIssued.sub(feesEscrowed);
 
-        // Issue hUSD to the fee pool
-        issuer().tribes(hUSD).issue(feePool().FEE_ADDRESS(), amountHUSD);
-        hUSDIssued = hUSDIssued.add(amountHUSD);
+        // Issue rUSD to the fee pool
+        issuer().tribes(rUSD).issue(feePool().FEE_ADDRESS(), amountRUSD);
+        rUSDIssued = rUSDIssued.add(amountRUSD);
 
         // Tell the fee pool about this
-        feePool().recordFeePaid(amountHUSD);
+        feePool().recordFeePaid(amountRUSD);
 
         feesEscrowed = 0;
     }

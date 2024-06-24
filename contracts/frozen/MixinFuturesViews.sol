@@ -9,7 +9,7 @@ import "./FuturesMarketBase.sol";
  */
 contract MixinFuturesViews is FuturesMarketBase {
     /*
-     * Sizes of the long and short sides of the market (in hUSD)
+     * Sizes of the long and short sides of the market (in rUSD)
      */
     function marketSizes() public view returns (uint long, uint short) {
         int size = int(marketSize);
@@ -110,7 +110,7 @@ contract MixinFuturesViews is FuturesMarketBase {
      * Returns 0 if account cannot be liquidated right now.
      * @param account address of the trader's account
      * @return fee that will be paid for liquidating the account if it can be liquidated
-     *  in hUSD fixed point decimal units or 0 if account is not liquidatable.
+     *  in rUSD fixed point decimal units or 0 if account is not liquidatable.
      */
     function liquidationFee(address account) external view returns (uint) {
         (uint price, bool invalid) = assetPrice();
@@ -137,52 +137,42 @@ contract MixinFuturesViews is FuturesMarketBase {
      * expensive than ones that decrease it. Dynamic fee is added according to the recent volatility
      * according to SIP-184.
      * @param sizeDelta size of the order in baseAsset units (negative numbers for shorts / selling)
-     * @return fee in hUSD decimal, and invalid boolean flag for invalid rates or dynamic fee that is
+     * @return fee in rUSD decimal, and invalid boolean flag for invalid rates or dynamic fee that is
      * too high due to recent volatility.
      */
     function orderFee(int sizeDelta) external view returns (uint fee, bool invalid) {
         (uint price, bool isInvalid) = assetPrice();
         (uint dynamicFeeRate, bool tooVolatile) = _dynamicFeeRate();
-        TradeParams memory params =
-            TradeParams({
-                sizeDelta: sizeDelta,
-                price: price,
-                takerFee: _takerFee(marketKey),
-                makerFee: _makerFee(marketKey),
-                trackingCode: bytes32(0)
-            });
+        TradeParams memory params = TradeParams({
+            sizeDelta: sizeDelta,
+            price: price,
+            takerFee: _takerFee(marketKey),
+            makerFee: _makerFee(marketKey),
+            trackingCode: bytes32(0)
+        });
         return (_orderFee(params, dynamicFeeRate), isInvalid || tooVolatile);
     }
 
     /*
      * Returns all new position details if a given order from `sender` was confirmed at the current price.
      */
-    function postTradeDetails(int sizeDelta, address sender)
-        external
-        view
-        returns (
-            uint margin,
-            int size,
-            uint price,
-            uint liqPrice,
-            uint fee,
-            Status status
-        )
-    {
+    function postTradeDetails(
+        int sizeDelta,
+        address sender
+    ) external view returns (uint margin, int size, uint price, uint liqPrice, uint fee, Status status) {
         bool invalid;
         (price, invalid) = assetPrice();
         if (invalid) {
             return (0, 0, 0, 0, 0, Status.InvalidPrice);
         }
 
-        TradeParams memory params =
-            TradeParams({
-                sizeDelta: sizeDelta,
-                price: price,
-                takerFee: _takerFee(marketKey),
-                makerFee: _makerFee(marketKey),
-                trackingCode: bytes32(0)
-            });
+        TradeParams memory params = TradeParams({
+            sizeDelta: sizeDelta,
+            price: price,
+            takerFee: _takerFee(marketKey),
+            makerFee: _makerFee(marketKey),
+            trackingCode: bytes32(0)
+        });
         (Position memory newPosition, uint fee_, Status status_) = _postTradeDetails(positions[sender], params);
 
         liqPrice = _approxLiquidationPrice(newPosition, newPosition.lastPrice);
@@ -213,10 +203,9 @@ contract MixinFuturesViews is FuturesMarketBase {
         //     and also with: funding = netFundingPerUnit * positionSize
         //     we get: margin + (price - last-price) * positionSize + netFundingPerUnit * positionSize =  liquidationMargin
         //     moving around: price  = lastPrice + (liquidationMargin - margin) / positionSize - netFundingPerUnit
-        int result =
-            int(position.lastPrice).add(int(liqMargin).sub(int(position.margin)).divideDecimal(positionSize)).sub(
-                fundingPerUnit
-            );
+        int result = int(position.lastPrice).add(int(liqMargin).sub(int(position.margin)).divideDecimal(positionSize)).sub(
+            fundingPerUnit
+        );
 
         // If the user has leverage less than 1, their liquidation price may actually be negative; return 0 instead.
         return uint(_max(0, result));

@@ -24,7 +24,7 @@ contract('ExchangeState', accounts => {
 		account1,
 		account2,
 	] = accounts;
-	const [hUSD, hBTC, sAUD] = ['hUSD', 'hBTC', 'sAUD'].map(toBytes32);
+	const [rUSD, hBTC, sAUD] = ['rUSD', 'hBTC', 'sAUD'].map(toBytes32);
 
 	let exchangeState;
 	beforeEach(async () => {
@@ -36,7 +36,7 @@ contract('ExchangeState', accounts => {
 
 	const addExchangeEntry = ({
 		user = account1,
-		src = hUSD,
+		src = rUSD,
 		amount = toUnit('100'),
 		dest = hBTC,
 		amountReceived = toUnit('99'),
@@ -97,7 +97,7 @@ contract('ExchangeState', accounts => {
 		it('only the associated contract can invoke appendExchangeEntry()', async () => {
 			await onlyGivenAddressCanInvoke({
 				fnc: exchangeState.appendExchangeEntry,
-				args: [account1, hUSD, toUnit('1'), hBTC, toUnit('1'), toUnit('0.01'), '0', '0', '0'],
+				args: [account1, rUSD, toUnit('1'), hBTC, toUnit('1'), toUnit('0.01'), '0', '0', '0'],
 				address: simulatedAssociatedContract,
 				accounts,
 			});
@@ -105,7 +105,7 @@ contract('ExchangeState', accounts => {
 		it('only the associated contract can invoke removeEntries()', async () => {
 			await onlyGivenAddressCanInvoke({
 				fnc: exchangeState.removeEntries,
-				args: [account1, hUSD],
+				args: [account1, rUSD],
 				address: simulatedAssociatedContract,
 				accounts,
 			});
@@ -129,7 +129,7 @@ contract('ExchangeState', accounts => {
 				assert.equal((await exchangeState.getLengthOfEntries(account1, hBTC)).toString(), '1');
 			});
 			it('and the length is 0 for other conditions', async () => {
-				assert.equal((await exchangeState.getLengthOfEntries(account1, hUSD)).toString(), '0');
+				assert.equal((await exchangeState.getLengthOfEntries(account1, rUSD)).toString(), '0');
 				assert.equal((await exchangeState.getLengthOfEntries(account2, hBTC)).toString(), '0');
 			});
 			describe('when the entry is fetch by index 0', () => {
@@ -150,7 +150,7 @@ contract('ExchangeState', accounts => {
 				beforeEach(async () => {
 					expectedSecondEntryAdded = {
 						user: account1,
-						src: hUSD,
+						src: rUSD,
 						amount: toUnit('5'),
 						dest: hBTC,
 						amountReceived: toUnit('4'),

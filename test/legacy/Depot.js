@@ -44,8 +44,8 @@ contract('Depot', async accounts => {
 		// Approve Transaction
 		await tribe.approve(depot.address, tribesToDeposit, { from: depositor });
 
-		// Deposit hUSD in Depot
-		// console.log('Deposit hUSD in Depot amount', tribesToDeposit, depositor);
+		// Deposit rUSD in Depot
+		// console.log('Deposit rUSD in Depot amount', tribesToDeposit, depositor);
 		const txn = await depot.depositTribes(tribesToDeposit, {
 			from: depositor,
 		});
@@ -55,9 +55,9 @@ contract('Depot', async accounts => {
 
 	// Run once at beginning - snapshots will take care of resetting this before each test
 	before(async () => {
-		// Mock hUSD as Depot only needs its ERC20 methods (System Pause will not work for suspending hUSD transfers)
+		// Mock rUSD as Depot only needs its ERC20 methods (System Pause will not work for suspending rUSD transfers)
 		[{ token: tribe }] = await Promise.all([
-			mockToken({ accounts, tribe: 'hUSD', name: 'Tribeetic USD', symbol: 'hUSD' }),
+			mockToken({ accounts, tribe: 'rUSD', name: 'RwaOne USD', symbol: 'rUSD' }),
 		]);
 
 		({
@@ -71,7 +71,7 @@ contract('Depot', async accounts => {
 			accounts,
 			mocks: {
 				// mocks necessary for address resolver imports
-				TribehUSD: tribe,
+				TriberUSD: tribe,
 			},
 			contracts: [
 				'Depot',
@@ -490,7 +490,7 @@ contract('Depot', async accounts => {
 				});
 				const gasPaidApprove = web3.utils.toBN(approveTxn.receipt.gasUsed * gasPrice);
 
-				// Deposit hUSD in Depot
+				// Deposit rUSD in Depot
 				const depositTxn = await depot.depositTribes(tribesToDeposit, {
 					from: depositor,
 					gasPrice,
@@ -524,12 +524,12 @@ contract('Depot', async accounts => {
 					});
 				}
 
-				// Exchange("ETH", msg.value, "hUSD", fulfilled);
+				// Exchange("ETH", msg.value, "rUSD", fulfilled);
 				const exchangeEvent = txn.logs.find(log => log.event === 'Exchange');
 				assert.eventEqual(exchangeEvent, 'Exchange', {
 					fromCurrency: 'ETH',
 					fromAmount: ethToSend,
-					toCurrency: 'hUSD',
+					toCurrency: 'rUSD',
 					toAmount: tribesToDeposit,
 				});
 
@@ -594,12 +594,12 @@ contract('Depot', async accounts => {
 					});
 				}
 
-				// Exchange("ETH", msg.value, "hUSD", fulfilled);
+				// Exchange("ETH", msg.value, "rUSD", fulfilled);
 				const exchangeEvent = txn.logs.find(log => log.event === 'Exchange');
 				assert.eventEqual(exchangeEvent, 'Exchange', {
 					fromCurrency: 'ETH',
 					fromAmount: ethToSend,
-					toCurrency: 'hUSD',
+					toCurrency: 'rUSD',
 					toAmount: tribesToDeposit.div(web3.utils.toBN('2')),
 				});
 
@@ -649,14 +649,14 @@ contract('Depot', async accounts => {
 					});
 				}
 
-				// Exchange("ETH", msg.value, "hUSD", fulfilled);
+				// Exchange("ETH", msg.value, "rUSD", fulfilled);
 				const exchangeEvent = transaction.logs.find(log => log.event === 'Exchange');
 				const tribesAmount = multiplyDecimal(ethToSend, ethUsd);
 
 				assert.eventEqual(exchangeEvent, 'Exchange', {
 					fromCurrency: 'ETH',
 					fromAmount: ethToSend,
-					toCurrency: 'hUSD',
+					toCurrency: 'rUSD',
 					toAmount: tribesAmount,
 				});
 
@@ -713,13 +713,13 @@ contract('Depot', async accounts => {
 
 				const gasPaid = web3.utils.toBN(txn.receipt.gasUsed * gasPrice);
 
-				// Exchange("ETH", msg.value, "hUSD", fulfilled);
+				// Exchange("ETH", msg.value, "rUSD", fulfilled);
 				const exchangeEvent = txn.logs.find(log => log.event === 'Exchange');
 
 				assert.eventEqual(exchangeEvent, 'Exchange', {
 					fromCurrency: 'ETH',
 					fromAmount: ethToSend,
-					toCurrency: 'hUSD',
+					toCurrency: 'rUSD',
 					toAmount: tribesToDeposit,
 				});
 
@@ -772,7 +772,7 @@ contract('Depot', async accounts => {
 					assert.eventEqual(exchangeEvent, 'Exchange', {
 						fromCurrency: 'ETH',
 						fromAmount: ethToSend,
-						toCurrency: 'hUSD',
+						toCurrency: 'rUSD',
 						toAmount: tribesToPurchase,
 					});
 				});
@@ -880,7 +880,7 @@ contract('Depot', async accounts => {
 					const exchangeEvent = txn.logs.find(log => log.event === 'Exchange');
 
 					assert.eventEqual(exchangeEvent, 'Exchange', {
-						fromCurrency: 'hUSD',
+						fromCurrency: 'rUSD',
 						fromAmount: tribesToSend,
 						toCurrency: 'wHAKA',
 						toAmount: snxToPurchase,
@@ -1219,12 +1219,12 @@ contract('Depot', async accounts => {
 			});
 		});
 
-		it('ensure user gets the correct amount of wHAKA after sending 10 hUSD', async () => {
+		it('ensure user gets the correct amount of wHAKA after sending 10 rUSD', async () => {
 			const purchaserHAKAStartBalance = await rwaone.balanceOf(purchaser);
 			// Purchaser should not have wHAKA yet
 			assert.equal(purchaserHAKAStartBalance, 0);
 
-			// Purchaser sends hUSD
+			// Purchaser sends rUSD
 			const txn = await depot.exchangeTribesForHAKA(tribesToSend, {
 				from: purchaser,
 			});
@@ -1240,7 +1240,7 @@ contract('Depot', async accounts => {
 			const exchangeEvent = txn.logs.find(log => log.event === 'Exchange');
 
 			assert.eventEqual(exchangeEvent, 'Exchange', {
-				fromCurrency: 'hUSD',
+				fromCurrency: 'rUSD',
 				fromAmount: tribesToSend,
 				toCurrency: 'wHAKA',
 				toAmount: purchaseValueInRwaone,

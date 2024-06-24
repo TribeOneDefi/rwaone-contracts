@@ -18,7 +18,7 @@ import "./../interfaces/ISystemStatus.sol";
 import "./../interfaces/IERC20.sol";
 
 /*
- * Tribeetic Futures
+ * RwaOne Futures
  * =================
  *
  * Futures markets allow users leveraged exposure to an asset, long or short.
@@ -27,8 +27,8 @@ import "./../interfaces/IERC20.sol";
  * by a liquidation keeper, which is rewarded with a flat fee extracted from the margin.
  *
  * The Rwaone debt pool is effectively the counterparty to each trade, so if a particular position
- * is in profit, then the debt pool pays by issuing hUSD into their margin account,
- * while if the position makes a loss then the debt pool burns hUSD from the margin, reducing the
+ * is in profit, then the debt pool pays by issuing rUSD into their margin account,
+ * while if the position makes a loss then the debt pool burns rUSD from the margin, reducing the
  * debt load in the system.
  *
  * As the debt pool underwrites all positions, the debt-inflation risk to the system is proportional to the
@@ -51,7 +51,7 @@ import "./../interfaces/IERC20.sol";
  *
  *     - FuturesMarketManager.sol:  the manager keeps track of which markets exist, and is the main window between
  *                                  futures markets and the rest of the system. It accumulates the total debt
- *                                  over all markets, and issues and burns hUSD on each market's behalf.
+ *                                  over all markets, and issues and burns rUSD on each market's behalf.
  *
  *     - FuturesMarketSettings.sol: Holds the settings for each market in the global FlexibleStorage instance used
  *                                  by SystemSettings, and provides an interface to modify these values. Other than
@@ -70,9 +70,9 @@ import "./../interfaces/IERC20.sol";
  *     - the account being managed was not liquidated in the same transaction;
  */
 interface IFuturesMarketManagerInternal {
-    function issueHUSD(address account, uint amount) external;
+    function issueRUSD(address account, uint amount) external;
 
-    function burnHUSD(address account, uint amount) external returns (uint postReclamationAmount);
+    function burnRUSD(address account, uint amount) external returns (uint postReclamationAmount);
 
     function payFee(uint amount) external;
 }
@@ -92,7 +92,7 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
     int private constant _UNIT = int(10 ** uint(18));
 
     //slither-disable-next-line naming-convention
-    bytes32 internal constant hUSD = "hUSD";
+    bytes32 internal constant rUSD = "rUSD";
 
     /* ========== STATE VARIABLES ========== */
 
@@ -383,11 +383,11 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
 
     /**
      * The fee charged from the margin during liquidation. Fee is proportional to position size
-     * but is at least the _minKeeperFee() of hUSD to prevent underincentivising
+     * but is at least the _minKeeperFee() of rUSD to prevent underincentivising
      * liquidations of small positions.
      * @param positionSize size of position in fixed point decimal baseAsset units
-     * @param price price of single baseAsset unit in hUSD fixed point decimal units
-     * @return lFee liquidation fee to be paid to liquidator in hUSD fixed point decimal units
+     * @param price price of single baseAsset unit in rUSD fixed point decimal units
+     * @return lFee liquidation fee to be paid to liquidator in rUSD fixed point decimal units
      */
     function _liquidationFee(int positionSize, uint price) internal view returns (uint lFee) {
         // size * price * fee-ratio
@@ -400,8 +400,8 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
     /**
      * The minimal margin at which liquidation can happen. Is the sum of liquidationBuffer and liquidationFee
      * @param positionSize size of position in fixed point decimal baseAsset units
-     * @param price price of single baseAsset unit in hUSD fixed point decimal units
-     * @return lMargin liquidation margin to maintain in hUSD fixed point decimal units
+     * @param price price of single baseAsset unit in rUSD fixed point decimal units
+     * @return lMargin liquidation margin to maintain in rUSD fixed point decimal units
      * @dev The liquidation margin contains a buffer that is proportional to the position
      * size. The buffer should prevent liquidation happenning at negative margin (due to next price being worse)
      * so that stakers would not leak value to liquidators through minting rewards that are not from the
@@ -447,12 +447,12 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
         return _abs(notionalDiff.multiplyDecimal(int(feeRate)));
     }
 
-    /// Uses the exchanger to get the dynamic fee (SIP-184) for trading from hUSD to baseAsset
+    /// Uses the exchanger to get the dynamic fee (SIP-184) for trading from rUSD to baseAsset
     /// this assumes dynamic fee is symmetric in direction of trade.
     /// @dev this is a pretty expensive action in terms of execution gas as it queries a lot
     ///   of past rates from oracle. Shoudn't be much of an issue on a rollup though.
     function _dynamicFeeRate() internal view returns (uint feeRate, bool tooVolatile) {
-        return _exchanger().dynamicFeeRateForExchange(hUSD, baseAsset);
+        return _exchanger().dynamicFeeRateForExchange(rUSD, baseAsset);
     }
 
     function _latestFundingIndex() internal view returns (uint) {
@@ -735,18 +735,18 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
         uint absDelta = _abs(marginDelta);
         if (marginDelta > 0) {
             // A positive margin delta corresponds to a deposit, which will be burnt from their
-            // hUSD balance and credited to their margin account.
+            // rUSD balance and credited to their margin account.
 
             // Ensure we handle reclamation when burning tokens.
-            uint postReclamationAmount = _manager().burnHUSD(sender, absDelta);
+            uint postReclamationAmount = _manager().burnRUSD(sender, absDelta);
             if (postReclamationAmount != absDelta) {
                 // If balance was insufficient, the actual delta will be smaller
                 marginDelta = int(postReclamationAmount);
             }
         } else if (marginDelta < 0) {
             // A negative margin delta corresponds to a withdrawal, which will be minted into
-            // their hUSD balance, and debited from their margin account.
-            _manager().issueHUSD(sender, absDelta);
+            // their rUSD balance, and debited from their margin account.
+            _manager().issueRUSD(sender, absDelta);
         } else {
             // Zero delta is a no-op
             return;
@@ -799,8 +799,8 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
 
     /*
      * Alter the amount of margin in a position. A positive input triggers a deposit; a negative one, a
-     * withdrawal. The margin will be burnt or issued directly into/out of the caller's hUSD wallet.
-     * Reverts on deposit if the caller lacks a sufficient hUSD balance.
+     * withdrawal. The margin will be burnt or issued directly into/out of the caller's rUSD wallet.
+     * Reverts on deposit if the caller lacks a sufficient rUSD balance.
      * Reverts on withdrawal if the amount to be withdrawn would expose an open position to liquidation.
      */
     function transferMargin(int marginDelta) external {
@@ -962,7 +962,7 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
 
         // Issue the reward to the liquidator.
         uint liqFee = _liquidationFee(positionSize, price);
-        _manager().issueHUSD(liquidator, liqFee);
+        _manager().issueRUSD(liquidator, liqFee);
 
         emit PositionModified(positionId, account, 0, 0, 0, price, fundingIndex, 0);
         emit PositionLiquidated(positionId, account, liquidator, positionSize, price, liqFee);

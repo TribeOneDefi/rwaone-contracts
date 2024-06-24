@@ -26,7 +26,7 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
     string public constant TOKEN_NAME = "Rwaone Network Wrap Token";
     string public constant TOKEN_SYMBOL = "wHAKA";
     uint8 public constant DECIMALS = 18;
-    bytes32 public constant hUSD = "hUSD";
+    bytes32 public constant rUSD = "rUSD";
 
     // ========== ADDRESS RESOLVER CONFIGURATION ==========
     bytes32 private constant CONTRACT_SYSTEMSTATUS = "SystemStatus";
@@ -182,7 +182,7 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
             return true;
         }
 
-        if (issuer().debtBalanceOf(account, hUSD) > 0) {
+        if (issuer().debtBalanceOf(account, rUSD) > 0) {
             (uint transferable, bool anyRateIsInvalid) = issuer().transferableRwaoneAndAnyRateIsInvalid(
                 account,
                 tokenState.balanceOf(account)

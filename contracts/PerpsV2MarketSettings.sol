@@ -222,7 +222,7 @@ contract PerpsV2MarketSettings is Owned, MixinPerpsV2MarketSettings, IPerpsV2Mar
     }
 
     /*
-     * The minimum amount of hUSD paid to a liquidator when they successfully liquidate a position.
+     * The minimum amount of rUSD paid to a liquidator when they successfully liquidate a position.
      * This quantity must be no greater than `minInitialMargin`.
      */
     function minKeeperFee() external view returns (uint) {
@@ -230,7 +230,7 @@ contract PerpsV2MarketSettings is Owned, MixinPerpsV2MarketSettings, IPerpsV2Mar
     }
 
     /*
-     * The maximum amount of hUSD paid to a liquidator when they successfully liquidate a position.
+     * The maximum amount of rUSD paid to a liquidator when they successfully liquidate a position.
      */
     function maxKeeperFee() external view returns (uint) {
         return _maxKeeperFee();
@@ -414,20 +414,20 @@ contract PerpsV2MarketSettings is Owned, MixinPerpsV2MarketSettings, IPerpsV2Mar
         setMaxPD(_marketKey, _parameters.maxPD);
     }
 
-    function setMinKeeperFee(uint _hUSD) external onlyOwner {
-        require(_hUSD <= _minInitialMargin(), "min margin < liquidation fee");
+    function setMinKeeperFee(uint _rUSD) external onlyOwner {
+        require(_rUSD <= _minInitialMargin(), "min margin < liquidation fee");
         if (_maxKeeperFee() > 0) {
             // only check if already set
-            require(_hUSD <= _maxKeeperFee(), "max fee < min fee");
+            require(_rUSD <= _maxKeeperFee(), "max fee < min fee");
         }
-        _flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, SETTING_MIN_KEEPER_FEE, _hUSD);
-        emit MinKeeperFeeUpdated(_hUSD);
+        _flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, SETTING_MIN_KEEPER_FEE, _rUSD);
+        emit MinKeeperFeeUpdated(_rUSD);
     }
 
-    function setMaxKeeperFee(uint _hUSD) external onlyOwner {
-        require(_hUSD >= _minKeeperFee(), "max fee < min fee");
-        _flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, SETTING_MAX_KEEPER_FEE, _hUSD);
-        emit MaxKeeperFeeUpdated(_hUSD);
+    function setMaxKeeperFee(uint _rUSD) external onlyOwner {
+        require(_rUSD >= _minKeeperFee(), "max fee < min fee");
+        _flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, SETTING_MAX_KEEPER_FEE, _rUSD);
+        emit MaxKeeperFeeUpdated(_rUSD);
     }
 
     function setLiquidationFeeRatio(uint _ratio) external onlyOwner {
@@ -450,8 +450,8 @@ contract PerpsV2MarketSettings is Owned, MixinPerpsV2MarketSettings, IPerpsV2Mar
 
     event ParameterUpdated(bytes32 indexed marketKey, bytes32 indexed parameter, uint value);
     event ParameterUpdatedBytes32(bytes32 indexed marketKey, bytes32 indexed parameter, bytes32 value);
-    event MinKeeperFeeUpdated(uint hUSD);
-    event MaxKeeperFeeUpdated(uint hUSD);
+    event MinKeeperFeeUpdated(uint rUSD);
+    event MaxKeeperFeeUpdated(uint rUSD);
     event LiquidationFeeRatioUpdated(uint bps);
     event LiquidationBufferRatioUpdated(uint bps);
     event MinInitialMarginUpdated(uint minMargin);

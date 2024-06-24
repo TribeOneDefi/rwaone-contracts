@@ -49,14 +49,13 @@ contract MixinFuturesNextPriceOrders is FuturesMarketBase {
         // simulate the order with current price and market and check that the order doesn't revert
         uint price = _assetPriceRequireSystemChecks();
         uint fundingIndex = _recomputeFunding(price);
-        TradeParams memory params =
-            TradeParams({
-                sizeDelta: sizeDelta,
-                price: price,
-                takerFee: _takerFeeNextPrice(marketKey),
-                makerFee: _makerFeeNextPrice(marketKey),
-                trackingCode: trackingCode
-            });
+        TradeParams memory params = TradeParams({
+            sizeDelta: sizeDelta,
+            price: price,
+            takerFee: _takerFeeNextPrice(marketKey),
+            makerFee: _makerFeeNextPrice(marketKey),
+            trackingCode: trackingCode
+        });
         (, , Status status) = _postTradeDetails(position, params);
         _revertIfError(status);
 
@@ -69,14 +68,13 @@ contract MixinFuturesNextPriceOrders is FuturesMarketBase {
 
         // create order
         uint targetRoundId = _exchangeRates().getCurrentRoundId(baseAsset) + 1; // next round
-        NextPriceOrder memory order =
-            NextPriceOrder({
-                sizeDelta: int128(sizeDelta),
-                targetRoundId: uint128(targetRoundId),
-                commitDeposit: uint128(commitDeposit),
-                keeperDeposit: uint128(keeperDeposit),
-                trackingCode: trackingCode
-            });
+        NextPriceOrder memory order = NextPriceOrder({
+            sizeDelta: int128(sizeDelta),
+            targetRoundId: uint128(targetRoundId),
+            commitDeposit: uint128(commitDeposit),
+            keeperDeposit: uint128(keeperDeposit),
+            trackingCode: trackingCode
+        });
         // emit event
         emit NextPriceOrderSubmitted(
             msg.sender,
@@ -127,7 +125,7 @@ contract MixinFuturesNextPriceOrders is FuturesMarketBase {
             require(_confirmationWindowOver(currentRoundId, order.targetRoundId), "cannot be cancelled by keeper yet");
 
             // send keeper fee to keeper
-            _manager().issueHUSD(msg.sender, order.keeperDeposit);
+            _manager().issueRUSD(msg.sender, order.keeperDeposit);
         }
 
         // pay the commitDeposit as fee to the FeePool
@@ -185,7 +183,7 @@ contract MixinFuturesNextPriceOrders is FuturesMarketBase {
         if (msg.sender == account) {
             toRefund += order.keeperDeposit;
         } else {
-            _manager().issueHUSD(msg.sender, order.keeperDeposit);
+            _manager().issueRUSD(msg.sender, order.keeperDeposit);
         }
 
         Position storage position = positions[account];

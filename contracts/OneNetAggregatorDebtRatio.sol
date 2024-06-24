@@ -9,7 +9,7 @@ contract OneNetAggregatorDebtRatio is BaseOneNetAggregator {
 
     function getRoundData(uint80) public view returns (uint80, int256, uint256, uint256, uint80) {
         uint totalIssuedTribes = IIssuer(resolver.requireAndGetAddress("Issuer", "aggregate debt info")).totalIssuedTribes(
-            "hUSD",
+            "rUSD",
             true
         );
         uint totalDebtShares = IRwaoneDebtShare(resolver.requireAndGetAddress("RwaoneDebtShare", "aggregate debt info"))

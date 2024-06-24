@@ -191,13 +191,13 @@
 	"DebtMigratorOnEthereum": {
 		"deploy": false
 	},
-	"TokenStatehUSD": {
+	"TokenStaterUSD": {
 		"deploy": false
 	},
-	"ProxyhUSD": {
+	"ProxyrUSD": {
 		"deploy": false
 	},
-	"TribehUSD": {
+	"TriberUSD": {
 		"deploy": false
 	},
 	"TokenStatehETH": {

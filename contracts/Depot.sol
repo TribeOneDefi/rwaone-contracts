@@ -54,15 +54,15 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
     // The ending index of our queue exclusive
     uint public depositEndIndex;
 
-    /* This is a convenience variable so users and dApps can just query how much hUSD
+    /* This is a convenience variable so users and dApps can just query how much rUSD
        we have available for purchase without having to iterate the mapping with a
        O(n) amount of calls for something we'll probably want to display quite regularly. */
     uint public totalSellableDeposits;
 
-    // The minimum amount of hUSD required to enter the FiFo queue
+    // The minimum amount of rUSD required to enter the FiFo queue
     uint public minimumDepositAmount = 50 * SafeDecimalMath.unit();
 
-    // A cap on the amount of hUSD you can buy with ETH in 1 transaction
+    // A cap on the amount of rUSD you can buy with ETH in 1 transaction
     uint public maxEthPurchase = 500 * SafeDecimalMath.unit();
 
     // If a user deposits a tribe amount < the minimumDepositAmount the contract will keep
@@ -72,7 +72,7 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
-    bytes32 private constant CONTRACT_RWAONEHUSD = "TribehUSD";
+    bytes32 private constant CONTRACT_RWAONERUSD = "TriberUSD";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
     bytes32 private constant CONTRACT_RWAONEETIX = "Rwaone";
 
@@ -103,8 +103,8 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
     }
 
     /**
-     * @notice Set the minimum deposit amount required to depoist hUSD into the FIFO queue
-     * @param _amount The new new minimum number of hUSD required to deposit
+     * @notice Set the minimum deposit amount required to depoist rUSD into the FIFO queue
+     * @param _amount The new new minimum number of rUSD required to deposit
      */
     function setMinimumDepositAmount(uint _amount) external onlyOwner {
         // Do not allow us to set it less than 1 dollar opening up to fractional desposits in the queue again
@@ -116,14 +116,14 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
     /* ========== MUTATIVE FUNCTIONS ========== */
 
     /**
-     * @notice Fallback function (exchanges ETH to hUSD)
+     * @notice Fallback function (exchanges ETH to rUSD)
      */
     function() external payable nonReentrant rateNotInvalid(ETH) notPaused {
         _exchangeEtherForTribes();
     }
 
     /**
-     * @notice Exchange ETH to hUSD.
+     * @notice Exchange ETH to rUSD.
      */
     /* solhint-disable multiple-sends, reentrancy */
     function exchangeEtherForTribes()
@@ -133,7 +133,7 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
         rateNotInvalid(ETH)
         notPaused
         returns (
-            uint // Returns the number of Tribes (hUSD) received
+            uint // Returns the number of Tribes (rUSD) received
         )
     {
         return _exchangeEtherForTribes();
@@ -189,7 +189,7 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
                     // Note: Fees are calculated by the Tribe contract, so when
                     //       we request a specific transfer here, the fee is
                     //       automatically deducted and sent to the fee pool.
-                    tribehUSD().transfer(msg.sender, remainingToFulfill);
+                    triberUSD().transfer(msg.sender, remainingToFulfill);
 
                     // And we have nothing left to fulfill on this order.
                     remainingToFulfill = 0;
@@ -224,7 +224,7 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
                     // Note: Fees are calculated by the Tribe contract, so when
                     //       we request a specific transfer here, the fee is
                     //       automatically deducted and sent to the fee pool.
-                    tribehUSD().transfer(msg.sender, deposit.amount);
+                    triberUSD().transfer(msg.sender, deposit.amount);
 
                     // And subtract the order from our outstanding amount remaining
                     // for the next iteration of the loop.
@@ -244,7 +244,7 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
 
         if (fulfilled > 0) {
             // Now tell everyone that we gave them that many (only if the amount is greater than 0).
-            emit Exchange("ETH", msg.value, "hUSD", fulfilled);
+            emit Exchange("ETH", msg.value, "rUSD", fulfilled);
         }
 
         return fulfilled;
@@ -253,7 +253,7 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
     /* solhint-enable multiple-sends, reentrancy */
 
     /**
-     * @notice Exchange ETH to hUSD while insisting on a particular rate. This allows a user to
+     * @notice Exchange ETH to rUSD while insisting on a particular rate. This allows a user to
      *         exchange while protecting against frontrunning by the contract owner on the exchange rate.
      * @param guaranteedRate The exchange rate (ether price) which must be honored or the call will revert.
      */
@@ -265,7 +265,7 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
         rateNotInvalid(ETH)
         notPaused
         returns (
-            uint // Returns the number of Tribes (hUSD) received
+            uint // Returns the number of Tribes (rUSD) received
         )
     {
         require(guaranteedRate == exchangeRates().rateForCurrency(ETH), "Guaranteed rate would not be received");
@@ -339,18 +339,18 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
         // Ok, transfer the Tribes to our funds wallet.
         // These do not go in the deposit queue as they aren't for sale as such unless
         // they're sent back in from the funds wallet.
-        tribehUSD().transferFrom(msg.sender, fundsWallet, tribeAmount);
+        triberUSD().transferFrom(msg.sender, fundsWallet, tribeAmount);
 
         // And send them the wHAKA.
         rwaone().transfer(msg.sender, tribeetixToSend);
 
-        emit Exchange("hUSD", tribeAmount, "wHAKA", tribeetixToSend);
+        emit Exchange("rUSD", tribeAmount, "wHAKA", tribeetixToSend);
 
         return tribeetixToSend;
     }
 
     /**
-     * @notice Exchange hUSD for wHAKA
+     * @notice Exchange rUSD for wHAKA
      * @param tribeAmount The amount of tribes the user wishes to exchange.
      */
     function exchangeTribesForHAKA(
@@ -367,7 +367,7 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
     }
 
     /**
-     * @notice Exchange hUSD for wHAKA while insisting on a particular rate. This allows a user to
+     * @notice Exchange rUSD for wHAKA while insisting on a particular rate. This allows a user to
      *         exchange while protecting against frontrunning by the contract owner on the exchange rate.
      * @param tribeAmount The amount of tribes the user wishes to exchange.
      * @param guaranteedRate A rate (rwaone price) the caller wishes to insist upon.
@@ -436,18 +436,18 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
         require(tribesToSend > 0, "You have no deposits to withdraw.");
 
         // Send their deposits back to them (minus fees)
-        tribehUSD().transfer(msg.sender, tribesToSend);
+        triberUSD().transfer(msg.sender, tribesToSend);
 
         emit TribeWithdrawal(msg.sender, tribesToSend);
     }
 
     /**
      * @notice depositTribes: Allows users to deposit tribes via the approve / transferFrom workflow
-     * @param amount The amount of hUSD you wish to deposit (must have been approved first)
+     * @param amount The amount of rUSD you wish to deposit (must have been approved first)
      */
     function depositTribes(uint amount) external {
         // Grab the amount of tribes. Will fail if not approved first
-        tribehUSD().transferFrom(msg.sender, address(this), amount);
+        triberUSD().transferFrom(msg.sender, address(this), amount);
 
         // A minimum deposit amount is designed to protect purchasers from over paying
         // gas for fullfilling multiple small tribe deposits
@@ -474,7 +474,7 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         addresses = new bytes32[](3);
-        addresses[0] = CONTRACT_RWAONEHUSD;
+        addresses[0] = CONTRACT_RWAONERUSD;
         addresses[1] = CONTRACT_EXRATES;
         addresses[2] = CONTRACT_RWAONEETIX;
     }
@@ -495,7 +495,7 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
      * @param amount The amount of ether (in wei) you want to ask about
      */
     function tribeetixReceivedForEther(uint amount) public view returns (uint) {
-        // How much is the ETH they sent us worth in hUSD (ignoring the transfer fee)?
+        // How much is the ETH they sent us worth in rUSD (ignoring the transfer fee)?
         uint valueSentInTribes = amount.multiplyDecimal(exchangeRates().rateForCurrency(ETH));
 
         // Now, how many wHAKA will that USD amount buy?
@@ -514,8 +514,8 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
 
     /* ========== INTERNAL VIEWS ========== */
 
-    function tribehUSD() internal view returns (IERC20) {
-        return IERC20(requireAndGetAddress(CONTRACT_RWAONEHUSD));
+    function triberUSD() internal view returns (IERC20) {
+        return IERC20(requireAndGetAddress(CONTRACT_RWAONERUSD));
     }
 
     function rwaone() internal view returns (IERC20) {

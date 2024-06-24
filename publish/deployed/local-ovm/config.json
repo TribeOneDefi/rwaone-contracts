@@ -92,7 +92,7 @@
 	"DappMaintenance": {
 		"deploy": true
 	},
-	"TribehUSD": {
+	"TriberUSD": {
 		"deploy": true
 	},
 	"ProxyFeePool": {
@@ -101,7 +101,7 @@
 	"ProxyRwaone": {
 		"deploy": true
 	},
-	"ProxyhUSD": {
+	"ProxyrUSD": {
 		"deploy": true
 	},
 	"SafeDecimalMath": {
@@ -113,7 +113,7 @@
 	"TokenStateRwaone": {
 		"deploy": true
 	},
-	"TokenStatehUSD": {
+	"TokenStaterUSD": {
 		"deploy": true
 	},
 	"TokenStatehBTC": {

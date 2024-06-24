@@ -20,13 +20,13 @@ const {
 } = require('../..');
 
 contract('CollateralUtil', async accounts => {
-	const hUSD = toBytes32('hUSD');
+	const rUSD = toBytes32('rUSD');
 	const hETH = toBytes32('hETH');
 	const hBTC = toBytes32('hBTC');
 
 	const oneRenBTC = web3.utils.toBN('100000000');
-	const oneThousandhUSD = toUnit(1000);
-	const fiveThousandhUSD = toUnit(5000);
+	const oneThousandrUSD = toUnit(1000);
+	const fiveThousandrUSD = toUnit(5000);
 
 	let tx;
 	let id;
@@ -41,7 +41,7 @@ contract('CollateralUtil', async accounts => {
 		feePool,
 		exchangeRates,
 		addressResolver,
-		hUSDTribe,
+		rUSDTribe,
 		hBTCTribe,
 		renBTC,
 		tribes,
@@ -56,9 +56,9 @@ contract('CollateralUtil', async accounts => {
 		return event.args.id;
 	};
 
-	const issuehUSDToAccount = async (issueAmount, receiver) => {
+	const issuerUSDToAccount = async (issueAmount, receiver) => {
 		// Set up the depositor with an amount of tribes to deposit.
-		await hUSDTribe.issue(receiver, issueAmount, {
+		await rUSDTribe.issue(receiver, issueAmount, {
 			from: owner,
 		});
 	};
@@ -89,10 +89,10 @@ contract('CollateralUtil', async accounts => {
 	};
 
 	const setupMultiCollateral = async () => {
-		tribes = ['hUSD', 'hBTC'];
+		tribes = ['rUSD', 'hBTC'];
 		({
 			ExchangeRates: exchangeRates,
-			TribehUSD: hUSDTribe,
+			TriberUSD: rUSDTribe,
 			TribehBTC: hBTCTribe,
 			FeePool: feePool,
 			AddressResolver: addressResolver,
@@ -159,14 +159,14 @@ contract('CollateralUtil', async accounts => {
 		await manager.addCollaterals([cerc20.address], { from: owner });
 
 		await cerc20.addTribes(
-			['TribehUSD', 'TribehBTC'].map(toBytes32),
-			['hUSD', 'hBTC'].map(toBytes32),
+			['TriberUSD', 'TribehBTC'].map(toBytes32),
+			['rUSD', 'hBTC'].map(toBytes32),
 			{ from: owner }
 		);
 
 		await manager.addTribes(
-			['TribehUSD', 'TribehBTC'].map(toBytes32),
-			['hUSD', 'hBTC'].map(toBytes32),
+			['TriberUSD', 'TribehBTC'].map(toBytes32),
+			['rUSD', 'hBTC'].map(toBytes32),
 			{ from: owner }
 		);
 		// rebuild the cache to add the tribes we need.
@@ -186,7 +186,7 @@ contract('CollateralUtil', async accounts => {
 	beforeEach(async () => {
 		await updateAggregatorRates(exchangeRates, null, [hETH, hBTC], [100, 10000].map(toUnit));
 
-		await issuehUSDToAccount(toUnit(1000), owner);
+		await issuerUSDToAccount(toUnit(1000), owner);
 		await issuehBTCtoAccount(toUnit(10), owner);
 
 		await debtCache.takeDebtSnapshot();
@@ -212,16 +212,16 @@ contract('CollateralUtil', async accounts => {
 
 		/**
 		 * r = target issuance ratio
-		 * D = debt balance in hUSD
-		 * V = Collateral VALUE in hUSD
+		 * D = debt balance in rUSD
+		 * V = Collateral VALUE in rUSD
 		 * P = liquidation penalty
-		 * Calculates amount of hUSD = (D - V * r) / (1 - (1 + P) * r)
+		 * Calculates amount of rUSD = (D - V * r) / (1 - (1 + P) * r)
 		 *
 		 * To go back to another tribe, remember to do effective value
 		 */
 
 		beforeEach(async () => {
-			tx = await cerc20.open(oneRenBTC, fiveThousandhUSD, hUSD, {
+			tx = await cerc20.open(oneRenBTC, fiveThousandrUSD, rUSD, {
 				from: account1,
 			});
 
@@ -282,24 +282,24 @@ contract('CollateralUtil', async accounts => {
 			collateralKey = await cerc20.collateralKey();
 		});
 
-		it('when BTC is @ $10000 and we are liquidating 1000 hUSD, then redeem 0.11 BTC', async () => {
-			collateralRedeemed = await util.collateralRedeemed(hUSD, oneThousandhUSD, collateralKey);
+		it('when BTC is @ $10000 and we are liquidating 1000 rUSD, then redeem 0.11 BTC', async () => {
+			collateralRedeemed = await util.collateralRedeemed(rUSD, oneThousandrUSD, collateralKey);
 
 			assert.bnEqual(collateralRedeemed, toUnit(0.11));
 		});
 
-		it('when BTC is @ $20000 and we are liquidating 1000 hUSD, then redeem 0.055 BTC', async () => {
+		it('when BTC is @ $20000 and we are liquidating 1000 rUSD, then redeem 0.055 BTC', async () => {
 			await updateAggregatorRates(exchangeRates, null, [hBTC], [toUnit(20000)]);
 
-			collateralRedeemed = await util.collateralRedeemed(hUSD, oneThousandhUSD, collateralKey);
+			collateralRedeemed = await util.collateralRedeemed(rUSD, oneThousandrUSD, collateralKey);
 
 			assert.bnEqual(collateralRedeemed, toUnit(0.055));
 		});
 
-		it('when BTC is @ $7000 and we are liquidating 2500 hUSD, then redeem 0.36666 BTC', async () => {
+		it('when BTC is @ $7000 and we are liquidating 2500 rUSD, then redeem 0.36666 BTC', async () => {
 			await updateAggregatorRates(exchangeRates, null, [hBTC], [toUnit(7000)]);
 
-			collateralRedeemed = await util.collateralRedeemed(hUSD, toUnit(2500), collateralKey);
+			collateralRedeemed = await util.collateralRedeemed(rUSD, toUnit(2500), collateralKey);
 
 			assert.bnClose(collateralRedeemed, toUnit(0.392857142857142857), '100');
 		});

@@ -39,7 +39,7 @@ contract('FuturesMarketSettings', accounts => {
 			FuturesMarketManager: futuresMarketManager,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['hUSD'],
+			tribes: ['rUSD'],
 			contracts: [
 				'FuturesMarketSettings',
 				'FuturesMarketManager',
@@ -316,7 +316,7 @@ contract('FuturesMarketSettings', accounts => {
 				from: owner,
 			});
 			assert.eventEqual(txn, 'MinKeeperFeeUpdated', {
-				hUSD: minKeeperFee,
+				rUSD: minKeeperFee,
 			});
 		});
 	});

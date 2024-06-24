@@ -69,7 +69,7 @@ contract('PerpsV2MarketSettings', accounts => {
 			FuturesMarketManager: futuresMarketManager,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['hUSD'],
+			tribes: ['rUSD'],
 			contracts: [
 				'PerpsV2MarketSettings',
 				'FuturesMarketManager',
@@ -406,7 +406,7 @@ contract('PerpsV2MarketSettings', accounts => {
 				from: owner,
 			});
 			assert.eventEqual(txn, 'MinKeeperFeeUpdated', {
-				hUSD: minKeeperFee,
+				rUSD: minKeeperFee,
 			});
 		});
 	});
@@ -457,7 +457,7 @@ contract('PerpsV2MarketSettings', accounts => {
 				from: owner,
 			});
 			assert.eventEqual(txn, 'MaxKeeperFeeUpdated', {
-				hUSD: maxKeeperFee,
+				rUSD: maxKeeperFee,
 			});
 		});
 	});

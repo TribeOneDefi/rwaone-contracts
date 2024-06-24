@@ -30,13 +30,13 @@ async function _getAmount({ ctx, symbol, user, amount }) {
 		await _getHAKA({ ctx, user, amount });
 	} else if (symbol === 'WETH') {
 		await _getWETH({ ctx, user, amount });
-	} else if (symbol === 'hUSD') {
-		await _gethUSD({ ctx, user, amount });
+	} else if (symbol === 'rUSD') {
+		await _getrUSD({ ctx, user, amount });
 	} else if (symbol === 'ETH') {
 		await _getETHFromOtherUsers({ ctx, user, amount });
 	} else {
 		throw new Error(
-			`Symbol ${symbol} not yet supported. TODO: Support via exchanging hUSD to other Tribes.`
+			`Symbol ${symbol} not yet supported. TODO: Support via exchanging rUSD to other Tribes.`
 		);
 	}
 }
@@ -128,12 +128,12 @@ async function _getHAKAForOwnerOnL2ByHackMinting({ ctx, amount }) {
 	await tx.wait();
 }
 
-async function _gethUSD({ ctx, user, amount }) {
-	let { Rwaone, TribehUSD } = ctx.contracts;
+async function _getrUSD({ ctx, user, amount }) {
+	let { Rwaone, TriberUSD } = ctx.contracts;
 
 	let tx;
 
-	const requiredHAKA = await _getHAKAAmountRequiredForhUSDAmount({ ctx, amount });
+	const requiredHAKA = await _getHAKAAmountRequiredForrUSDAmount({ ctx, amount });
 	// TODO: mul(12) is a temp workaround for "Amount too large" error.
 	await ensureBalance({ ctx, symbol: 'wHAKA', user: ctx.users.owner, balance: requiredHAKA.mul(12) });
 
@@ -141,12 +141,12 @@ async function _gethUSD({ ctx, user, amount }) {
 	tx = await Rwaone.issueTribes(amount);
 	await tx.wait();
 
-	TribehUSD = TribehUSD.connect(ctx.users.owner);
-	tx = await TribehUSD.transfer(user.address, amount);
+	TriberUSD = TriberUSD.connect(ctx.users.owner);
+	tx = await TriberUSD.transfer(user.address, amount);
 	await tx.wait();
 }
 
-async function _getHAKAAmountRequiredForhUSDAmount({ ctx, amount }) {
+async function _getHAKAAmountRequiredForrUSDAmount({ ctx, amount }) {
 	const { Exchanger, SystemSettings } = ctx.contracts;
 
 	const ratio = await SystemSettings.issuanceRatio();
@@ -154,7 +154,7 @@ async function _getHAKAAmountRequiredForhUSDAmount({ ctx, amount }) {
 
 	const [expectedAmount, ,] = await Exchanger.getAmountsForExchange(
 		collateral,
-		toBytes32('hUSD'),
+		toBytes32('rUSD'),
 		toBytes32('wHAKA')
 	);
 

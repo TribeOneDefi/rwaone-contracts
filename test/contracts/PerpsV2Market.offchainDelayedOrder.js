@@ -21,7 +21,7 @@ contract('PerpsV2Market PerpsV2MarketOffchainOrders', accounts => {
 		mockPyth,
 		exchangeRates,
 		circuitBreaker,
-		hUSD,
+		rUSD,
 		systemSettings,
 		systemStatus,
 		debtCache;
@@ -111,13 +111,13 @@ contract('PerpsV2Market PerpsV2MarketOffchainOrders', accounts => {
 			PerpsV2ExchangeRate: perpsV2ExchangeRate,
 			ExchangeRates: exchangeRates,
 			CircuitBreaker: circuitBreaker,
-			TribehUSD: hUSD,
+			TriberUSD: rUSD,
 			SystemSettings: systemSettings,
 			SystemStatus: systemStatus,
 			DebtCache: debtCache,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['hUSD', 'hBTC', 'hETH'],
+			tribes: ['rUSD', 'hBTC', 'hETH'],
 			contracts: [
 				'FuturesMarketManager',
 				'PerpsV2MarketSettings',
@@ -146,9 +146,9 @@ contract('PerpsV2Market PerpsV2MarketOffchainOrders', accounts => {
 		// it will be enabled for specific tests
 		await systemSettings.setExchangeDynamicFeeRounds('0', { from: owner });
 
-		// Issue the trader some hUSD
+		// Issue the trader some rUSD
 		for (const t of [trader, trader2, trader3]) {
-			await hUSD.issue(t, traderInitialBalance);
+			await rUSD.issue(t, traderInitialBalance);
 		}
 
 		// use implementation ABI on the proxy address to simplify calling
@@ -353,7 +353,7 @@ contract('PerpsV2Market PerpsV2MarketOffchainOrders', accounts => {
 
 			const decodedLogs = await getDecodedLogs({
 				hash: tx.tx,
-				contracts: [hUSD, perpsV2Market, perpsV2MarketDelayedExecution],
+				contracts: [rUSD, perpsV2Market, perpsV2MarketDelayedExecution],
 			});
 
 			// OffchainDelayedOrderSubmitted
@@ -415,7 +415,7 @@ contract('PerpsV2Market PerpsV2MarketOffchainOrders', accounts => {
 
 			const decodedLogs = await getDecodedLogs({
 				hash: tx.tx,
-				contracts: [hUSD, perpsV2Market, perpsV2MarketDelayedExecution, perpsV2MarketDelayedIntent],
+				contracts: [rUSD, perpsV2Market, perpsV2MarketDelayedExecution, perpsV2MarketDelayedIntent],
 			});
 
 			decodedEventEqual({
@@ -519,7 +519,7 @@ contract('PerpsV2Market PerpsV2MarketOffchainOrders', accounts => {
 				const decodedLogs = await getDecodedLogs({
 					hash: tx.tx,
 					contracts: [
-						hUSD,
+						rUSD,
 						perpsV2Market,
 						perpsV2MarketDelayedExecution,
 						perpsV2MarketDelayedIntent,
@@ -555,7 +555,7 @@ contract('PerpsV2Market PerpsV2MarketOffchainOrders', accounts => {
 					assert.deepEqual(decodedLogNames, ['Issued', 'DelayedOrderRemoved']);
 					decodedEventEqual({
 						event: 'Issued',
-						emittedFrom: hUSD.address,
+						emittedFrom: rUSD.address,
 						args: [from, keeperFee],
 						log: decodedLogs[0],
 					});
@@ -1104,7 +1104,7 @@ contract('PerpsV2Market PerpsV2MarketOffchainOrders', accounts => {
 					hash: tx.tx,
 					contracts: [
 						mockPyth,
-						hUSD,
+						rUSD,
 						perpsV2Market,
 						perpsV2MarketDelayedExecution,
 						perpsV2MarketDelayedIntent,
@@ -1148,7 +1148,7 @@ contract('PerpsV2Market PerpsV2MarketOffchainOrders', accounts => {
 					);
 					decodedEventEqual({
 						event: 'Issued',
-						emittedFrom: hUSD.address,
+						emittedFrom: rUSD.address,
 						args: [from, keeperFee],
 						log: decodedLogs[3],
 					});

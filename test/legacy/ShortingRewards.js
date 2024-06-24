@@ -30,7 +30,7 @@ contract('ShortingRewards', accounts => {
 		account2,
 	] = accounts;
 
-	const hUSD = toBytes32('hUSD');
+	const rUSD = toBytes32('rUSD');
 	const hETH = toBytes32('hETH');
 	const iETH = toBytes32('iETH');
 	const hBTC = toBytes32('hBTC');
@@ -46,7 +46,7 @@ contract('ShortingRewards', accounts => {
 		feePool,
 		tribes,
 		short,
-		hUSDTribe,
+		rUSDTribe,
 		hBTCTribe,
 		hETHTribe,
 		issuer,
@@ -78,9 +78,9 @@ contract('ShortingRewards', accounts => {
 		assert.equal(await exchangeRates.rateIsStale(toBytes32(rewardsTokenIdentifier)), false);
 	};
 
-	const issuehUSDToAccount = async (issueAmount, receiver) => {
+	const issuerUSDToAccount = async (issueAmount, receiver) => {
 		// Set up the depositor with an amount of tribes to deposit.
-		await hUSDTribe.issue(receiver, issueAmount, {
+		await rUSDTribe.issue(receiver, issueAmount, {
 			from: owner,
 		});
 	};
@@ -109,10 +109,10 @@ contract('ShortingRewards', accounts => {
 	});
 
 	before(async () => {
-		tribes = ['hUSD', 'hBTC', 'hETH', 'iBTC', 'iETH'];
+		tribes = ['rUSD', 'hBTC', 'hETH', 'iBTC', 'iETH'];
 		({
 			ExchangeRates: exchangeRates,
-			TribehUSD: hUSDTribe,
+			TriberUSD: rUSDTribe,
 			TribehBTC: hBTCTribe,
 			TribehETH: hETHTribe,
 			FeePool: feePool,
@@ -170,7 +170,7 @@ contract('ShortingRewards', accounts => {
 			owner: owner,
 			manager: manager.address,
 			resolver: addressResolver.address,
-			collatKey: hUSD,
+			collatKey: rUSD,
 			minColat: toUnit(1.5),
 			minSize: toUnit(0.1),
 		});
@@ -202,7 +202,7 @@ contract('ShortingRewards', accounts => {
 			{ from: owner }
 		);
 
-		await hUSDTribe.approve(short.address, toUnit(100000), { from: account1 });
+		await rUSDTribe.approve(short.address, toUnit(100000), { from: account1 });
 
 		shortingRewards = await setupContract({
 			accounts,
@@ -231,11 +231,11 @@ contract('ShortingRewards', accounts => {
 	beforeEach(async () => {
 		await updateAggregatorRates(exchangeRates, null, [hETH, hBTC], [100, 10000].map(toUnit));
 
-		await issuehUSDToAccount(toUnit(100000), owner);
+		await issuerUSDToAccount(toUnit(100000), owner);
 		await issuehBTCtoAccount(toUnit(10), owner);
 		await issuehETHToAccount(toUnit(100), owner);
 
-		await issuehUSDToAccount(toUnit(20000), account1);
+		await issuerUSDToAccount(toUnit(20000), account1);
 		await issuehBTCtoAccount(toUnit(2), account1);
 		await issuehETHToAccount(toUnit(10), account1);
 

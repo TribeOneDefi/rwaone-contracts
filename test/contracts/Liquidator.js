@@ -41,7 +41,7 @@ const MockExchanger = artifacts.require('MockExchanger');
 const FlexibleStorage = artifacts.require('FlexibleStorage');
 
 contract('Liquidator', accounts => {
-	const [hUSD, wHAKA] = ['hUSD', 'wHAKA'].map(toBytes32);
+	const [rUSD, wHAKA] = ['rUSD', 'wHAKA'].map(toBytes32);
 	const [deployerAccount, owner, , account1, alice, bob, carol, david] = accounts;
 	const week = 3600 * 24 * 7;
 
@@ -53,7 +53,7 @@ contract('Liquidator', accounts => {
 		rwaone,
 		tribeetixProxy,
 		tribeetixDebtShare,
-		tribehUSD,
+		triberUSD,
 		rewardEscrowV2,
 		systemSettings,
 		systemStatus,
@@ -74,7 +74,7 @@ contract('Liquidator', accounts => {
 			ProxyERC20Rwaone: tribeetixProxy,
 			RwaoneDebtShare: tribeetixDebtShare,
 			RewardEscrowV2: rewardEscrowV2,
-			TribehUSD: tribehUSD,
+			TriberUSD: triberUSD,
 			SystemSettings: systemSettings,
 			SystemStatus: systemStatus,
 			DebtCache: debtCache,
@@ -82,7 +82,7 @@ contract('Liquidator', accounts => {
 			RwaoneEscrow: legacyRwaoneEscrow,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['hUSD'],
+			tribes: ['rUSD'],
 			contracts: [
 				'AddressResolver',
 				'ExchangeRates',
@@ -131,7 +131,7 @@ contract('Liquidator', accounts => {
 
 	const setLiquidHAKABalance = async (account, amount) => {
 		// burn debt
-		await rwaone.burnTribes(await tribehUSD.balanceOf(account), { from: account });
+		await rwaone.burnTribes(await triberUSD.balanceOf(account), { from: account });
 		// remove all snx
 		await rwaone.transfer(owner, await rwaone.balanceOf(account), {
 			from: account,
@@ -349,22 +349,22 @@ contract('Liquidator', accounts => {
 					penalty = toUnit('0.1');
 				});
 				describe('given liquidation penalty is 10%', () => {
-					it('calculates hUSD to fix ratio from 200%, with $600 wHAKA collateral and $300 debt', async () => {
+					it('calculates rUSD to fix ratio from 200%, with $600 wHAKA collateral and $300 debt', async () => {
 						const expectedAmount = toUnit('260.869565217391304347');
 
 						// amount of debt to redeem to fix
-						const husdToLiquidate = await liquidator.calculateAmountToFixCollateral(
+						const rusdToLiquidate = await liquidator.calculateAmountToFixCollateral(
 							debtBefore,
 							collateralBefore,
 							penalty
 						);
 
-						assert.bnEqual(husdToLiquidate, expectedAmount);
+						assert.bnEqual(rusdToLiquidate, expectedAmount);
 
 						// check expected amount fixes c-ratio to 800%
-						const debtAfter = debtBefore.sub(husdToLiquidate);
+						const debtAfter = debtBefore.sub(rusdToLiquidate);
 						const collateralAfterMinusPenalty = collateralBefore.sub(
-							multiplyDecimal(husdToLiquidate, toUnit('1').add(penalty))
+							multiplyDecimal(rusdToLiquidate, toUnit('1').add(penalty))
 						);
 
 						// c-ratio = debt / collateral
@@ -372,23 +372,23 @@ contract('Liquidator', accounts => {
 
 						assert.bnEqual(collateralRatio, ratio);
 					});
-					it('calculates hUSD to fix ratio from 300%, with $600 wHAKA collateral and $200 debt', async () => {
+					it('calculates rUSD to fix ratio from 300%, with $600 wHAKA collateral and $200 debt', async () => {
 						debtBefore = toUnit('200');
 						const expectedAmount = toUnit('144.927536231884057971');
 
 						// amount of debt to redeem to fix
-						const husdToLiquidate = await liquidator.calculateAmountToFixCollateral(
+						const rusdToLiquidate = await liquidator.calculateAmountToFixCollateral(
 							debtBefore,
 							collateralBefore,
 							penalty
 						);
 
-						assert.bnEqual(husdToLiquidate, expectedAmount);
+						assert.bnEqual(rusdToLiquidate, expectedAmount);
 
 						// check expected amount fixes c-ratio to 800%
-						const debtAfter = debtBefore.sub(husdToLiquidate);
+						const debtAfter = debtBefore.sub(rusdToLiquidate);
 						const collateralAfterMinusPenalty = collateralBefore.sub(
-							multiplyDecimal(husdToLiquidate, toUnit('1').add(penalty))
+							multiplyDecimal(rusdToLiquidate, toUnit('1').add(penalty))
 						);
 
 						// c-ratio = debt / collateral
@@ -418,11 +418,11 @@ contract('Liquidator', accounts => {
 					// wen wHAKA 6 dolla
 					await updateHAKAPrice('6');
 
-					// Alice issues hUSD $600
+					// Alice issues rUSD $600
 					await rwaone.transfer(alice, toUnit('800'), { from: owner });
 					await rwaone.issueMaxTribes({ from: alice });
 
-					// Bob issues hUSD $6000
+					// Bob issues rUSD $6000
 					await rwaone.transfer(bob, toUnit('8000'), { from: owner });
 					await rwaone.issueMaxTribes({ from: bob });
 
@@ -520,10 +520,10 @@ contract('Liquidator', accounts => {
 							// Record Alices state
 							aliceCollateralBefore = await rwaone.collateral(alice);
 							aliceDebtShareBefore = await tribeetixDebtShare.balanceOf(alice);
-							aliceDebtValueBefore = await rwaone.debtBalanceOf(alice, hUSD);
+							aliceDebtValueBefore = await rwaone.debtBalanceOf(alice, rUSD);
 
 							// Record Bobs state
-							bobDebtValueBefore = await rwaone.debtBalanceOf(bob, hUSD);
+							bobDebtValueBefore = await rwaone.debtBalanceOf(bob, rUSD);
 							bobRewardsBalanceBefore = await liquidatorRewards.earned(bob);
 
 							txn = await rwaone.liquidateSelf({
@@ -577,7 +577,7 @@ contract('Liquidator', accounts => {
 							);
 
 							// Make sure the other staker, Bob, gets the redeemed wHAKA bonus.
-							const bobDebtValueAfter = await rwaone.debtBalanceOf(bob, hUSD);
+							const bobDebtValueAfter = await rwaone.debtBalanceOf(bob, rUSD);
 							const bobRewardsBalanceAfter = await liquidatorRewards.earned(bob);
 
 							assert.bnGt(bobDebtValueAfter, bobDebtValueBefore);
@@ -598,8 +598,8 @@ contract('Liquidator', accounts => {
 					});
 					it('escrow balance is not used for self-liquidation', async () => {
 						const snxBalanceBefore = await rwaone.balanceOf(alice);
-						const debtBefore = await rwaone.debtBalanceOf(alice, hUSD);
-						const totalDebt = await rwaone.totalIssuedTribes(hUSD);
+						const debtBefore = await rwaone.debtBalanceOf(alice, rUSD);
+						const totalDebt = await rwaone.totalIssuedTribes(rUSD);
 						// just above the liquidation ratio
 						await updateHAKAPrice('1');
 						await rwaone.liquidateSelf({ from: alice });
@@ -609,7 +609,7 @@ contract('Liquidator', accounts => {
 						// escrow untouched
 						assert.bnEqual(await rewardEscrowV2.balanceOf(alice), escrowBalance);
 						// system debt is the same
-						assert.bnEqual(await rwaone.totalIssuedTribes(hUSD), totalDebt);
+						assert.bnEqual(await rwaone.totalIssuedTribes(rUSD), totalDebt);
 						// debt shares forgiven matching the liquidated wHAKA
 						// redeemed = (liquidatedSnx * HAKAPrice / (1 + penalty))
 						// debt is fewer shares (but of higher debt per share), by (total - redeemed / total) more debt per share
@@ -617,7 +617,7 @@ contract('Liquidator', accounts => {
 						const redeemed = divideDecimal(liquidatedSnx, toUnit('1.2'));
 						const shareMultiplier = divideDecimal(totalDebt, totalDebt.sub(redeemed));
 						assert.bnClose(
-							await rwaone.debtBalanceOf(alice, hUSD),
+							await rwaone.debtBalanceOf(alice, rUSD),
 							multiplyDecimal(debtBefore.sub(redeemed), shareMultiplier),
 							toUnit(0.001)
 						);
@@ -675,11 +675,11 @@ contract('Liquidator', accounts => {
 					// wen wHAKA 6 dolla
 					await updateHAKAPrice('6');
 
-					// Alice issues hUSD $600
+					// Alice issues rUSD $600
 					await rwaone.transfer(alice, toUnit('800'), { from: owner });
 					await rwaone.issueMaxTribes({ from: alice });
 
-					// Bob issues hUSD $6000
+					// Bob issues rUSD $6000
 					await rwaone.transfer(bob, toUnit('8000'), { from: owner });
 					await rwaone.issueMaxTribes({ from: bob });
 
@@ -1083,7 +1083,7 @@ contract('Liquidator', accounts => {
 										// Record Alices state
 										aliceCollateralBefore = await rwaone.collateral(alice);
 										aliceDebtShareBefore = await tribeetixDebtShare.balanceOf(alice);
-										aliceDebtValueBefore = await rwaone.debtBalanceOf(alice, hUSD);
+										aliceDebtValueBefore = await rwaone.debtBalanceOf(alice, rUSD);
 
 										// Record Bobs state
 										bobSnxBalanceBefore = await rwaone.balanceOf(bob);
@@ -1195,10 +1195,10 @@ contract('Liquidator', accounts => {
 									assert.bnEqual(await rwaone.getFirstNonZeroEscrowIndex(alice), 0);
 								});
 								it('escrow balance is used for liquidation (partial)', async () => {
-									const debtBefore = await rwaone.debtBalanceOf(alice, hUSD);
+									const debtBefore = await rwaone.debtBalanceOf(alice, rUSD);
 									const debtSharesBefore = await tribeetixDebtShare.balanceOf(alice);
 									const totalDebtSharesBefore = await tribeetixDebtShare.totalSupply();
-									const totalDebt = await rwaone.totalIssuedTribes(hUSD);
+									const totalDebt = await rwaone.totalIssuedTribes(rUSD);
 									const viewResult = await liquidator.liquidationAmounts(alice, false);
 
 									// calculate debt per debt share BEFORE liquidation
@@ -1214,9 +1214,9 @@ contract('Liquidator', accounts => {
 									assert.bnEqual(await rwaone.balanceOf(alice), 0);
 
 									// system debt is the same
-									assert.bnEqual(await rwaone.totalIssuedTribes(hUSD), totalDebt);
+									assert.bnEqual(await rwaone.totalIssuedTribes(rUSD), totalDebt);
 									const escrowAfter = await rewardEscrowV2.balanceOf(alice);
-									const debtAfter = await rwaone.debtBalanceOf(alice, hUSD);
+									const debtAfter = await rwaone.debtBalanceOf(alice, rUSD);
 
 									// first non zero entry is equal to the amount of 100 - escrow remaining
 									const firstNonZero = await rwaone.getFirstNonZeroEscrowIndex(alice);
@@ -1282,15 +1282,15 @@ contract('Liquidator', accounts => {
 								it('escrow balance is used for liquidation (full)', async () => {
 									// penalty leaves no wHAKA
 									await updateHAKAPrice('0.1');
-									const totalDebt = await rwaone.totalIssuedTribes(hUSD);
+									const totalDebt = await rwaone.totalIssuedTribes(rUSD);
 									const viewResult = await liquidator.liquidationAmounts(alice, false);
 									await rwaone.liquidateDelinquentAccount(alice, { from: bob });
 									// no liquid balance added
 									assert.bnEqual(await rwaone.balanceOf(alice), 0);
 									// system debt is the same
-									assert.bnEqual(await rwaone.totalIssuedTribes(hUSD), totalDebt);
+									assert.bnEqual(await rwaone.totalIssuedTribes(rUSD), totalDebt);
 									const escrowAfter = await rewardEscrowV2.balanceOf(alice);
-									const debtAfter = await rwaone.debtBalanceOf(alice, hUSD);
+									const debtAfter = await rwaone.debtBalanceOf(alice, rUSD);
 									// escrow is mostly removed
 									assert.bnEqual(escrowAfter, 0);
 									assert.bnEqual(debtAfter, 0);
@@ -1309,8 +1309,8 @@ contract('Liquidator', accounts => {
 									);
 								});
 								it('liquidateDelinquentAccountEscrowIndex revokes only after the index provided', async () => {
-									const debtBefore = await rwaone.debtBalanceOf(alice, hUSD);
-									const totalDebt = await rwaone.totalIssuedTribes(hUSD);
+									const debtBefore = await rwaone.debtBalanceOf(alice, rUSD);
+									const totalDebt = await rwaone.totalIssuedTribes(rUSD);
 									const viewResult = await liquidator.liquidationAmounts(alice, false);
 									await rwaone.liquidateDelinquentAccountEscrowIndex(alice, 2, { from: bob });
 									// check first two entries
@@ -1328,9 +1328,9 @@ contract('Liquidator', accounts => {
 									// no liquid balance added
 									assert.bnEqual(await rwaone.balanceOf(alice), 0);
 									// system debt is the same
-									assert.bnEqual(await rwaone.totalIssuedTribes(hUSD), totalDebt);
+									assert.bnEqual(await rwaone.totalIssuedTribes(rUSD), totalDebt);
 									const escrowAfter = await rewardEscrowV2.balanceOf(alice);
-									const debtAfter = await rwaone.debtBalanceOf(alice, hUSD);
+									const debtAfter = await rwaone.debtBalanceOf(alice, rUSD);
 
 									// they have less collateral and less debt
 									assert.bnLt(escrowAfter, escrowBefore);
@@ -1381,13 +1381,13 @@ contract('Liquidator', accounts => {
 									escrowBefore = await createEscrowEntries(alice, toUnit('1'), 200);
 								});
 								it('if liquid is enough, only liquid is used for liquidation', async () => {
-									const totalDebt = await rwaone.totalIssuedTribes(hUSD);
+									const totalDebt = await rwaone.totalIssuedTribes(rUSD);
 									await rwaone.liquidateDelinquentAccount(alice, { from: bob });
 									// new balances
 									const liquidAfter = await rwaone.balanceOf(alice);
 									const escrowAfter = await rewardEscrowV2.balanceOf(alice);
 									// system debt is the same
-									assert.bnEqual(await rwaone.totalIssuedTribes(hUSD), totalDebt);
+									assert.bnEqual(await rwaone.totalIssuedTribes(rUSD), totalDebt);
 									// liquid is reduced
 									assert.bnLt(liquidAfter, liquidBefore);
 									// escrow untouched
@@ -1395,14 +1395,14 @@ contract('Liquidator', accounts => {
 								});
 								it('if liquid is not enough, escrow is used for liquidation (full)', async () => {
 									await updateHAKAPrice('0.25');
-									const totalDebt = await rwaone.totalIssuedTribes(hUSD);
+									const totalDebt = await rwaone.totalIssuedTribes(rUSD);
 									await rwaone.liquidateDelinquentAccount(alice, { from: bob });
 									// new balances
 									const liquidAfter = await rwaone.balanceOf(alice);
 									const escrowAfter = await rewardEscrowV2.balanceOf(alice);
-									const debtAfter = await rwaone.debtBalanceOf(alice, hUSD);
+									const debtAfter = await rwaone.debtBalanceOf(alice, rUSD);
 									// system debt is the same
-									assert.bnEqual(await rwaone.totalIssuedTribes(hUSD), totalDebt);
+									assert.bnEqual(await rwaone.totalIssuedTribes(rUSD), totalDebt);
 									// liquid zero
 									assert.bnEqual(liquidAfter, 0);
 									// escrow zero
@@ -1421,7 +1421,7 @@ contract('Liquidator', accounts => {
 									// new balances
 									const liquidAfter = await rwaone.balanceOf(alice);
 									const escrowAfter = await rewardEscrowV2.balanceOf(alice);
-									const debtAfter = await rwaone.debtBalanceOf(alice, hUSD);
+									const debtAfter = await rwaone.debtBalanceOf(alice, rUSD);
 									// liquid is zero
 									assert.bnEqual(liquidAfter, 0);
 									// escrow is reduced
@@ -1475,7 +1475,7 @@ contract('Liquidator', accounts => {
 									// new balances
 									const liquidAfter = await rwaone.balanceOf(alice);
 									const escrowAfter = await rewardEscrowV2.balanceOf(alice);
-									const debtAfter = await rwaone.debtBalanceOf(alice, hUSD);
+									const debtAfter = await rwaone.debtBalanceOf(alice, rUSD);
 									// liquid is zero
 									assert.bnEqual(liquidAfter, 0);
 									// some debt remains
@@ -1527,7 +1527,7 @@ contract('Liquidator', accounts => {
 			beforeEach(async () => {
 				await updateHAKAPrice('6');
 
-				// David issues hUSD $600
+				// David issues rUSD $600
 				await rwaone.transfer(david, toUnit('800'), { from: owner });
 				await rwaone.issueMaxTribes({ from: david });
 
@@ -1544,7 +1544,7 @@ contract('Liquidator', accounts => {
 				const collateralInUSD = await exchangeRates.effectiveValue(
 					wHAKA,
 					davidCollateralBefore,
-					hUSD
+					rUSD
 				);
 
 				assert.isTrue(davidDebtBefore.gt(collateralInUSD));
@@ -1566,7 +1566,7 @@ contract('Liquidator', accounts => {
 					// Drop wHAKA value to $0.1 after update rates resets to default
 					await updateHAKAPrice('0.1');
 
-					// ensure Bob has enough hUSD
+					// ensure Bob has enough rUSD
 					await rwaone.transfer(bob, toUnit('100000'), {
 						from: owner,
 					});

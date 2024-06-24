@@ -173,22 +173,22 @@
 				"status": "current",
 				"keccak256": "0x0f4ba7bb7e5e1693c90c7133fd0e50e9a2e1e09d8b73dbbf639e36643ac2c66e"
 			},
-			"TokenStatehUSD": {
+			"TokenStaterUSD": {
 				"address": "0x92bAc115d89cA17fd02Ed9357CEcA32842ACB4c2",
 				"status": "current",
 				"keccak256": "0xe9a73f8ee5731dad3d6edc8ba982fbde4f3b6185636701fdc0928ee0fec4ee49"
 			},
-			"ProxyhUSD": {
+			"ProxyrUSD": {
 				"address": "0xbecc58c6D7Ca71b6FCC4cC8c9c5294A0eA7A0397",
 				"status": "current",
 				"keccak256": "0x1e84bdcd34ca237a148738ea651c354fc7a63049db067eee4af5b74261ac052b"
 			},
-			"ProxyERC20hUSD": {
+			"ProxyERC20rUSD": {
 				"address": "0x8c6f28f2F1A3C87F0f938b96d27520d9751ec8d9",
 				"status": "current",
 				"keccak256": "0x067912d947f7e44dc3cc78c50cba795498728b2e8c213acc9a80f317df773762"
 			},
-			"TribehUSD": {
+			"TriberUSD": {
 				"address": "0xF2FF43DA7B6e5963059b7004df43b5c5870EEb18",
 				"status": "replaced",
 				"keccak256": "0x46ea3a53d11e9a3e1dcbb57dc0c282dcd37f3dea3d25fc83d2849d9da9055074",
@@ -199,7 +199,7 @@
 				"status": "current",
 				"keccak256": "0x7a479ab85e4661d4f1eb57135d710b20bd2e4ab066a37a1c1b7b9eeb536da3f6"
 			},
-			"EtherCollateralhUSD": {
+			"EtherCollateralrUSD": {
 				"address": "0xC0c66470E766AE2026E6695966C56C90741811AA",
 				"status": "current",
 				"keccak256": "0x7a479ab85e4661d4f1eb57135d710b20bd2e4ab066a37a1c1b7b9eeb536da3f6"
@@ -291,7 +291,7 @@
 				"status": "current",
 				"keccak256": "0x6bad7c208a6d9e921fbe254a7af649062cdd75b9e4adf4518af082123fa0eb0b"
 			},
-			"TribehUSD": {
+			"TriberUSD": {
 				"address": "0xDfA2d3a0d32F870D87f8A0d7AA6b9CdEB7bc5AdB",
 				"status": "current",
 				"keccak256": "0x548d16dab51321918778c500b04c32240f3d720f19d48533e0db9c2b9b722ebe"
@@ -391,7 +391,7 @@
 				"status": "current",
 				"keccak256": "0xd83c3667bcacd4d33cf0fc649cee03d85e7d3914abb7ce6c9898e6ee1d66da81"
 			},
-			"StakingRewardshUSDDAIUniswapV3": {
+			"StakingRewardsrUSDDAIUniswapV3": {
 				"address": "0x7E11c004d20b502729918687E6E6777b28499085",
 				"status": "current",
 				"keccak256": "0x9841ea1c48ac32392a4bfd0ed581d0950963aa09e866407736fc8b2adb6a25dd"

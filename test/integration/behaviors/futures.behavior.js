@@ -12,11 +12,11 @@ const divideDecimal = (a, b) => a.mul(unit).div(b);
 const multiplyDecimal = (a, b) => a.mul(b).div(unit);
 
 function itCanTrade({ ctx }) {
-	describe.skip('opening positions ', function() {
+	describe.skip('opening positions ', function () {
 		// Sckiped since futures market size is being reduced to deprecate futures in favor of PerpsV2
 		this.retries(0);
 
-		const hUSDAmount = ethers.utils.parseEther('100000');
+		const rUSDAmount = ethers.utils.parseEther('100000');
 
 		let someUser, otherUser;
 		let FuturesMarketManager,
@@ -25,7 +25,7 @@ function itCanTrade({ ctx }) {
 			FuturesMarketData,
 			FuturesMarketBTC,
 			ExchangeRates,
-			TribehUSD;
+			TriberUSD;
 
 		before('target contracts and users', () => {
 			({
@@ -35,7 +35,7 @@ function itCanTrade({ ctx }) {
 				FuturesMarketData,
 				FuturesMarketBTC,
 				ExchangeRates,
-				TribehUSD,
+				TriberUSD,
 			} = ctx.contracts);
 
 			// owner = ctx.users.owner;
@@ -43,12 +43,12 @@ function itCanTrade({ ctx }) {
 			otherUser = ctx.users.otherUser;
 		});
 
-		before('ensure users have hUSD', async () => {
-			await ensureBalance({ ctx, symbol: 'hUSD', user: someUser, balance: hUSDAmount });
+		before('ensure users have rUSD', async () => {
+			await ensureBalance({ ctx, symbol: 'rUSD', user: someUser, balance: rUSDAmount });
 		});
 
-		after('reset the hUSD balance', async () => {
-			await ensureBalance({ ctx, symbol: 'hUSD', user: someUser, balance: toBN(0) });
+		after('reset the rUSD balance', async () => {
+			await ensureBalance({ ctx, symbol: 'rUSD', user: someUser, balance: toBN(0) });
 		});
 
 		describe('position management', () => {
@@ -60,18 +60,18 @@ function itCanTrade({ ctx }) {
 				assetKey = await market.baseAsset();
 				marketKey = await market.marketKey();
 				price = await ExchangeRates.rateForCurrency(assetKey);
-				balance = await TribehUSD.balanceOf(someUser.address);
+				balance = await TriberUSD.balanceOf(someUser.address);
 				posSize1x = divideDecimal(margin, price);
 			});
 
 			it('user can transferMargin and withdraw it', async () => {
 				// transfer
 				await market.transferMargin(margin);
-				assert.bnEqual(await TribehUSD.balanceOf(someUser.address), balance.sub(margin));
+				assert.bnEqual(await TriberUSD.balanceOf(someUser.address), balance.sub(margin));
 
 				// withdraw
 				await (await market.withdrawAllMargin()).wait();
-				const withdrawBalance = await TribehUSD.balanceOf(someUser.address);
+				const withdrawBalance = await TriberUSD.balanceOf(someUser.address);
 				assert.bnEqual(withdrawBalance, balance);
 			});
 

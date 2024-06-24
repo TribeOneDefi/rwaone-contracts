@@ -1,6 +1,6 @@
 [
 	{
-		"name": "hUSD",
+		"name": "rUSD",
 		"asset": "USD",
 		"subclass": "MultiCollateralTribe"
 	},

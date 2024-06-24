@@ -8,7 +8,7 @@ const { updateCache } = require('../utils/rates');
 
 function itCanExchange({ ctx }) {
 	describe('exchanging and settling', () => {
-		const hUSDAmount = ethers.utils.parseEther('100');
+		const rUSDAmount = ethers.utils.parseEther('100');
 
 		let owner;
 		let balancehETH, originialPendingSettlements;
@@ -20,11 +20,11 @@ function itCanExchange({ ctx }) {
 			owner = ctx.users.owner;
 		});
 
-		before('ensure the owner has hUSD', async () => {
-			await ensureBalance({ ctx, symbol: 'hUSD', user: owner, balance: hUSDAmount });
+		before('ensure the owner has rUSD', async () => {
+			await ensureBalance({ ctx, symbol: 'rUSD', user: owner, balance: rUSDAmount });
 		});
 
-		describe('when the owner exchanges hUSD to hETH', () => {
+		describe('when the owner exchanges rUSD to hETH', () => {
 			before('record balances', async () => {
 				balancehETH = await TribehETH.balanceOf(owner.address);
 			});
@@ -40,15 +40,15 @@ function itCanExchange({ ctx }) {
 
 				await updateCache({ ctx });
 
-				const tx = await Rwaone.exchange(toBytes32('hUSD'), hUSDAmount, toBytes32('hETH'));
+				const tx = await Rwaone.exchange(toBytes32('rUSD'), rUSDAmount, toBytes32('hETH'));
 				const { gasUsed } = await tx.wait();
 				console.log(`exchange() gas used: ${Math.round(gasUsed / 1000).toString()}k`);
 			});
 
 			it('receives the expected amount of hETH', async () => {
 				const [expectedAmount, ,] = await Exchanger.getAmountsForExchange(
-					hUSDAmount,
-					toBytes32('hUSD'),
+					rUSDAmount,
+					toBytes32('rUSD'),
 					toBytes32('hETH')
 				);
 
@@ -99,18 +99,18 @@ function itCanExchange({ ctx }) {
 			owner = ctx.users.owner;
 		});
 
-		it('set hUSD to use the pure chainlink price for atomic swap', async () => {
+		it('set rUSD to use the pure chainlink price for atomic swap', async () => {
 			await SystemSettings.connect(owner).setPureChainlinkPriceForAtomicSwapsEnabled(
-				toBytes32('hUSD'),
+				toBytes32('rUSD'),
 				false
 			);
-			const resp1 = await SystemSettings.pureChainlinkPriceForAtomicSwapsEnabled(toBytes32('hUSD'));
+			const resp1 = await SystemSettings.pureChainlinkPriceForAtomicSwapsEnabled(toBytes32('rUSD'));
 			assert.bnEqual(resp1, false);
 			await SystemSettings.connect(owner).setPureChainlinkPriceForAtomicSwapsEnabled(
-				toBytes32('hUSD'),
+				toBytes32('rUSD'),
 				true
 			);
-			const resp2 = await SystemSettings.pureChainlinkPriceForAtomicSwapsEnabled(toBytes32('hUSD'));
+			const resp2 = await SystemSettings.pureChainlinkPriceForAtomicSwapsEnabled(toBytes32('rUSD'));
 			assert.bnEqual(resp2, true);
 		});
 	});

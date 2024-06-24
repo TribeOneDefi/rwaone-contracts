@@ -6,9 +6,9 @@
 [![Discord](https://img.shields.io/discord/413890591840272394.svg?color=768AD4&label=discord&logo=https%3A%2F%2Fdiscordapp.com%2Fassets%2F8c9701b98ad4372b58f13fd9f65f966e.svg)](https://discord.com/invite/Rwaone)
 [![Twitter Follow](https://img.shields.io/twitter/follow/tribeetix_io.svg?label=tribeetix_io&style=social)](https://twitter.com/tribeetix_io)
 
-Rwaone is a crypto-backed tribeetic asset platform.
+Rwaone is a crypto-backed rwaone asset platform.
 
-It is a multi-token system, powered by wHAKA, the Rwaone Network Token. wHAKA holders can stake wHAKA to issue Tribes, on-chain tribeetic assets via the [Staking dApp](https://staking.rwaone.io) The network currently supports an ever-growing [list of tribeetic assets](https://www.rwaone.io/tribes/). Please see the [list of the deployed contracts on MAIN and TESTNETS](https://docs.rwaone.io/addresses/)
+It is a multi-token system, powered by wHAKA, the Rwaone Network Token. wHAKA holders can stake wHAKA to issue Tribes, on-chain rwaone assets via the [Staking dApp](https://staking.rwaone.io) The network currently supports an ever-growing [list of rwaone assets](https://www.rwaone.io/tribes/). Please see the [list of the deployed contracts on MAIN and TESTNETS](https://docs.rwaone.io/addresses/)
 Tribes can be traded using [Kwenta](https://kwenta.io)
 
 Rwaone uses a proxy system so that upgrades will not be disruptive to the functionality of the contract. This smooths user interaction, since new functionality will become available without any interruption in their experience. It is also transparent to the community at large, since each upgrade is accompanied by events announcing those upgrades. New releases are managed via the [Rwaone Improvement Proposal (SIP)](https://sips.rwaone.io/all-sip) system similar to the [EIPs](https://eips.ethereum.org/all)
@@ -64,7 +64,7 @@ This repo may be installed via `npm install` to support both node.js scripting a
 
 All interfaces are available via the path [`rwaone/contracts/interfaces`](./contracts/interfaces/).
 
-:zap: In your code, the key is to use `IAddressResolver` which can be tied to the immutable proxy: [`ReadProxyAddressResolver`](https://contracts.rwaone.io/ReadProxyAddressResolver) ([introduced in SIP-57](https://sips.rwaone.io/sips/sip-57)). You can then fetch `Rwaone`, `FeePool`, `Depot`, et al via `IAddressResolver.getAddress(bytes32 name)` where `name` is the `bytes32` version of the contract name (case-sensitive). Or you can fetch any tribe using `IAddressResolver.getTribe(bytes32 tribe)` where `tribe` is the `bytes32` name of the tribe (e.g. `iETH`, `hUSD`, `sDEFI`).
+:zap: In your code, the key is to use `IAddressResolver` which can be tied to the immutable proxy: [`ReadProxyAddressResolver`](https://contracts.rwaone.io/ReadProxyAddressResolver) ([introduced in SIP-57](https://sips.rwaone.io/sips/sip-57)). You can then fetch `Rwaone`, `FeePool`, `Depot`, et al via `IAddressResolver.getAddress(bytes32 name)` where `name` is the `bytes32` version of the contract name (case-sensitive). Or you can fetch any tribe using `IAddressResolver.getTribe(bytes32 tribe)` where `tribe` is the `bytes32` name of the tribe (e.g. `iETH`, `rUSD`, `sDEFI`).
 
 E.g.
 
@@ -199,7 +199,7 @@ snx.getSuspensionReasons();
 
 // retrieve the array of tribes used
 snx.getTribes({ network: 'goerli' }).map(({ name }) => name);
-// ['hUSD', 'sEUR', ...]
+// ['rUSD', 'sEUR', ...]
 
 // retrieve an object detailing the contract deployed to the given network.
 snx.getTarget({ network: 'goerli', contract: 'ProxyRwaone' });
@@ -249,7 +249,7 @@ snx.getVersions();
 snx.networks;
 // [ 'local', 'goerli', 'mainnet' ]
 
-snx.toBytes32('hUSD');
+snx.toBytes32('rUSD');
 // '0x7355534400000000000000000000000000000000000000000000000000000000'
 ```
 
@@ -275,7 +275,7 @@ $ npx rwaone ast contracts/Tribe.sol
   ]
 }
 
-$ npx rwaone bytes32 hUSD
+$ npx rwaone bytes32 rUSD
 0x7355534400000000000000000000000000000000000000000000000000000000
 
 $ npx rwaone networks
@@ -291,7 +291,7 @@ $ npx rwaone suspension-reason --code 2
 Market Closure
 
 $ npx rwaone tribes --network goerli --key name
-["hUSD", "sEUR", ... ]
+["rUSD", "sEUR", ... ]
 
 $ npx rwaone target --network goerli --contract ProxyRwaone
 {

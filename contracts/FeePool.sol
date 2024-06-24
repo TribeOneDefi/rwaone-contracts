@@ -38,11 +38,11 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
     bytes32 public constant CONTRACT_NAME = "FeePool";
 
-    // Where fees are pooled in hUSD.
+    // Where fees are pooled in rUSD.
     address public constant FEE_ADDRESS = 0xfeEFEEfeefEeFeefEEFEEfEeFeefEEFeeFEEFEeF;
 
-    // hUSD currencyKey. Fees stored and paid in hUSD
-    bytes32 private hUSD = "hUSD";
+    // rUSD currencyKey. Fees stored and paid in rUSD
+    bytes32 private rUSD = "rUSD";
 
     // This struct represents the issuance activity that's happened in a fee period.
     struct FeePeriod {
@@ -238,10 +238,10 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
     /**
      * @notice The Exchanger contract informs us when fees are paid.
-     * @param amount husd amount in fees being paid.
+     * @param amount rusd amount in fees being paid.
      */
     function recordFeePaid(uint amount) external onlyInternalContracts {
-        // Keep track off fees in hUSD in the open fee pool period.
+        // Keep track off fees in rUSD in the open fee pool period.
         _recentFeePeriodsStorage(0).feesToDistribute = _recentFeePeriodsStorage(0).feesToDistribute.add(amount);
     }
 
@@ -307,9 +307,9 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
             .sub(periodToRollover.rewardsClaimed)
             .add(periodClosing.rewardsToDistribute);
 
-        // Note: As of SIP-255, all hUSD fee are now automatically burned and are effectively shared amongst stakers in the form of reduced debt.
+        // Note: As of SIP-255, all rUSD fee are now automatically burned and are effectively shared amongst stakers in the form of reduced debt.
         if (_recentFeePeriodsStorage(0).feesToDistribute > 0) {
-            issuer().burnTribesWithoutDebt(hUSD, FEE_ADDRESS, _recentFeePeriodsStorage(0).feesToDistribute);
+            issuer().burnTribesWithoutDebt(rUSD, FEE_ADDRESS, _recentFeePeriodsStorage(0).feesToDistribute);
 
             // Mark the burnt fees as claimed.
             _recentFeePeriodsStorage(0).feesClaimed = _recentFeePeriodsStorage(0).feesToDistribute;
@@ -353,7 +353,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     }
 
     /**
-     * Note: As of SIP-255, all hUSD fees are burned at the closure of the fee period and are no longer claimable.
+     * Note: As of SIP-255, all rUSD fees are burned at the closure of the fee period and are no longer claimable.
      * @notice Send the rewards to claiming address.
      * @param claimingAddress The address to send the rewards to.
      */
@@ -477,7 +477,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     }
 
     /**
-     * @notice The total fees available in the system to be withdrawn in hUSD.
+     * @notice The total fees available in the system to be withdrawn in rUSD.
      */
     function totalFeesAvailable() external view returns (uint) {
         uint totalFees = 0;
@@ -514,7 +514,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     }
 
     /**
-     * @notice The fees available to be withdrawn by a specific account, priced in hUSD
+     * @notice The fees available to be withdrawn by a specific account, priced in rUSD
      * @dev Returns two amounts, one for fees and one for wHAKA rewards
      */
     function feesAvailable(address account) public view returns (uint, uint) {
@@ -530,7 +530,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
             totalRewards = totalRewards.add(userFees[i][1]);
         }
 
-        // And convert totalFees to hUSD
+        // And convert totalFees to rUSD
         // Return totalRewards as is in wHAKA amount
         return (totalFees, totalRewards);
     }
@@ -584,7 +584,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     }
 
     /**
-     * @notice Calculates fees by period for an account, priced in hUSD
+     * @notice Calculates fees by period for an account, priced in rUSD
      * @param account The address you want to query the fees for
      */
     function feesByPeriod(address account) public view returns (uint[FEE_PERIOD_LENGTH][2] memory results) {
@@ -728,10 +728,10 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         proxy._emit(abi.encode(feePeriodId), 1, FEEPERIODCLOSED_SIG, 0, 0, 0);
     }
 
-    event FeesClaimed(address account, uint hUSDAmount, uint snxRewards);
+    event FeesClaimed(address account, uint rUSDAmount, uint snxRewards);
     bytes32 private constant FEESCLAIMED_SIG = keccak256("FeesClaimed(address,uint256,uint256)");
 
-    function emitFeesClaimed(address account, uint hUSDAmount, uint snxRewards) internal {
-        proxy._emit(abi.encode(account, hUSDAmount, snxRewards), 1, FEESCLAIMED_SIG, 0, 0, 0);
+    function emitFeesClaimed(address account, uint rUSDAmount, uint snxRewards) internal {
+        proxy._emit(abi.encode(account, rUSDAmount, snxRewards), 1, FEESCLAIMED_SIG, 0, 0, 0);
     }
 }

@@ -17,8 +17,8 @@ const {
 const { toBytes32 } = require('../..');
 
 contract('ExchangeCircuitBreaker tests', async accounts => {
-	const [hUSD, sAUD, sEUR, wHAKA, hBTC, iBTC, hETH, iETH] = [
-		'hUSD',
+	const [rUSD, sAUD, sEUR, wHAKA, hBTC, iBTC, hETH, iETH] = [
+		'rUSD',
 		'sAUD',
 		'sEUR',
 		'wHAKA',
@@ -28,13 +28,13 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 		'iETH',
 	].map(toBytes32);
 
-	const tribeKeys = [hUSD, sAUD, sEUR, hBTC, iBTC, hETH, iETH];
+	const tribeKeys = [rUSD, sAUD, sEUR, hBTC, iBTC, hETH, iETH];
 
 	const [, owner, account1, account2] = accounts;
 
 	let rwaone,
 		exchangeRates,
-		hUSDContract,
+		rUSDContract,
 		exchangeFeeRate,
 		exchangeCircuitBreaker,
 		circuitBreaker,
@@ -76,9 +76,9 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 
 					// lastExchangeRate, used for price deviations (SIP-65)
 					describe('lastValue in new CircuitBreaker is persisted during exchanges', () => {
-						describe('when a user exchanges into hETH from hUSD', () => {
+						describe('when a user exchanges into hETH from rUSD', () => {
 							beforeEach(async () => {
-								await rwaone.exchange(hUSD, toUnit('100'), hETH, { from: account1 });
+								await rwaone.exchange(rUSD, toUnit('100'), hETH, { from: account1 });
 							});
 							it('and the dest side has a rate persisted', async () => {
 								assert.bnEqual(
@@ -127,11 +127,11 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 				CircuitBreaker: circuitBreaker,
 				Rwaone: rwaone,
 				ExchangeRates: exchangeRates,
-				TribehUSD: hUSDContract,
+				TriberUSD: rUSDContract,
 				SystemSettings: systemSettings,
 			} = await setupAllContracts({
 				accounts,
-				tribes: ['hUSD', 'hETH', 'sEUR', 'sAUD', 'hBTC', 'iBTC', 'sTRX'],
+				tribes: ['rUSD', 'hETH', 'sEUR', 'sAUD', 'hBTC', 'iBTC', 'sTRX'],
 				contracts: [
 					'Exchanger',
 					'ExchangeCircuitBreaker',
@@ -157,9 +157,9 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 
 			amountIssued = toUnit('1000');
 
-			// give the first two accounts 1000 hUSD each
-			await hUSDContract.issue(account1, amountIssued);
-			await hUSDContract.issue(account2, amountIssued);
+			// give the first two accounts 1000 rUSD each
+			await rUSDContract.issue(account1, amountIssued);
+			await rUSDContract.issue(account2, amountIssued);
 		});
 
 		addSnapshotBeforeRestoreAfterEach();

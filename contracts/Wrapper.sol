@@ -26,10 +26,10 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
 
     /* ========== ENCODED NAMES ========== */
 
-    bytes32 internal constant hUSD = "hUSD";
+    bytes32 internal constant rUSD = "rUSD";
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
-    bytes32 private constant CONTRACT_RWAONE_HUSD = "TribehUSD";
+    bytes32 private constant CONTRACT_RWAONE_RUSD = "TriberUSD";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
     bytes32 private constant CONTRACT_SYSTEMSTATUS = "SystemStatus";
@@ -62,7 +62,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](6);
-        newAddresses[0] = CONTRACT_RWAONE_HUSD;
+        newAddresses[0] = CONTRACT_RWAONE_RUSD;
         newAddresses[1] = tribeContractName;
         newAddresses[2] = CONTRACT_EXRATES;
         newAddresses[3] = CONTRACT_DEBTCACHE;
@@ -73,8 +73,8 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
     }
 
     /* ========== INTERNAL VIEWS ========== */
-    function tribehUSD() internal view returns (ITribe) {
-        return ITribe(requireAndGetAddress(CONTRACT_RWAONE_HUSD));
+    function triberUSD() internal view returns (ITribe) {
+        return ITribe(requireAndGetAddress(CONTRACT_RWAONE_RUSD));
     }
 
     function tribe() internal view returns (ITribe) {
@@ -113,7 +113,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
 
     function totalIssuedTribes() public view returns (uint) {
         // tribes issued by this contract is always exactly equal to the balance of reserves
-        return exchangeRates().effectiveValue(currencyKey, targetTribeIssued, hUSD);
+        return exchangeRates().effectiveValue(currencyKey, targetTribeIssued, rUSD);
     }
 
     function getReserves() public view returns (uint) {
@@ -232,14 +232,14 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
         uint reserves = getReserves();
 
         uint excessAmount = reserves > targetTribeIssued.add(amount) ? reserves.sub(targetTribeIssued.add(amount)) : 0;
-        uint excessAmountUsd = exchangeRates().effectiveValue(currencyKey, excessAmount, hUSD);
+        uint excessAmountUsd = exchangeRates().effectiveValue(currencyKey, excessAmount, rUSD);
 
         // Mint `amount` to user.
         tribe().issue(msg.sender, amount);
 
         // Escrow fee.
         if (excessAmountUsd > 0) {
-            tribehUSD().issue(address(wrapperFactory()), excessAmountUsd);
+            triberUSD().issue(address(wrapperFactory()), excessAmountUsd);
         }
 
         // in the case of a negative fee extra tribes will be issued, billed to the snx stakers
@@ -252,7 +252,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
         // this is logically equivalent to getReserves() - (targetTribeIssued - amount), without going negative
         uint excessAmount = reserves.add(amount) > targetTribeIssued ? reserves.add(amount).sub(targetTribeIssued) : 0;
 
-        uint excessAmountUsd = exchangeRates().effectiveValue(currencyKey, excessAmount, hUSD);
+        uint excessAmountUsd = exchangeRates().effectiveValue(currencyKey, excessAmount, rUSD);
 
         // Burn `amount` of currencyKey from user.
         tribe().burn(msg.sender, amount);
@@ -261,7 +261,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
         // This saves an approval and is cheaper.
         // Escrow fee.
         if (excessAmountUsd > 0) {
-            tribehUSD().issue(address(wrapperFactory()), excessAmountUsd);
+            triberUSD().issue(address(wrapperFactory()), excessAmountUsd);
         }
 
         // in the case of a negative fee fewer tribes will be burned, billed to the snx stakers

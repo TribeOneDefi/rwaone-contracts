@@ -99,7 +99,7 @@ async function _getAvailableCurrencyKeys({ ctx }) {
 	const availableCurrencyKeys = await Issuer.availableCurrencyKeys();
 
 	return availableCurrencyKeys
-		.filter(key => key !== toBytes32('hUSD'))
+		.filter(key => key !== toBytes32('rUSD'))
 		.concat(['wHAKA', 'ETH'].map(toBytes32));
 }
 

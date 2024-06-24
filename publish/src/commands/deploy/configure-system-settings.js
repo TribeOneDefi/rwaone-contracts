@@ -59,7 +59,7 @@ module.exports = async ({
 
 	const exchangeFeeRates = await getDeployParameter('EXCHANGE_FEE_RATES');
 
-	// update all tribes with 0 current rate, except hUSD
+	// update all tribes with 0 current rate, except rUSD
 	const tribesRatesToUpdate = tribes
 		.map((tribe, i) =>
 			Object.assign(
@@ -71,7 +71,7 @@ module.exports = async ({
 			)
 		)
 		.filter(({ currentRate }) => currentRate === '0')
-		.filter(({ name }) => name !== 'hUSD'); // SCCP-190: hUSD rate is 0 despite it being in forex category
+		.filter(({ name }) => name !== 'rUSD'); // SCCP-190: rUSD rate is 0 despite it being in forex category
 
 	console.log(gray(`Found ${tribesRatesToUpdate.length} tribes needs exchange rate pricing`));
 

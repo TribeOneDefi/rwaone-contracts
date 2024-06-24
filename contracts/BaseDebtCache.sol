@@ -36,7 +36,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
 
     /* ========== ENCODED NAMES ========== */
 
-    bytes32 internal constant hUSD = "hUSD";
+    bytes32 internal constant rUSD = "rUSD";
     bytes32 internal constant hETH = "hETH";
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
@@ -226,7 +226,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         }
     }
 
-    // Returns the total hUSD debt backed by non-wHAKA collateral.
+    // Returns the total rUSD debt backed by non-wHAKA collateral.
     function totalNonSnxBackedDebt() external view returns (uint excludedDebt, bool isInvalid) {
         bytes32[] memory currencyKeys = issuer().availableCurrencyKeys();
         (uint[] memory rates, bool ratesAreInvalid) = exchangeRates().ratesAndInvalidForCurrencies(currencyKeys);
@@ -247,7 +247,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         excludedDebt = longValue.add(shortValue);
 
         // 2. EtherWrapper.
-        // Subtract hETH and hUSD issued by EtherWrapper.
+        // Subtract hETH and rUSD issued by EtherWrapper.
         excludedDebt = excludedDebt.add(etherWrapper().totalIssuedTribes());
 
         // 3. WrapperFactory.
@@ -311,7 +311,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
 
     function recordExcludedDebtChange(bytes32 currencyKey, int256 delta) external {}
 
-    function updateCachedhUSDDebt(int amount) external {}
+    function updateCachedrUSDDebt(int amount) external {}
 
     /* ========== MODIFIERS ========== */
 

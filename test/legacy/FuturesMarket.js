@@ -40,7 +40,7 @@ contract('FuturesMarket', accounts => {
 		exchanger,
 		circuitBreaker,
 		addressResolver,
-		hUSD,
+		rUSD,
 		rwaone,
 		feePool,
 		debtCache,
@@ -110,7 +110,7 @@ contract('FuturesMarket', accounts => {
 			Exchanger: exchanger,
 			CircuitBreaker: circuitBreaker,
 			AddressResolver: addressResolver,
-			TribehUSD: hUSD,
+			TriberUSD: rUSD,
 			Rwaone: rwaone,
 			FeePool: feePool,
 			DebtCache: debtCache,
@@ -118,7 +118,7 @@ contract('FuturesMarket', accounts => {
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['hUSD', 'hBTC', 'hETH'],
+			tribes: ['rUSD', 'hBTC', 'hETH'],
 			contracts: [
 				'FuturesMarketManager',
 				'FuturesMarketSettings',
@@ -146,9 +146,9 @@ contract('FuturesMarket', accounts => {
 		// tests assume 100, but in actual deployment is different
 		await futuresMarketSettings.setMinInitialMargin(minInitialMargin, { from: owner });
 
-		// Issue the trader some hUSD
+		// Issue the trader some rUSD
 		for (const t of [trader, trader2, trader3]) {
-			await hUSD.issue(t, traderInitialBalance);
+			await rUSD.issue(t, traderInitialBalance);
 		}
 
 		// allow ownder to suspend system or tribes
@@ -614,16 +614,16 @@ contract('FuturesMarket', accounts => {
 			assert.isTrue(false);
 		});
 
-		describe('hUSD balance', () => {
-			it(`Can't deposit more hUSD than owned`, async () => {
-				const preBalance = await hUSD.balanceOf(trader);
+		describe('rUSD balance', () => {
+			it(`Can't deposit more rUSD than owned`, async () => {
+				const preBalance = await rUSD.balanceOf(trader);
 				await assert.revert(
 					futuresMarket.transferMargin(preBalance.add(toUnit('1')), { from: trader }),
 					'subtraction overflow'
 				);
 			});
 
-			it(`Can't withdraw more hUSD than is in the margin`, async () => {
+			it(`Can't withdraw more rUSD than is in the margin`, async () => {
 				await futuresMarket.transferMargin(toUnit('100'), { from: trader });
 				await assert.revert(
 					futuresMarket.transferMargin(toUnit('-101'), { from: trader }),
@@ -631,23 +631,23 @@ contract('FuturesMarket', accounts => {
 				);
 			});
 
-			it('Positive delta -> burn hUSD', async () => {
-				const preBalance = await hUSD.balanceOf(trader);
+			it('Positive delta -> burn rUSD', async () => {
+				const preBalance = await rUSD.balanceOf(trader);
 				await futuresMarket.transferMargin(toUnit('1000'), { from: trader });
-				assert.bnEqual(await hUSD.balanceOf(trader), preBalance.sub(toUnit('1000')));
+				assert.bnEqual(await rUSD.balanceOf(trader), preBalance.sub(toUnit('1000')));
 			});
 
-			it('Negative delta -> mint hUSD', async () => {
+			it('Negative delta -> mint rUSD', async () => {
 				await futuresMarket.transferMargin(toUnit('1000'), { from: trader });
-				const preBalance = await hUSD.balanceOf(trader);
+				const preBalance = await rUSD.balanceOf(trader);
 				await futuresMarket.transferMargin(toUnit('-500'), { from: trader });
-				assert.bnEqual(await hUSD.balanceOf(trader), preBalance.add(toUnit('500')));
+				assert.bnEqual(await rUSD.balanceOf(trader), preBalance.add(toUnit('500')));
 			});
 
 			it('Zero delta -> NOP', async () => {
-				const preBalance = await hUSD.balanceOf(trader);
+				const preBalance = await rUSD.balanceOf(trader);
 				await futuresMarket.transferMargin(toUnit('0'), { from: trader });
-				assert.bnEqual(await hUSD.balanceOf(trader), preBalance.sub(toUnit('0')));
+				assert.bnEqual(await rUSD.balanceOf(trader), preBalance.sub(toUnit('0')));
 			});
 
 			it('fee reclamation is respected', async () => {
@@ -664,7 +664,7 @@ contract('FuturesMarket', accounts => {
 				await futuresMarketManager.rebuildCache();
 
 				// Set up a starting balance
-				const preBalance = await hUSD.balanceOf(trader);
+				const preBalance = await rUSD.balanceOf(trader);
 				await futuresMarket.transferMargin(toUnit('1000'), { from: trader });
 
 				// Now set a reclamation event
@@ -673,12 +673,12 @@ contract('FuturesMarket', accounts => {
 
 				// Issuance works fine
 				await futuresMarket.transferMargin(toUnit('-900'), { from: trader });
-				assert.bnEqual(await hUSD.balanceOf(trader), preBalance.sub(toUnit('100')));
+				assert.bnEqual(await rUSD.balanceOf(trader), preBalance.sub(toUnit('100')));
 				assert.bnEqual((await futuresMarket.remainingMargin(trader))[0], toUnit('100'));
 
 				// But burning properly deducts the reclamation amount
 				await futuresMarket.transferMargin(preBalance.sub(toUnit('100')), { from: trader });
-				assert.bnEqual(await hUSD.balanceOf(owner), toUnit('0'));
+				assert.bnEqual(await rUSD.balanceOf(owner), toUnit('0'));
 				assert.bnEqual(
 					(await futuresMarket.remainingMargin(trader))[0],
 					preBalance.sub(toUnit('10'))
@@ -690,12 +690,12 @@ contract('FuturesMarket', accounts => {
 				let tx = await futuresMarket.transferMargin(toUnit('1000'), { from: trader3 });
 				let decodedLogs = await getDecodedLogs({
 					hash: tx.tx,
-					contracts: [futuresMarketManager, hUSD, futuresMarket],
+					contracts: [futuresMarketManager, rUSD, futuresMarket],
 				});
 
 				decodedEventEqual({
 					event: 'Burned',
-					emittedFrom: hUSD.address,
+					emittedFrom: rUSD.address,
 					args: [trader3, toUnit('1000')],
 					log: decodedLogs[1],
 				});
@@ -723,11 +723,11 @@ contract('FuturesMarket', accounts => {
 					log: decodedLogs[3],
 				});
 
-				// Zero delta means no PositionModified, MarginTransferred, or hUSD events
+				// Zero delta means no PositionModified, MarginTransferred, or rUSD events
 				tx = await futuresMarket.transferMargin(toUnit('0'), { from: trader3 });
 				decodedLogs = await getDecodedLogs({
 					hash: tx.tx,
-					contracts: [futuresMarketManager, hUSD, futuresMarket],
+					contracts: [futuresMarketManager, rUSD, futuresMarket],
 				});
 				assert.equal(decodedLogs.length, 1);
 				assert.equal(decodedLogs[0].name, 'FundingRecomputed');
@@ -736,12 +736,12 @@ contract('FuturesMarket', accounts => {
 				tx = await futuresMarket.transferMargin(toUnit('-1000'), { from: trader3 });
 				decodedLogs = await getDecodedLogs({
 					hash: tx.tx,
-					contracts: [futuresMarketManager, hUSD, futuresMarket],
+					contracts: [futuresMarketManager, rUSD, futuresMarket],
 				});
 
 				decodedEventEqual({
 					event: 'Issued',
-					emittedFrom: hUSD.address,
+					emittedFrom: rUSD.address,
 					args: [trader3, toUnit('1000')],
 					log: decodedLogs[1],
 				});
@@ -906,11 +906,11 @@ contract('FuturesMarket', accounts => {
 			);
 
 			// The relevant events are properly emitted
-			const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [hUSD, futuresMarket] });
+			const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [rUSD, futuresMarket] });
 			assert.equal(decodedLogs.length, 3);
 			decodedEventEqual({
 				event: 'Issued',
-				emittedFrom: hUSD.address,
+				emittedFrom: rUSD.address,
 				args: [await feePool.FEE_ADDRESS(), fee],
 				log: decodedLogs[1],
 			});
@@ -935,7 +935,7 @@ contract('FuturesMarket', accounts => {
 			});
 
 			// The relevant events are properly emitted
-			const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [hUSD, futuresMarket] });
+			const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [rUSD, futuresMarket] });
 			assert.equal(decodedLogs.length, 4); // funding, issued, tracking, pos-modified
 			decodedEventEqual({
 				event: 'FuturesTracking',
@@ -1044,7 +1044,7 @@ contract('FuturesMarket', accounts => {
 
 		it('Order modification properly records the exchange fee with the fee pool', async () => {
 			const FEE_ADDRESS = await feePool.FEE_ADDRESS();
-			const preBalance = await hUSD.balanceOf(FEE_ADDRESS);
+			const preBalance = await rUSD.balanceOf(FEE_ADDRESS);
 			const preDistribution = (await feePool.recentFeePeriods(0))[3];
 			await setPrice(baseAsset, toUnit('200'));
 			const fee = (await futuresMarket.orderFee(toUnit('50')))[0];
@@ -1056,7 +1056,7 @@ contract('FuturesMarket', accounts => {
 				sizeDelta: toUnit('50'),
 			});
 
-			assert.bnEqual(await hUSD.balanceOf(FEE_ADDRESS), preBalance.add(fee));
+			assert.bnEqual(await rUSD.balanceOf(FEE_ADDRESS), preBalance.add(fee));
 			assert.bnEqual((await feePool.recentFeePeriods(0))[3], preDistribution.add(fee));
 		});
 
@@ -1381,7 +1381,7 @@ contract('FuturesMarket', accounts => {
 
 				const decodedLogs = await getDecodedLogs({
 					hash: tx.tx,
-					contracts: [futuresMarketManager, hUSD, futuresMarket],
+					contracts: [futuresMarketManager, rUSD, futuresMarket],
 				});
 
 				assert.equal(decodedLogs.length, 3);
@@ -1422,7 +1422,7 @@ contract('FuturesMarket', accounts => {
 
 				const decodedLogs = await getDecodedLogs({
 					hash: tx.tx,
-					contracts: [futuresMarketManager, hUSD, futuresMarket],
+					contracts: [futuresMarketManager, rUSD, futuresMarket],
 				});
 
 				assert.equal(decodedLogs.length, 4);
@@ -3269,15 +3269,15 @@ contract('FuturesMarket', accounts => {
 					multiplyDecimal(await futuresMarketSettings.liquidationFeeRatio(), newPrice),
 					toUnit(40) // position size
 				);
-				assert.bnClose(await hUSD.balanceOf(noBalance), liquidationFee, toUnit('0.001'));
+				assert.bnClose(await rUSD.balanceOf(noBalance), liquidationFee, toUnit('0.001'));
 
-				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [hUSD, futuresMarket] });
+				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [rUSD, futuresMarket] });
 
 				assert.equal(decodedLogs.length, 4);
 
 				decodedEventEqual({
 					event: 'Issued',
-					emittedFrom: hUSD.address,
+					emittedFrom: rUSD.address,
 					args: [noBalance, liquidationFee],
 					log: decodedLogs[1],
 					bnCloseVariance: toUnit('0.001'),
@@ -3326,11 +3326,11 @@ contract('FuturesMarket', accounts => {
 					multiplyDecimal(await futuresMarketSettings.liquidationFeeRatio(), newPrice),
 					toUnit(40) // position size
 				);
-				assert.bnClose(await hUSD.balanceOf(noBalance), liquidationFee, toUnit('0.001'));
+				assert.bnClose(await rUSD.balanceOf(noBalance), liquidationFee, toUnit('0.001'));
 
-				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [hUSD, futuresMarket] });
+				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [rUSD, futuresMarket] });
 
-				assert.equal(decodedLogs.length, 5); // additional hUSD issue event
+				assert.equal(decodedLogs.length, 5); // additional rUSD issue event
 
 				const poolFee = remainingMargin.sub(liquidationFee);
 				// the price needs to be set in a way that leaves positive margin after fee
@@ -3338,7 +3338,7 @@ contract('FuturesMarket', accounts => {
 
 				decodedEventEqual({
 					event: 'Issued',
-					emittedFrom: hUSD.address,
+					emittedFrom: rUSD.address,
 					args: [await feePool.FEE_ADDRESS(), poolFee],
 					log: decodedLogs[4],
 					bnCloseVariance: toUnit('0.001'),
@@ -3372,14 +3372,14 @@ contract('FuturesMarket', accounts => {
 					multiplyDecimal(await futuresMarketSettings.liquidationFeeRatio(), newPrice),
 					toUnit(20) // position size
 				);
-				assert.bnClose(await hUSD.balanceOf(noBalance), liquidationFee, toUnit('0.001'));
+				assert.bnClose(await rUSD.balanceOf(noBalance), liquidationFee, toUnit('0.001'));
 
-				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [hUSD, futuresMarket] });
+				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [rUSD, futuresMarket] });
 
 				assert.equal(decodedLogs.length, 4);
 				decodedEventEqual({
 					event: 'Issued',
-					emittedFrom: hUSD.address,
+					emittedFrom: rUSD.address,
 					args: [noBalance, liquidationFee],
 					log: decodedLogs[1],
 				});
@@ -3427,11 +3427,11 @@ contract('FuturesMarket', accounts => {
 					multiplyDecimal(await futuresMarketSettings.liquidationFeeRatio(), newPrice),
 					toUnit(20) // position size
 				);
-				assert.bnClose(await hUSD.balanceOf(noBalance), liquidationFee, toUnit('0.001'));
+				assert.bnClose(await rUSD.balanceOf(noBalance), liquidationFee, toUnit('0.001'));
 
-				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [hUSD, futuresMarket] });
+				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [rUSD, futuresMarket] });
 
-				assert.equal(decodedLogs.length, 5); // additional hUSD issue event
+				assert.equal(decodedLogs.length, 5); // additional rUSD issue event
 
 				const poolFee = remainingMargin.sub(liquidationFee);
 				// the price needs to be set in a way that leaves positive margin after fee
@@ -3439,7 +3439,7 @@ contract('FuturesMarket', accounts => {
 
 				decodedEventEqual({
 					event: 'Issued',
-					emittedFrom: hUSD.address,
+					emittedFrom: rUSD.address,
 					args: [await feePool.FEE_ADDRESS(), poolFee],
 					log: decodedLogs[4],
 					bnCloseVariance: toUnit('0.001'),
@@ -3471,7 +3471,7 @@ contract('FuturesMarket', accounts => {
 				// Remaining margin = 250 + (125 - (1000 - 30)) / (40)= 228.875
 				assert.bnClose(price, toUnit(228.875), toUnit(0.1));
 
-				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [hUSD, futuresMarket] });
+				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [rUSD, futuresMarket] });
 				decodedEventEqual({
 					event: 'PositionModified',
 					emittedFrom: futuresMarket.address,
@@ -3805,7 +3805,7 @@ contract('FuturesMarket', accounts => {
 				await setPrice(baseAsset, multiplyDecimal(initialPrice, toUnit(1.1)));
 				// check is too volatile
 				assert.ok(
-					(await exchanger.dynamicFeeRateForExchange(toBytes32('hUSD'), baseAsset)).tooVolatile
+					(await exchanger.dynamicFeeRateForExchange(toBytes32('rUSD'), baseAsset)).tooVolatile
 				);
 			});
 
@@ -3852,7 +3852,7 @@ contract('FuturesMarket', accounts => {
 				// spike the price
 				await setPrice(baseAsset, spikedRate);
 				// check is not too volatile
-				const res = await exchanger.dynamicFeeRateForExchange(toBytes32('hUSD'), baseAsset);
+				const res = await exchanger.dynamicFeeRateForExchange(toBytes32('rUSD'), baseAsset);
 				// check dynamic fee is as expected
 				assert.bnClose(res.feeRate, expectedRate, toUnit('0.0000001'));
 				assert.notOk(res.tooVolatile);

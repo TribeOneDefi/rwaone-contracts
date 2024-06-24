@@ -57,7 +57,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 		exchanger,
 		circuitBreaker,
 		addressResolver,
-		hUSD,
+		rUSD,
 		rwaone,
 		feePool,
 		debtCache,
@@ -200,7 +200,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			Exchanger: exchanger,
 			CircuitBreaker: circuitBreaker,
 			AddressResolver: addressResolver,
-			TribehUSD: hUSD,
+			TriberUSD: rUSD,
 			Rwaone: rwaone,
 			FeePool: feePool,
 			DebtCache: debtCache,
@@ -208,7 +208,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['hUSD', 'hBTC', 'hETH'],
+			tribes: ['rUSD', 'hBTC', 'hETH'],
 			contracts: [
 				'FuturesMarketManager',
 				{ contract: 'PerpsV2MarketStateBTC', properties: { perpSuffix: marketKeySuffix } },
@@ -243,9 +243,9 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 		// tests assume 100, but in actual deployment is different
 		await perpsV2MarketSettings.setMinInitialMargin(minInitialMargin, { from: owner });
 
-		// Issue the trader some hUSD
+		// Issue the trader some rUSD
 		for (const t of [trader, trader2, trader3]) {
-			await hUSD.issue(t, traderInitialBalance);
+			await rUSD.issue(t, traderInitialBalance);
 		}
 
 		// allow owner to suspend system or tribes
@@ -1015,7 +1015,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 					//
 					// - maker fee is 0.003
 					// - taker fee is 0.001
-					// - price is 100 hUSD
+					// - price is 100 rUSD
 					//
 					// fee = 17.5 * fillPrice * 0.001 + 17.5 * fillPrice * 0.003
 					//     = 1.75 + 5.25
@@ -1296,16 +1296,16 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			assert.isTrue(false);
 		});
 
-		describe('hUSD balance', () => {
-			it(`Can't deposit more hUSD than owned`, async () => {
-				const preBalance = await hUSD.balanceOf(trader);
+		describe('rUSD balance', () => {
+			it(`Can't deposit more rUSD than owned`, async () => {
+				const preBalance = await rUSD.balanceOf(trader);
 				await assert.revert(
 					perpsV2Market.transferMargin(preBalance.add(toUnit('1')), { from: trader }),
 					'subtraction overflow'
 				);
 			});
 
-			it(`Can't withdraw more hUSD than is in the margin`, async () => {
+			it(`Can't withdraw more rUSD than is in the margin`, async () => {
 				await perpsV2Market.transferMargin(toUnit('100'), { from: trader });
 				await assert.revert(
 					perpsV2Market.transferMargin(toUnit('-101'), { from: trader }),
@@ -1313,23 +1313,23 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 				);
 			});
 
-			it('Positive delta -> burn hUSD', async () => {
-				const preBalance = await hUSD.balanceOf(trader);
+			it('Positive delta -> burn rUSD', async () => {
+				const preBalance = await rUSD.balanceOf(trader);
 				await perpsV2Market.transferMargin(toUnit('1000'), { from: trader });
-				assert.bnEqual(await hUSD.balanceOf(trader), preBalance.sub(toUnit('1000')));
+				assert.bnEqual(await rUSD.balanceOf(trader), preBalance.sub(toUnit('1000')));
 			});
 
-			it('Negative delta -> mint hUSD', async () => {
+			it('Negative delta -> mint rUSD', async () => {
 				await perpsV2Market.transferMargin(toUnit('1000'), { from: trader });
-				const preBalance = await hUSD.balanceOf(trader);
+				const preBalance = await rUSD.balanceOf(trader);
 				await perpsV2Market.transferMargin(toUnit('-500'), { from: trader });
-				assert.bnEqual(await hUSD.balanceOf(trader), preBalance.add(toUnit('500')));
+				assert.bnEqual(await rUSD.balanceOf(trader), preBalance.add(toUnit('500')));
 			});
 
 			it('Zero delta -> NOP', async () => {
-				const preBalance = await hUSD.balanceOf(trader);
+				const preBalance = await rUSD.balanceOf(trader);
 				await perpsV2Market.transferMargin(toUnit('0'), { from: trader });
-				assert.bnEqual(await hUSD.balanceOf(trader), preBalance.sub(toUnit('0')));
+				assert.bnEqual(await rUSD.balanceOf(trader), preBalance.sub(toUnit('0')));
 			});
 
 			it('fee reclamation is respected', async () => {
@@ -1346,7 +1346,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 				await futuresMarketManager.rebuildCache();
 
 				// Set up a starting balance
-				const preBalance = await hUSD.balanceOf(trader);
+				const preBalance = await rUSD.balanceOf(trader);
 				await perpsV2Market.transferMargin(toUnit('1000'), { from: trader });
 
 				// Now set a reclamation event
@@ -1355,12 +1355,12 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 
 				// Issuance works fine
 				await perpsV2Market.transferMargin(toUnit('-900'), { from: trader });
-				assert.bnEqual(await hUSD.balanceOf(trader), preBalance.sub(toUnit('100')));
+				assert.bnEqual(await rUSD.balanceOf(trader), preBalance.sub(toUnit('100')));
 				assert.bnEqual((await perpsV2Market.remainingMargin(trader))[0], toUnit('100'));
 
 				// But burning properly deducts the reclamation amount
 				await perpsV2Market.transferMargin(preBalance.sub(toUnit('100')), { from: trader });
-				assert.bnEqual(await hUSD.balanceOf(owner), toUnit('0'));
+				assert.bnEqual(await rUSD.balanceOf(owner), toUnit('0'));
 				assert.bnEqual(
 					(await perpsV2Market.remainingMargin(trader))[0],
 					preBalance.sub(toUnit('10'))
@@ -1372,12 +1372,12 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 				let tx = await perpsV2Market.transferMargin(toUnit('1000'), { from: trader3 });
 				let decodedLogs = await getDecodedLogs({
 					hash: tx.tx,
-					contracts: [futuresMarketManager, hUSD, perpsV2Market],
+					contracts: [futuresMarketManager, rUSD, perpsV2Market],
 				});
 
 				decodedEventEqual({
 					event: 'Burned',
-					emittedFrom: hUSD.address,
+					emittedFrom: rUSD.address,
 					args: [trader3, toUnit('1000')],
 					log: decodedLogs[1],
 				});
@@ -1406,11 +1406,11 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 					log: decodedLogs[3],
 				});
 
-				// Zero delta means no PositionModified, MarginTransferred, or hUSD events
+				// Zero delta means no PositionModified, MarginTransferred, or rUSD events
 				tx = await perpsV2Market.transferMargin(toUnit('0'), { from: trader3 });
 				decodedLogs = await getDecodedLogs({
 					hash: tx.tx,
-					contracts: [futuresMarketManager, hUSD, perpsV2Market],
+					contracts: [futuresMarketManager, rUSD, perpsV2Market],
 				});
 				assert.deepEqual(
 					decodedLogs.map(({ name }) => name),
@@ -1423,12 +1423,12 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 				tx = await perpsV2Market.transferMargin(toUnit('-1000'), { from: trader3 });
 				decodedLogs = await getDecodedLogs({
 					hash: tx.tx,
-					contracts: [futuresMarketManager, hUSD, perpsV2Market],
+					contracts: [futuresMarketManager, rUSD, perpsV2Market],
 				});
 
 				decodedEventEqual({
 					event: 'Issued',
-					emittedFrom: hUSD.address,
+					emittedFrom: rUSD.address,
 					args: [trader3, toUnit('1000')],
 					log: decodedLogs[1],
 				});
@@ -1596,7 +1596,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 				const tx = await perpsV2Market.modifyPosition(size, desiredFillPrice, {
 					from: trader,
 				});
-				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [hUSD, perpsV2Market] });
+				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [rUSD, perpsV2Market] });
 				decodedEventEqual({
 					event: 'PositionModified',
 					emittedFrom: perpsV2Market.address,
@@ -1657,7 +1657,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 				const tx = await perpsV2Market.modifyPosition(size, desiredFillPrice, {
 					from: trader,
 				});
-				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [hUSD, perpsV2Market] });
+				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [rUSD, perpsV2Market] });
 				decodedEventEqual({
 					event: 'PositionModified',
 					emittedFrom: perpsV2Market.address,
@@ -1717,7 +1717,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 					from: trader2,
 				});
 				skew = skew.add(size);
-				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [hUSD, perpsV2Market] });
+				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [rUSD, perpsV2Market] });
 				decodedEventEqual({
 					event: 'PositionModified',
 					emittedFrom: perpsV2Market.address,
@@ -1761,7 +1761,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			);
 
 			// The relevant events are properly emitted
-			const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [hUSD, perpsV2Market] });
+			const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [rUSD, perpsV2Market] });
 			assert.deepEqual(
 				decodedLogs.map(({ name }) => name),
 				['FundingRecomputed', 'Issued', 'PositionModified']
@@ -1769,7 +1769,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			assert.equal(decodedLogs.length, 3);
 			decodedEventEqual({
 				event: 'Issued',
-				emittedFrom: hUSD.address,
+				emittedFrom: rUSD.address,
 				args: [await feePool.FEE_ADDRESS(), fee],
 				log: decodedLogs[1],
 			});
@@ -1812,7 +1812,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			);
 
 			// The relevant events are properly emitted
-			const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [hUSD, perpsV2Market] });
+			const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [rUSD, perpsV2Market] });
 			assert.deepEqual(
 				decodedLogs.map(({ name }) => name),
 				['FundingRecomputed', 'Issued', 'PerpsTracking', 'PositionModified']
@@ -1966,7 +1966,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 
 		it('Order modification properly records the exchange fee with the fee pool', async () => {
 			const FEE_ADDRESS = await feePool.FEE_ADDRESS();
-			const preBalance = await hUSD.balanceOf(FEE_ADDRESS);
+			const preBalance = await rUSD.balanceOf(FEE_ADDRESS);
 			const preDistribution = (await feePool.recentFeePeriods(0))[3];
 			const price = toUnit('200');
 			await setPrice(baseAsset, price);
@@ -1979,7 +1979,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 				sizeDelta: toUnit('50'),
 			});
 
-			assert.bnEqual(await hUSD.balanceOf(FEE_ADDRESS), preBalance.add(fee));
+			assert.bnEqual(await rUSD.balanceOf(FEE_ADDRESS), preBalance.add(fee));
 			assert.bnEqual((await feePool.recentFeePeriods(0))[3], preDistribution.add(fee));
 		});
 
@@ -2339,7 +2339,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 
 				const decodedLogs = await getDecodedLogs({
 					hash: tx.tx,
-					contracts: [futuresMarketManager, hUSD, perpsV2Market],
+					contracts: [futuresMarketManager, rUSD, perpsV2Market],
 				});
 				assert.deepEqual(
 					decodedLogs.map(({ name }) => name),
@@ -2393,7 +2393,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 
 				const decodedLogs = await getDecodedLogs({
 					hash: tx.tx,
-					contracts: [futuresMarketManager, hUSD, perpsV2Market],
+					contracts: [futuresMarketManager, rUSD, perpsV2Market],
 				});
 				assert.deepEqual(
 					decodedLogs.map(({ name }) => name),
@@ -4744,7 +4744,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 		}) => {
 			const defaultLiquidationBufferRatio = toUnit('0.0025');
 			const defaultLiquidationFeeRatio = toUnit('0.0035');
-			const defaultLiquidationMinFee = toUnit('20'); // 20 hUSD
+			const defaultLiquidationMinFee = toUnit('20'); // 20 rUSD
 			const defaultLiquidationPremiumMultiplier = toUnit('1'); // *1
 
 			const liqMinFee = minFee || defaultLiquidationMinFee;
@@ -4825,7 +4825,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			const positionFlaggedIdx = pendingOrder ? 2 : 1;
 			const decodedLogs = await getDecodedLogs({
 				hash: tx.tx,
-				contracts: [hUSD, perpsV2Market],
+				contracts: [rUSD, perpsV2Market],
 			});
 
 			assert.equal(decodedLogs.length, eventsLen);
@@ -4855,7 +4855,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			feePoolFee = toBN(0),
 			skew,
 		}) => {
-			const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [hUSD, perpsV2Market] });
+			const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [rUSD, perpsV2Market] });
 			const events = ['FundingRecomputed', 'Issued'];
 			let eventsLen = 4;
 			let latestIdx = 2;
@@ -4889,7 +4889,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			// flagger Fee
 			decodedEventEqual({
 				event: 'Issued',
-				emittedFrom: hUSD.address,
+				emittedFrom: rUSD.address,
 				args: [flaggerAccount, flaggerFee],
 				log: decodedLogs[1],
 				bnCloseVariance: toUnit('0.001'),
@@ -4899,7 +4899,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			if (liquidatorFeeIdx) {
 				decodedEventEqual({
 					event: 'Issued',
-					emittedFrom: hUSD.address,
+					emittedFrom: rUSD.address,
 					args: [liquidatorAccount, liquidatorFee],
 					log: decodedLogs[liquidatorFeeIdx],
 					bnCloseVariance: toUnit('0.001'),
@@ -4910,7 +4910,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			if (feePoolFeeIdx) {
 				decodedEventEqual({
 					event: 'Issued',
-					emittedFrom: hUSD.address,
+					emittedFrom: rUSD.address,
 					args: [await feePool.FEE_ADDRESS(), feePoolFee],
 					log: decodedLogs[feePoolFeeIdx],
 					bnCloseVariance: toUnit('0.001'),
@@ -5710,8 +5710,8 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 
 				assert.bnLt(remainingMargin, fees.flaggerFee);
 
-				assert.bnClose(await hUSD.balanceOf(noBalance), fees.flaggerFee, toUnit('0.001'));
-				assert.bnClose(await hUSD.balanceOf(noBalance2), fees.liquidatorFee, toUnit('0.001'));
+				assert.bnClose(await rUSD.balanceOf(noBalance), fees.flaggerFee, toUnit('0.001'));
+				assert.bnClose(await rUSD.balanceOf(noBalance2), fees.liquidatorFee, toUnit('0.001'));
 
 				await assertFlagTx({
 					tx: txFlag,
@@ -5763,8 +5763,8 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 
 				assert.bnLt(remainingMargin, fees.flaggerFee);
 
-				assert.bnClose(await hUSD.balanceOf(noBalance), fees.flaggerFee, toUnit('0.001'));
-				assert.bnClose(await hUSD.balanceOf(noBalance2), fees.liquidatorFee, toUnit('0.001'));
+				assert.bnClose(await rUSD.balanceOf(noBalance), fees.flaggerFee, toUnit('0.001'));
+				assert.bnClose(await rUSD.balanceOf(noBalance2), fees.liquidatorFee, toUnit('0.001'));
 
 				await assertFlagTx({
 					tx: txFlag,
@@ -5801,7 +5801,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 
 				const { size: positionSize, id: positionId } = await perpsV2Market.positions(trader);
 
-				const preFeePoolBalance = await hUSD.balanceOf(await feePool.FEE_ADDRESS());
+				const preFeePoolBalance = await rUSD.balanceOf(await feePool.FEE_ADDRESS());
 
 				const remainingMargin = (await perpsV2Market.remainingMargin(trader)).marginRemaining;
 				const txFlag = await perpsV2Market.flagPosition(trader, { from: noBalance });
@@ -5812,10 +5812,10 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 
 				assert.bnGt(remainingMargin, fees.flaggerFee.add(fees.liquidatorFee));
 
-				assert.bnClose(await hUSD.balanceOf(noBalance), fees.flaggerFee, toUnit('0.001'));
-				assert.bnClose(await hUSD.balanceOf(noBalance2), fees.liquidatorFee, toUnit('0.001'));
+				assert.bnClose(await rUSD.balanceOf(noBalance), fees.flaggerFee, toUnit('0.001'));
+				assert.bnClose(await rUSD.balanceOf(noBalance2), fees.liquidatorFee, toUnit('0.001'));
 				assert.bnClose(
-					await hUSD.balanceOf(await feePool.FEE_ADDRESS()),
+					await rUSD.balanceOf(await feePool.FEE_ADDRESS()),
 					preFeePoolBalance.add(fees.feePoolFee),
 					toUnit('0.001')
 				);
@@ -5861,14 +5861,14 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 					multiplyDecimal(await perpsV2MarketSettings.liquidationFeeRatio(), newPrice),
 					toUnit(40) // position size
 				);
-				assert.bnClose(await hUSD.balanceOf(noBalance), liquidationFee, toUnit('0.001'));
+				assert.bnClose(await rUSD.balanceOf(noBalance), liquidationFee, toUnit('0.001'));
 
-				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [hUSD, perpsV2Market] });
+				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [rUSD, perpsV2Market] });
 				assert.deepEqual(
 					decodedLogs.map(({ name }) => name),
 					['FundingRecomputed', 'Issued', 'Issued', 'PositionModified', 'PositionLiquidated']
 				);
-				assert.equal(decodedLogs.length, 5); // additional hUSD issue event
+				assert.equal(decodedLogs.length, 5); // additional rUSD issue event
 
 				const poolFee = remainingMargin.sub(liquidationFee);
 				// the price needs to be set in a way that leaves positive margin after fee
@@ -5876,7 +5876,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 
 				decodedEventEqual({
 					event: 'Issued',
-					emittedFrom: hUSD.address,
+					emittedFrom: rUSD.address,
 					args: [await feePool.FEE_ADDRESS(), poolFee],
 					log: decodedLogs[2],
 					bnCloseVariance: toUnit('0.001'),
@@ -5894,7 +5894,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 
 				const { size: positionSize, id: positionId } = await perpsV2Market.positions(trader3);
 
-				const preFeePoolBalance = await hUSD.balanceOf(await feePool.FEE_ADDRESS());
+				const preFeePoolBalance = await rUSD.balanceOf(await feePool.FEE_ADDRESS());
 
 				const remainingMargin = (await perpsV2Market.remainingMargin(trader3)).marginRemaining;
 				const txFlag = await perpsV2Market.flagPosition(trader3, { from: noBalance });
@@ -5903,10 +5903,10 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 				const fees = await computeFees(remainingMargin, toUnit(20), newPrice); // position size = 20
 				assert.isTrue(fees.feePoolFee.gt(toBN(0)));
 
-				assert.bnClose(await hUSD.balanceOf(noBalance), fees.flaggerFee, toUnit('0.001'));
-				assert.bnClose(await hUSD.balanceOf(noBalance2), fees.liquidatorFee, toUnit('0.001'));
+				assert.bnClose(await rUSD.balanceOf(noBalance), fees.flaggerFee, toUnit('0.001'));
+				assert.bnClose(await rUSD.balanceOf(noBalance2), fees.liquidatorFee, toUnit('0.001'));
 				assert.bnClose(
-					await hUSD.balanceOf(await feePool.FEE_ADDRESS()),
+					await rUSD.balanceOf(await feePool.FEE_ADDRESS()),
 					preFeePoolBalance.add(fees.feePoolFee),
 					toUnit('0.001')
 				);
@@ -6158,24 +6158,24 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 				assert.isTrue(poolFee.gt(toBN(0)));
 
 				const feeAddress = await feePool.FEE_ADDRESS();
-				const preFeePoolBalance = await hUSD.balanceOf(feeAddress);
-				const preFlaggerBalance = await hUSD.balanceOf(noBalance);
-				const preLiquidatorBalance = await hUSD.balanceOf(noBalance2);
+				const preFeePoolBalance = await rUSD.balanceOf(feeAddress);
+				const preFlaggerBalance = await rUSD.balanceOf(noBalance);
+				const preLiquidatorBalance = await rUSD.balanceOf(noBalance2);
 
 				await perpsV2Market.flagPosition(trader, { from: noBalance });
 				await perpsV2Market.liquidatePosition(trader, { from: noBalance2 });
 
 				assert.bnEqual(
-					await hUSD.balanceOf(noBalance),
+					await rUSD.balanceOf(noBalance),
 					preFlaggerBalance.add(expectedLiquidationFee)
 				);
 
 				assert.bnEqual(
-					await hUSD.balanceOf(noBalance2),
+					await rUSD.balanceOf(noBalance2),
 					preLiquidatorBalance.add(expectedKeeperLiquidationFee)
 				);
 
-				const postFeePoolBalance = await hUSD.balanceOf(feeAddress);
+				const postFeePoolBalance = await rUSD.balanceOf(feeAddress);
 				assert.bnGt(postFeePoolBalance, preFeePoolBalance.add(toUnit(1))); // we are exceeding the 'close' margin below
 				assert.bnClose(postFeePoolBalance, preFeePoolBalance.add(poolFee), toUnit('0.0000001'));
 			});
@@ -6234,24 +6234,24 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 				assert.isTrue(poolFee.gt(toBN(0)));
 
 				const feeAddress = await feePool.FEE_ADDRESS();
-				const preFeePoolBalance = await hUSD.balanceOf(feeAddress);
-				const preFlaggerBalance = await hUSD.balanceOf(noBalance);
-				const preLiquidatorBalance = await hUSD.balanceOf(noBalance2);
+				const preFeePoolBalance = await rUSD.balanceOf(feeAddress);
+				const preFlaggerBalance = await rUSD.balanceOf(noBalance);
+				const preLiquidatorBalance = await rUSD.balanceOf(noBalance2);
 
 				await perpsV2Market.flagPosition(trader2, { from: noBalance });
 				await perpsV2Market.liquidatePosition(trader2, { from: noBalance2 });
 
 				assert.bnEqual(
-					await hUSD.balanceOf(noBalance),
+					await rUSD.balanceOf(noBalance),
 					preFlaggerBalance.add(expectedLiquidationFee)
 				);
 
 				assert.bnEqual(
-					await hUSD.balanceOf(noBalance2),
+					await rUSD.balanceOf(noBalance2),
 					preLiquidatorBalance.add(expectedKeeperLiquidationFee)
 				);
 
-				const postFeePoolBalance = await hUSD.balanceOf(feeAddress);
+				const postFeePoolBalance = await rUSD.balanceOf(feeAddress);
 				assert.bnGt(postFeePoolBalance, preFeePoolBalance.add(toUnit(1))); // we are exceeding the 'close' margin below
 				assert.bnClose(postFeePoolBalance, preFeePoolBalance.add(poolFee), toUnit('0.0000001'));
 			});
@@ -6367,8 +6367,8 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 						assert.bnGt(fees.flaggerFee, toBN(0));
 						assert.bnLt(remainingMargin, fees.flaggerFee);
 
-						assert.bnClose(await hUSD.balanceOf(flagger), fees.flaggerFee, toUnit('0.001'));
-						assert.bnClose(await hUSD.balanceOf(liquidator), fees.liquidatorFee, toUnit('0.001'));
+						assert.bnClose(await rUSD.balanceOf(flagger), fees.flaggerFee, toUnit('0.001'));
+						assert.bnClose(await rUSD.balanceOf(liquidator), fees.liquidatorFee, toUnit('0.001'));
 
 						await assertFlagTx({
 							tx: txFlag,
@@ -6437,11 +6437,11 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 						assert.bnLt(remainingMargin, fees.flaggerFee);
 
 						assert.bnClose(
-							await hUSD.balanceOf(flagger),
+							await rUSD.balanceOf(flagger),
 							fees.flaggerFee.add(fees.delayedOrderKeeperFee),
 							toUnit('0.001')
 						);
-						assert.bnClose(await hUSD.balanceOf(liquidator), fees.liquidatorFee, toUnit('0.001'));
+						assert.bnClose(await rUSD.balanceOf(liquidator), fees.liquidatorFee, toUnit('0.001'));
 
 						await assertFlagTx({
 							tx: txFlag,
@@ -6492,8 +6492,8 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 					const flaggingPrice = multiplyDecimal(liquidationPrice1, toUnit('0.995'));
 					await setPrice(baseAsset, flaggingPrice);
 
-					flaggerBalanceBefore = await hUSD.balanceOf(flagger);
-					liquidatorBalanceBefore = await hUSD.balanceOf(liquidator);
+					flaggerBalanceBefore = await rUSD.balanceOf(flagger);
+					liquidatorBalanceBefore = await rUSD.balanceOf(liquidator);
 
 					await perpsV2Market.flagPosition(trader, { from: flagger });
 				});
@@ -6538,8 +6538,8 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 						assert.bnEqual(position.size, toUnit('0'));
 
 						// balances
-						assert.bnGt(await hUSD.balanceOf(flagger), flaggerBalanceBefore);
-						assert.bnEqual(await hUSD.balanceOf(liquidator), liquidatorBalanceBefore);
+						assert.bnGt(await rUSD.balanceOf(flagger), flaggerBalanceBefore);
+						assert.bnEqual(await rUSD.balanceOf(liquidator), liquidatorBalanceBefore);
 					});
 				});
 
@@ -6571,8 +6571,8 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 						assert.bnEqual(position.size, toUnit('0'));
 
 						// balances
-						assert.bnGt(await hUSD.balanceOf(flagger), flaggerBalanceBefore);
-						assert.bnGt(await hUSD.balanceOf(liquidator), liquidatorBalanceBefore);
+						assert.bnGt(await rUSD.balanceOf(flagger), flaggerBalanceBefore);
+						assert.bnGt(await rUSD.balanceOf(liquidator), liquidatorBalanceBefore);
 					});
 
 					it('When a endorsed account attempts to force liquidate account A', async () => {
@@ -6593,8 +6593,8 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 						assert.bnEqual(position.size, toUnit('0'));
 
 						// balances
-						assert.bnGt(await hUSD.balanceOf(flagger), flaggerBalanceBefore);
-						assert.bnEqual(await hUSD.balanceOf(liquidator), liquidatorBalanceBefore);
+						assert.bnGt(await rUSD.balanceOf(flagger), flaggerBalanceBefore);
+						assert.bnEqual(await rUSD.balanceOf(liquidator), liquidatorBalanceBefore);
 					});
 				});
 
@@ -6629,8 +6629,8 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 						assert.bnEqual(position.size, toUnit('0'));
 
 						// balances
-						assert.bnGt(await hUSD.balanceOf(flagger), flaggerBalanceBefore);
-						assert.bnGt(await hUSD.balanceOf(liquidator), liquidatorBalanceBefore);
+						assert.bnGt(await rUSD.balanceOf(flagger), flaggerBalanceBefore);
+						assert.bnGt(await rUSD.balanceOf(liquidator), liquidatorBalanceBefore);
 					});
 				});
 
@@ -6670,8 +6670,8 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 						assert.bnEqual(position.size, toUnit('0'));
 
 						// balances
-						assert.bnGt(await hUSD.balanceOf(flagger), flaggerBalanceBefore);
-						assert.bnEqual(await hUSD.balanceOf(liquidator), liquidatorBalanceBefore);
+						assert.bnGt(await rUSD.balanceOf(flagger), flaggerBalanceBefore);
+						assert.bnEqual(await rUSD.balanceOf(liquidator), liquidatorBalanceBefore);
 					});
 				});
 
@@ -6699,8 +6699,8 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 						assert.bnEqual(position.size, toUnit('0'));
 
 						// balances
-						assert.bnGt(await hUSD.balanceOf(flagger), flaggerBalanceBefore);
-						assert.bnGt(await hUSD.balanceOf(liquidator), liquidatorBalanceBefore);
+						assert.bnGt(await rUSD.balanceOf(flagger), flaggerBalanceBefore);
+						assert.bnGt(await rUSD.balanceOf(liquidator), liquidatorBalanceBefore);
 					});
 
 					it('When a endorsed account attempts to liquidate account A', async () => {
@@ -6721,8 +6721,8 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 						assert.bnEqual(position.size, toUnit('0'));
 
 						// balances
-						assert.bnGt(await hUSD.balanceOf(flagger), flaggerBalanceBefore);
-						assert.bnEqual(await hUSD.balanceOf(liquidator), liquidatorBalanceBefore);
+						assert.bnGt(await rUSD.balanceOf(flagger), flaggerBalanceBefore);
+						assert.bnEqual(await rUSD.balanceOf(liquidator), liquidatorBalanceBefore);
 					});
 				});
 
@@ -6753,13 +6753,13 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 						assert.bnEqual(position.size, toUnit('0'));
 
 						// balances
-						assert.bnGt(await hUSD.balanceOf(flagger), flaggerBalanceBefore);
-						assert.bnGt(await hUSD.balanceOf(liquidator), liquidatorBalanceBefore);
+						assert.bnGt(await rUSD.balanceOf(flagger), flaggerBalanceBefore);
+						assert.bnGt(await rUSD.balanceOf(liquidator), liquidatorBalanceBefore);
 					});
 				});
 
 				describe('When account A attempts to transact (still flagged)', () => {
-					it('When account A attempts to deposit hUSD into his position', async () => {
+					it('When account A attempts to deposit rUSD into his position', async () => {
 						await assert.revert(
 							perpsV2Market.transferMargin(toUnit('1'), { from: trader }),
 							'Position flagged'
@@ -7069,7 +7069,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 				await setPrice(baseAsset, multiplyDecimal(initialPrice, toUnit(1.1)));
 				// check is too volatile
 				assert.ok(
-					(await exchanger.dynamicFeeRateForExchange(toBytes32('hUSD'), baseAsset)).tooVolatile
+					(await exchanger.dynamicFeeRateForExchange(toBytes32('rUSD'), baseAsset)).tooVolatile
 				);
 			});
 
@@ -7136,7 +7136,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 				// spike the price
 				await setPrice(baseAsset, spikedRate);
 				// check is not too volatile
-				const res = await exchanger.dynamicFeeRateForExchange(toBytes32('hUSD'), baseAsset);
+				const res = await exchanger.dynamicFeeRateForExchange(toBytes32('rUSD'), baseAsset);
 				// check dynamic fee is as expected
 				assert.bnClose(res.feeRate, expectedRate, toUnit('0.0000001'));
 				assert.notOk(res.tooVolatile);

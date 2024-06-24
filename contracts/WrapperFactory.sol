@@ -17,7 +17,7 @@ contract WrapperFactory is Owned, MixinResolver, IWrapperFactory {
     bytes32 public constant CONTRACT_NAME = "WrapperFactory";
 
     bytes32 internal constant CONTRACT_FLEXIBLESTORAGE = "FlexibleStorage";
-    bytes32 internal constant CONTRACT_RWAONE_HUSD = "TribehUSD";
+    bytes32 internal constant CONTRACT_RWAONE_RUSD = "TriberUSD";
     bytes32 internal constant CONTRACT_FEEPOOL = "FeePool";
 
     uint internal constant WRAPPER_VERSION = 1;
@@ -27,14 +27,14 @@ contract WrapperFactory is Owned, MixinResolver, IWrapperFactory {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         addresses = new bytes32[](3);
-        addresses[0] = CONTRACT_RWAONE_HUSD;
+        addresses[0] = CONTRACT_RWAONE_RUSD;
         addresses[1] = CONTRACT_FLEXIBLESTORAGE;
         addresses[2] = CONTRACT_FEEPOOL;
     }
 
     /* ========== INTERNAL VIEWS ========== */
-    function tribehUSD() internal view returns (IERC20) {
-        return IERC20(requireAndGetAddress(CONTRACT_RWAONE_HUSD));
+    function triberUSD() internal view returns (IERC20) {
+        return IERC20(requireAndGetAddress(CONTRACT_RWAONE_RUSD));
     }
 
     function flexibleStorage() internal view returns (IFlexibleStorage) {
@@ -53,7 +53,7 @@ contract WrapperFactory is Owned, MixinResolver, IWrapperFactory {
     }
 
     function feesEscrowed() public view returns (uint) {
-        return tribehUSD().balanceOf(address(this));
+        return triberUSD().balanceOf(address(this));
     }
 
     // ========== RESTRICTED ==========
@@ -86,12 +86,12 @@ contract WrapperFactory is Owned, MixinResolver, IWrapperFactory {
     }
 
     function distributeFees() external {
-        // Normalize fee to hUSD
-        uint amountHUSD = feesEscrowed();
+        // Normalize fee to rUSD
+        uint amountRUSD = feesEscrowed();
 
-        if (amountHUSD > 0) {
-            // Transfer hUSD to the fee pool
-            bool success = tribehUSD().transfer(feePool().FEE_ADDRESS(), amountHUSD);
+        if (amountRUSD > 0) {
+            // Transfer rUSD to the fee pool
+            bool success = triberUSD().transfer(feePool().FEE_ADDRESS(), amountRUSD);
             require(success, "Transfer did not succeed");
         }
     }

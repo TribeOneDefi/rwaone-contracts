@@ -21,7 +21,7 @@ const { toBytes32 } = require('../..');
 const { toBN } = require('web3-utils');
 
 contract('WrapperFactory', async accounts => {
-	const tribes = ['hUSD', 'hETH', 'ETH', 'wHAKA'];
+	const tribes = ['rUSD', 'hETH', 'ETH', 'wHAKA'];
 	const [hETH, ETH] = ['hETH', 'ETH'].map(toBytes32);
 
 	const [, owner, , , account1] = accounts;
@@ -32,7 +32,7 @@ contract('WrapperFactory', async accounts => {
 		feePool,
 		exchangeRates,
 		FEE_ADDRESS,
-		hUSDTribe,
+		rUSDTribe,
 		wrapperFactory,
 		weth;
 
@@ -43,7 +43,7 @@ contract('WrapperFactory', async accounts => {
 			FeePool: feePool,
 			ExchangeRates: exchangeRates,
 			WrapperFactory: wrapperFactory,
-			TribehUSD: hUSDTribe,
+			TriberUSD: rUSDTribe,
 			WETH: weth,
 			FlexibleStorage: flexibleStorage,
 		} = await setupAllContracts({
@@ -187,10 +187,10 @@ contract('WrapperFactory', async accounts => {
 			tx = await wrapperFactory.distributeFees();
 		});
 
-		it('issues hUSD to the feepool', async () => {
+		it('issues rUSD to the feepool', async () => {
 			const logs = await getDecodedLogs({
 				hash: tx.tx,
-				contracts: [hUSDTribe],
+				contracts: [rUSDTribe],
 			});
 
 			// sanity
@@ -198,7 +198,7 @@ contract('WrapperFactory', async accounts => {
 
 			decodedEventEqual({
 				event: 'Transfer',
-				emittedFrom: await hUSDTribe.proxy(),
+				emittedFrom: await rUSDTribe.proxy(),
 				args: [wrapperFactory.address, FEE_ADDRESS, feesEscrowed],
 				log: logs
 					.reverse()

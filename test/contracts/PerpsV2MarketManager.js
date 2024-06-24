@@ -29,7 +29,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 		systemSettings,
 		exchangeRates,
 		circuitBreaker,
-		hUSD,
+		rUSD,
 		debtCache,
 		feePool,
 		rwaone,
@@ -79,7 +79,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 			PerpsV2MarketSettings: perpsV2MarketSettings,
 			ExchangeRates: exchangeRates,
 			CircuitBreaker: circuitBreaker,
-			TribehUSD: hUSD,
+			TriberUSD: rUSD,
 			DebtCache: debtCache,
 			FeePool: feePool,
 			Rwaone: rwaone,
@@ -87,7 +87,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['hUSD'],
+			tribes: ['rUSD'],
 			feeds: ['BTC', 'ETH', 'LINK'],
 			contracts: [
 				'FuturesMarketManager',
@@ -107,15 +107,15 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 			],
 		}));
 
-		await hUSD.issue(trader, initialMint, { from: owner });
+		await rUSD.issue(trader, initialMint, { from: owner });
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
 
 	describe('Basic parameters', () => {
-		it('Requires hUSD contract', async () => {
+		it('Requires rUSD contract', async () => {
 			const required = await futuresMarketManager.resolverAddressesRequired();
-			assert.deepEqual(required, ['TribehUSD', 'FeePool', 'Exchanger'].map(toBytes32));
+			assert.deepEqual(required, ['TriberUSD', 'FeePool', 'Exchanger'].map(toBytes32));
 		});
 
 		it('only expected functions are mutable', () => {
@@ -127,8 +127,8 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 					'addProxiedMarkets',
 					'removeMarkets',
 					'removeMarketsByKey',
-					'issueHUSD',
-					'burnHUSD',
+					'issueRUSD',
+					'burnRUSD',
 					'payFee',
 					'payFee',
 					'updateMarketsImplementations',
@@ -490,13 +490,13 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 				});
 
 				// check new implementation can issue
-				await updatedMarketImplementation.issueHUSD(owner, toUnit('10'));
-				assert.bnEqual(await hUSD.balanceOf(owner), toUnit('10'));
+				await updatedMarketImplementation.issueRUSD(owner, toUnit('10'));
+				assert.bnEqual(await rUSD.balanceOf(owner), toUnit('10'));
 			});
 		});
 	});
 
-	describe('hUSD issuance', () => {
+	describe('rUSD issuance', () => {
 		let market, proxy;
 		beforeEach(async () => {
 			market = await setupContract({
@@ -516,18 +516,18 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 			await futuresMarketManager.addProxiedMarkets([proxy.address], { from: owner });
 		});
 
-		it('issuing/burning hUSD', async () => {
-			await market.issueHUSD(owner, toUnit('10'));
-			assert.bnEqual(await hUSD.balanceOf(owner), toUnit('10'));
+		it('issuing/burning rUSD', async () => {
+			await market.issueRUSD(owner, toUnit('10'));
+			assert.bnEqual(await rUSD.balanceOf(owner), toUnit('10'));
 
-			await market.burnHUSD(owner, toUnit('5'));
-			assert.bnEqual(await hUSD.balanceOf(owner), toUnit('5'));
+			await market.burnRUSD(owner, toUnit('5'));
+			assert.bnEqual(await rUSD.balanceOf(owner), toUnit('5'));
 
-			await market.issueHUSD(owner, toUnit('2'));
-			await market.burnHUSD(owner, toUnit('7'));
+			await market.issueRUSD(owner, toUnit('2'));
+			await market.burnRUSD(owner, toUnit('7'));
 
-			assert.bnEqual(await hUSD.balanceOf(owner), toUnit('0'));
-			await assert.revert(market.burnHUSD(owner, toUnit('1')), 'SafeMath: subtraction overflow');
+			assert.bnEqual(await rUSD.balanceOf(owner), toUnit('0'));
+			await assert.revert(market.burnRUSD(owner, toUnit('1')), 'SafeMath: subtraction overflow');
 		});
 
 		it('burning respects settlement', async () => {
@@ -543,24 +543,24 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 			await mockExchanger.setNumEntries('1');
 
 			// Issuance works fine
-			await market.issueHUSD(owner, toUnit('100'));
-			assert.bnEqual(await hUSD.balanceOf(owner), toUnit('100'));
+			await market.issueRUSD(owner, toUnit('100'));
+			assert.bnEqual(await rUSD.balanceOf(owner), toUnit('100'));
 
 			// But burning properly deducts the reclamation amount
-			await market.burnHUSD(owner, toUnit('90'));
-			assert.bnEqual(await hUSD.balanceOf(owner), toUnit('0'));
+			await market.burnRUSD(owner, toUnit('90'));
+			assert.bnEqual(await rUSD.balanceOf(owner), toUnit('0'));
 		});
 
-		it('only markets are permitted to issue or burn hUSD', async () => {
+		it('only markets are permitted to issue or burn rUSD', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: futuresMarketManager.issueHUSD,
+				fnc: futuresMarketManager.issueRUSD,
 				args: [owner, toUnit('1')],
 				accounts,
 				skipPassCheck: true,
 				reason: 'Permitted only for market implementations',
 			});
 			await onlyGivenAddressCanInvoke({
-				fnc: futuresMarketManager.burnHUSD,
+				fnc: futuresMarketManager.burnRUSD,
 				args: [owner, toUnit('1')],
 				accounts,
 				skipPassCheck: true,
@@ -591,16 +591,16 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 
 		it('pays fees', async () => {
 			const FEE_ADDRESS = await feePool.FEE_ADDRESS();
-			const preBalance = await hUSD.balanceOf(FEE_ADDRESS);
+			const preBalance = await rUSD.balanceOf(FEE_ADDRESS);
 			await market.payFee(toUnit('10'));
-			assert.bnEqual(await hUSD.balanceOf(FEE_ADDRESS), preBalance.add(toUnit('10')));
+			assert.bnEqual(await rUSD.balanceOf(FEE_ADDRESS), preBalance.add(toUnit('10')));
 		});
 
 		it('pays fees (with tracking)', async () => {
 			const FEE_ADDRESS = await feePool.FEE_ADDRESS();
-			const preBalance = await hUSD.balanceOf(FEE_ADDRESS);
+			const preBalance = await rUSD.balanceOf(FEE_ADDRESS);
 			await market.methods['payFee(uint256,bytes32)'](toUnit('10'), toBytes32('trackingCode'));
-			assert.bnEqual(await hUSD.balanceOf(FEE_ADDRESS), preBalance.add(toUnit('10')));
+			assert.bnEqual(await rUSD.balanceOf(FEE_ADDRESS), preBalance.add(toUnit('10')));
 		});
 
 		it('only markets are permitted to pay fees', async () => {
@@ -628,8 +628,8 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 		it('perpsV2 debt is zero when no markets are deployed', async () => {
 			// check initial debt
 			const initialSystemDebt = (await debtCache.currentDebt())[0];
-			// issue some hUSD
-			hUSD.issue(trader, toUnit(100), { from: owner });
+			// issue some rUSD
+			rUSD.issue(trader, toUnit(100), { from: owner });
 			await debtCache.takeDebtSnapshot();
 			// check debt currentDebt() works as expected
 			assert.bnEqual((await debtCache.currentDebt())[0], initialSystemDebt.add(toUnit(100)));
@@ -1067,8 +1067,8 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 			// disable dynamic fee for simpler testing
 			await systemSettings.setExchangeDynamicFeeRounds('0', { from: owner });
 
-			// Issue the traders some hUSD
-			await hUSD.issue(trader, traderInitialBalance);
+			// Issue the traders some rUSD
+			await rUSD.issue(trader, traderInitialBalance);
 
 			// Update the rates to ensure they aren't stale
 			const price = toUnit('100');

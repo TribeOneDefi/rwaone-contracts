@@ -20,8 +20,8 @@ const { toBytes32 } = require('../..');
 const { toBN } = require('web3-utils');
 
 contract('Wrapper', async accounts => {
-	const tribes = ['hUSD', 'hETH', 'ETH', 'wHAKA'];
-	const [hETH, hUSD, ETH] = ['hETH', 'hUSD', 'ETH'].map(toBytes32);
+	const tribes = ['rUSD', 'hETH', 'ETH', 'wHAKA'];
+	const [hETH, rUSD, ETH] = ['hETH', 'rUSD', 'ETH'].map(toBytes32);
 
 	const ONE = toBN('1');
 
@@ -33,28 +33,28 @@ contract('Wrapper', async accounts => {
 		addressResolver,
 		depot,
 		issuer,
-		hUSDTribe,
+		rUSDTribe,
 		hETHTribe,
 		wrapperFactory,
 		etherWrapper,
 		weth;
 
 	const calculateETHToUSD = async feesInETH => {
-		// Ask the Depot how many hUSD I will get for this ETH
-		const expectedFeehUSD = await depot.tribesReceivedForEther(feesInETH);
-		return expectedFeehUSD;
+		// Ask the Depot how many rUSD I will get for this ETH
+		const expectedFeerUSD = await depot.tribesReceivedForEther(feesInETH);
+		return expectedFeerUSD;
 	};
 
 	const calculateMintFees = async amount => {
 		const mintFee = (await etherWrapper.calculateMintFee(amount))[0];
-		const expectedFeehUSD = await calculateETHToUSD(mintFee);
-		return { mintFee, expectedFeehUSD };
+		const expectedFeerUSD = await calculateETHToUSD(mintFee);
+		return { mintFee, expectedFeerUSD };
 	};
 
 	const calculateBurnFees = async amount => {
 		const burnFee = (await etherWrapper.calculateBurnFee(amount))[0];
-		const expectedFeehUSD = await calculateETHToUSD(burnFee);
-		return { burnFee, expectedFeehUSD };
+		const expectedFeerUSD = await calculateETHToUSD(burnFee);
+		return { burnFee, expectedFeerUSD };
 	};
 
 	before(async () => {
@@ -66,7 +66,7 @@ contract('Wrapper', async accounts => {
 			Depot: depot,
 			ExchangeRates: exchangeRates,
 			WrapperFactory: wrapperFactory,
-			TribehUSD: hUSDTribe,
+			TriberUSD: rUSDTribe,
 			TribehETH: hETHTribe,
 			WETH: weth,
 		} = await setupAllContracts({
@@ -150,7 +150,7 @@ contract('Wrapper', async accounts => {
 
 		it('should access its dependencies via the address resolver', async () => {
 			assert.equal(await addressResolver.getAddress(toBytes32('TribehETH')), hETHTribe.address);
-			assert.equal(await addressResolver.getAddress(toBytes32('TribehUSD')), hUSDTribe.address);
+			assert.equal(await addressResolver.getAddress(toBytes32('TriberUSD')), rUSDTribe.address);
 			assert.equal(
 				await addressResolver.getAddress(toBytes32('ExchangeRates')),
 				exchangeRates.address
@@ -203,7 +203,7 @@ contract('Wrapper', async accounts => {
 		let feeAmount;
 
 		before(async () => {
-			feeAmount = await exchangeRates.effectiveValue(hETH, toUnit('0.005'), hUSD);
+			feeAmount = await exchangeRates.effectiveValue(hETH, toUnit('0.005'), rUSD);
 		});
 
 		describe('when mint(1 hETH) is called', async () => {
@@ -257,7 +257,7 @@ contract('Wrapper', async accounts => {
 			let amount;
 			let initialCapacity;
 			let mintFee;
-			let expectedFeehUSD;
+			let expectedFeerUSD;
 			let mintTx;
 			let feesEscrowed;
 
@@ -266,7 +266,7 @@ contract('Wrapper', async accounts => {
 					initialCapacity = await etherWrapper.capacity();
 					amount = initialCapacity.sub(toUnit('1.0'));
 
-					({ mintFee, expectedFeehUSD } = await calculateMintFees(amount));
+					({ mintFee, expectedFeerUSD } = await calculateMintFees(amount));
 
 					feesEscrowed = await wrapperFactory.feesEscrowed();
 
@@ -291,8 +291,8 @@ contract('Wrapper', async accounts => {
 				it('mints amount(1-mintFeeRate) hETH into the user’s wallet', async () => {
 					assert.bnEqual(await hETHTribe.balanceOf(account1), amount.sub(mintFee));
 				});
-				it('escrows `amount * mintFeeRate` worth of hUSD as fees', async () => {
-					assert.bnEqual(await wrapperFactory.feesEscrowed(), feesEscrowed.add(expectedFeehUSD));
+				it('escrows `amount * mintFeeRate` worth of rUSD as fees', async () => {
+					assert.bnEqual(await wrapperFactory.feesEscrowed(), feesEscrowed.add(expectedFeerUSD));
 				});
 				it('has a capacity of (capacity - amount) after', async () => {
 					assert.bnEqual(await etherWrapper.capacity(), initialCapacity.sub(amount));
@@ -327,7 +327,7 @@ contract('Wrapper', async accounts => {
 					initialCapacity = await etherWrapper.capacity();
 					amount = initialCapacity.sub(toUnit('1.0'));
 
-					({ mintFee, expectedFeehUSD } = await calculateMintFees(amount));
+					({ mintFee, expectedFeerUSD } = await calculateMintFees(amount));
 
 					feesEscrowed = await wrapperFactory.feesEscrowed();
 
@@ -359,7 +359,7 @@ contract('Wrapper', async accounts => {
 			let amount;
 			let initialCapacity;
 			let mintFee;
-			let expectedFeehUSD;
+			let expectedFeerUSD;
 			let mintTx;
 			let feesEscrowed;
 
@@ -370,7 +370,7 @@ contract('Wrapper', async accounts => {
 
 					// Calculate the mint fees on the capacity amount,
 					// as this will be the ETH accepted by the contract.
-					({ mintFee, expectedFeehUSD } = await calculateMintFees(initialCapacity));
+					({ mintFee, expectedFeerUSD } = await calculateMintFees(initialCapacity));
 
 					feesEscrowed = await wrapperFactory.feesEscrowed();
 
@@ -395,8 +395,8 @@ contract('Wrapper', async accounts => {
 				it('mints capacity(1-mintFeeRate) hETH into the user’s wallet', async () => {
 					assert.bnEqual(await hETHTribe.balanceOf(account1), initialCapacity.sub(mintFee));
 				});
-				it('escrows `capacity * mintFeeRate` worth of hUSD as fees', async () => {
-					assert.bnEqual(await wrapperFactory.feesEscrowed(), feesEscrowed.add(expectedFeehUSD));
+				it('escrows `capacity * mintFeeRate` worth of rUSD as fees', async () => {
+					assert.bnEqual(await wrapperFactory.feesEscrowed(), feesEscrowed.add(expectedFeerUSD));
 				});
 				it('has a capacity of 0 after', async () => {
 					assert.bnEqual(await etherWrapper.capacity(), toBN('0'));
@@ -420,7 +420,7 @@ contract('Wrapper', async accounts => {
 
 					// Calculate the mint fees on the capacity amount,
 					// as this will be the ETH accepted by the contract.
-					({ mintFee, expectedFeehUSD } = await calculateMintFees(initialCapacity));
+					({ mintFee, expectedFeerUSD } = await calculateMintFees(initialCapacity));
 
 					feesEscrowed = await wrapperFactory.feesEscrowed();
 
@@ -487,7 +487,7 @@ contract('Wrapper', async accounts => {
 				const principal = toUnit('1.0');
 				let amount;
 				let burnFee;
-				let expectedFeehUSD;
+				let expectedFeerUSD;
 				let initialCapacity;
 				let feesEscrowed;
 
@@ -496,7 +496,7 @@ contract('Wrapper', async accounts => {
 						initialCapacity = await etherWrapper.capacity();
 						feesEscrowed = await wrapperFactory.feesEscrowed();
 
-						({ burnFee, expectedFeehUSD } = await calculateBurnFees(principal));
+						({ burnFee, expectedFeerUSD } = await calculateBurnFees(principal));
 						amount = principal.add(burnFee);
 						await hETHTribe.issue(account1, amount);
 						await hETHTribe.approve(etherWrapper.address, amount, { from: account1 });
@@ -534,7 +534,7 @@ contract('Wrapper', async accounts => {
 						});
 					});
 					it('escrows `amount * burnFeeRate` worth of hETH as fees', async () => {
-						assert.bnEqual(await wrapperFactory.feesEscrowed(), feesEscrowed.add(expectedFeehUSD));
+						assert.bnEqual(await wrapperFactory.feesEscrowed(), feesEscrowed.add(expectedFeerUSD));
 					});
 					it('increases capacity by `amount - fees` WETH', async () => {
 						assert.bnEqual(await etherWrapper.capacity(), initialCapacity.add(amount.sub(burnFee)));
@@ -572,7 +572,7 @@ contract('Wrapper', async accounts => {
 						initialCapacity = await etherWrapper.capacity();
 						feesEscrowed = await wrapperFactory.feesEscrowed();
 
-						({ burnFee, expectedFeehUSD } = await calculateBurnFees(principal));
+						({ burnFee, expectedFeerUSD } = await calculateBurnFees(principal));
 						amount = principal;
 						await hETHTribe.issue(account1, amount);
 						await hETHTribe.approve(etherWrapper.address, amount, { from: account1 });
@@ -616,13 +616,13 @@ contract('Wrapper', async accounts => {
 				let reserves;
 				let amount;
 				let burnFee;
-				let expectedFeehUSD;
+				let expectedFeerUSD;
 				let feesEscrowed;
 
 				describe('fee is positive', () => {
 					beforeEach(async () => {
 						reserves = await etherWrapper.targetTribeIssued();
-						({ burnFee, expectedFeehUSD } = await calculateBurnFees(reserves));
+						({ burnFee, expectedFeerUSD } = await calculateBurnFees(reserves));
 
 						amount = reserves.add(burnFee).add(toBN('100000000'));
 						feesEscrowed = await wrapperFactory.feesEscrowed();
@@ -662,8 +662,8 @@ contract('Wrapper', async accounts => {
 								.find(({ name }) => name === 'Transfer'),
 						});
 					});
-					it('escrows `amount * burnFeeRate` worth of hUSD as fees', async () => {
-						assert.bnEqual(await wrapperFactory.feesEscrowed(), feesEscrowed.add(expectedFeehUSD));
+					it('escrows `amount * burnFeeRate` worth of rUSD as fees', async () => {
+						assert.bnEqual(await wrapperFactory.feesEscrowed(), feesEscrowed.add(expectedFeerUSD));
 					});
 					it('has a max capacity after', async () => {
 						assert.bnEqual(await etherWrapper.capacity(), await etherWrapper.maxTokenAmount());
@@ -680,7 +680,7 @@ contract('Wrapper', async accounts => {
 						});
 
 						reserves = await etherWrapper.targetTribeIssued();
-						({ burnFee, expectedFeehUSD } = await calculateBurnFees(reserves));
+						({ burnFee, expectedFeerUSD } = await calculateBurnFees(reserves));
 
 						amount = reserves.add(burnFee).add(toBN('100000000'));
 						feesEscrowed = await wrapperFactory.feesEscrowed();

@@ -53,7 +53,7 @@ async function extractStakingBalances({
 
 	// The address of the inverse tribe that is about to be purged.
 	// Note that this must be the PROXY address, where Transfer events are emitted from.
-	const iTribeContract = getTarget({ contract: `Proxy${tribe === 'hUSD' ? 'ERC20hUSD' : tribe}` });
+	const iTribeContract = getTarget({ contract: `Proxy${tribe === 'rUSD' ? 'ERC20rUSD' : tribe}` });
 
 	if (!iTribeContract) {
 		throw new Error(`Cannot find tribe contract for tribe: "${tribe}"`);
@@ -115,10 +115,10 @@ async function extractStakingBalances({
 		provider
 	);
 
-	// The exchange fee incurred when users are purged into hUSD
-	const exchangeFee = await SystemSettings.exchangeFeeRate(toBytes32('hUSD'));
+	// The exchange fee incurred when users are purged into rUSD
+	const exchangeFee = await SystemSettings.exchangeFeeRate(toBytes32('rUSD'));
 
-	console.log(gray(`Exchange fee of hUSD is`), yellow(ethers.utils.formatEther(exchangeFee)));
+	console.log(gray(`Exchange fee of rUSD is`), yellow(ethers.utils.formatEther(exchangeFee)));
 
 	/** *********** --------------------- *********** **/
 
@@ -209,7 +209,7 @@ async function extractStakingBalances({
 
 	// Computes the balances owed to each account
 	function computeOwedBalances(balances) {
-		console.log(`\nComputing owed hUSD balances for accounts using parameters:`);
+		console.log(`\nComputing owed rUSD balances for accounts using parameters:`);
 		console.log(`    Price: ${ethers.utils.formatEther(frozenPrice)}`);
 		console.log(
 			`    Exchange Fee: ${ethers.utils.formatEther(
@@ -237,14 +237,14 @@ async function extractStakingBalances({
 		const totalOwed = result.reduce((total, curr) => total.add(curr.owed), ethers.constants.Zero);
 
 		console.log(`\n${ethers.utils.formatEther(totalStaked, 'ether')} staked in total.`);
-		console.log(`${ethers.utils.formatEther(totalOwed, 'ether')} total hUSD owed.\n`);
+		console.log(`${ethers.utils.formatEther(totalOwed, 'ether')} total rUSD owed.\n`);
 		return result;
 	}
 
-	function saveOwedBalances(owedHUSDBalances) {
-		let csvString = 'Address,Staked Balance,Owed hUSD,Readable Staked Balance,Readable Owed hUSD\n';
+	function saveOwedBalances(owedRUSDBalances) {
+		let csvString = 'Address,Staked Balance,Owed rUSD,Readable Staked Balance,Readable Owed rUSD\n';
 
-		for (const balance of owedHUSDBalances) {
+		for (const balance of owedRUSDBalances) {
 			const line = `${balance.address},${balance.balance},${balance.owed},${balance.readableBalance},${balance.readableOwed}\n`;
 			csvString = csvString.concat(line);
 		}
@@ -257,9 +257,9 @@ async function extractStakingBalances({
 	}
 
 	const nonzeroBalances = await fetchStakedBalances();
-	const owedHUSDBalances = computeOwedBalances(nonzeroBalances);
+	const owedRUSDBalances = computeOwedBalances(nonzeroBalances);
 
-	saveOwedBalances(owedHUSDBalances);
+	saveOwedBalances(owedRUSDBalances);
 }
 
 module.exports = {

@@ -53,8 +53,8 @@ contract('Rewards Integration Tests', accounts => {
 	// };
 
 	// CURRENCIES
-	const [hUSD, sAUD, sEUR, hBTC, wHAKA, iBTC, hETH, ETH] = [
-		'hUSD',
+	const [rUSD, sAUD, sEUR, hBTC, wHAKA, iBTC, hETH, ETH] = [
+		'rUSD',
 		'sAUD',
 		'sEUR',
 		'hBTC',
@@ -64,7 +64,7 @@ contract('Rewards Integration Tests', accounts => {
 		'ETH',
 	].map(toBytes32);
 
-	const tribeKeys = [hUSD, sAUD, sEUR, hBTC, iBTC, hETH, ETH];
+	const tribeKeys = [rUSD, sAUD, sEUR, hBTC, iBTC, hETH, ETH];
 
 	const initialInflationAmount = toUnit(800000);
 
@@ -136,7 +136,7 @@ contract('Rewards Integration Tests', accounts => {
 		systemSettings,
 		rewardEscrow,
 		periodOneMintableSupplyMinusMinterReward,
-		hUSDContract,
+		rUSDContract,
 		MINTER_HAKA_REWARD;
 
 	// run this once before all tests to prepare our environment, snapshots on beforeEach will take
@@ -154,14 +154,14 @@ contract('Rewards Integration Tests', accounts => {
 			SupplySchedule: supplySchedule,
 			Rwaone: rwaone,
 			ProxyERC20Rwaone: tribeetixProxy,
-			TribehUSD: hUSDContract,
+			TriberUSD: rUSDContract,
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['hUSD', 'sAUD', 'sEUR', 'hBTC', 'iBTC', 'hETH'],
+			tribes: ['rUSD', 'sAUD', 'sEUR', 'hBTC', 'iBTC', 'hETH'],
 			contracts: [
 				'AddressResolver',
-				'Exchanger', // necessary for burnTribes to check settlement of hUSD
+				'Exchanger', // necessary for burnTribes to check settlement of rUSD
 				'ExchangeRates',
 				'FeePool',
 				'FeePoolEternalStorage', // necessary to claimFees()
@@ -488,7 +488,7 @@ contract('Rewards Integration Tests', accounts => {
 			// await logFeePeriods();
 
 			// Account 1 leaves the system in week 2
-			const burnableTotal = await rwaone.debtBalanceOf(account1, hUSD);
+			const burnableTotal = await rwaone.debtBalanceOf(account1, rUSD);
 			await rwaone.burnTribes(burnableTotal, { from: account1 });
 			// await logFeesByPeriod(account1);
 
@@ -540,7 +540,7 @@ contract('Rewards Integration Tests', accounts => {
 			);
 
 			// Account 1 leaves the system
-			const burnableTotal = await rwaone.debtBalanceOf(account1, hUSD);
+			const burnableTotal = await rwaone.debtBalanceOf(account1, rUSD);
 			await rwaone.burnTribes(burnableTotal, { from: account1 });
 
 			// FastForward into the second mintable week
@@ -602,8 +602,8 @@ contract('Rewards Integration Tests', accounts => {
 			await rwaone.issueTribes(tenK, { from: account1 });
 			await rwaone.issueTribes(tenK, { from: account2 });
 
-			await rwaone.exchange(hUSD, tenK, hBTC, { from: account1 });
-			await rwaone.exchange(hUSD, tenK, hBTC, { from: account2 });
+			await rwaone.exchange(rUSD, tenK, hBTC, { from: account1 });
+			await rwaone.exchange(rUSD, tenK, hBTC, { from: account2 });
 
 			await fastForwardAndCloseFeePeriod();
 			// //////////////////////////////////////////////
@@ -644,7 +644,7 @@ contract('Rewards Integration Tests', accounts => {
 			await updateAggregatorRates(exchangeRates, null, [hBTC], ['10000'].map(toUnit));
 			await debtCache.takeDebtSnapshot();
 
-			// Account 3 (enters the system and) mints 10K hUSD (minus half of an exchange fee - to balance the fact
+			// Account 3 (enters the system and) mints 10K rUSD (minus half of an exchange fee - to balance the fact
 			// that the other two holders have doubled their hBTC holdings) and should have 20% of the debt not 33.33%
 			const potentialFee = exchangeFeeIncurred(toUnit('20000'));
 			await rwaone.issueTribes(tenK.sub(half(potentialFee)), { from: account3 });
@@ -661,9 +661,9 @@ contract('Rewards Integration Tests', accounts => {
 			// disable dynamic fee here otherwise it will flag rates as too volatile
 			await systemSettings.setExchangeDynamicFeeRounds('0', { from: owner });
 
-			const { amountReceived } = await exchanger.getAmountsForExchange(tenK, hUSD, hBTC);
-			await rwaone.exchange(hBTC, amountReceived, hUSD, { from: account1 });
-			await rwaone.exchange(hBTC, amountReceived, hUSD, { from: account2 });
+			const { amountReceived } = await exchanger.getAmountsForExchange(tenK, rUSD, hBTC);
+			await rwaone.exchange(hBTC, amountReceived, rUSD, { from: account1 });
+			await rwaone.exchange(hBTC, amountReceived, rUSD, { from: account2 });
 
 			// Close so we can claim
 			await fastForwardAndCloseFeePeriod();
@@ -737,14 +737,14 @@ contract('Rewards Integration Tests', accounts => {
 			// Commenting out this logic for now (v2.14.x) - needs to be relooked at -JJ
 
 			// // now in p3 Acc1 burns all and leaves (-40%) and Acc2 has 67% and Acc3 33% rewards allocated as such
-			// // Account 1 exchanges all hBTC back to hUSD
+			// // Account 1 exchanges all hBTC back to rUSD
 			// const acc1hBTCBalance = await hBTCContract.balanceOf(account1, { from: account1 });
-			// await rwaone.exchange(hBTC, acc1hBTCBalance, hUSD, { from: account1 });
+			// await rwaone.exchange(hBTC, acc1hBTCBalance, rUSD, { from: account1 });
 			// const amountAfterExchange = await feePool.amountReceivedFromExchange(acc1hBTCBalance);
 			// const amountAfterExchangeInUSD = await exchangeRates.effectiveValue(
 			// 	hBTC,
 			// 	amountAfterExchange,
-			// 	hUSD
+			// 	rUSD
 			// );
 
 			// await rwaone.burnTribes(amountAfterExchangeInUSD, { from: account1 });
@@ -829,7 +829,7 @@ contract('Rewards Integration Tests', accounts => {
 		});
 	});
 
-	describe('3 Accounts issue 10K hUSD each in week 1', async () => {
+	describe('3 Accounts issue 10K rUSD each in week 1', async () => {
 		beforeEach(async () => {
 			await rwaone.issueTribes(tenK, { from: account1 });
 			await rwaone.issueTribes(tenK, { from: account2 });
@@ -837,7 +837,7 @@ contract('Rewards Integration Tests', accounts => {
 		});
 
 		it('Acc1 issues and burns multiple times and should have accounts 1,2,3 rewards 50%,25%,25%', async () => {
-			// Acc 1 Issues 20K hUSD
+			// Acc 1 Issues 20K rUSD
 			await rwaone.issueTribes(tenK, { from: account1 });
 
 			// Close week 2
@@ -885,9 +885,9 @@ contract('Rewards Integration Tests', accounts => {
 
 			// Acc1 Burns all
 			await rwaone.burnTribes(twentyK, { from: account1 });
-			// Acc 1 Issues 10K hUSD
+			// Acc 1 Issues 10K rUSD
 			await rwaone.issueTribes(tenK, { from: account1 });
-			// Acc 1 Issues 10K hUSD again
+			// Acc 1 Issues 10K rUSD again
 			await rwaone.issueTribes(tenK, { from: account1 });
 
 			// Get the wHAKA mintableSupply for week 2
@@ -995,8 +995,8 @@ contract('Rewards Integration Tests', accounts => {
 			await rwaone.issueTribes(oneThousand, { from: account2 });
 			await rwaone.issueTribes(oneThousand, { from: account1 });
 
-			await rwaone.exchange(hUSD, oneThousand, sAUD, { from: account2 });
-			await rwaone.exchange(hUSD, oneThousand, sAUD, { from: account1 });
+			await rwaone.exchange(rUSD, oneThousand, sAUD, { from: account2 });
+			await rwaone.exchange(rUSD, oneThousand, sAUD, { from: account1 });
 
 			await fastForwardAndCloseFeePeriod();
 		});
@@ -1004,23 +1004,23 @@ contract('Rewards Integration Tests', accounts => {
 		it('then account gets remainder of fees/rewards available after wei rounding', async () => {
 			// Assert that we have correct values in the fee pool
 			const feesAvailableUSD = await feePool.feesAvailable(account2);
-			const oldhUSDBalance = await hUSDContract.balanceOf(account2);
+			const oldrUSDBalance = await rUSDContract.balanceOf(account2);
 
 			// Now we should be able to claim them.
 			const claimFeesTx = await feePool.claimFees({ from: account2 });
 			assert.eventEqual(claimFeesTx, 'FeesClaimed', {
-				hUSDAmount: feesAvailableUSD[0],
+				rUSDAmount: feesAvailableUSD[0],
 				snxRewards: feesAvailableUSD[1],
 			});
 
-			const newUSDBalance = await hUSDContract.balanceOf(account2);
-			// hUSD balance remains unchanged since the fees are burned.
-			assert.bnEqual(newUSDBalance, oldhUSDBalance);
+			const newUSDBalance = await rUSDContract.balanceOf(account2);
+			// rUSD balance remains unchanged since the fees are burned.
+			assert.bnEqual(newUSDBalance, oldrUSDBalance);
 
 			const period = await feePool.recentFeePeriods(1);
 			period.index = 1;
 
-			// Simulate rounding on hUSD leaving fraction less for the last claimer.
+			// Simulate rounding on rUSD leaving fraction less for the last claimer.
 			// No need to simulate for wHAKA as the 1.44M wHAKA has a 1 wei rounding already
 			period.feesClaimed = period.feesClaimed.add(toUnit('0.000000000000000001'));
 			await feePool.importFeePeriod(
@@ -1041,7 +1041,7 @@ contract('Rewards Integration Tests', accounts => {
 			// however only   721,053.846153846153846153 Claimable after rounding to 18 decimals
 			const transaction = await feePool.claimFees({ from: account1 });
 			assert.eventEqual(transaction, 'FeesClaimed', {
-				hUSDAmount: feesAvailableUSDAcc1[0],
+				rUSDAmount: feesAvailableUSDAcc1[0],
 				snxRewards: feesAvailableUSDAcc1[1],
 			});
 		});

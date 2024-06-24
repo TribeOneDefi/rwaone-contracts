@@ -24,7 +24,7 @@ library ExchangeSettlementLib {
         IRwaone rwaone;
     }
 
-    bytes32 internal constant hUSD = "hUSD";
+    bytes32 internal constant rUSD = "rUSD";
 
     function internalSettle(
         ResolvedAddresses calldata resolvedAddresses,

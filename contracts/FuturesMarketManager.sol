@@ -62,8 +62,8 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
 
     bytes32 public constant CONTRACT_NAME = "FuturesMarketManager";
 
-    bytes32 internal constant HUSD = "hUSD";
-    bytes32 internal constant CONTRACT_RWAONEHUSD = "TribehUSD";
+    bytes32 internal constant RUSD = "rUSD";
+    bytes32 internal constant CONTRACT_RWAONERUSD = "TriberUSD";
     bytes32 internal constant CONTRACT_FEEPOOL = "FeePool";
     bytes32 internal constant CONTRACT_EXCHANGER = "Exchanger";
 
@@ -75,13 +75,13 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         addresses = new bytes32[](3);
-        addresses[0] = CONTRACT_RWAONEHUSD;
+        addresses[0] = CONTRACT_RWAONERUSD;
         addresses[1] = CONTRACT_FEEPOOL;
         addresses[2] = CONTRACT_EXCHANGER;
     }
 
-    function _hUSD() internal view returns (ITribe) {
-        return ITribe(requireAndGetAddress(CONTRACT_RWAONEHUSD));
+    function _rUSD() internal view returns (ITribe) {
+        return ITribe(requireAndGetAddress(CONTRACT_RWAONERUSD));
     }
 
     function _feePool() internal view returns (IFeePool) {
@@ -367,38 +367,38 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
     }
 
     /*
-     * Allows a market to issue hUSD to an account when it withdraws margin.
+     * Allows a market to issue rUSD to an account when it withdraws margin.
      * This function is not callable through the proxy, only underlying contracts interact;
      * it reverts if not called by a known market.
      */
-    function issueHUSD(address account, uint amount) external onlyMarketImplementations {
+    function issueRUSD(address account, uint amount) external onlyMarketImplementations {
         // No settlement is required to issue tribes into the target account.
-        _hUSD().issue(account, amount);
+        _rUSD().issue(account, amount);
     }
 
     /*
-     * Allows a market to burn hUSD from an account when it deposits margin.
+     * Allows a market to burn rUSD from an account when it deposits margin.
      * This function is not callable through the proxy, only underlying contracts interact;
      * it reverts if not called by a known market.
      */
-    function burnHUSD(address account, uint amount) external onlyMarketImplementations returns (uint postReclamationAmount) {
+    function burnRUSD(address account, uint amount) external onlyMarketImplementations returns (uint postReclamationAmount) {
         // We'll settle first, in order to ensure the user has sufficient balance.
         // If the settlement reduces the user's balance below the requested amount,
         // the settled remainder will be the resulting deposit.
 
         // Exchanger.settle ensures tribe is active
-        ITribe hUSD = _hUSD();
-        (uint reclaimed, , ) = _exchanger().settle(account, HUSD);
+        ITribe rUSD = _rUSD();
+        (uint reclaimed, , ) = _exchanger().settle(account, RUSD);
 
         uint balanceAfter = amount;
         if (0 < reclaimed) {
-            balanceAfter = IERC20(address(hUSD)).balanceOf(account);
+            balanceAfter = IERC20(address(rUSD)).balanceOf(account);
         }
 
         // Reduce the value to burn if balance is insufficient after reclamation
         amount = balanceAfter < amount ? balanceAfter : amount;
 
-        hUSD.burn(account, amount);
+        rUSD.burn(account, amount);
 
         return amount;
     }
@@ -420,7 +420,7 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
     function _payFee(uint amount, bytes32 trackingCode) internal {
         delete trackingCode; // unused for now, will be used SIP 203
         IFeePool pool = _feePool();
-        _hUSD().issue(pool.FEE_ADDRESS(), amount);
+        _rUSD().issue(pool.FEE_ADDRESS(), amount);
         pool.recordFeePaid(amount);
     }
 

@@ -24,7 +24,7 @@ contract('PerpsV2MarketData', accounts => {
 		perpsV2MarketData,
 		exchangeRates,
 		circuitBreaker,
-		hUSD,
+		rUSD,
 		systemSettings,
 		marketKey,
 		baseAsset;
@@ -61,11 +61,11 @@ contract('PerpsV2MarketData', accounts => {
 			PerpsV2MarketData: perpsV2MarketData,
 			ExchangeRates: exchangeRates,
 			CircuitBreaker: circuitBreaker,
-			TribehUSD: hUSD,
+			TriberUSD: rUSD,
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['hUSD', 'hBTC', 'hETH', 'sLINK'],
+			tribes: ['rUSD', 'hBTC', 'hETH', 'sLINK'],
 			contracts: [
 				'FuturesMarketManager',
 				'PerpsV2MarketSettings',
@@ -256,10 +256,10 @@ contract('PerpsV2MarketData', accounts => {
 		// disable dynamic fee for simpler testing
 		await systemSettings.setExchangeDynamicFeeRounds('0', { from: owner });
 
-		// Issue the traders some hUSD
-		await hUSD.issue(trader1, traderInitialBalance);
-		await hUSD.issue(trader2, traderInitialBalance);
-		await hUSD.issue(trader3, traderInitialBalance);
+		// Issue the traders some rUSD
+		await rUSD.issue(trader1, traderInitialBalance);
+		await rUSD.issue(trader2, traderInitialBalance);
+		await rUSD.issue(trader3, traderInitialBalance);
 
 		// The traders take positions on market
 		let desiredFillPrice;

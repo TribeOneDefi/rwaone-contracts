@@ -11,7 +11,7 @@ contract MockTribe is ExternStateToken {
     IAddressResolver private addressResolver;
     bytes32 public currencyKey;
 
-    // Where fees are pooled in hUSD
+    // Where fees are pooled in rUSD
     address public constant FEE_ADDRESS = 0xfeEFEEfeefEeFeefEEFEEfEeFeefEEFeeFEEFEeF;
 
     constructor(
@@ -37,20 +37,20 @@ contract MockTribe is ExternStateToken {
 
     /**
      * @notice _transferToFeeAddress function
-     * non-hUSD tribes are exchanged into hUSD via tribeInitiatedExchange
+     * non-rUSD tribes are exchanged into rUSD via tribeInitiatedExchange
      * notify feePool to record amount as fee paid to feePool */
     function _transferToFeeAddress(address to, uint value) internal returns (bool) {
         uint amountInUSD;
 
-        // hUSD can be transferred to FEE_ADDRESS directly
-        if (currencyKey == "hUSD") {
+        // rUSD can be transferred to FEE_ADDRESS directly
+        if (currencyKey == "rUSD") {
             amountInUSD = value;
             _transferByProxy(messageSender, to, value);
         } else {
             // for now, do nothing
         }
 
-        // Notify feePool to record hUSD to distribute as fees
+        // Notify feePool to record rUSD to distribute as fees
         IFeePool(addressResolver.getAddress("FeePool")).recordFeePaid(amountInUSD);
 
         return true;
@@ -59,7 +59,7 @@ contract MockTribe is ExternStateToken {
     function transfer(address to, uint value) external optionalProxy returns (bool) {
         ISystemStatus(addressResolver.getAddress("SystemStatus")).requireTribeActive(currencyKey);
 
-        // transfers to FEE_ADDRESS will be exchanged into hUSD and recorded as fee
+        // transfers to FEE_ADDRESS will be exchanged into rUSD and recorded as fee
         if (to == FEE_ADDRESS) {
             return _transferToFeeAddress(to, value);
         }
@@ -73,11 +73,7 @@ contract MockTribe is ExternStateToken {
         return _transferByProxy(messageSender, to, value);
     }
 
-    function transferFrom(
-        address from,
-        address to,
-        uint value
-    ) external optionalProxy returns (bool) {
+    function transferFrom(address from, address to, uint value) external optionalProxy returns (bool) {
         ISystemStatus(addressResolver.getAddress("SystemStatus")).requireTribeActive(currencyKey);
 
         return _transferFromByProxy(messageSender, from, to, value);

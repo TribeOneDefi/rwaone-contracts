@@ -21,11 +21,11 @@ contract EmptyCollateralManager is ICollateralManager {
         return 0;
     }
 
-    function totalLong() external view returns (uint husdValue, bool anyRateIsInvalid) {
+    function totalLong() external view returns (uint rusdValue, bool anyRateIsInvalid) {
         return (0, false);
     }
 
-    function totalShort() external view returns (uint husdValue, bool anyRateIsInvalid) {
+    function totalShort() external view returns (uint rusdValue, bool anyRateIsInvalid) {
         return (0, false);
     }
 
@@ -37,29 +37,14 @@ contract EmptyCollateralManager is ICollateralManager {
         return (0, false);
     }
 
-    function getRatesAndTime(uint)
-        external
-        view
-        returns (
-            uint entryRate,
-            uint lastRate,
-            uint lastUpdated,
-            uint newIndex
-        )
-    {
+    function getRatesAndTime(uint) external view returns (uint entryRate, uint lastRate, uint lastUpdated, uint newIndex) {
         return (0, 0, 0, 0);
     }
 
-    function getShortRatesAndTime(bytes32, uint)
-        external
-        view
-        returns (
-            uint entryRate,
-            uint lastRate,
-            uint lastUpdated,
-            uint newIndex
-        )
-    {
+    function getShortRatesAndTime(
+        bytes32,
+        uint
+    ) external view returns (uint entryRate, uint lastRate, uint lastUpdated, uint newIndex) {
         return (0, 0, 0, 0);
     }
 

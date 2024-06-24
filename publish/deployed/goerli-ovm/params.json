@@ -34,7 +34,7 @@
 	{
 		"name": "COLLATERAL_MANAGER",
 		"value": {
-			"TRIBES": ["hUSD", "hBTC", "hETH"],
+			"TRIBES": ["rUSD", "hBTC", "hETH"],
 			"SHORTS": ["hBTC", "hETH"],
 			"MAX_DEBT": "75000000000000000000000000",
 			"MAX_SKEW_RATE": "200000000000000000",
@@ -56,7 +56,7 @@
 	{
 		"name": "COLLATERAL_ETH",
 		"value": {
-			"TRIBES": ["hUSD", "hETH"],
+			"TRIBES": ["rUSD", "hETH"],
 			"ISSUE_FEE_RATE": "0"
 		}
 	}

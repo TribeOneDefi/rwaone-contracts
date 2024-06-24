@@ -197,17 +197,17 @@
 				"status": "current",
 				"keccak256": "0x0f35b4d59bcbb3b0e37dd3f4c7fd4a1e747ab05bbd888f51fbf1c7c1f5c91955"
 			},
-			"TokenStatehUSD": {
+			"TokenStaterUSD": {
 				"address": "0x43CA5848a2957C0718D240c02A4381A90111591e",
 				"status": "current",
 				"keccak256": "0xd22abb3b26a3a908924ea980e019c9e61bb2e80be675db7ff683d4f64c1e66f2"
 			},
-			"ProxyhUSD": {
+			"ProxyrUSD": {
 				"address": "0xeBaEAAD9236615542844adC5c149F86C36aD1136",
 				"status": "current",
 				"keccak256": "0x450f870a93352e0feae6dfb45be1371d9e0dcb42c57b8795f2392ccf7ec6b87a"
 			},
-			"TribehUSD": {
+			"TriberUSD": {
 				"address": "0xfDa54191F3C0999dbf4c193dEF1B83EDD3e3Ba39",
 				"status": "current",
 				"keccak256": "0xf57c8b4b5c7f8534be6c98ca83ddda4d0f10609eb84e5418c886d6dfabea11ba"

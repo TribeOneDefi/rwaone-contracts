@@ -29,7 +29,7 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     bytes32 internal constant CONTRACT_CIRCUIT_BREAKER = "CircuitBreaker";
 
     //slither-disable-next-line naming-convention
-    bytes32 internal constant hUSD = "hUSD";
+    bytes32 internal constant rUSD = "rUSD";
 
     // Decentralized oracle networks that feed into pricing aggregators
     mapping(bytes32 => AggregatorV2V3Interface) public aggregators;
@@ -93,14 +93,14 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
 
     function rateWithSafetyChecks(bytes32 currencyKey) external returns (uint rate, bool broken, bool staleOrInvalid) {
         address aggregatorAddress = address(aggregators[currencyKey]);
-        require(currencyKey == hUSD || aggregatorAddress != address(0), "No aggregator for asset");
+        require(currencyKey == rUSD || aggregatorAddress != address(0), "No aggregator for asset");
 
         if (enableUpdateOracle[currencyKey] == true) {
             updateOracle(aggregators[currencyKey]);
         }
         RateAndUpdatedTime memory rateAndTime = _getRateAndUpdatedTime(currencyKey);
 
-        if (currencyKey == hUSD) {
+        if (currencyKey == rUSD) {
             return (rateAndTime.rate, false, false);
         }
 
@@ -291,7 +291,7 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     function rateAndInvalid(bytes32 currencyKey) public view returns (uint rate, bool isInvalid) {
         RateAndUpdatedTime memory rateAndTime = _getRateAndUpdatedTime(currencyKey);
 
-        if (currencyKey == hUSD) {
+        if (currencyKey == rUSD) {
             return (rateAndTime.rate, false);
         }
         return (
@@ -316,7 +316,7 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
             // do one lookup of the rate & time to minimize gas
             RateAndUpdatedTime memory rateEntry = _getRateAndUpdatedTime(currencyKeys[i]);
             rates[i] = rateEntry.rate;
-            if (!anyRateInvalid && currencyKeys[i] != hUSD) {
+            if (!anyRateInvalid && currencyKeys[i] != rUSD) {
                 anyRateInvalid =
                     flagList[i] ||
                     _rateIsStaleWithTime(_rateStalePeriod, rateEntry.time) ||
@@ -345,7 +345,7 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         bool[] memory flagList = getFlagsForRates(currencyKeys);
 
         for (uint i = 0; i < currencyKeys.length; i++) {
-            if (currencyKeys[i] == hUSD) {
+            if (currencyKeys[i] == rUSD) {
                 continue;
             }
 
@@ -377,7 +377,7 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         bool[] memory flagList = getFlagsForRates(currencyKeys);
 
         for (uint i = 0; i < currencyKeys.length; i++) {
-            if (currencyKeys[i] == hUSD) {
+            if (currencyKeys[i] == rUSD) {
                 continue;
             }
 
@@ -461,8 +461,8 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     }
 
     function _getRateAndUpdatedTime(bytes32 currencyKey) internal view returns (RateAndUpdatedTime memory) {
-        // hUSD rate is 1.0
-        if (currencyKey == hUSD) {
+        // rUSD rate is 1.0
+        if (currencyKey == rUSD) {
             return RateAndUpdatedTime({rate: uint216(SafeDecimalMath.unit()), time: 0});
         } else {
             AggregatorV2V3Interface aggregator = aggregators[currencyKey];
@@ -490,7 +490,7 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     }
 
     function _getCurrentRoundId(bytes32 currencyKey) internal view returns (uint) {
-        if (currencyKey == hUSD) {
+        if (currencyKey == rUSD) {
             return 0;
         }
         AggregatorV2V3Interface aggregator = aggregators[currencyKey];
@@ -500,9 +500,9 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     }
 
     function _getRateAndTimestampAtRound(bytes32 currencyKey, uint roundId) internal view returns (uint rate, uint time) {
-        // short circuit hUSD
-        if (currencyKey == hUSD) {
-            // hUSD has no rounds, and 0 time is preferrable for "volatility" heuristics
+        // short circuit rUSD
+        if (currencyKey == rUSD) {
+            // rUSD has no rounds, and 0 time is preferrable for "volatility" heuristics
             // which are used in atomic swaps and fee reclamation
             return (SafeDecimalMath.unit(), 0);
         } else {
@@ -554,8 +554,8 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     }
 
     function _rateIsStale(bytes32 currencyKey, uint _rateStalePeriod) internal view returns (bool) {
-        // hUSD is a special case and is never stale (check before an SLOAD of getRateAndUpdatedTime)
-        if (currencyKey == hUSD) {
+        // rUSD is a special case and is never stale (check before an SLOAD of getRateAndUpdatedTime)
+        if (currencyKey == rUSD) {
             return false;
         }
         return _rateIsStaleWithTime(_rateStalePeriod, _getUpdatedTime(currencyKey));
@@ -566,8 +566,8 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     }
 
     function _rateIsFlagged(bytes32 currencyKey, FlagsInterface flags) internal view returns (bool) {
-        // hUSD is a special case and is never invalid
-        if (currencyKey == hUSD) {
+        // rUSD is a special case and is never invalid
+        if (currencyKey == rUSD) {
             return false;
         }
         address aggregator = address(aggregators[currencyKey]);

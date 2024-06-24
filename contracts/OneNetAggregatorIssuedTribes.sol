@@ -7,19 +7,11 @@ contract OneNetAggregatorIssuedTribes is BaseOneNetAggregator {
 
     constructor(AddressResolver _resolver) public BaseOneNetAggregator(_resolver) {}
 
-    function getRoundData(uint80)
-        public
-        view
-        returns (
-            uint80,
-            int256,
-            uint256,
-            uint256,
-            uint80
-        )
-    {
-        uint totalIssuedTribes =
-            IIssuer(resolver.requireAndGetAddress("Issuer", "aggregate debt info")).totalIssuedTribes("hUSD", true);
+    function getRoundData(uint80) public view returns (uint80, int256, uint256, uint256, uint80) {
+        uint totalIssuedTribes = IIssuer(resolver.requireAndGetAddress("Issuer", "aggregate debt info")).totalIssuedTribes(
+            "rUSD",
+            true
+        );
 
         uint dataTimestamp = now;
 

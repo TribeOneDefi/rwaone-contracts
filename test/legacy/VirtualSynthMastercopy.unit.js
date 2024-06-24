@@ -33,7 +33,7 @@ contract('VirtualTribeMastercopy (unit tests)', async accounts => {
 	describe('with instance', () => {
 		let instance;
 
-		before(async () => {});
+		before(async () => { });
 
 		beforeEach(async () => {
 			instance = await VirtualTribeMastercopy.new();
@@ -45,7 +45,7 @@ contract('VirtualTribeMastercopy (unit tests)', async accounts => {
 
 		it('and the instance cannot be initialized again', async () => {
 			await assert.revert(
-				instance.initialize(mockTribe, mockResolver, owner, '10', toBytes32('hUSD')),
+				instance.initialize(mockTribe, mockResolver, owner, '10', toBytes32('rUSD')),
 				'vTribe already initialized'
 			);
 		});

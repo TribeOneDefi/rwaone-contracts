@@ -13,7 +13,7 @@ import "./interfaces/IExchangeRates.sol";
 contract PurgeableTribe is Tribe {
     using SafeDecimalMath for uint;
 
-    // The maximum allowed amount of tokenSupply in equivalent hUSD value for this tribe to permit purging
+    // The maximum allowed amount of tokenSupply in equivalent rUSD value for this tribe to permit purging
     uint public maxSupplyToPurgeInUSD = 100000 * SafeDecimalMath.unit(); // 100,000
 
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
@@ -48,7 +48,7 @@ contract PurgeableTribe is Tribe {
     function purge(address[] calldata addresses) external optionalProxy_onlyOwner {
         IExchangeRates exRates = exchangeRates();
 
-        uint maxSupplyToPurge = exRates.effectiveValue("hUSD", maxSupplyToPurgeInUSD, currencyKey);
+        uint maxSupplyToPurge = exRates.effectiveValue("rUSD", maxSupplyToPurgeInUSD, currencyKey);
 
         // Only allow purge when total supply is lte the max
         require(totalSupply <= maxSupplyToPurge, "Cannot purge as total supply is above threshol.");
@@ -59,7 +59,7 @@ contract PurgeableTribe is Tribe {
             uint amountHeld = tokenState.balanceOf(holder);
 
             if (amountHeld > 0) {
-                exchanger().exchange(holder, holder, currencyKey, amountHeld, "hUSD", holder, false, address(0), bytes32(0));
+                exchanger().exchange(holder, holder, currencyKey, amountHeld, "rUSD", holder, false, address(0), bytes32(0));
                 emitPurged(holder, amountHeld);
             }
         }

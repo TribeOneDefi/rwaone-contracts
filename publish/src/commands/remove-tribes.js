@@ -71,7 +71,7 @@ const removeTribes = async ({
 			console.error(red(`Tribe ${tribe} not found!`));
 			process.exitCode = 1;
 			return;
-		} else if (['hUSD'].indexOf(tribe) >= 0) {
+		} else if (['rUSD'].indexOf(tribe) >= 0) {
 			console.error(red(`Tribe ${tribe} cannot be removed`));
 			process.exitCode = 1;
 			return;
@@ -186,7 +186,7 @@ const removeTribes = async ({
 				await ExchangeRates.effectiveValue(
 					toBytes32(currencyKey),
 					ethers.utils.parseEther(totalSupply),
-					toBytes32('hUSD')
+					toBytes32('rUSD')
 				)
 			);
 			try {

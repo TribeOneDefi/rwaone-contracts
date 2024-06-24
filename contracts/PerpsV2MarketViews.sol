@@ -90,7 +90,7 @@ contract PerpsV2MarketViews is PerpsV2MarketBase, IPerpsV2MarketViews {
     }
 
     /*
-     * Sizes of the long and short sides of the market (in hUSD)
+     * Sizes of the long and short sides of the market (in rUSD)
      */
     function marketSizes() external view returns (uint long, uint short) {
         int size = int(marketState.marketSize());
@@ -199,7 +199,7 @@ contract PerpsV2MarketViews is PerpsV2MarketBase, IPerpsV2MarketViews {
      * Returns 0 if account cannot be liquidated right now.
      * @param account address of the trader's account
      * @return fee that will be paid for liquidating the account if it can be liquidated
-     *  in hUSD fixed point decimal units or 0 if account is not liquidatable.
+     *  in rUSD fixed point decimal units or 0 if account is not liquidatable.
      */
     function liquidationFee(address account) external view returns (uint) {
         (uint price, bool invalid) = _assetPrice();
@@ -235,7 +235,7 @@ contract PerpsV2MarketViews is PerpsV2MarketBase, IPerpsV2MarketViews {
      *
      * @param sizeDelta size of the order in baseAsset units (negative numbers for shorts / selling)
      * @param orderType the type of order to calc fees against (e.g. Delayed, Offchain, Atomic).
-     * @return fee in hUSD decimal, and invalid boolean flag for invalid rates or dynamic fee that is
+     * @return fee in rUSD decimal, and invalid boolean flag for invalid rates or dynamic fee that is
      * too high due to recent volatility.
      */
     function orderFee(

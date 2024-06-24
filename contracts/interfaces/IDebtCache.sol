@@ -17,15 +17,9 @@ interface IDebtCache {
 
     function isInitialized() external view returns (bool);
 
-    function currentTribeDebts(bytes32[] calldata currencyKeys)
-        external
-        view
-        returns (
-            uint[] memory debtValues,
-            uint futuresDebt,
-            uint excludedDebt,
-            bool anyRateIsInvalid
-        );
+    function currentTribeDebts(
+        bytes32[] calldata currencyKeys
+    ) external view returns (uint[] memory debtValues, uint futuresDebt, uint excludedDebt, bool anyRateIsInvalid);
 
     function cachedTribeDebts(bytes32[] calldata currencyKeys) external view returns (uint[] memory debtValues);
 
@@ -33,15 +27,7 @@ interface IDebtCache {
 
     function currentDebt() external view returns (uint debt, bool anyRateIsInvalid);
 
-    function cacheInfo()
-        external
-        view
-        returns (
-            uint debt,
-            uint timestamp,
-            bool isInvalid,
-            bool isStale
-        );
+    function cacheInfo() external view returns (uint debt, uint timestamp, bool isInvalid, bool isStale);
 
     function excludedIssuedDebts(bytes32[] calldata currencyKeys) external view returns (uint[] memory excludedDebts);
 
@@ -61,7 +47,7 @@ interface IDebtCache {
 
     function recordExcludedDebtChange(bytes32 currencyKey, int256 delta) external;
 
-    function updateCachedhUSDDebt(int amount) external;
+    function updateCachedrUSDDebt(int amount) external;
 
     function importExcludedIssuedDebts(IDebtCache prevDebtCache, IIssuer prevIssuer) external;
 }

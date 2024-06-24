@@ -59,7 +59,7 @@ contract ExchangeRatesWithDexPricing is ExchangeRates {
         IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings = directIntegrationManager()
             .getExchangeParameters(msg.sender, destinationCurrencyKey);
         IDirectIntegrationManager.ParameterIntegrationSettings memory usdSettings = directIntegrationManager()
-            .getExchangeParameters(msg.sender, hUSD);
+            .getExchangeParameters(msg.sender, rUSD);
 
         return effectiveAtomicValueAndRates(sourceSettings, amount, destinationSettings, usdSettings);
     }
@@ -118,7 +118,7 @@ contract ExchangeRatesWithDexPricing is ExchangeRates {
     /// @notice Retrieve the TWAP (time-weighted average price) of an asset from its Uniswap V3-equivalent pool
     /// @dev By default, the TWAP oracle 'hops' through the wETH pool. This can be overridden. See DexPriceAggregator for more information.
     /// @dev The TWAP oracle doesn't take into account variable slippage due to trade amounts, as Uniswap's OracleLibary doesn't cross ticks based on their liquidity. See: https://docs.uniswap.org/protocol/concepts/V3-overview/oracle#deriving-price-from-a-tick
-    /// @dev One of `sourceCurrencyKey` or `destCurrencyKey` should be hUSD. There are two parameters to indicate directionality. Because this function returns "price", if the source is hUSD, the result will be flipped.
+    /// @dev One of `sourceCurrencyKey` or `destCurrencyKey` should be rUSD. There are two parameters to indicate directionality. Because this function returns "price", if the source is rUSD, the result will be flipped.
     /// @param sourceSettings The settings data for the source token
     /// @param destinationSettings The settings data for the destination token
     /// @param amount The amount of the asset we're interested in
@@ -130,8 +130,8 @@ contract ExchangeRatesWithDexPricing is ExchangeRates {
     ) internal view returns (uint) {
         require(amount != 0, "Amount must be greater than 0");
         require(
-            sourceSettings.currencyKey == hUSD || destinationSettings.currencyKey == hUSD,
-            "Atomic swaps must go through hUSD"
+            sourceSettings.currencyKey == rUSD || destinationSettings.currencyKey == rUSD,
+            "Atomic swaps must go through rUSD"
         );
 
         IERC20 sourceEquivalent = IERC20(sourceSettings.atomicEquivalentForDexPricing);
@@ -150,7 +150,7 @@ contract ExchangeRatesWithDexPricing is ExchangeRates {
 
         require(result != 0, "Result must be greater than 0");
 
-        return destinationSettings.currencyKey == "hUSD" ? result : SafeDecimalMath.unit().divideDecimalRound(result);
+        return destinationSettings.currencyKey == "rUSD" ? result : SafeDecimalMath.unit().divideDecimalRound(result);
     }
 
     function _dexPriceDestinationValue(
@@ -192,8 +192,8 @@ contract ExchangeRatesWithDexPricing is ExchangeRates {
     function tribeTooVolatileForAtomicExchange(
         IDirectIntegrationManager.ParameterIntegrationSettings memory settings
     ) public view returns (bool) {
-        // hUSD is a special case and is never volatile
-        if (settings.currencyKey == "hUSD") return false;
+        // rUSD is a special case and is never volatile
+        if (settings.currencyKey == "rUSD") return false;
 
         uint considerationWindow = settings.atomicVolatilityConsiderationWindow;
         uint updateThreshold = settings.atomicVolatilityUpdateThreshold;

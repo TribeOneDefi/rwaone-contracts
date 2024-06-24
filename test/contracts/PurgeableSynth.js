@@ -27,14 +27,14 @@ const {
 const { setupAllContracts } = require('./setup');
 
 contract('PurgeableTribe', accounts => {
-	const [hUSD, wHAKA, sAUD, iETH] = ['hUSD', 'wHAKA', 'sAUD', 'iETH'].map(toBytes32);
-	const tribeKeys = [hUSD, sAUD, iETH];
+	const [rUSD, wHAKA, sAUD, iETH] = ['rUSD', 'wHAKA', 'sAUD', 'iETH'].map(toBytes32);
+	const tribeKeys = [rUSD, sAUD, iETH];
 	const [deployerAccount, owner, , , account1, account2] = accounts;
 
 	let exchangeRates,
 		exchanger,
 		systemSettings,
-		hUSDContract,
+		rUSDContract,
 		sAUDContract,
 		iETHContract,
 		systemStatus,
@@ -49,7 +49,7 @@ contract('PurgeableTribe', accounts => {
 			AddressResolver: addressResolver,
 			ExchangeRates: exchangeRates,
 			Exchanger: exchanger,
-			TribehUSD: hUSDContract,
+			TriberUSD: rUSDContract,
 			TribesAUD: sAUDContract,
 			SystemStatus: systemStatus,
 			SystemSettings: systemSettings,
@@ -57,7 +57,7 @@ contract('PurgeableTribe', accounts => {
 			Issuer: issuer,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['hUSD', 'sAUD'],
+			tribes: ['rUSD', 'sAUD'],
 			contracts: [
 				'ExchangeRates',
 				'Exchanger',
@@ -175,12 +175,12 @@ contract('PurgeableTribe', accounts => {
 
 			describe('and a user holds 100K USD worth of purgeable tribe iETH', () => {
 				let amountToExchange;
-				let userhUSDBalance;
+				let userrUSDBalance;
 				let balanceBeforePurge;
 				beforeEach(async () => {
 					// issue the user 100K USD worth of iETH
 					amountToExchange = toUnit(1e5);
-					const iETHAmount = await exchangeRates.effectiveValue(hUSD, amountToExchange, iETH);
+					const iETHAmount = await exchangeRates.effectiveValue(rUSD, amountToExchange, iETH);
 					await issueTribesToUser({
 						owner,
 						issuer,
@@ -189,7 +189,7 @@ contract('PurgeableTribe', accounts => {
 						user: account1,
 						amount: iETHAmount,
 					});
-					userhUSDBalance = await hUSDContract.balanceOf(account1);
+					userrUSDBalance = await rUSDContract.balanceOf(account1);
 					balanceBeforePurge = await iETHContract.balanceOf(account1);
 				});
 
@@ -236,19 +236,19 @@ contract('PurgeableTribe', accounts => {
 							'The user must no longer have a balance after the purge'
 						);
 					});
-					it('and they have the value added back to hUSD (with fees taken out)', async () => {
-						const userBalance = await hUSDContract.balanceOf(account1);
+					it('and they have the value added back to rUSD (with fees taken out)', async () => {
+						const userBalance = await rUSDContract.balanceOf(account1);
 
 						const {
 							amountReceived,
 							// exchangeFee,
 							// exchangeFeeRate,
-						} = await exchanger.getAmountsForExchange(balanceBeforePurge, iETH, hUSD);
+						} = await exchanger.getAmountsForExchange(balanceBeforePurge, iETH, rUSD);
 
 						assert.bnEqual(
 							userBalance,
-							amountReceived.add(userhUSDBalance),
-							'User must be credited back in hUSD from the purge'
+							amountReceived.add(userrUSDBalance),
+							'User must be credited back in rUSD from the purge'
 						);
 					});
 					it('then the tribe has totalSupply back at 0', async () => {
@@ -299,7 +299,7 @@ contract('PurgeableTribe', accounts => {
 						// Note: 5000 is chosen to be large enough to accommodate exchange fees which
 						// ultimately limit the total supply of that tribe
 						const amountToExchange = toUnit(5000);
-						const iETHAmount = await exchangeRates.effectiveValue(hUSD, amountToExchange, iETH);
+						const iETHAmount = await exchangeRates.effectiveValue(rUSD, amountToExchange, iETH);
 						await issueTribesToUser({
 							owner,
 							issuer,
@@ -332,14 +332,14 @@ contract('PurgeableTribe', accounts => {
 			});
 			describe('when a user holds some sAUD', () => {
 				let userBalanceOfOldTribe;
-				let userhUSDBalance;
+				let userrUSDBalance;
 				beforeEach(async () => {
 					const amountToExchange = toUnit('100');
 
 					// as sAUD is MockTribe, we can invoke this directly
 					await sAUDContract.issue(account1, amountToExchange);
 
-					userhUSDBalance = await hUSDContract.balanceOf(account1);
+					userrUSDBalance = await rUSDContract.balanceOf(account1);
 					this.oldTribe = sAUDContract;
 					userBalanceOfOldTribe = await this.oldTribe.balanceOf(account1);
 					assert.equal(
@@ -402,19 +402,19 @@ contract('PurgeableTribe', accounts => {
 											const balance = await this.replacement.balanceOf(account1);
 											assert.bnEqual(balance, toUnit('0'), 'The balance after purge must be 0');
 										});
-										it('and their balance must have gone back into hUSD', async () => {
-											const balance = await hUSDContract.balanceOf(account1);
+										it('and their balance must have gone back into rUSD', async () => {
+											const balance = await rUSDContract.balanceOf(account1);
 
 											const { amountReceived } = await exchanger.getAmountsForExchange(
 												userBalanceOfOldTribe,
 												sAUD,
-												hUSD
+												rUSD
 											);
 
 											assert.bnEqual(
 												balance,
-												amountReceived.add(userhUSDBalance),
-												'The hUSD balance after purge must return to the initial amount, less fees'
+												amountReceived.add(userrUSDBalance),
+												'The rUSD balance after purge must return to the initial amount, less fees'
 											);
 										});
 										it('and the purge event is issued', async () => {
@@ -430,18 +430,18 @@ contract('PurgeableTribe', accounts => {
 												await issuer.removeTribe(sAUD, { from: owner });
 											});
 											it('then the balance remains in USD (and no errors occur)', async () => {
-												const balance = await hUSDContract.balanceOf(account1);
+												const balance = await rUSDContract.balanceOf(account1);
 
 												const { amountReceived } = await exchanger.getAmountsForExchange(
 													userBalanceOfOldTribe,
 													sAUD,
-													hUSD
+													rUSD
 												);
 
 												assert.bnEqual(
 													balance,
-													amountReceived.add(userhUSDBalance),
-													'The hUSD balance after purge must return to the initial amount, less fees'
+													amountReceived.add(userrUSDBalance),
+													'The rUSD balance after purge must return to the initial amount, less fees'
 												);
 											});
 										});

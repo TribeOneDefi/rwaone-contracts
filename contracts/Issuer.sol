@@ -42,7 +42,7 @@ interface IIssuerInternalDebtCache {
 
     function cacheInfo() external view returns (uint cachedDebt, uint timestamp, bool isInvalid, bool isStale);
 
-    function updateCachedhUSDDebt(int amount) external;
+    function updateCachedrUSDDebt(int amount) external;
 }
 
 // https://docs.rwaone.io/contracts/source/contracts/issuer
@@ -59,7 +59,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     /* ========== ENCODED NAMES ========== */
 
-    bytes32 internal constant hUSD = "hUSD";
+    bytes32 internal constant rUSD = "rUSD";
     bytes32 internal constant wHAKA = "wHAKA";
 
     // Flexible storage names
@@ -243,7 +243,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             anyRateIsInvalid = anyRateIsInvalid || invalid;
         }
 
-        if (currencyKey == hUSD) {
+        if (currencyKey == rUSD) {
             return (debt, anyRateIsInvalid);
         }
 
@@ -283,7 +283,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function _remainingIssuableTribes(
         address _issuer
     ) internal view returns (uint maxIssuable, uint alreadyIssued, uint totalSystemDebt, bool anyRateIsInvalid) {
-        (alreadyIssued, totalSystemDebt, anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_debtShareBalanceOf(_issuer), hUSD);
+        (alreadyIssued, totalSystemDebt, anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_debtShareBalanceOf(_issuer), rUSD);
         (uint issuable, bool isInvalid) = _maxIssuableTribes(_issuer);
         maxIssuable = issuable;
         anyRateIsInvalid = anyRateIsInvalid || isInvalid;
@@ -304,7 +304,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     }
 
     function _maxIssuableTribes(address _issuer) internal view returns (uint, bool) {
-        // What is the value of their wHAKA balance in hUSD
+        // What is the value of their wHAKA balance in rUSD
         (uint snxRate, bool isInvalid) = _rateAndInvalid(wHAKA);
         uint destinationValue = _snxToUSD(_collateral(_issuer), snxRate);
 
@@ -429,9 +429,9 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     /// @param account The account to be liquidated
     /// @param isSelfLiquidation boolean to determine if this is a forced or self-invoked liquidation
     /// @return totalRedeemed the total amount of collateral (wHAKA) to redeem (liquid and escrow)
-    /// @return debtToRemove the amount of debt (hUSD) to burn in order to fix the account's c-ratio
+    /// @return debtToRemove the amount of debt (rUSD) to burn in order to fix the account's c-ratio
     /// @return escrowToLiquidate the amount of escrow wHAKA that will be revoked during liquidation
-    /// @return initialDebtBalance the amount of initial (hUSD) debt the account has
+    /// @return initialDebtBalance the amount of initial (rUSD) debt the account has
     function liquidationAmounts(
         address account,
         bool isSelfLiquidation
@@ -474,21 +474,21 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function _removeTribe(bytes32 currencyKey) internal {
         address tribeToRemove = address(tribes[currencyKey]);
         require(tribeToRemove != address(0), "Tribe does not exist");
-        require(currencyKey != hUSD, "Cannot remove tribe");
+        require(currencyKey != rUSD, "Cannot remove tribe");
 
         uint tribeSupply = IERC20(tribeToRemove).totalSupply();
 
         if (tribeSupply > 0) {
-            (uint amountOfhUSD, uint rateToRedeem, ) = exchangeRates().effectiveValueAndRates(
+            (uint amountOfrUSD, uint rateToRedeem, ) = exchangeRates().effectiveValueAndRates(
                 currencyKey,
                 tribeSupply,
-                "hUSD"
+                "rUSD"
             );
             require(rateToRedeem > 0, "Cannot remove without rate");
             ITribeRedeemer _tribeRedeemer = tribeRedeemer();
-            tribes[hUSD].issue(address(_tribeRedeemer), amountOfhUSD);
-            // ensure the debt cache is aware of the new hUSD issued
-            debtCache().updateCachedhUSDDebt(SafeCast.toInt256(amountOfhUSD));
+            tribes[rUSD].issue(address(_tribeRedeemer), amountOfrUSD);
+            // ensure the debt cache is aware of the new rUSD issued
+            debtCache().updateCachedrUSDDebt(SafeCast.toInt256(amountOfrUSD));
             _tribeRedeemer.deprecate(IERC20(address(Proxyable(tribeToRemove).proxy())), rateToRedeem);
         }
 
@@ -557,7 +557,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         // Account for the issued debt in the cache
         (uint rate, bool rateInvalid) = _rateAndInvalid(currencyKey);
-        debtCache().updateCachedhUSDDebt(SafeCast.toInt256(amount.multiplyDecimal(rate)));
+        debtCache().updateCachedrUSDDebt(SafeCast.toInt256(amount.multiplyDecimal(rate)));
 
         // returned so that the caller can decide what to do if the rate is invalid
         return rateInvalid;
@@ -578,7 +578,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         // Account for the burnt debt in the cache. If rate is invalid, the user won't be able to exchange
         (uint rate, bool rateInvalid) = _rateAndInvalid(currencyKey);
-        debtCache().updateCachedhUSDDebt(-SafeCast.toInt256(amount.multiplyDecimal(rate)));
+        debtCache().updateCachedrUSDDebt(-SafeCast.toInt256(amount.multiplyDecimal(rate)));
 
         // returned so that the caller can decide what to do if the rate is invalid
         return rateInvalid;
@@ -603,15 +603,15 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     /**
      * Function used to migrate balances from the CollateralShort contract
      * @param short The address of the CollateralShort contract to be upgraded
-     * @param amount The amount of hUSD collateral to be burnt
+     * @param amount The amount of rUSD collateral to be burnt
      */
     function upgradeCollateralShort(address short, uint amount) external onlyOwner {
         require(short == resolver.getAddress("CollateralShortLegacy"), "wrong address");
         require(amount > 0, "cannot burn 0 tribes");
 
-        exchanger().settle(short, hUSD);
+        exchanger().settle(short, rUSD);
 
-        tribes[hUSD].burn(short, amount);
+        tribes[rUSD].burn(short, amount);
     }
 
     function issueTribes(address from, uint amount) external onlyRwaone {
@@ -663,7 +663,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     /// @param account The account to be liquidated
     /// @param isSelfLiquidation boolean to determine if this is a forced or self-invoked liquidation
     /// @return totalRedeemed the total amount of collateral (wHAKA) to redeem (liquid and escrow)
-    /// @return debtRemoved the amount of debt (hUSD) to burn in order to fix the account's c-ratio
+    /// @return debtRemoved the amount of debt (rUSD) to burn in order to fix the account's c-ratio
     /// @return escrowToLiquidate the amount of escrow wHAKA that will be revoked during liquidation
     function liquidateAccount(
         address account,
@@ -694,7 +694,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     ) internal view returns (uint totalRedeemed, uint debtToRemove, uint escrowToLiquidate, uint debtBalance) {
         // Get the account's debt balance
         bool anyRateIsInvalid;
-        (debtBalance, , anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_debtShareBalanceOf(account), hUSD);
+        (debtBalance, , anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_debtShareBalanceOf(account), rUSD);
 
         // Get the wHAKA rate
         (uint snxRate, bool snxRateInvalid) = _rateAndInvalid(wHAKA);
@@ -733,7 +733,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             // Get the total USD value of their wHAKA collateral (including escrow and rewards minus the flag and liquidate rewards)
             uint collateralForAccountUSD = _snxToUSD(_collateral(account).sub(rewardsSum), snxRate);
 
-            // Calculate the amount of debt to remove and the hUSD value of the wHAKA required to liquidate.
+            // Calculate the amount of debt to remove and the rUSD value of the wHAKA required to liquidate.
             debtToRemove = liquidator().calculateAmountToFixCollateral(debtBalance, collateralForAccountUSD, penalty);
             uint redeemTarget = _usdToSnx(debtToRemove, snxRate).multiplyDecimal(SafeDecimalMath.unit().add(penalty));
 
@@ -822,10 +822,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _setLastIssueEvent(from);
 
         // Create their tribes
-        tribes[hUSD].issue(from, amount);
+        tribes[rUSD].issue(from, amount);
 
         // Account for the issued debt in the cache
-        debtCache().updateCachedhUSDDebt(SafeCast.toInt256(amount));
+        debtCache().updateCachedrUSDDebt(SafeCast.toInt256(amount));
     }
 
     function _burnTribes(
@@ -838,7 +838,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             return 0;
         }
 
-        // liquidation requires hUSD to be already settled / not in waiting period
+        // liquidation requires rUSD to be already settled / not in waiting period
 
         // If they're trying to burn more debt than they actually owe, rather than fail the transaction, let's just
         // clear their debt and leave them be.
@@ -848,13 +848,13 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _removeFromDebtRegister(debtAccount, amountBurnt, existingDebt);
 
         // tribe.burn does a safe subtraction on balance (so it will revert if there are not enough tribes).
-        tribes[hUSD].burn(burnAccount, amountBurnt);
+        tribes[rUSD].burn(burnAccount, amountBurnt);
 
         // Account for the burnt debt in the cache.
-        debtCache().updateCachedhUSDDebt(-SafeCast.toInt256(amountBurnt));
+        debtCache().updateCachedrUSDDebt(-SafeCast.toInt256(amountBurnt));
     }
 
-    // If burning to target, `amount` is ignored, and the correct quantity of hUSD is burnt to reach the target
+    // If burning to target, `amount` is ignored, and the correct quantity of rUSD is burnt to reach the target
     // c-ratio, allowing fees to be claimed. In this case, pending settlements will be skipped as the user
     // will still have debt remaining after reaching their target.
     function _voluntaryBurnTribes(address from, uint amount, bool burnToTarget) internal {
@@ -865,14 +865,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         if (!burnToTarget) {
             // If not burning to target, then burning requires that the minimum stake time has elapsed.
             require(_canBurnTribes(from), "Minimum stake time not reached");
-            // First settle anything pending into hUSD as burning or issuing impacts the size of the debt pool
-            (, uint refunded, uint numEntriesSettled) = exchanger().settle(from, hUSD);
+            // First settle anything pending into rUSD as burning or issuing impacts the size of the debt pool
+            (, uint refunded, uint numEntriesSettled) = exchanger().settle(from, rUSD);
             if (numEntriesSettled > 0) {
-                amount = exchanger().calculateAmountAfterSettlement(from, hUSD, amount, refunded);
+                amount = exchanger().calculateAmountAfterSettlement(from, rUSD, amount, refunded);
             }
         }
 
-        (uint existingDebt, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_debtShareBalanceOf(from), hUSD);
+        (uint existingDebt, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_debtShareBalanceOf(from), rUSD);
         (uint maxIssuableTribesForAccount, bool snxRateInvalid) = _maxIssuableTribes(from);
         _requireRatesNotInvalid(anyRateIsInvalid || snxRateInvalid);
         require(existingDebt > 0, "No debt to forgive");

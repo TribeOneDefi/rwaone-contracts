@@ -122,7 +122,7 @@
 	"DappMaintenance": {
 		"deploy": true
 	},
-	"TribehUSD": {
+	"TriberUSD": {
 		"deploy": true
 	},
 	"TribehBTC": {
@@ -134,7 +134,7 @@
 	"ProxyRwaone": {
 		"deploy": true
 	},
-	"ProxyhUSD": {
+	"ProxyrUSD": {
 		"deploy": true
 	},
 	"ProxyhBTC": {
@@ -149,7 +149,7 @@
 	"TokenStateRwaone": {
 		"deploy": true
 	},
-	"TokenStatehUSD": {
+	"TokenStaterUSD": {
 		"deploy": true
 	},
 	"TokenStatehBTC": {

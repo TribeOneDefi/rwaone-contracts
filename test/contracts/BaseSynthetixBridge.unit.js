@@ -12,7 +12,7 @@ const BaseRwaoneBridge = artifacts.require('BaseRwaoneBridge');
 contract('BaseRwaoneBridge (unit tests)', accounts => {
 	const [, owner, user1, smockedMessenger] = accounts;
 
-	const [hUSD, hETH] = [toBytes32('hUSD'), toBytes32('hETH')];
+	const [rUSD, hETH] = [toBytes32('rUSD'), toBytes32('hETH')];
 
 	it('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
@@ -221,7 +221,7 @@ contract('BaseRwaoneBridge (unit tests)', accounts => {
 						// two initiate calls to verify summation
 						await instance.initiateTribeTransfer(hETH, user1, toUnit('50'), { from: owner });
 
-						txn = await instance.initiateTribeTransfer(hUSD, owner, toUnit('100'), { from: user1 });
+						txn = await instance.initiateTribeTransfer(rUSD, owner, toUnit('100'), { from: user1 });
 					});
 
 					it('fails if initiation is not active', async () => {
@@ -246,7 +246,7 @@ contract('BaseRwaoneBridge (unit tests)', accounts => {
 					});
 
 					it('emits event', () => {
-						assert.eventEqual(txn, 'InitiateTribeTransfer', [hUSD, owner, toUnit('100')]);
+						assert.eventEqual(txn, 'InitiateTribeTransfer', [rUSD, owner, toUnit('100')]);
 					});
 				});
 			});
@@ -258,7 +258,7 @@ contract('BaseRwaoneBridge (unit tests)', accounts => {
 
 				it('fails if xdomainmessagesender doesnt match counterpart', async () => {
 					messenger.xDomainMessageSender.returns(owner);
-					await assert.revert(instance.finalizeTribeTransfer(hUSD, owner, '100'));
+					await assert.revert(instance.finalizeTribeTransfer(rUSD, owner, '100'));
 				});
 
 				it('can only be called by messenger and registered counterpart', async () => {
@@ -266,7 +266,7 @@ contract('BaseRwaoneBridge (unit tests)', accounts => {
 						fnc: instance.finalizeTribeTransfer,
 						accounts,
 						address: smockedMessenger,
-						args: [hUSD, owner, '100'],
+						args: [rUSD, owner, '100'],
 						reason: 'Only the relayer can call this',
 					});
 				});
@@ -282,7 +282,7 @@ contract('BaseRwaoneBridge (unit tests)', accounts => {
 							from: smockedMessenger,
 						});
 
-						txn = await instance.finalizeTribeTransfer(hUSD, user1, toUnit('125'), {
+						txn = await instance.finalizeTribeTransfer(rUSD, user1, toUnit('125'), {
 							from: smockedMessenger,
 						});
 					});
@@ -296,7 +296,7 @@ contract('BaseRwaoneBridge (unit tests)', accounts => {
 					});
 
 					it('emits event', () => {
-						assert.eventEqual(txn, 'FinalizeTribeTransfer', [hUSD, user1, toUnit('125')]);
+						assert.eventEqual(txn, 'FinalizeTribeTransfer', [rUSD, user1, toUnit('125')]);
 					});
 				});
 			});
@@ -304,7 +304,7 @@ contract('BaseRwaoneBridge (unit tests)', accounts => {
 			describe('tribeTransferSent & tribeTransferReceived', () => {
 				beforeEach('set fake values', () => {
 					// create some fake tribes
-					issuer.availableCurrencyKeys.returns([hUSD, hETH]);
+					issuer.availableCurrencyKeys.returns([rUSD, hETH]);
 
 					// set some exchange rates
 					exchangeRates.ratesAndInvalidForCurrencies.returns([

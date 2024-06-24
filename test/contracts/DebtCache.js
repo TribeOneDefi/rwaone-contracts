@@ -26,8 +26,8 @@ const {
 } = require('../..');
 
 contract('DebtCache', async accounts => {
-	const [hUSD, sAUD, sEUR, wHAKA, hETH, ETH, iETH] = [
-		'hUSD',
+	const [rUSD, sAUD, sEUR, wHAKA, hETH, ETH, iETH] = [
+		'rUSD',
 		'sAUD',
 		'sEUR',
 		'wHAKA',
@@ -35,7 +35,7 @@ contract('DebtCache', async accounts => {
 		'ETH',
 		'iETH',
 	].map(toBytes32);
-	const tribeKeys = [hUSD, sAUD, sEUR, hETH, wHAKA];
+	const tribeKeys = [rUSD, sAUD, sEUR, hETH, wHAKA];
 
 	const [deployerAccount, owner, , account1] = accounts;
 
@@ -49,7 +49,7 @@ contract('DebtCache', async accounts => {
 		exchangeRates,
 		circuitBreaker,
 		feePool,
-		hUSDContract,
+		rUSDContract,
 		hETHContract,
 		sEURContract,
 		sAUDContract,
@@ -82,7 +82,7 @@ contract('DebtCache', async accounts => {
 		const CollateralManager = artifacts.require(`CollateralManager`);
 		const CollateralManagerState = artifacts.require('CollateralManagerState');
 
-		tribes = ['hUSD', 'hETH', 'sAUD'];
+		tribes = ['rUSD', 'hETH', 'sAUD'];
 
 		// Deploy CollateralManagerState.
 		const managerState = await CollateralManagerState.new(owner, ZERO_ADDRESS, {
@@ -135,14 +135,14 @@ contract('DebtCache', async accounts => {
 		await manager.addCollaterals([ceth.address], { from: owner });
 
 		await ceth.addTribes(
-			['TribehUSD', 'TribehETH'].map(toBytes32),
-			['hUSD', 'hETH'].map(toBytes32),
+			['TriberUSD', 'TribehETH'].map(toBytes32),
+			['rUSD', 'hETH'].map(toBytes32),
 			{ from: owner }
 		);
 
 		await manager.addTribes(
-			['TribehUSD', 'TribehETH'].map(toBytes32),
-			['hUSD', 'hETH'].map(toBytes32),
+			['TriberUSD', 'TribehETH'].map(toBytes32),
+			['rUSD', 'hETH'].map(toBytes32),
 			{ from: owner }
 		);
 		// rebuild the cache to add the tribes we need.
@@ -195,7 +195,7 @@ contract('DebtCache', async accounts => {
 			owner: owner,
 			manager: manager.address,
 			resolver: addressResolver.address,
-			collatKey: hUSD,
+			collatKey: rUSD,
 			minColat: toUnit(1.2),
 			minSize: toUnit(0.1),
 		});
@@ -221,7 +221,7 @@ contract('DebtCache', async accounts => {
 			from: owner,
 		});
 
-		await hUSDContract.approve(short.address, toUnit(100000), { from: account1 });
+		await rUSDContract.approve(short.address, toUnit(100000), { from: account1 });
 	};
 
 	const setupDebtIssuer = async () => {
@@ -246,7 +246,7 @@ contract('DebtCache', async accounts => {
 	// run this once before all tests to prepare our environment, snapshots on beforeEach will take
 	// care of resetting to this state
 	before(async () => {
-		tribes = ['hUSD', 'sAUD', 'sEUR', 'hETH', 'iETH'];
+		tribes = ['rUSD', 'sAUD', 'sEUR', 'hETH', 'iETH'];
 		({
 			Rwaone: rwaone,
 			ProxyERC20Rwaone: tribeetixProxy,
@@ -254,7 +254,7 @@ contract('DebtCache', async accounts => {
 			SystemSettings: systemSettings,
 			ExchangeRates: exchangeRates,
 			CircuitBreaker: circuitBreaker,
-			TribehUSD: hUSDContract,
+			TriberUSD: rUSDContract,
 			TribehETH: hETHContract,
 			TribesAUD: sAUDContract,
 			TribesEUR: sEURContract,
@@ -284,7 +284,7 @@ contract('DebtCache', async accounts => {
 				'Issuer',
 				'LiquidatorRewards',
 				'DebtCache',
-				'Exchanger', // necessary for burnTribes to check settlement of hUSD
+				'Exchanger', // necessary for burnTribes to check settlement of rUSD
 				'DelegateApprovals', // necessary for *OnBehalf functions
 				'FlexibleStorage',
 				'CollateralManager',
@@ -334,7 +334,7 @@ contract('DebtCache', async accounts => {
 				'updateCachedTribeDebtWithRate',
 				'updateCachedTribeDebtsWithRates',
 				'updateDebtCacheValidity',
-				'updateCachedhUSDDebt',
+				'updateCachedrUSDDebt',
 				'importExcludedIssuedDebts',
 			],
 		});
@@ -408,9 +408,9 @@ contract('DebtCache', async accounts => {
 			});
 		});
 
-		it('updateCachedhUSDDebt() can only be invoked by the issuer', async () => {
+		it('updateCachedrUSDDebt() can only be invoked by the issuer', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: debtCache.updateCachedhUSDDebt,
+				fnc: debtCache.updateCachedrUSDDebt,
 				args: [toUnit('1')],
 				accounts,
 				reason: 'Sender is not Issuer',
@@ -433,8 +433,8 @@ contract('DebtCache', async accounts => {
 			);
 			await debtCache.takeDebtSnapshot();
 
-			// Issue 1000 hUSD worth of tokens to a user
-			await hUSDContract.issue(account1, toUnit(100));
+			// Issue 1000 rUSD worth of tokens to a user
+			await rUSDContract.issue(account1, toUnit(100));
 			await sAUDContract.issue(account1, toUnit(100));
 			await sEURContract.issue(account1, toUnit(100));
 			await hETHContract.issue(account1, toUnit(2));
@@ -451,7 +451,7 @@ contract('DebtCache', async accounts => {
 			});
 
 			it('Live debt is reported accurately for individual currencies', async () => {
-				const result = await debtCache.currentTribeDebts([hUSD, sEUR, sAUD, hETH]);
+				const result = await debtCache.currentTribeDebts([rUSD, sEUR, sAUD, hETH]);
 				const debts = result[0];
 
 				assert.bnEqual(debts[0], toUnit(100));
@@ -515,13 +515,13 @@ contract('DebtCache', async accounts => {
 					['1', '3', '200'].map(toUnit)
 				);
 				await debtCache.takeDebtSnapshot();
-				let debts = await debtCache.currentTribeDebts([hUSD, sEUR, sAUD, hETH]);
+				let debts = await debtCache.currentTribeDebts([rUSD, sEUR, sAUD, hETH]);
 				assert.bnEqual(debts[0][0], toUnit(100));
 				assert.bnEqual(debts[0][1], toUnit(300));
 				assert.bnEqual(debts[0][2], toUnit(100));
 				assert.bnEqual(debts[0][3], toUnit(400));
 
-				debts = await debtCache.cachedTribeDebts([hUSD, sEUR, sAUD, hETH]);
+				debts = await debtCache.cachedTribeDebts([rUSD, sEUR, sAUD, hETH]);
 				assert.bnEqual(debts[0], toUnit(100));
 				assert.bnEqual(debts[1], toUnit(300));
 				assert.bnEqual(debts[2], toUnit(100));
@@ -568,7 +568,7 @@ contract('DebtCache', async accounts => {
 					const initialDebt = (await debtCache.cacheInfo()).debt;
 
 					// issue some debt to sanity check it's being updated
-					hUSDContract.issue(account1, toUnit(100), { from: owner });
+					rUSDContract.issue(account1, toUnit(100), { from: owner });
 					await debtCache.takeDebtSnapshot();
 
 					// debt calc works
@@ -685,7 +685,7 @@ contract('DebtCache', async accounts => {
 				const expectedDebts = (await debtCache.currentTribeDebts([sAUD, sEUR, hETH]))[0];
 
 				await debtCache.updateCachedTribeDebts([sAUD]);
-				assert.bnEqual(await issuer.totalIssuedTribes(hUSD, true), toUnit(600));
+				assert.bnEqual(await issuer.totalIssuedTribes(rUSD, true), toUnit(600));
 				let debts = await debtCache.cachedTribeDebts([sAUD, sEUR, hETH]);
 
 				assert.bnEqual(debts[0], expectedDebts[0]);
@@ -694,7 +694,7 @@ contract('DebtCache', async accounts => {
 
 				// Then a subset
 				await debtCache.updateCachedTribeDebts([sEUR, hETH]);
-				assert.bnEqual(await issuer.totalIssuedTribes(hUSD, true), toUnit(900));
+				assert.bnEqual(await issuer.totalIssuedTribes(rUSD, true), toUnit(900));
 				debts = await debtCache.cachedTribeDebts([sEUR, hETH]);
 				assert.bnEqual(debts[0], expectedDebts[1]);
 				assert.bnEqual(debts[1], expectedDebts[2]);
@@ -742,7 +742,7 @@ contract('DebtCache', async accounts => {
 				await assert.revert(debtCache.updateCachedTribeDebts([wHAKA]));
 				const fakeTribe = toBytes32('FAKE');
 				await assert.revert(debtCache.updateCachedTribeDebts([fakeTribe]));
-				await assert.revert(debtCache.updateCachedTribeDebts([hUSD, fakeTribe]));
+				await assert.revert(debtCache.updateCachedTribeDebts([rUSD, fakeTribe]));
 			});
 
 			it('will not operate if the system is paused except for the owner', async () => {
@@ -860,20 +860,20 @@ contract('DebtCache', async accounts => {
 			});
 		});
 
-		describe('updateCachedhUSDDebt()', () => {
+		describe('updateCachedrUSDDebt()', () => {
 			beforeEach(async () => {
 				await addressResolver.importAddresses([toBytes32('Issuer')], [owner], {
 					from: owner,
 				});
 				await debtCache.rebuildCache();
 			});
-			it('when hUSD is increased by minting', async () => {
-				const cachedTribeDebt = (await debtCache.cachedTribeDebts([hUSD]))[0];
+			it('when rUSD is increased by minting', async () => {
+				const cachedTribeDebt = (await debtCache.cachedTribeDebts([rUSD]))[0];
 				const amount = toUnit('1000');
-				const tx = await debtCache.updateCachedhUSDDebt(amount, { from: owner });
+				const tx = await debtCache.updateCachedrUSDDebt(amount, { from: owner });
 
 				assert.bnEqual((await debtCache.cacheInfo())[0], cachedTribeDebt.add(amount));
-				assert.bnEqual(await debtCache.cachedTribeDebts([hUSD]), cachedTribeDebt.add(amount));
+				assert.bnEqual(await debtCache.cachedTribeDebts([rUSD]), cachedTribeDebt.add(amount));
 
 				const logs = await getDecodedLogs({
 					hash: tx.tx,
@@ -887,21 +887,21 @@ contract('DebtCache', async accounts => {
 					log: logs.find(({ name } = {}) => name === 'DebtCacheUpdated'),
 				});
 			});
-			it('when hUSD cache is decreased by minting', async () => {
+			it('when rUSD cache is decreased by minting', async () => {
 				const amount = toUnit('1000');
-				await debtCache.updateCachedhUSDDebt(amount, { from: owner });
+				await debtCache.updateCachedrUSDDebt(amount, { from: owner });
 
 				// cached Tribe after increase
-				const cachedTribeDebt = (await debtCache.cachedTribeDebts([hUSD]))[0];
+				const cachedTribeDebt = (await debtCache.cachedTribeDebts([rUSD]))[0];
 				assert.bnEqual((await debtCache.cacheInfo())[0], amount);
-				assert.bnEqual(await debtCache.cachedTribeDebts([hUSD]), amount);
+				assert.bnEqual(await debtCache.cachedTribeDebts([rUSD]), amount);
 
-				// decrease the cached hUSD amount
+				// decrease the cached rUSD amount
 				const amountToReduce = toUnit('500');
-				const tx = await debtCache.updateCachedhUSDDebt(amountToReduce.neg(), { from: owner });
+				const tx = await debtCache.updateCachedrUSDDebt(amountToReduce.neg(), { from: owner });
 
 				assert.bnEqual(
-					await debtCache.cachedTribeDebts([hUSD]),
+					await debtCache.cachedTribeDebts([rUSD]),
 					cachedTribeDebt.sub(amountToReduce)
 				);
 
@@ -920,7 +920,7 @@ contract('DebtCache', async accounts => {
 		});
 
 		describe('Issuance, burning, exchange, settlement', () => {
-			it('issuing hUSD updates the debt total', async () => {
+			it('issuing rUSD updates the debt total', async () => {
 				await debtCache.takeDebtSnapshot();
 				const issued = (await debtCache.cacheInfo())[0];
 
@@ -942,7 +942,7 @@ contract('DebtCache', async accounts => {
 				});
 			});
 
-			it('burning hUSD updates the debt total', async () => {
+			it('burning rUSD updates the debt total', async () => {
 				await debtCache.takeDebtSnapshot();
 				const tribesToIssue = toUnit('10');
 				await rwaone.transfer(account1, toUnit('1000'), { from: owner });
@@ -977,12 +977,12 @@ contract('DebtCache', async accounts => {
 				});
 			});
 
-			it('issuing hUSD updates the total debt cached and hUSD cache', async () => {
+			it('issuing rUSD updates the total debt cached and rUSD cache', async () => {
 				await debtCache.takeDebtSnapshot();
 				const issued = (await debtCache.cacheInfo())[0];
 
 				const tribesToIssue = toUnit('1000');
-				const cachedTribes = (await debtCache.cachedTribeDebts([hUSD]))[0];
+				const cachedTribes = (await debtCache.cachedTribeDebts([rUSD]))[0];
 
 				await rwaone.transfer(account1, toUnit('10000'), { from: owner });
 
@@ -1000,19 +1000,19 @@ contract('DebtCache', async accounts => {
 					log: logs.find(({ name } = {}) => name === 'DebtCacheUpdated'),
 				});
 
-				// cached hUSD increased by tribe issued
-				assert.bnEqual(await debtCache.cachedTribeDebts([hUSD]), cachedTribes.add(tribesToIssue));
+				// cached rUSD increased by tribe issued
+				assert.bnEqual(await debtCache.cachedTribeDebts([rUSD]), cachedTribes.add(tribesToIssue));
 				assert.bnEqual((await debtCache.cacheInfo())[0], issued.add(tribesToIssue));
 			});
 
-			it('burning hUSD reduces the total debt and hUSD cache', async () => {
+			it('burning rUSD reduces the total debt and rUSD cache', async () => {
 				await debtCache.takeDebtSnapshot();
 
 				const tribesToIssue = toUnit('1000');
 				await rwaone.transfer(account1, toUnit('10000'), { from: owner });
 				await rwaone.issueTribes(tribesToIssue, { from: account1 });
 
-				const cachedTribes = (await debtCache.cachedTribeDebts([hUSD]))[0];
+				const cachedTribes = (await debtCache.cachedTribeDebts([rUSD]))[0];
 				const issued = (await debtCache.cacheInfo())[0];
 				const tribesToBurn = toUnit('500');
 
@@ -1030,14 +1030,14 @@ contract('DebtCache', async accounts => {
 					log: logs.find(({ name } = {}) => name === 'DebtCacheUpdated'),
 				});
 
-				// cached hUSD decreased by tribe burned
-				assert.bnEqual(await debtCache.cachedTribeDebts([hUSD]), cachedTribes.sub(tribesToBurn));
+				// cached rUSD decreased by tribe burned
+				assert.bnEqual(await debtCache.cachedTribeDebts([rUSD]), cachedTribes.sub(tribesToBurn));
 				assert.bnEqual((await debtCache.cacheInfo())[0], issued.sub(tribesToBurn));
 			});
 
 			it('exchanging between tribes updates the debt totals for those tribes', async () => {
 				// Zero exchange fees so that we can neglect them.
-				await systemSettings.setExchangeFeeRateForTribes([sAUD, hUSD], [toUnit(0), toUnit(0)], {
+				await systemSettings.setExchangeFeeRateForTribes([sAUD, rUSD], [toUnit(0), toUnit(0)], {
 					from: owner,
 				});
 
@@ -1045,9 +1045,9 @@ contract('DebtCache', async accounts => {
 				await rwaone.transfer(account1, toUnit('1000'), { from: owner });
 				await rwaone.issueTribes(toUnit('10'), { from: account1 });
 				const issued = (await debtCache.cacheInfo())[0];
-				const debts = await debtCache.cachedTribeDebts([hUSD, sAUD]);
-				const tx = await rwaone.exchange(hUSD, toUnit('5'), sAUD, { from: account1 });
-				const postDebts = await debtCache.cachedTribeDebts([hUSD, sAUD]);
+				const debts = await debtCache.cachedTribeDebts([rUSD, sAUD]);
+				const tx = await rwaone.exchange(rUSD, toUnit('5'), sAUD, { from: account1 });
+				const postDebts = await debtCache.cachedTribeDebts([rUSD, sAUD]);
 				assert.bnEqual((await debtCache.cacheInfo())[0], issued);
 				assert.bnEqual(postDebts[0], debts[0].sub(toUnit(5)));
 				assert.bnEqual(postDebts[1], debts[1].add(toUnit(5)));
@@ -1061,12 +1061,12 @@ contract('DebtCache', async accounts => {
 				assert.isUndefined(logs.find(({ name } = {}) => name === 'DebtCacheUpdated'));
 			});
 
-			it('exchanging between tribes updates hUSD debt total due to fees', async () => {
+			it('exchanging between tribes updates rUSD debt total due to fees', async () => {
 				// Disable Dynamic fee so that we can neglect it.
 				await systemSettings.setExchangeDynamicFeeRounds('0', { from: owner });
 
 				await systemSettings.setExchangeFeeRateForTribes(
-					[sAUD, hUSD, sEUR],
+					[sAUD, rUSD, sEUR],
 					[toUnit(0.05), toUnit(0.05), toUnit(0.05)],
 					{ from: owner }
 				);
@@ -1075,10 +1075,10 @@ contract('DebtCache', async accounts => {
 				await debtCache.takeDebtSnapshot();
 				const issued = (await debtCache.cacheInfo())[0];
 
-				const debts = await debtCache.cachedTribeDebts([hUSD, sAUD, sEUR]);
+				const debts = await debtCache.cachedTribeDebts([rUSD, sAUD, sEUR]);
 
 				await rwaone.exchange(sEUR, toUnit(10), sAUD, { from: account1 });
-				const postDebts = await debtCache.cachedTribeDebts([hUSD, sAUD, sEUR]);
+				const postDebts = await debtCache.cachedTribeDebts([rUSD, sAUD, sEUR]);
 
 				assert.bnEqual((await debtCache.cacheInfo())[0], issued);
 				assert.bnEqual(postDebts[0], debts[0].add(toUnit(2)));
@@ -1089,7 +1089,7 @@ contract('DebtCache', async accounts => {
 			it('exchanging between tribes updates debt properly when prices have changed', async () => {
 				// Zero exchange fees so that we can neglect them.
 				await systemSettings.setExchangeFeeRateForTribes(
-					[sAUD, hUSD, sEUR],
+					[sAUD, rUSD, sEUR],
 					[toUnit(0), toUnit(0), toUnit(0)],
 					{
 						from: owner,
@@ -1137,7 +1137,7 @@ contract('DebtCache', async accounts => {
 				const cachedDebt = await debtCache.cachedDebt();
 
 				await rwaone.exchange(sAUD, toUnit(50), sEUR, { from: account1 });
-				// so there's now 100 - 25 hUSD left (25 of it was exchanged)
+				// so there's now 100 - 25 rUSD left (25 of it was exchanged)
 				// and now there's 100 + (25 / 2 ) of sEUR = 112.5
 
 				await systemSettings.setWaitingPeriodSecs(60, { from: owner });
@@ -1494,7 +1494,7 @@ contract('DebtCache', async accounts => {
 			describe('after the tribes are exchanged into other tribes', async () => {
 				let tx;
 				beforeEach(async () => {
-					// Swap some hETH into tribeetic dollarydoos.
+					// Swap some hETH into rwaone dollarydoos.
 					tx = await rwaone.exchange(hETH, '5', sAUD, { from: account1 });
 				});
 
@@ -1551,9 +1551,9 @@ contract('DebtCache', async accounts => {
 				({ rate } = await exchangeRates.rateAndInvalid(hETH));
 
 				// Take out a short position on hETH.
-				// hUSD collateral = 1.5 * rate_eth
+				// rUSD collateral = 1.5 * rate_eth
 				amount = multiplyDecimalRound(rate, toUnit('1.5'));
-				await hUSDContract.issue(account1, amount, { from: owner });
+				await rUSDContract.issue(account1, amount, { from: owner });
 				// Again, avoid a divide-by-zero in computing the short rate,
 				// by ensuring hETH.totalSupply() > 0.
 				await hETHContract.issue(account1, amount, { from: owner });

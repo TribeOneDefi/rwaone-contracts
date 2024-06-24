@@ -7,7 +7,7 @@ import "./MixinFuturesViews.sol";
 import "./../interfaces/IFuturesMarket.sol";
 
 /*
- * Tribeetic Futures
+ * RwaOne Futures
  * =================
  *
  * Futures markets allow users leveraged exposure to an asset, long or short.
@@ -16,8 +16,8 @@ import "./../interfaces/IFuturesMarket.sol";
  * by a liquidation keeper, which is rewarded with a flat fee extracted from the margin.
  *
  * The Rwaone debt pool is effectively the counterparty to each trade, so if a particular position
- * is in profit, then the debt pool pays by issuing hUSD into their margin account,
- * while if the position makes a loss then the debt pool burns hUSD from the margin, reducing the
+ * is in profit, then the debt pool pays by issuing rUSD into their margin account,
+ * while if the position makes a loss then the debt pool burns rUSD from the margin, reducing the
  * debt load in the system.
  *
  * As the debt pool underwrites all positions, the debt-inflation risk to the system is proportional to the
@@ -38,7 +38,7 @@ import "./../interfaces/IFuturesMarket.sol";
  *
  *     - FuturesMarketManager.sol:  the manager keeps track of which markets exist, and is the main window between
  *                                  futures markets and the rest of the system. It accumulates the total debt
- *                                  over all markets, and issues and burns hUSD on each market's behalf.
+ *                                  over all markets, and issues and burns rUSD on each market's behalf.
  *
  *     - FuturesMarketSettings.sol: Holds the settings for each market in the global FlexibleStorage instance used
  *                                  by SystemSettings, and provides an interface to modify these values. Other than

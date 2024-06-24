@@ -10,8 +10,8 @@
 	{
 		"name": "ATOMIC_EQUIVALENTS_ON_DEX",
 		"value": {
-			"hUSD": {
-				"currencyKey": "hUSD",
+			"rUSD": {
+				"currencyKey": "rUSD",
 				"equivalent": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
 				"token": "USDC"
 			},
@@ -32,7 +32,7 @@
 		"value": {
 			"hETH": "3000000000000000",
 			"hBTC": "3000000000000000",
-			"hUSD": "3000000000000000"
+			"rUSD": "3000000000000000"
 		}
 	},
 	{
@@ -60,7 +60,7 @@
 	{
 		"name": "COLLATERAL_ETH",
 		"value": {
-			"TRIBES": ["hUSD", "hETH"],
+			"TRIBES": ["rUSD", "hETH"],
 			"ISSUE_FEE_RATE": "0",
 			"MIN_CRATIO": "1300000000000000000",
 			"MIN_COLLATERAL": "2000000000000000000"

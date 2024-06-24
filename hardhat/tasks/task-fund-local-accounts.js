@@ -49,7 +49,7 @@ async function fundAccounts({ ctx, accounts }) {
 
 		await ensureBalance({
 			ctx,
-			symbol: 'hUSD',
+			symbol: 'rUSD',
 			user: { address: account },
 			balance: ethers.utils.parseEther('100000000'),
 		});
@@ -81,7 +81,7 @@ task('fund-local-accounts')
 		'http://localhost:8545'
 	)
 	.addOptionalParam('privateKey', 'Private key to use to sign txs')
-	.addOptionalParam('account', 'The account to fund with ETH, wHAKA, hUSD')
+	.addOptionalParam('account', 'The account to fund with ETH, wHAKA, rUSD')
 	.addOptionalParam('deploymentPath', 'Specify the path to the deployment data directory')
 	.setAction(async (taskArguments, hre, runSuper) => {
 		const { account, providerUrl, targetNetwork, privateKey, deploymentPath } = taskArguments;

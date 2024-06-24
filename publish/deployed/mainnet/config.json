@@ -101,7 +101,7 @@
 	"DappMaintenance": {
 		"deploy": false
 	},
-	"TribehUSD": {
+	"TriberUSD": {
 		"deploy": false
 	},
 	"TribesEUR": {
@@ -128,7 +128,7 @@
 	"ProxyRwaone": {
 		"deploy": false
 	},
-	"ProxyhUSD": {
+	"ProxyrUSD": {
 		"deploy": false
 	},
 	"ProxysEUR": {
@@ -158,7 +158,7 @@
 	"TokenStateRwaone": {
 		"deploy": false
 	},
-	"TokenStatehUSD": {
+	"TokenStaterUSD": {
 		"deploy": false
 	},
 	"TokenStatesEUR": {

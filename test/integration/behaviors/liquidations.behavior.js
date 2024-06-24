@@ -305,7 +305,7 @@ function itCanLiquidate({ ctx }) {
 						beforeRemainingRewardCredittedSnx = await Rwaone.balanceOf(
 							LiquidatorRewards.address
 						);
-						beforeDebtBalance = await Rwaone.debtBalanceOf(user7.address, toBytes32('hUSD'));
+						beforeDebtBalance = await Rwaone.debtBalanceOf(user7.address, toBytes32('rUSD'));
 
 						viewResults = await Liquidator.liquidationAmounts(user7.address, false);
 						tx = await Rwaone.connect(liquidatorUser).liquidateDelinquentAccount(user7.address);
@@ -461,7 +461,7 @@ function itCanLiquidate({ ctx }) {
 				beforeEscrowBalance = await RewardEscrowV2.totalEscrowedAccountBalance(user8.address);
 				beforeDebtShares = await RwaoneDebtShare.balanceOf(user8.address);
 				beforeSharesSupply = await RwaoneDebtShare.totalSupply();
-				beforeDebtBalance = await Rwaone.debtBalanceOf(user8.address, toBytes32('hUSD'));
+				beforeDebtBalance = await Rwaone.debtBalanceOf(user8.address, toBytes32('rUSD'));
 				beforeRewardsCredittedSnx = await Rwaone.balanceOf(LiquidatorRewards.address);
 
 				viewResults = await Liquidator.liquidationAmounts(user8.address, false);
@@ -494,7 +494,7 @@ function itCanLiquidate({ ctx }) {
 			});
 
 			it('should remove all debt', async () => {
-				const afterDebtBalance = await Rwaone.debtBalanceOf(user8.address, toBytes32('hUSD'));
+				const afterDebtBalance = await Rwaone.debtBalanceOf(user8.address, toBytes32('rUSD'));
 				assert.bnEqual(afterDebtBalance, '0');
 			});
 

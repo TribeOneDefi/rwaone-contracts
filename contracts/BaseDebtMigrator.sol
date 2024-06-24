@@ -37,7 +37,7 @@ contract BaseDebtMigrator is Owned, MixinSystemSettings {
     bytes32 internal constant DEBT_TRANSFER_SENT = "Sent";
     bytes32 internal constant DEBT_TRANSFER_RECV = "Recv";
 
-    bytes32 internal constant hUSD = "hUSD";
+    bytes32 internal constant rUSD = "rUSD";
     bytes32 internal constant SDS = "SDS";
 
     /* ========== CONSTRUCTOR ========= */

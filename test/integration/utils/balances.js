@@ -27,8 +27,8 @@ async function _getAmount({ ctx, symbol, user, amount }) {
 		await _getHAKA({ ctx, user, amount });
 	} else if (symbol === 'WETH') {
 		await _getWETH({ ctx, user, amount });
-	} else if (symbol === 'hUSD') {
-		await _gethUSD({ ctx, user, amount });
+	} else if (symbol === 'rUSD') {
+		await _getrUSD({ ctx, user, amount });
 	} else if (symbol === 'hETHBTC') {
 		await _getTribe({ ctx, symbol, user, amount });
 	} else if (symbol === 'hETH') {
@@ -37,7 +37,7 @@ async function _getAmount({ ctx, symbol, user, amount }) {
 		await _getETHFromOtherUsers({ ctx, user, amount });
 	} else {
 		throw new Error(
-			`Symbol ${symbol} not yet supported. TODO: Support via exchanging hUSD to other Tribes.`
+			`Symbol ${symbol} not yet supported. TODO: Support via exchanging rUSD to other Tribes.`
 		);
 	}
 
@@ -147,17 +147,17 @@ async function _getHAKAForOwnerOnL2ByHackMinting({ ctx, amount }) {
 	await tx.wait();
 }
 
-async function _gethUSD({ ctx, user, amount }) {
-	const { ProxyRwaone, ProxyhUSD } = ctx.contracts;
-	let { Rwaone, TribehUSD } = ctx.contracts;
+async function _getrUSD({ ctx, user, amount }) {
+	const { ProxyRwaone, ProxyrUSD } = ctx.contracts;
+	let { Rwaone, TriberUSD } = ctx.contracts;
 
 	// connect via proxy
 	Rwaone = new ethers.Contract(ProxyRwaone.address, Rwaone.interface, ctx.provider);
-	TribehUSD = new ethers.Contract(ProxyhUSD.address, TribehUSD.interface, ctx.provider);
+	TriberUSD = new ethers.Contract(ProxyrUSD.address, TriberUSD.interface, ctx.provider);
 
 	let tx;
 
-	const requiredHAKA = await _getHAKAAmountRequiredForhUSDAmount({ ctx, amount });
+	const requiredHAKA = await _getHAKAAmountRequiredForrUSDAmount({ ctx, amount });
 	await ensureBalance({ ctx, symbol: 'wHAKA', user, balance: requiredHAKA });
 
 	Rwaone = Rwaone.connect(ctx.users.owner);
@@ -182,7 +182,7 @@ async function _gethUSD({ ctx, user, amount }) {
 	tx = await Rwaone.connect(tmpWallet).issueTribes(amount);
 	await tx.wait();
 
-	tx = await TribehUSD.connect(tmpWallet).transfer(user.address, amount);
+	tx = await TriberUSD.connect(tmpWallet).transfer(user.address, amount);
 	await tx.wait();
 }
 
@@ -201,7 +201,7 @@ async function _getTribe({ ctx, user, symbol, amount }) {
 		await exchangeTribes({
 			ctx,
 			dest: symbol,
-			src: 'hUSD',
+			src: 'rUSD',
 			amount: partialAmount,
 			user,
 		});
@@ -220,7 +220,7 @@ async function _getTribe({ ctx, user, symbol, amount }) {
 	}
 }
 
-async function _getHAKAAmountRequiredForhUSDAmount({ ctx, amount }) {
+async function _getHAKAAmountRequiredForrUSDAmount({ ctx, amount }) {
 	const { Exchanger, SystemSettings } = ctx.contracts;
 
 	const ratio = await SystemSettings.issuanceRatio();
@@ -228,7 +228,7 @@ async function _getHAKAAmountRequiredForhUSDAmount({ ctx, amount }) {
 
 	const [expectedAmount, ,] = await Exchanger.getAmountsForExchange(
 		collateral,
-		toBytes32('hUSD'),
+		toBytes32('rUSD'),
 		toBytes32('wHAKA')
 	);
 

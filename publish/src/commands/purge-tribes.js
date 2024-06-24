@@ -61,7 +61,7 @@ const purgeTribes = async ({
 			console.error(red(`Tribe ${tribe} not found!`));
 			process.exitCode = 1;
 			return;
-		} else if (['hUSD'].indexOf(tribe) >= 0) {
+		} else if (['rUSD'].indexOf(tribe) >= 0) {
 			console.error(red(`Tribe ${tribe} cannot be purged`));
 			process.exitCode = 1;
 			return;

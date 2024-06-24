@@ -35,7 +35,7 @@
 		"name": "COLLATERAL_MANAGER",
 		"value": {
 			"TRIBES": [
-				"hUSD",
+				"rUSD",
 				"hBTC",
 				"hETH",
 				"sLINK",
@@ -74,7 +74,7 @@
 	{
 		"name": "COLLATERAL_ETH",
 		"value": {
-			"TRIBES": ["hUSD", "hETH"],
+			"TRIBES": ["rUSD", "hETH"],
 			"ISSUE_FEE_RATE": "0"
 		}
 	},

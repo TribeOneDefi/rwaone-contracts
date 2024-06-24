@@ -61,7 +61,7 @@ contract('LiquidatorRewards', accounts => {
 	addSnapshotBeforeRestoreAfterEach();
 
 	before(async () => {
-		tribes = ['hUSD', 'sAUD', 'sEUR', 'hETH'];
+		tribes = ['rUSD', 'sAUD', 'sEUR', 'hETH'];
 		({
 			AddressResolver: addressResolver,
 			CircuitBreaker: circuitBreaker,

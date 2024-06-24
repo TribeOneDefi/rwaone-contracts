@@ -38,7 +38,7 @@ contract('TribeRedeemer (unit tests)', async accounts => {
 		let tribe, otherTribe;
 		beforeEach(async () => {
 			({ mocks: this.mocks, resolver: this.resolver } = await prepareSmocks({
-				contracts: ['Issuer', 'Tribe:TribehUSD'],
+				contracts: ['Issuer', 'Tribe:TriberUSD'],
 				accounts: accounts.slice(10), // mock using accounts after the first few
 			}));
 		});
@@ -69,10 +69,10 @@ contract('TribeRedeemer (unit tests)', async accounts => {
 					tribe.totalSupply.returns(parseEther('999'));
 				});
 
-				describe('when there is sufficient hUSD for the tribe to be deprecated', () => {
+				describe('when there is sufficient rUSD for the tribe to be deprecated', () => {
 					beforeEach(async () => {
-						// smock hUSD balance to prevent the deprecation failing
-						this.mocks['TribehUSD'].balanceOf.returns(parseEther('10000'));
+						// smock rUSD balance to prevent the deprecation failing
+						this.mocks['TriberUSD'].balanceOf.returns(parseEther('10000'));
 					});
 
 					describe('when successfully executed', () => {
@@ -92,7 +92,7 @@ contract('TribeRedeemer (unit tests)', async accounts => {
 								tribe: tribe.address,
 								rateToRedeem: parseEther('10'),
 								totalTribeSupply: parseEther('999'),
-								supplyInhUSD: parseEther('9990'),
+								supplyInrUSD: parseEther('9990'),
 							});
 						});
 					});
@@ -113,19 +113,19 @@ contract('TribeRedeemer (unit tests)', async accounts => {
 					tribe.totalSupply.returns(parseEther('1000'));
 				});
 
-				it('deprecation fails when insufficient hUSD supply', async () => {
+				it('deprecation fails when insufficient rUSD supply', async () => {
 					await assert.revert(
 						instance.deprecate(tribe.address, parseEther('1000'), {
 							from: this.mocks['Issuer'].address,
 						}),
-						'hUSD must first be supplied'
+						'rUSD must first be supplied'
 					);
 				});
 
-				describe('when there is sufficient hUSD for the tribe to be deprecated', () => {
+				describe('when there is sufficient rUSD for the tribe to be deprecated', () => {
 					beforeEach(async () => {
-						// smock hUSD balance to prevent the deprecation failing
-						this.mocks['TribehUSD'].balanceOf.returns(parseEther('2000'));
+						// smock rUSD balance to prevent the deprecation failing
+						this.mocks['TriberUSD'].balanceOf.returns(parseEther('2000'));
 					});
 					it('then deprecation succeeds', async () => {
 						await instance.deprecate(tribe.address, parseEther('2'), {
@@ -176,8 +176,8 @@ contract('TribeRedeemer (unit tests)', async accounts => {
 				});
 				describe('when a tribe is deprecated', () => {
 					beforeEach(async () => {
-						// smock hUSD balance to prevent the deprecation failing
-						this.mocks['TribehUSD'].balanceOf.returns(parseEther('2000'));
+						// smock rUSD balance to prevent the deprecation failing
+						this.mocks['TriberUSD'].balanceOf.returns(parseEther('2000'));
 						await instance.deprecate(tribe.address, parseEther('2'), {
 							from: this.mocks['Issuer'].address,
 						});
@@ -213,8 +213,8 @@ contract('TribeRedeemer (unit tests)', async accounts => {
 				});
 				describe('when a tribe is deprecated', () => {
 					beforeEach(async () => {
-						// smock hUSD balance to prevent the deprecation failing
-						this.mocks['TribehUSD'].balanceOf.returns(parseEther('2000'));
+						// smock rUSD balance to prevent the deprecation failing
+						this.mocks['TriberUSD'].balanceOf.returns(parseEther('2000'));
 						await instance.deprecate(tribe.address, parseEther('2'), {
 							from: this.mocks['Issuer'].address,
 						});
@@ -238,8 +238,8 @@ contract('TribeRedeemer (unit tests)', async accounts => {
 
 				describe('when tribe marked for redemption', () => {
 					beforeEach(async () => {
-						// smock hUSD balance to prevent the deprecation failing
-						this.mocks['TribehUSD'].balanceOf.returns(parseEther('2000'));
+						// smock rUSD balance to prevent the deprecation failing
+						this.mocks['TriberUSD'].balanceOf.returns(parseEther('2000'));
 						await instance.deprecate(tribe.address, parseEther('2'), {
 							from: this.mocks['Issuer'].address,
 						});
@@ -269,11 +269,11 @@ contract('TribeRedeemer (unit tests)', async accounts => {
 								assert.equal(this.mocks['Issuer'].burnForRedemption.calls[0][1], account1);
 								assert.bnEqual(this.mocks['Issuer'].burnForRedemption.calls[0][2], userBalance);
 							});
-							it('transfers the correct amount of hUSD to the user', async () => {
-								assert.equal(this.mocks['TribehUSD'].transfer.calls.length, 1);
-								assert.equal(this.mocks['TribehUSD'].transfer.calls[0][0], account1);
+							it('transfers the correct amount of rUSD to the user', async () => {
+								assert.equal(this.mocks['TriberUSD'].transfer.calls.length, 1);
+								assert.equal(this.mocks['TriberUSD'].transfer.calls[0][0], account1);
 								assert.bnEqual(
-									this.mocks['TribehUSD'].transfer.calls[0][1],
+									this.mocks['TriberUSD'].transfer.calls[0][1],
 									parseEther('10') // 5 units deprecated at price 2 is 10
 								);
 							});
@@ -282,7 +282,7 @@ contract('TribeRedeemer (unit tests)', async accounts => {
 									tribe: tribe.address,
 									account: account1,
 									amountOfTribe: userBalance,
-									amountInhUSD: parseEther('10'),
+									amountInrUSD: parseEther('10'),
 								});
 							});
 						});
@@ -301,8 +301,8 @@ contract('TribeRedeemer (unit tests)', async accounts => {
 
 				describe('when a tribe marked for redemption', () => {
 					beforeEach(async () => {
-						// smock hUSD balance to prevent the deprecation failing
-						this.mocks['TribehUSD'].balanceOf.returns(parseEther('2000'));
+						// smock rUSD balance to prevent the deprecation failing
+						this.mocks['TriberUSD'].balanceOf.returns(parseEther('2000'));
 					});
 					beforeEach(async () => {
 						await instance.deprecate(tribe.address, parseEther('2'), {
@@ -353,11 +353,11 @@ contract('TribeRedeemer (unit tests)', async accounts => {
 													userBalance
 												);
 											});
-											it('transfers the correct amount of hUSD to the user', async () => {
-												assert.equal(this.mocks['TribehUSD'].transfer.calls.length, 2);
-												assert.equal(this.mocks['TribehUSD'].transfer.calls[i][0], account1);
+											it('transfers the correct amount of rUSD to the user', async () => {
+												assert.equal(this.mocks['TriberUSD'].transfer.calls.length, 2);
+												assert.equal(this.mocks['TriberUSD'].transfer.calls[i][0], account1);
 												assert.bnEqual(
-													this.mocks['TribehUSD'].transfer.calls[i][1],
+													this.mocks['TriberUSD'].transfer.calls[i][1],
 													parseEther('10') // 5 units deprecated at price 2 is 10
 												);
 											});
@@ -386,8 +386,8 @@ contract('TribeRedeemer (unit tests)', async accounts => {
 
 				describe('when tribe marked for redemption', () => {
 					beforeEach(async () => {
-						// smock hUSD balance to prevent the deprecation failing
-						this.mocks['TribehUSD'].balanceOf.returns(parseEther('2000'));
+						// smock rUSD balance to prevent the deprecation failing
+						this.mocks['TriberUSD'].balanceOf.returns(parseEther('2000'));
 						await instance.deprecate(tribe.address, parseEther('2'), {
 							from: this.mocks['Issuer'].address,
 						});
@@ -419,11 +419,11 @@ contract('TribeRedeemer (unit tests)', async accounts => {
 								assert.equal(this.mocks['Issuer'].burnForRedemption.calls[0][1], account1);
 								assert.bnEqual(this.mocks['Issuer'].burnForRedemption.calls[0][2], parseEther('1'));
 							});
-							it('transfers the correct amount of hUSD to the user', async () => {
-								assert.equal(this.mocks['TribehUSD'].transfer.calls.length, 1);
-								assert.equal(this.mocks['TribehUSD'].transfer.calls[0][0], account1);
+							it('transfers the correct amount of rUSD to the user', async () => {
+								assert.equal(this.mocks['TriberUSD'].transfer.calls.length, 1);
+								assert.equal(this.mocks['TriberUSD'].transfer.calls[0][0], account1);
 								assert.bnEqual(
-									this.mocks['TribehUSD'].transfer.calls[0][1],
+									this.mocks['TriberUSD'].transfer.calls[0][1],
 									parseEther('2') // 1 units deprecated at price 2 is 2
 								);
 							});
@@ -432,7 +432,7 @@ contract('TribeRedeemer (unit tests)', async accounts => {
 									tribe: tribe.address,
 									account: account1,
 									amountOfTribe: parseEther('1'),
-									amountInhUSD: parseEther('2'),
+									amountInrUSD: parseEther('2'),
 								});
 							});
 						});

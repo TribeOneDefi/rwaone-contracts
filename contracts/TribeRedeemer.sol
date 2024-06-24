@@ -19,30 +19,30 @@ contract TribeRedeemer is ITribeRedeemer, MixinResolver {
     mapping(address => uint) public redemptions;
 
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
-    bytes32 private constant CONTRACT_RWAONEHUSD = "TribehUSD";
+    bytes32 private constant CONTRACT_RWAONERUSD = "TriberUSD";
 
     constructor(address _resolver) public MixinResolver(_resolver) {}
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         addresses = new bytes32[](2);
         addresses[0] = CONTRACT_ISSUER;
-        addresses[1] = CONTRACT_RWAONEHUSD;
+        addresses[1] = CONTRACT_RWAONERUSD;
     }
 
     function issuer() internal view returns (IIssuer) {
         return IIssuer(requireAndGetAddress(CONTRACT_ISSUER));
     }
 
-    function hUSD() internal view returns (IERC20) {
-        return IERC20(requireAndGetAddress(CONTRACT_RWAONEHUSD));
+    function rUSD() internal view returns (IERC20) {
+        return IERC20(requireAndGetAddress(CONTRACT_RWAONERUSD));
     }
 
-    function totalSupply(IERC20 tribeProxy) public view returns (uint supplyInhUSD) {
-        supplyInhUSD = tribeProxy.totalSupply().multiplyDecimal(redemptions[address(tribeProxy)]);
+    function totalSupply(IERC20 tribeProxy) public view returns (uint supplyInrUSD) {
+        supplyInrUSD = tribeProxy.totalSupply().multiplyDecimal(redemptions[address(tribeProxy)]);
     }
 
-    function balanceOf(IERC20 tribeProxy, address account) external view returns (uint balanceInhUSD) {
-        balanceInhUSD = tribeProxy.balanceOf(account).multiplyDecimal(redemptions[address(tribeProxy)]);
+    function balanceOf(IERC20 tribeProxy, address account) external view returns (uint balanceInrUSD) {
+        balanceInrUSD = tribeProxy.balanceOf(account).multiplyDecimal(redemptions[address(tribeProxy)]);
     }
 
     function redeemAll(IERC20[] calldata tribeProxies) external {
@@ -67,9 +67,9 @@ contract TribeRedeemer is ITribeRedeemer, MixinResolver {
         require(rateToRedeem > 0, "Tribe not redeemable");
         require(amountOfTribe > 0, "No balance of tribe to redeem");
         issuer().burnForRedemption(address(tribeProxy), msg.sender, amountOfTribe);
-        uint amountInhUSD = amountOfTribe.multiplyDecimal(rateToRedeem);
-        hUSD().transfer(msg.sender, amountInhUSD);
-        emit TribeRedeemed(address(tribeProxy), msg.sender, amountOfTribe, amountInhUSD);
+        uint amountInrUSD = amountOfTribe.multiplyDecimal(rateToRedeem);
+        rUSD().transfer(msg.sender, amountInrUSD);
+        emit TribeRedeemed(address(tribeProxy), msg.sender, amountOfTribe, amountInrUSD);
     }
 
     function deprecate(IERC20 tribeProxy, uint rateToRedeem) external onlyIssuer {
@@ -77,10 +77,10 @@ contract TribeRedeemer is ITribeRedeemer, MixinResolver {
         require(redemptions[tribeProxyAddress] == 0, "Tribe is already deprecated");
         require(rateToRedeem > 0, "No rate for tribe to redeem");
         uint totalTribeSupply = tribeProxy.totalSupply();
-        uint supplyInhUSD = totalTribeSupply.multiplyDecimal(rateToRedeem);
-        require(hUSD().balanceOf(address(this)) >= supplyInhUSD, "hUSD must first be supplied");
+        uint supplyInrUSD = totalTribeSupply.multiplyDecimal(rateToRedeem);
+        require(rUSD().balanceOf(address(this)) >= supplyInrUSD, "rUSD must first be supplied");
         redemptions[tribeProxyAddress] = rateToRedeem;
-        emit TribeDeprecated(address(tribeProxy), rateToRedeem, totalTribeSupply, supplyInhUSD);
+        emit TribeDeprecated(address(tribeProxy), rateToRedeem, totalTribeSupply, supplyInrUSD);
     }
 
     function requireOnlyIssuer() internal view {
@@ -92,6 +92,6 @@ contract TribeRedeemer is ITribeRedeemer, MixinResolver {
         _;
     }
 
-    event TribeRedeemed(address tribe, address account, uint amountOfTribe, uint amountInhUSD);
-    event TribeDeprecated(address tribe, uint rateToRedeem, uint totalTribeSupply, uint supplyInhUSD);
+    event TribeRedeemed(address tribe, address account, uint amountOfTribe, uint amountInrUSD);
+    event TribeDeprecated(address tribe, uint rateToRedeem, uint totalTribeSupply, uint supplyInrUSD);
 }

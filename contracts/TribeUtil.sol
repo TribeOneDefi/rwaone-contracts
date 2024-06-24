@@ -13,7 +13,7 @@ contract TribeUtil {
 
     bytes32 internal constant CONTRACT_RWAONEETIX = "Rwaone";
     bytes32 internal constant CONTRACT_EXRATES = "ExchangeRates";
-    bytes32 internal constant HUSD = "hUSD";
+    bytes32 internal constant RUSD = "rUSD";
 
     constructor(address resolver) public {
         addressResolverProxy = IAddressResolver(resolver);
@@ -48,14 +48,14 @@ contract TribeUtil {
         uint numTribes = rwaone.availableTribeCount();
         bytes32[] memory currencyKeys = new bytes32[](numTribes);
         uint[] memory balances = new uint[](numTribes);
-        uint[] memory hUSDBalances = new uint[](numTribes);
+        uint[] memory rUSDBalances = new uint[](numTribes);
         for (uint i = 0; i < numTribes; i++) {
             ITribe tribe = rwaone.availableTribes(i);
             currencyKeys[i] = tribe.currencyKey();
             balances[i] = IERC20(address(tribe)).balanceOf(account);
-            hUSDBalances[i] = exchangeRates.effectiveValue(currencyKeys[i], balances[i], HUSD);
+            rUSDBalances[i] = exchangeRates.effectiveValue(currencyKeys[i], balances[i], RUSD);
         }
-        return (currencyKeys, balances, hUSDBalances);
+        return (currencyKeys, balances, rUSDBalances);
     }
 
     function tribesRates() external view returns (bytes32[] memory, uint[] memory) {
@@ -70,13 +70,13 @@ contract TribeUtil {
         uint256 numTribes = rwaone.availableTribeCount();
         bytes32[] memory currencyKeys = new bytes32[](numTribes);
         uint256[] memory balances = new uint256[](numTribes);
-        uint256[] memory hUSDBalances = new uint256[](numTribes);
+        uint256[] memory rUSDBalances = new uint256[](numTribes);
         for (uint256 i = 0; i < numTribes; i++) {
             ITribe tribe = rwaone.availableTribes(i);
             currencyKeys[i] = tribe.currencyKey();
             balances[i] = IERC20(address(tribe)).totalSupply();
-            hUSDBalances[i] = exchangeRates.effectiveValue(currencyKeys[i], balances[i], HUSD);
+            rUSDBalances[i] = exchangeRates.effectiveValue(currencyKeys[i], balances[i], RUSD);
         }
-        return (currencyKeys, balances, hUSDBalances);
+        return (currencyKeys, balances, rUSDBalances);
     }
 }

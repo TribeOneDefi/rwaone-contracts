@@ -20,7 +20,7 @@ const { toBytes32 } = require('../..');
 const { toBN } = require('web3-utils');
 
 contract('EtherWrapper', async accounts => {
-	const tribes = ['hUSD', 'hETH', 'ETH', 'wHAKA'];
+	const tribes = ['rUSD', 'hETH', 'ETH', 'wHAKA'];
 	const [hETH, ETH] = ['hETH', 'ETH'].map(toBytes32);
 
 	const ONE = toBN('1');
@@ -34,27 +34,27 @@ contract('EtherWrapper', async accounts => {
 		depot,
 		issuer,
 		FEE_ADDRESS,
-		hUSDTribe,
+		rUSDTribe,
 		hETHTribe,
 		etherWrapper,
 		weth;
 
 	const calculateETHToUSD = async feesInETH => {
-		// Ask the Depot how many hUSD I will get for this ETH
-		const expectedFeehUSD = await depot.tribesReceivedForEther(feesInETH);
-		return expectedFeehUSD;
+		// Ask the Depot how many rUSD I will get for this ETH
+		const expectedFeerUSD = await depot.tribesReceivedForEther(feesInETH);
+		return expectedFeerUSD;
 	};
 
 	const calculateMintFees = async amount => {
 		const mintFee = await etherWrapper.calculateMintFee(amount);
-		const expectedFeehUSD = await calculateETHToUSD(mintFee);
-		return { mintFee, expectedFeehUSD };
+		const expectedFeerUSD = await calculateETHToUSD(mintFee);
+		return { mintFee, expectedFeerUSD };
 	};
 
 	const calculateBurnFees = async amount => {
 		const burnFee = await etherWrapper.calculateBurnFee(amount);
-		const expectedFeehUSD = await calculateETHToUSD(burnFee);
-		return { burnFee, expectedFeehUSD };
+		const expectedFeerUSD = await calculateETHToUSD(burnFee);
+		return { burnFee, expectedFeerUSD };
 	};
 
 	before(async () => {
@@ -66,7 +66,7 @@ contract('EtherWrapper', async accounts => {
 			Depot: depot,
 			ExchangeRates: exchangeRates,
 			EtherWrapper: etherWrapper,
-			TribehUSD: hUSDTribe,
+			TriberUSD: rUSDTribe,
 			TribehETH: hETHTribe,
 			WETH: weth,
 		} = await setupAllContracts({
@@ -123,7 +123,7 @@ contract('EtherWrapper', async accounts => {
 
 		it('should access its dependencies via the address resolver', async () => {
 			assert.equal(await addressResolver.getAddress(toBytes32('TribehETH')), hETHTribe.address);
-			assert.equal(await addressResolver.getAddress(toBytes32('TribehUSD')), hUSDTribe.address);
+			assert.equal(await addressResolver.getAddress(toBytes32('TriberUSD')), rUSDTribe.address);
 			assert.equal(
 				await addressResolver.getAddress(toBytes32('ExchangeRates')),
 				exchangeRates.address
@@ -152,8 +152,8 @@ contract('EtherWrapper', async accounts => {
 				it('hETH = 0', async () => {
 					assert.bnEqual(await etherWrapper.hETHIssued(), toBN('0'));
 				});
-				it('hUSD = 0', async () => {
-					assert.bnEqual(await etherWrapper.hUSDIssued(), toBN('0'));
+				it('rUSD = 0', async () => {
+					assert.bnEqual(await etherWrapper.rUSDIssued(), toBN('0'));
 				});
 			});
 		});
@@ -200,9 +200,9 @@ contract('EtherWrapper', async accounts => {
 						await etherWrapper.distributeFees();
 					});
 
-					it('total issued hUSD = $15', async () => {
+					it('total issued rUSD = $15', async () => {
 						// 1500*0.01 = 15
-						assert.bnEqual(await etherWrapper.hUSDIssued(), toUnit('15.0'));
+						assert.bnEqual(await etherWrapper.rUSDIssued(), toUnit('15.0'));
 					});
 
 					it('fees escrowed = 0.0', async () => {
@@ -548,16 +548,16 @@ contract('EtherWrapper', async accounts => {
 				log: logs.filter(l => !!l).find(({ name }) => name === 'Burned'),
 			});
 		});
-		it('issues hUSD to the feepool', async () => {
+		it('issues rUSD to the feepool', async () => {
 			const logs = await getDecodedLogs({
 				hash: tx.tx,
-				contracts: [hUSDTribe],
+				contracts: [rUSDTribe],
 			});
 			const rate = await exchangeRates.rateForCurrency(hETH);
 
 			decodedEventEqual({
 				event: 'Issued',
-				emittedFrom: hUSDTribe.address,
+				emittedFrom: rUSDTribe.address,
 				args: [FEE_ADDRESS, multiplyDecimal(feesEscrowed, rate)],
 				log: logs
 					.reverse()

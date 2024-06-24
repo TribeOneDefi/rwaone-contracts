@@ -16,7 +16,7 @@ contract('FuturesMarket MixinFuturesNextPriceOrders', accounts => {
 		futuresMarket,
 		exchangeRates,
 		circuitBreaker,
-		hUSD,
+		rUSD,
 		systemSettings,
 		systemStatus,
 		feePool;
@@ -50,13 +50,13 @@ contract('FuturesMarket MixinFuturesNextPriceOrders', accounts => {
 			FuturesMarketBTC: futuresMarket,
 			ExchangeRates: exchangeRates,
 			CircuitBreaker: circuitBreaker,
-			TribehUSD: hUSD,
+			TriberUSD: rUSD,
 			FeePool: feePool,
 			SystemSettings: systemSettings,
 			SystemStatus: systemStatus,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['hUSD', 'hBTC', 'hETH'],
+			tribes: ['rUSD', 'hBTC', 'hETH'],
 			contracts: [
 				'FuturesMarketManager',
 				'FuturesMarketSettings',
@@ -80,9 +80,9 @@ contract('FuturesMarket MixinFuturesNextPriceOrders', accounts => {
 		// it will be enabled for specific tests
 		await systemSettings.setExchangeDynamicFeeRounds('0', { from: owner });
 
-		// Issue the trader some hUSD
+		// Issue the trader some rUSD
 		for (const t of [trader, trader2, trader3]) {
-			await hUSD.issue(t, traderInitialBalance);
+			await rUSD.issue(t, traderInitialBalance);
 		}
 	});
 
@@ -207,7 +207,7 @@ contract('FuturesMarket MixinFuturesNextPriceOrders', accounts => {
 			assert.bnEqual(order.keeperDeposit, keeperFee);
 			assert.bnEqual(order.trackingCode, trackingCode);
 
-			const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [hUSD, futuresMarket] });
+			const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [rUSD, futuresMarket] });
 
 			// NextPriceOrderSubmitted
 			decodedEventEqual({
@@ -230,7 +230,7 @@ contract('FuturesMarket MixinFuturesNextPriceOrders', accounts => {
 			// excute the order
 			const tx = await futuresMarket.executeNextPriceOrder(trader, { from: trader });
 
-			const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [hUSD, futuresMarket] });
+			const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [rUSD, futuresMarket] });
 
 			decodedEventEqual({
 				event: 'FuturesTracking',
@@ -272,7 +272,7 @@ contract('FuturesMarket MixinFuturesNextPriceOrders', accounts => {
 				assert.bnEqual(order.keeperDeposit, 0);
 
 				// The relevant events are properly emitted
-				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [hUSD, futuresMarket] });
+				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [rUSD, futuresMarket] });
 
 				if (from === trader) {
 					// trader gets refunded
@@ -290,7 +290,7 @@ contract('FuturesMarket MixinFuturesNextPriceOrders', accounts => {
 					assert.equal(decodedLogs.length, 3);
 					decodedEventEqual({
 						event: 'Issued',
-						emittedFrom: hUSD.address,
+						emittedFrom: rUSD.address,
 						args: [from, keeperFee],
 						log: decodedLogs[0],
 					});
@@ -299,7 +299,7 @@ contract('FuturesMarket MixinFuturesNextPriceOrders', accounts => {
 				// commitFee (equal to spotFee) paid to fee pool
 				decodedEventEqual({
 					event: 'Issued',
-					emittedFrom: hUSD.address,
+					emittedFrom: rUSD.address,
 					args: [await feePool.FEE_ADDRESS(), spotFee],
 					log: decodedLogs.slice(-2, -1)[0], // [-2]
 				});
@@ -538,7 +538,7 @@ contract('FuturesMarket MixinFuturesNextPriceOrders', accounts => {
 				assert.bnEqual(order.keeperDeposit, 0);
 
 				// The relevant events are properly emitted
-				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [hUSD, futuresMarket] });
+				const decodedLogs = await getDecodedLogs({ hash: tx.tx, contracts: [rUSD, futuresMarket] });
 
 				let expectedRefund = commitFee; // at least the commitFee is refunded
 				if (from === trader) {
@@ -553,7 +553,7 @@ contract('FuturesMarket MixinFuturesNextPriceOrders', accounts => {
 					// keeper fee, funding, position(refund), issued (exchange fee), position(trade), order removed
 					decodedEventEqual({
 						event: 'Issued',
-						emittedFrom: hUSD.address,
+						emittedFrom: rUSD.address,
 						args: [from, keeperFee],
 						log: decodedLogs[0],
 					});

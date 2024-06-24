@@ -24,7 +24,7 @@ contract('CollateralManager', async accounts => {
 	const [, owner, , , account1] = accounts;
 
 	const hETH = toBytes32('hETH');
-	const hUSD = toBytes32('hUSD');
+	const rUSD = toBytes32('rUSD');
 	const hBTC = toBytes32('hBTC');
 
 	const name = 'Some name';
@@ -43,7 +43,7 @@ contract('CollateralManager', async accounts => {
 		issuer,
 		exchangeRates,
 		feePool,
-		hUSDTribe,
+		rUSDTribe,
 		hETHTribe,
 		hBTCTribe,
 		tribes,
@@ -89,10 +89,10 @@ contract('CollateralManager', async accounts => {
 	};
 
 	const setupManager = async () => {
-		tribes = ['hUSD', 'hBTC', 'hETH', 'iBTC', 'iETH'];
+		tribes = ['rUSD', 'hBTC', 'hETH', 'iBTC', 'iETH'];
 		({
 			ExchangeRates: exchangeRates,
-			TribehUSD: hUSDTribe,
+			TriberUSD: rUSDTribe,
 			TribehETH: hETHTribe,
 			TribehBTC: hBTCTribe,
 			FeePool: feePool,
@@ -173,13 +173,13 @@ contract('CollateralManager', async accounts => {
 		await manager.addCollaterals([ceth.address, cerc20.address, short.address], { from: owner });
 
 		await ceth.addTribes(
-			['TribehUSD', 'TribehETH'].map(toBytes32),
-			['hUSD', 'hETH'].map(toBytes32),
+			['TriberUSD', 'TribehETH'].map(toBytes32),
+			['rUSD', 'hETH'].map(toBytes32),
 			{ from: owner }
 		);
 		await cerc20.addTribes(
-			['TribehUSD', 'TribehBTC'].map(toBytes32),
-			['hUSD', 'hBTC'].map(toBytes32),
+			['TriberUSD', 'TribehBTC'].map(toBytes32),
+			['rUSD', 'hBTC'].map(toBytes32),
 			{ from: owner }
 		);
 		await short.addTribes(
@@ -189,8 +189,8 @@ contract('CollateralManager', async accounts => {
 		);
 
 		await manager.addTribes(
-			[toBytes32('TribehUSD'), toBytes32('TribehBTC'), toBytes32('TribehETH')],
-			[toBytes32('hUSD'), toBytes32('hBTC'), toBytes32('hETH')],
+			[toBytes32('TriberUSD'), toBytes32('TribehBTC'), toBytes32('TribehETH')],
+			[toBytes32('rUSD'), toBytes32('hBTC'), toBytes32('hETH')],
 			{
 				from: owner,
 			}
@@ -207,8 +207,8 @@ contract('CollateralManager', async accounts => {
 		// check tribes, currencies, and shortable tribes are set
 		assert.isTrue(
 			await manager.areTribesAndCurrenciesSet(
-				['TribehUSD', 'TribehBTC', 'TribehETH'].map(toBytes32),
-				['hUSD', 'hBTC', 'hETH'].map(toBytes32)
+				['TriberUSD', 'TribehBTC', 'TribehETH'].map(toBytes32),
+				['rUSD', 'hBTC', 'hETH'].map(toBytes32)
 			)
 		);
 
@@ -220,7 +220,7 @@ contract('CollateralManager', async accounts => {
 		);
 
 		await renBTC.approve(cerc20.address, toUnit(100), { from: account1 });
-		await hUSDTribe.approve(short.address, toUnit(100000), { from: account1 });
+		await rUSDTribe.approve(short.address, toUnit(100000), { from: account1 });
 	};
 
 	before(async () => {
@@ -232,7 +232,7 @@ contract('CollateralManager', async accounts => {
 	beforeEach(async () => {
 		await updateRatesWithDefaults();
 
-		await issue(hUSDTribe, toUnit(1000), owner);
+		await issue(rUSDTribe, toUnit(1000), owner);
 		await issue(hETHTribe, toUnit(10), owner);
 		await issue(hBTCTribe, toUnit(0.1), owner);
 		await debtCache.takeDebtSnapshot();
@@ -274,7 +274,7 @@ contract('CollateralManager', async accounts => {
 	});
 
 	it('should access its dependencies via the address resolver', async () => {
-		assert.equal(await addressResolver.getAddress(toBytes32('TribehUSD')), hUSDTribe.address);
+		assert.equal(await addressResolver.getAddress(toBytes32('TriberUSD')), rUSDTribe.address);
 		assert.equal(await addressResolver.getAddress(toBytes32('FeePool')), feePool.address);
 		assert.equal(
 			await addressResolver.getAddress(toBytes32('ExchangeRates')),
@@ -292,24 +292,24 @@ contract('CollateralManager', async accounts => {
 
 	describe('adding tribes', async () => {
 		it('should add the tribes during construction', async () => {
-			assert.isTrue(await manager.isTribeManaged(hUSD));
+			assert.isTrue(await manager.isTribeManaged(rUSD));
 			assert.isTrue(await manager.isTribeManaged(hBTC));
 			assert.isTrue(await manager.isTribeManaged(hETH));
 		});
 		it('should not allow duplicate tribes to be added', async () => {
-			await manager.addTribes([toBytes32('TribehUSD')], [toBytes32('hUSD')], {
+			await manager.addTribes([toBytes32('TriberUSD')], [toBytes32('rUSD')], {
 				from: owner,
 			});
 			assert.isTrue(
 				await manager.areTribesAndCurrenciesSet(
-					['TribehUSD', 'TribehBTC', 'TribehETH'].map(toBytes32),
-					['hUSD', 'hBTC', 'hETH'].map(toBytes32)
+					['TriberUSD', 'TribehBTC', 'TribehETH'].map(toBytes32),
+					['rUSD', 'hBTC', 'hETH'].map(toBytes32)
 				)
 			);
 		});
 		it('should revert when input array lengths dont match', async () => {
 			await assert.revert(
-				manager.addTribes([toBytes32('TribehUSD'), toBytes32('TribehBTC')], [toBytes32('hUSD')], {
+				manager.addTribes([toBytes32('TriberUSD'), toBytes32('TribehBTC')], [toBytes32('rUSD')], {
 					from: owner,
 				}),
 				'Input array length mismatch'
@@ -324,8 +324,8 @@ contract('CollateralManager', async accounts => {
 			});
 			assert.isTrue(
 				await manager.areTribesAndCurrenciesSet(
-					['TribehUSD', 'TribehBTC', 'TribehETH'].map(toBytes32),
-					['hUSD', 'hBTC', 'hETH'].map(toBytes32)
+					['TriberUSD', 'TribehBTC', 'TribehETH'].map(toBytes32),
+					['rUSD', 'hBTC', 'hETH'].map(toBytes32)
 				)
 			);
 		});
@@ -335,16 +335,16 @@ contract('CollateralManager', async accounts => {
 			});
 			assert.isTrue(
 				await manager.areTribesAndCurrenciesSet(
-					['TribehUSD', 'TribehBTC'].map(toBytes32),
-					['hUSD', 'hBTC'].map(toBytes32)
+					['TriberUSD', 'TribehBTC'].map(toBytes32),
+					['rUSD', 'hBTC'].map(toBytes32)
 				)
 			);
 		});
 		it('should revert when input array lengths dont match', async () => {
 			await assert.revert(
 				manager.removeTribes(
-					[toBytes32('TribehUSD'), toBytes32('TribehBTC')],
-					[toBytes32('hUSD')],
+					[toBytes32('TriberUSD'), toBytes32('TribehBTC')],
+					[toBytes32('rUSD')],
 					{
 						from: owner,
 					}
@@ -357,18 +357,18 @@ contract('CollateralManager', async accounts => {
 	describe('default values for totalLong and totalShort', async () => {
 		it('totalLong should be 0', async () => {
 			const long = await manager.totalLong();
-			assert.bnEqual(long.husdValue, toUnit('0'));
+			assert.bnEqual(long.rusdValue, toUnit('0'));
 		});
 		it('totalShort should be 0', async () => {
 			const short = await manager.totalShort();
-			assert.bnEqual(short.husdValue, toUnit('0'));
+			assert.bnEqual(short.rusdValue, toUnit('0'));
 		});
 	});
 
 	describe('should only allow opening positions up to the debt limiit', async () => {
 		beforeEach(async () => {
-			await issue(hUSDTribe, toUnit(15000000), account1);
-			await hUSDTribe.approve(short.address, toUnit(15000000), { from: account1 });
+			await issue(rUSDTribe, toUnit(15000000), account1);
+			await rUSDTribe.approve(short.address, toUnit(15000000), { from: account1 });
 		});
 
 		it('should not allow opening a position that would surpass the debt limit', async () => {
@@ -381,17 +381,17 @@ contract('CollateralManager', async accounts => {
 
 	describe('tracking tribe balances across collaterals', async () => {
 		beforeEach(async () => {
-			tx = await ceth.open(toUnit(100), hUSD, { value: toUnit(2), from: account1 });
+			tx = await ceth.open(toUnit(100), rUSD, { value: toUnit(2), from: account1 });
 			await ceth.open(toUnit(1), hETH, { value: toUnit(2), from: account1 });
-			await cerc20.open(oneRenBTC, toUnit(100), hUSD, { from: account1 });
+			await cerc20.open(oneRenBTC, toUnit(100), rUSD, { from: account1 });
 			await cerc20.open(oneRenBTC, toUnit(0.01), hBTC, { from: account1 });
 			await short.open(toUnit(200), toUnit(1), hETH, { from: account1 });
 
 			id = getid(tx);
 		});
 
-		it('should correctly get the total hUSD balance', async () => {
-			assert.bnEqual(await manager.long(hUSD), toUnit(200));
+		it('should correctly get the total rUSD balance', async () => {
+			assert.bnEqual(await manager.long(rUSD), toUnit(200));
 		});
 
 		it('should correctly get the total hETH balance', async () => {
@@ -406,23 +406,23 @@ contract('CollateralManager', async accounts => {
 			assert.bnEqual(await manager.short(hETH), toUnit(1));
 		});
 
-		it('should get the total long balance in hUSD correctly', async () => {
+		it('should get the total long balance in rUSD correctly', async () => {
 			const total = await manager.totalLong();
-			const debt = total.husdValue;
+			const debt = total.rusdValue;
 
 			assert.bnEqual(debt, toUnit(400));
 		});
 
-		it('should get the total short balance in hUSD correctly', async () => {
+		it('should get the total short balance in rUSD correctly', async () => {
 			const total = await manager.totalShort();
-			const debt = total.husdValue;
+			const debt = total.rusdValue;
 
 			assert.bnEqual(debt, toUnit(100));
 		});
 
-		it('should get the total long and short balance in hUSD correctly', async () => {
+		it('should get the total long and short balance in rUSD correctly', async () => {
 			const total = await manager.totalLongAndShort();
-			const debt = total.husdValue;
+			const debt = total.rusdValue;
 
 			assert.bnEqual(debt, toUnit(500));
 		});
@@ -431,11 +431,11 @@ contract('CollateralManager', async accounts => {
 			await fastForward(await exchangeRates.rateStalePeriod());
 
 			const long = await manager.totalLong();
-			const debt = long.husdValue;
+			const debt = long.rusdValue;
 			const invalid = long.anyRateIsInvalid;
 
 			const short = await manager.totalShort();
-			const shortDebt = short.husdValue;
+			const shortDebt = short.rusdValue;
 			const shortInvalid = short.anyRateIsInvalid;
 
 			assert.bnEqual(debt, toUnit(400));
@@ -444,21 +444,21 @@ contract('CollateralManager', async accounts => {
 			assert.isTrue(shortInvalid);
 		});
 
-		it('should reduce the hUSD balance when a loan is closed', async () => {
-			issue(hUSDTribe, toUnit(10), account1);
+		it('should reduce the rUSD balance when a loan is closed', async () => {
+			issue(rUSDTribe, toUnit(10), account1);
 			await fastForwardAndUpdateRates(INTERACTION_DELAY);
 			await ceth.close(id, { from: account1 });
 
-			assert.bnEqual(await manager.long(hUSD), toUnit(100));
+			assert.bnEqual(await manager.long(rUSD), toUnit(100));
 		});
 
-		it('should reduce the total balance in hUSD when a loan is closed', async () => {
-			issue(hUSDTribe, toUnit(10), account1);
+		it('should reduce the total balance in rUSD when a loan is closed', async () => {
+			issue(rUSDTribe, toUnit(10), account1);
 			await fastForwardAndUpdateRates(INTERACTION_DELAY);
 			await ceth.close(id, { from: account1 });
 
 			const total = await manager.totalLong();
-			const debt = total.husdValue;
+			const debt = total.rusdValue;
 
 			assert.bnEqual(debt, toUnit(300));
 		});
@@ -470,7 +470,7 @@ contract('CollateralManager', async accounts => {
 		beforeEach(async () => {
 			systemDebtBefore = (await debtCache.currentDebt()).debt;
 
-			tx = await ceth.open(toUnit(100), hUSD, { value: toUnit(2), from: account1 });
+			tx = await ceth.open(toUnit(100), rUSD, { value: toUnit(2), from: account1 });
 
 			id = getid(tx);
 		});

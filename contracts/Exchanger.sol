@@ -28,7 +28,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
 
     bytes32 public constant CONTRACT_NAME = "Exchanger";
 
-    bytes32 internal constant hUSD = "hUSD";
+    bytes32 internal constant rUSD = "rUSD";
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
@@ -253,8 +253,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     }
 
     function _updateHAKAIssuedDebtOnExchange(bytes32[2] memory currencyKeys, uint[2] memory currencyRates) internal {
-        bool includesHUSD = currencyKeys[0] == hUSD || currencyKeys[1] == hUSD;
-        uint numKeys = includesHUSD ? 2 : 3;
+        bool includesRUSD = currencyKeys[0] == rUSD || currencyKeys[1] == rUSD;
+        uint numKeys = includesRUSD ? 2 : 3;
 
         bytes32[] memory keys = new bytes32[](numKeys);
         keys[0] = currencyKeys[0];
@@ -264,8 +264,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         rates[0] = currencyRates[0];
         rates[1] = currencyRates[1];
 
-        if (!includesHUSD) {
-            keys[2] = hUSD; // And we'll also update hUSD to account for any fees if it wasn't one of the exchanged currencies
+        if (!includesRUSD) {
+            keys[2] = rUSD; // And we'll also update rUSD to account for any fees if it wasn't one of the exchanged currencies
             rates[2] = SafeDecimalMath.unit();
         }
 
@@ -382,18 +382,18 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
 
         // Remit the fee if required
         if (fee > 0) {
-            // Normalize fee to hUSD
+            // Normalize fee to rUSD
             // Note: `fee` is being reused to avoid stack too deep errors.
-            fee = addrs.exchangeRates.effectiveValue(destinationSettings.currencyKey, fee, hUSD);
+            fee = addrs.exchangeRates.effectiveValue(destinationSettings.currencyKey, fee, rUSD);
 
-            // Remit the fee in hUSDs
-            issuer().tribes(hUSD).issue(feePool().FEE_ADDRESS(), fee);
+            // Remit the fee in rUSDs
+            issuer().tribes(rUSD).issue(feePool().FEE_ADDRESS(), fee);
 
             // Tell the fee pool about this
             feePool().recordFeePaid(fee);
         }
 
-        // Note: As of this point, `fee` is denominated in hUSD.
+        // Note: As of this point, `fee` is denominated in rUSD.
 
         // Nothing changes as far as issuance data goes because the total value in the system hasn't changed.
         // But we will update the debt snapshot in case exchange rates have fluctuated since the last exchange
@@ -485,10 +485,10 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         require(sourceCurrencyKey != destinationCurrencyKey, "Can't be same tribe");
         require(sourceAmount > 0, "Zero amount");
 
-        (, bool srcBroken, bool srcStaleOrInvalid) = sourceCurrencyKey != hUSD
+        (, bool srcBroken, bool srcStaleOrInvalid) = sourceCurrencyKey != rUSD
             ? exchangeRates().rateWithSafetyChecks(sourceCurrencyKey)
             : (0, false, false);
-        (, bool dstBroken, bool dstStaleOrInvalid) = destinationCurrencyKey != hUSD
+        (, bool dstBroken, bool dstStaleOrInvalid) = destinationCurrencyKey != rUSD
             ? exchangeRates().rateWithSafetyChecks(destinationCurrencyKey)
             : (0, false, false);
 
@@ -632,8 +632,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     function _dynamicFeeRateForCurrency(
         IDirectIntegrationManager.ParameterIntegrationSettings memory settings
     ) internal view returns (uint dynamicFee, bool tooVolatile) {
-        // no dynamic dynamicFee for hUSD or too few rounds
-        if (settings.currencyKey == hUSD || settings.exchangeDynamicFeeRounds <= 1) {
+        // no dynamic dynamicFee for rUSD or too few rounds
+        if (settings.currencyKey == rUSD || settings.exchangeDynamicFeeRounds <= 1) {
             return (0, false);
         }
         uint roundId = exchangeRates().getCurrentRoundId(settings.currencyKey);
@@ -648,8 +648,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         IDirectIntegrationManager.ParameterIntegrationSettings memory settings,
         uint roundId
     ) internal view returns (uint dynamicFee, bool tooVolatile) {
-        // no dynamic dynamicFee for hUSD or too few rounds
-        if (settings.currencyKey == hUSD || settings.exchangeDynamicFeeRounds <= 1) {
+        // no dynamic dynamicFee for rUSD or too few rounds
+        if (settings.currencyKey == rUSD || settings.exchangeDynamicFeeRounds <= 1) {
             return (0, false);
         }
         uint[] memory prices;
@@ -722,10 +722,10 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
             destinationCurrencyKey
         );
 
-        require(sourceCurrencyKey == hUSD || !exchangeRates().rateIsInvalid(sourceCurrencyKey), "src tribe rate invalid");
+        require(sourceCurrencyKey == rUSD || !exchangeRates().rateIsInvalid(sourceCurrencyKey), "src tribe rate invalid");
 
         require(
-            destinationCurrencyKey == hUSD || !exchangeRates().rateIsInvalid(destinationCurrencyKey),
+            destinationCurrencyKey == rUSD || !exchangeRates().rateIsInvalid(destinationCurrencyKey),
             "dest tribe rate invalid"
         );
 

@@ -34,7 +34,7 @@ node publish deploy # "--help" for options
   ```javascript
   // config.json
   {
-    "ProxyhUSD": {
+    "ProxyrUSD": {
       "deploy": true // whether or not to deploy this or use existing instance from any deployment.json file
     },
 
@@ -89,8 +89,8 @@ node publish nominate # "--help" for options
 ### Example
 
 ```bash
-node publish nominate -n goerli -d publish/deployed/goerli -g 3 -c Rwaone -c ProxyhUSD -o 0x0000000000000000000000000000000000000000
-node publish nominate -o 0xB64fF7a4a33Acdf48d97dab0D764afD0F6176882 -n goerli -c ProxyhUSD -d publish/deployed/goerli -g 20
+node publish nominate -n goerli -d publish/deployed/goerli -g 3 -c Rwaone -c ProxyrUSD -o 0x0000000000000000000000000000000000000000
+node publish nominate -o 0xB64fF7a4a33Acdf48d97dab0D764afD0F6176882 -n goerli -c ProxyrUSD -d publish/deployed/goerli -g 20
 ```
 
 ## 5. Owner Actions
