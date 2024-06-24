@@ -3387,18 +3387,18 @@ contract('Exchanger (spec tests)', async accounts => {
 					await exchangeRates.addAggregator(sAUD, saudAggregator.address, { from: owner });
 					await saudAggregator.setLatestAnswer(saudChainlinkPrice, await currentTime());
 
-					const hbtcChainlinkPrice = toUnit('40000');
-					const hbtcAggregator = await MockAggregator.new({ from: owner });
-					await exchangeRates.addAggregator(rBTC, hbtcAggregator.address, { from: owner });
-					await hbtcAggregator.setLatestAnswer(hbtcChainlinkPrice, await currentTime());
+					const rbtcChainlinkPrice = toUnit('40000');
+					const rbtcAggregator = await MockAggregator.new({ from: owner });
+					await exchangeRates.addAggregator(rBTC, rbtcAggregator.address, { from: owner });
+					await rbtcAggregator.setLatestAnswer(rbtcChainlinkPrice, await currentTime());
 
 					// Add Tribe Equivalents to System Settings
 					const rusdDexEquivalentToken = await MockToken.new('rUSD equivalent', 'erUSD', '6');
-					const hbtcDexEquivalentToken = await MockToken.new('rBTC equivalent', 'erBTC', '9');
+					const rbtcDexEquivalentToken = await MockToken.new('rBTC equivalent', 'erBTC', '9');
 					const seurDexEquivalentToken = await MockToken.new('sEUR equivalent', 'esEUR', '18');
 					const saudDexEquivalentToken = await MockToken.new('sAUD equivalent', 'esAUD', '18');
 					await setAtomicEquivalentForDexPricing(rUSD, rusdDexEquivalentToken.address);
-					await setAtomicEquivalentForDexPricing(rBTC, hbtcDexEquivalentToken.address);
+					await setAtomicEquivalentForDexPricing(rBTC, rbtcDexEquivalentToken.address);
 					await setAtomicEquivalentForDexPricing(sEUR, seurDexEquivalentToken.address);
 					await setAtomicEquivalentForDexPricing(sAUD, saudDexEquivalentToken.address);
 
@@ -3414,7 +3414,7 @@ contract('Exchanger (spec tests)', async accounts => {
 						toUnit('0.8')
 					);
 					await dexPriceAggregator.setAssetToAssetRate(
-						hbtcDexEquivalentToken.address,
+						rbtcDexEquivalentToken.address,
 						toUnit('50000')
 					);
 					await setDexPriceAggregator(dexPriceAggregator.address, { from: owner });
