@@ -8,7 +8,7 @@ import "./interfaces/IFuturesMarketManager.sol";
 import "./interfaces/IFuturesMarketSettings.sol";
 import "./interfaces/IAddressResolver.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/FuturesMarketData
+// https://docs.rwaone.io/contracts/source/contracts/FuturesMarketData
 // A utility contract to allow the front end to query market data in a single call.
 contract FuturesMarketData {
     /* ========== TYPES ========== */
@@ -203,11 +203,9 @@ contract FuturesMarketData {
         return _marketSummaries(_futuresMarketManager().allMarkets());
     }
 
-    function _fundingParameters(IFuturesMarketSettings.Parameters memory params)
-        internal
-        pure
-        returns (FundingParameters memory)
-    {
+    function _fundingParameters(
+        IFuturesMarketSettings.Parameters memory params
+    ) internal pure returns (FundingParameters memory) {
         return FundingParameters(params.maxFundingRate, params.skewScaleUSD);
     }
 
@@ -245,11 +243,10 @@ contract FuturesMarketData {
         return _marketDetails(IFuturesMarket(_futuresMarketManager().marketForKey(marketKey)));
     }
 
-    function _position(IFuturesMarket market, address account)
-        internal
-        view
-        returns (IFuturesMarketBaseTypes.Position memory)
-    {
+    function _position(
+        IFuturesMarket market,
+        address account
+    ) internal view returns (IFuturesMarketBaseTypes.Position memory) {
         (
             uint64 positionId,
             uint64 positionEntryIndex,

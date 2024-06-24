@@ -2,7 +2,7 @@ pragma solidity >=0.4.24;
 pragma experimental ABIEncoderV2;
 import "./IVirtualTribe.sol";
 
-// https://docs.tribeone.io/contracts/source/interfaces/iexchanger
+// https://docs.rwaone.io/contracts/source/interfaces/iexchanger
 interface IExchanger {
     struct ExchangeEntrySettlement {
         bytes32 src;
@@ -38,36 +38,25 @@ interface IExchanger {
 
     function maxSecsLeftInWaitingPeriod(address account, bytes32 currencyKey) external view returns (uint);
 
-    function settlementOwing(address account, bytes32 currencyKey)
-        external
-        view
-        returns (
-            uint reclaimAmount,
-            uint rebateAmount,
-            uint numEntries
-        );
+    function settlementOwing(
+        address account,
+        bytes32 currencyKey
+    ) external view returns (uint reclaimAmount, uint rebateAmount, uint numEntries);
 
     function hasWaitingPeriodOrSettlementOwing(address account, bytes32 currencyKey) external view returns (bool);
 
     function feeRateForExchange(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey) external view returns (uint);
 
-    function dynamicFeeRateForExchange(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey)
-        external
-        view
-        returns (uint feeRate, bool tooVolatile);
+    function dynamicFeeRateForExchange(
+        bytes32 sourceCurrencyKey,
+        bytes32 destinationCurrencyKey
+    ) external view returns (uint feeRate, bool tooVolatile);
 
     function getAmountsForExchange(
         uint sourceAmount,
         bytes32 sourceCurrencyKey,
         bytes32 destinationCurrencyKey
-    )
-        external
-        view
-        returns (
-            uint amountReceived,
-            uint fee,
-            uint exchangeFeeRate
-        );
+    ) external view returns (uint amountReceived, uint fee, uint exchangeFeeRate);
 
     function priceDeviationThresholdFactor() external view returns (uint);
 
@@ -98,23 +87,12 @@ interface IExchanger {
         uint minAmount
     ) external returns (uint amountReceived);
 
-    function settle(address from, bytes32 currencyKey)
-        external
-        returns (
-            uint reclaimed,
-            uint refunded,
-            uint numEntries
-        );
+    function settle(address from, bytes32 currencyKey) external returns (uint reclaimed, uint refunded, uint numEntries);
 }
 
-// Used to have strongly-typed access to internal mutative functions in Tribeone
-interface ITribeoneInternal {
-    function emitExchangeTracking(
-        bytes32 trackingCode,
-        bytes32 toCurrencyKey,
-        uint256 toAmount,
-        uint256 fee
-    ) external;
+// Used to have strongly-typed access to internal mutative functions in Rwaone
+interface IRwaoneInternal {
+    function emitExchangeTracking(bytes32 trackingCode, bytes32 toCurrencyKey, uint256 toAmount, uint256 fee) external;
 
     function emitTribeExchange(
         address account,
@@ -134,17 +112,9 @@ interface ITribeoneInternal {
         address toAddress
     ) external;
 
-    function emitExchangeReclaim(
-        address account,
-        bytes32 currencyKey,
-        uint amount
-    ) external;
+    function emitExchangeReclaim(address account, bytes32 currencyKey, uint amount) external;
 
-    function emitExchangeRebate(
-        address account,
-        bytes32 currencyKey,
-        uint amount
-    ) external;
+    function emitExchangeRebate(address account, bytes32 currencyKey, uint amount) external;
 }
 
 interface IExchangerInternalDebtCache {

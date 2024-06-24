@@ -7,7 +7,7 @@ import "./interfaces/IExchangeRates.sol";
 import "./interfaces/IExchangeState.sol";
 import "./interfaces/IDebtCache.sol";
 import "./interfaces/IIssuer.sol";
-import "./interfaces/ITribeone.sol";
+import "./interfaces/IRwaone.sol";
 
 import "./SafeDecimalMath.sol";
 
@@ -21,7 +21,7 @@ library ExchangeSettlementLib {
         ICircuitBreaker circuitBreaker;
         IExchangerInternalDebtCache debtCache;
         IIssuer issuer;
-        ITribeone tribeone;
+        IRwaone rwaone;
     }
 
     bytes32 internal constant hUSD = "hUSD";
@@ -32,21 +32,18 @@ library ExchangeSettlementLib {
         bytes32 currencyKey,
         bool updateCache,
         uint waitingPeriod
-    )
-        external
-        returns (
-            uint reclaimed,
-            uint refunded,
-            uint numEntriesSettled
-        )
-    {
+    ) external returns (uint reclaimed, uint refunded, uint numEntriesSettled) {
         require(
             maxSecsLeftInWaitingPeriod(resolvedAddresses.exchangeState, from, currencyKey, waitingPeriod) == 0,
             "Cannot settle during waiting period"
         );
 
-        (uint reclaimAmount, uint rebateAmount, uint entries, IExchanger.ExchangeEntrySettlement[] memory settlements) =
-            _settlementOwing(resolvedAddresses, from, currencyKey, waitingPeriod);
+        (
+            uint reclaimAmount,
+            uint rebateAmount,
+            uint entries,
+            IExchanger.ExchangeEntrySettlement[] memory settlements
+        ) = _settlementOwing(resolvedAddresses, from, currencyKey, waitingPeriod);
 
         if (reclaimAmount > rebateAmount) {
             reclaimed = reclaimAmount.sub(rebateAmount);
@@ -102,26 +99,16 @@ library ExchangeSettlementLib {
         return timestamp.add(waitingPeriod).sub(now);
     }
 
-    function _reclaim(
-        ResolvedAddresses memory resolvedAddresses,
-        address from,
-        bytes32 currencyKey,
-        uint amount
-    ) internal {
+    function _reclaim(ResolvedAddresses memory resolvedAddresses, address from, bytes32 currencyKey, uint amount) internal {
         // burn amount from user
         resolvedAddresses.issuer.tribes(currencyKey).burn(from, amount);
-        ITribeoneInternal(address(resolvedAddresses.tribeone)).emitExchangeReclaim(from, currencyKey, amount);
+        IRwaoneInternal(address(resolvedAddresses.rwaone)).emitExchangeReclaim(from, currencyKey, amount);
     }
 
-    function _refund(
-        ResolvedAddresses memory resolvedAddresses,
-        address from,
-        bytes32 currencyKey,
-        uint amount
-    ) internal {
+    function _refund(ResolvedAddresses memory resolvedAddresses, address from, bytes32 currencyKey, uint amount) internal {
         // issue amount to user
         resolvedAddresses.issuer.tribes(currencyKey).issue(from, amount);
-        ITribeoneInternal(address(resolvedAddresses.tribeone)).emitExchangeRebate(from, currencyKey, amount);
+        IRwaoneInternal(address(resolvedAddresses.rwaone)).emitExchangeRebate(from, currencyKey, amount);
     }
 
     function hasWaitingPeriodOrSettlementOwing(
@@ -147,12 +134,7 @@ library ExchangeSettlementLib {
     )
         external
         view
-        returns (
-            uint reclaimAmount,
-            uint rebateAmount,
-            uint numEntries,
-            IExchanger.ExchangeEntrySettlement[] memory
-        )
+        returns (uint reclaimAmount, uint rebateAmount, uint numEntries, IExchanger.ExchangeEntrySettlement[] memory)
     {
         return _settlementOwing(resolvedAddresses, account, currencyKey, waitingPeriod);
     }
@@ -166,12 +148,7 @@ library ExchangeSettlementLib {
     )
         internal
         view
-        returns (
-            uint reclaimAmount,
-            uint rebateAmount,
-            uint numEntries,
-            IExchanger.ExchangeEntrySettlement[] memory
-        )
+        returns (uint reclaimAmount, uint rebateAmount, uint numEntries, IExchanger.ExchangeEntrySettlement[] memory)
     {
         // Need to sum up all reclaim and rebate amounts for the user and the currency key
         numEntries = resolvedAddresses.exchangeState.getLengthOfEntries(account, currencyKey);
@@ -180,24 +157,30 @@ library ExchangeSettlementLib {
         IExchanger.ExchangeEntrySettlement[] memory settlements = new IExchanger.ExchangeEntrySettlement[](numEntries);
         for (uint i = 0; i < numEntries; i++) {
             // fetch the entry from storage
-            IExchangeState.ExchangeEntry memory exchangeEntry =
-                _getExchangeEntry(resolvedAddresses.exchangeState, account, currencyKey, i);
+            IExchangeState.ExchangeEntry memory exchangeEntry = _getExchangeEntry(
+                resolvedAddresses.exchangeState,
+                account,
+                currencyKey,
+                i
+            );
 
             // determine the last round ids for src and dest pairs when period ended or latest if not over
-            (uint srcRoundIdAtPeriodEnd, uint destRoundIdAtPeriodEnd) =
-                _getRoundIdsAtPeriodEnd(resolvedAddresses.exchangeRates, exchangeEntry, waitingPeriod);
+            (uint srcRoundIdAtPeriodEnd, uint destRoundIdAtPeriodEnd) = _getRoundIdsAtPeriodEnd(
+                resolvedAddresses.exchangeRates,
+                exchangeEntry,
+                waitingPeriod
+            );
 
             // given these round ids, determine what effective value they should have received
             uint amountShouldHaveReceived;
             {
-                (uint destinationAmount, , ) =
-                    resolvedAddresses.exchangeRates.effectiveValueAndRatesAtRound(
-                        exchangeEntry.src,
-                        exchangeEntry.amount,
-                        exchangeEntry.dest,
-                        srcRoundIdAtPeriodEnd,
-                        destRoundIdAtPeriodEnd
-                    );
+                (uint destinationAmount, , ) = resolvedAddresses.exchangeRates.effectiveValueAndRatesAtRound(
+                    exchangeEntry.src,
+                    exchangeEntry.amount,
+                    exchangeEntry.dest,
+                    srcRoundIdAtPeriodEnd,
+                    destRoundIdAtPeriodEnd
+                );
 
                 // and deduct the fee from this amount using the exchangeFeeRate from storage
                 amountShouldHaveReceived = _deductFeesFromAmount(destinationAmount, exchangeEntry.exchangeFeeRate);
@@ -205,11 +188,10 @@ library ExchangeSettlementLib {
 
             // SIP-65 settlements where the amount at end of waiting period is beyond the threshold, then
             // settle with no reclaim or rebate
-            bool sip65condition =
-                resolvedAddresses.circuitBreaker.isDeviationAboveThreshold(
-                    exchangeEntry.amountReceived,
-                    amountShouldHaveReceived
-                );
+            bool sip65condition = resolvedAddresses.circuitBreaker.isDeviationAboveThreshold(
+                exchangeEntry.amountReceived,
+                amountShouldHaveReceived
+            );
 
             uint reclaim;
             uint rebate;
@@ -290,11 +272,10 @@ library ExchangeSettlementLib {
         );
     }
 
-    function _deductFeesFromAmount(uint destinationAmount, uint exchangeFeeRate)
-        internal
-        pure
-        returns (uint amountReceived)
-    {
+    function _deductFeesFromAmount(
+        uint destinationAmount,
+        uint exchangeFeeRate
+    ) internal pure returns (uint amountReceived) {
         amountReceived = destinationAmount.multiplyDecimal(SafeDecimalMath.unit().sub(exchangeFeeRate));
     }
 

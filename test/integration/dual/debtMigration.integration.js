@@ -21,8 +21,8 @@ describe('migrateDebt() integration tests (L1, L2)', () => {
 		DebtMigratorOnEthereum,
 		DebtMigratorOnOptimism,
 		RewardEscrowV2,
-		Tribeone,
-		TribeoneDebtShare;
+		Rwaone,
+		RwaoneDebtShare;
 
 	let initialParametersL1,
 		initialParametersL2,
@@ -44,7 +44,7 @@ describe('migrateDebt() integration tests (L1, L2)', () => {
 	addSnapshotBeforeRestoreAfterEach();
 
 	before('target contracts and users', () => {
-		({ DebtMigratorOnEthereum, RewardEscrowV2, Tribeone, TribeoneDebtShare } = ctx.l1.contracts);
+		({ DebtMigratorOnEthereum, RewardEscrowV2, Rwaone, RwaoneDebtShare } = ctx.l1.contracts);
 		({ DebtMigratorOnOptimism } = ctx.l2.contracts);
 		user = ctx.l1.users.someUser;
 		owner = ctx.l1.users.owner;
@@ -56,7 +56,7 @@ describe('migrateDebt() integration tests (L1, L2)', () => {
 
 	before('approve reward escrow if needed', async () => {
 		await approveIfNeeded({
-			token: Tribeone,
+			token: Rwaone,
 			owner: user,
 			beneficiary: RewardEscrowV2,
 			amount: HAKAAmount,
@@ -75,9 +75,9 @@ describe('migrateDebt() integration tests (L1, L2)', () => {
 	});
 
 	before('stake some wHAKA', async () => {
-		Tribeone = Tribeone.connect(user);
+		Rwaone = Rwaone.connect(user);
 
-		const tx = await Tribeone.issueTribes(amountToIssue);
+		const tx = await Rwaone.issueTribes(amountToIssue);
 		const { gasUsed } = await tx.wait();
 		console.log(`debtMigration: issueTribes() gas used: ${Math.round(gasUsed / 1000).toString()}k`);
 	});
@@ -85,19 +85,19 @@ describe('migrateDebt() integration tests (L1, L2)', () => {
 	before('record balances on L1', async () => {
 		initialParametersL1 = await retrieveEscrowParameters({ ctx: ctx.l1, user: user });
 		initialParametersL2 = await retrieveEscrowParameters({ ctx: ctx.l2, user: user });
-		initialCollateralBalanceL1 = await Tribeone.collateral(user.address);
-		initialLiquidBalanceL1 = await Tribeone.balanceOf(user.address);
-		initialDebtShareBalanceL1 = await TribeoneDebtShare.balanceOf(user.address);
+		initialCollateralBalanceL1 = await Rwaone.collateral(user.address);
+		initialLiquidBalanceL1 = await Rwaone.balanceOf(user.address);
+		initialDebtShareBalanceL1 = await RwaoneDebtShare.balanceOf(user.address);
 		initialRewardEscrowBalanceL1 = await RewardEscrowV2.balanceOf(user.address);
 	});
 
 	before('record balances on L2', async () => {
-		({ RewardEscrowV2, Tribeone, TribeoneDebtShare } = ctx.l2.contracts);
+		({ RewardEscrowV2, Rwaone, RwaoneDebtShare } = ctx.l2.contracts);
 
-		userLiquidBalanceL2 = await Tribeone.balanceOf(user.address);
-		userCollateralBalanceL2 = await Tribeone.collateral(user.address);
-		userDebtShareBalanceL2 = await TribeoneDebtShare.balanceOf(user.address);
-		rewardEscrowBalanceL2 = await Tribeone.balanceOf(RewardEscrowV2.address);
+		userLiquidBalanceL2 = await Rwaone.balanceOf(user.address);
+		userCollateralBalanceL2 = await Rwaone.collateral(user.address);
+		userDebtShareBalanceL2 = await RwaoneDebtShare.balanceOf(user.address);
+		rewardEscrowBalanceL2 = await Rwaone.balanceOf(RewardEscrowV2.address);
 	});
 
 	before('ensure the migrator is connected on L1', async () => {
@@ -168,12 +168,12 @@ describe('migrateDebt() integration tests (L1, L2)', () => {
 			);
 		});
 
-		it('should update the L1 Tribeone state', async () => {
-			({ Tribeone, TribeoneDebtShare, RewardEscrowV2 } = ctx.l1.contracts);
+		it('should update the L1 Rwaone state', async () => {
+			({ Rwaone, RwaoneDebtShare, RewardEscrowV2 } = ctx.l1.contracts);
 
-			assert.bnEqual(await Tribeone.collateral(user.address), 0);
-			assert.bnEqual(await Tribeone.balanceOf(user.address), 0);
-			assert.bnEqual(await TribeoneDebtShare.balanceOf(user.address), 0);
+			assert.bnEqual(await Rwaone.collateral(user.address), 0);
+			assert.bnEqual(await Rwaone.balanceOf(user.address), 0);
+			assert.bnEqual(await RwaoneDebtShare.balanceOf(user.address), 0);
 			assert.bnEqual(await RewardEscrowV2.balanceOf(user.address), 0);
 		});
 
@@ -190,7 +190,7 @@ describe('migrateDebt() integration tests (L1, L2)', () => {
 			});
 
 			before('target contracts and users', () => {
-				({ RewardEscrowV2, Tribeone, TribeoneDebtShare } = ctx.l2.contracts);
+				({ RewardEscrowV2, Rwaone, RwaoneDebtShare } = ctx.l2.contracts);
 				user = ctx.l2.users.someUser;
 			});
 
@@ -232,21 +232,21 @@ describe('migrateDebt() integration tests (L1, L2)', () => {
 				);
 			});
 
-			it('should update the L2 Tribeone state', async () => {
+			it('should update the L2 Rwaone state', async () => {
 				assert.bnEqual(
-					await Tribeone.balanceOf(user.address),
+					await Rwaone.balanceOf(user.address),
 					userLiquidBalanceL2.add(initialLiquidBalanceL1)
 				);
 				assert.bnEqual(
-					await Tribeone.balanceOf(RewardEscrowV2.address),
+					await Rwaone.balanceOf(RewardEscrowV2.address),
 					rewardEscrowBalanceL2.add(escrowEntriesData.totalEscrowed)
 				);
 				assert.bnEqual(
-					await Tribeone.collateral(user.address),
+					await Rwaone.collateral(user.address),
 					userCollateralBalanceL2.add(initialCollateralBalanceL1)
 				);
 				assert.bnEqual(
-					await TribeoneDebtShare.balanceOf(user.address),
+					await RwaoneDebtShare.balanceOf(user.address),
 					userDebtShareBalanceL2.add(initialDebtShareBalanceL1)
 				);
 			});

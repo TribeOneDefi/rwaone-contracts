@@ -16,7 +16,7 @@ import "./SafeDecimalMath.sol";
 // Internal references
 import "./interfaces/IIssuer.sol";
 import "./interfaces/IRewardEscrowV2.sol";
-import "./interfaces/ITribeoneDebtShare.sol";
+import "./interfaces/IRwaoneDebtShare.sol";
 
 /// @title Liquidator Rewards (SIP-148)
 /// @notice This contract holds wHAKA from liquidated positions.
@@ -42,10 +42,10 @@ contract LiquidatorRewards is ILiquidatorRewards, Owned, MixinSystemSettings, Re
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
-    bytes32 private constant CONTRACT_TRIBEONEETIXDEBTSHARE = "TribeoneDebtShare";
+    bytes32 private constant CONTRACT_RWAONEETIXDEBTSHARE = "RwaoneDebtShare";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_REWARDESCROW_V2 = "RewardEscrowV2";
-    bytes32 private constant CONTRACT_TRIBEONEETIX = "Tribeone";
+    bytes32 private constant CONTRACT_RWAONEETIX = "Rwaone";
 
     /* ========== CONSTRUCTOR ========== */
 
@@ -56,15 +56,15 @@ contract LiquidatorRewards is ILiquidatorRewards, Owned, MixinSystemSettings, Re
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](4);
-        newAddresses[0] = CONTRACT_TRIBEONEETIXDEBTSHARE;
+        newAddresses[0] = CONTRACT_RWAONEETIXDEBTSHARE;
         newAddresses[1] = CONTRACT_ISSUER;
         newAddresses[2] = CONTRACT_REWARDESCROW_V2;
-        newAddresses[3] = CONTRACT_TRIBEONEETIX;
+        newAddresses[3] = CONTRACT_RWAONEETIX;
         return combineArrays(existingAddresses, newAddresses);
     }
 
-    function tribeetixDebtShare() internal view returns (ITribeoneDebtShare) {
-        return ITribeoneDebtShare(requireAndGetAddress(CONTRACT_TRIBEONEETIXDEBTSHARE));
+    function tribeetixDebtShare() internal view returns (IRwaoneDebtShare) {
+        return IRwaoneDebtShare(requireAndGetAddress(CONTRACT_RWAONEETIXDEBTSHARE));
     }
 
     function issuer() internal view returns (IIssuer) {
@@ -75,8 +75,8 @@ contract LiquidatorRewards is ILiquidatorRewards, Owned, MixinSystemSettings, Re
         return IRewardEscrowV2(requireAndGetAddress(CONTRACT_REWARDESCROW_V2));
     }
 
-    function tribeone() internal view returns (IERC20) {
-        return IERC20(requireAndGetAddress(CONTRACT_TRIBEONEETIX));
+    function rwaone() internal view returns (IERC20) {
+        return IERC20(requireAndGetAddress(CONTRACT_RWAONEETIX));
     }
 
     function earned(address account) public view returns (uint256) {
@@ -96,7 +96,7 @@ contract LiquidatorRewards is ILiquidatorRewards, Owned, MixinSystemSettings, Re
         uint256 reward = entries[account].claimable;
         if (reward > 0) {
             entries[account].claimable = 0;
-            tribeone().approve(address(rewardEscrowV2()), reward);
+            rwaone().approve(address(rewardEscrowV2()), reward);
             rewardEscrowV2().createEscrowEntry(account, reward, getLiquidationEscrowDuration());
             emit RewardPaid(account, reward);
         }
@@ -117,7 +117,7 @@ contract LiquidatorRewards is ILiquidatorRewards, Owned, MixinSystemSettings, Re
     /* ========== RESTRICTED FUNCTIONS ========== */
 
     /// @notice This is called only after an account is liquidated and the wHAKA rewards are sent to this contract.
-    function notifyRewardAmount(uint256 reward) external onlyTribeone {
+    function notifyRewardAmount(uint256 reward) external onlyRwaone {
         uint sharesSupply = tribeetixDebtShare().totalSupply();
 
         if (sharesSupply > 0) {
@@ -127,9 +127,9 @@ contract LiquidatorRewards is ILiquidatorRewards, Owned, MixinSystemSettings, Re
 
     /* ========== MODIFIERS ========== */
 
-    modifier onlyTribeone {
-        bool isTribeone = msg.sender == address(tribeone());
-        require(isTribeone, "Tribeone only");
+    modifier onlyRwaone() {
+        bool isRwaone = msg.sender == address(rwaone());
+        require(isRwaone, "Rwaone only");
         _;
     }
 

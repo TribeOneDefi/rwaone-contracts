@@ -14,7 +14,7 @@ const { setupAllContracts } = require('./setup');
 
 contract('TribeUtil', accounts => {
 	const [, ownerAccount, , account2] = accounts;
-	let tribeUtil, hUSDContract, tribeone, exchangeRates, systemSettings, debtCache, circuitBreaker;
+	let tribeUtil, hUSDContract, rwaone, exchangeRates, systemSettings, debtCache, circuitBreaker;
 
 	const [hUSD, hBTC, iBTC, wHAKA] = ['hUSD', 'hBTC', 'iBTC', 'wHAKA'].map(toBytes32);
 	const tribeKeys = [hUSD, hBTC, iBTC];
@@ -24,7 +24,7 @@ contract('TribeUtil', accounts => {
 		({
 			TribeUtil: tribeUtil,
 			TribehUSD: hUSDContract,
-			Tribeone: tribeone,
+			Rwaone: rwaone,
 			ExchangeRates: exchangeRates,
 			SystemSettings: systemSettings,
 			CircuitBreaker: circuitBreaker,
@@ -34,7 +34,7 @@ contract('TribeUtil', accounts => {
 			tribes: ['hUSD', 'hBTC', 'iBTC'],
 			contracts: [
 				'TribeUtil',
-				'Tribeone',
+				'Rwaone',
 				'Exchanger',
 				'ExchangeRates',
 				'ExchangeState',
@@ -78,11 +78,11 @@ contract('TribeUtil', accounts => {
 		const amountToExchange = toUnit('50');
 		const hUSDAmount = toUnit('100');
 		beforeEach(async () => {
-			await tribeone.issueTribes(hUSDMinted, {
+			await rwaone.issueTribes(hUSDMinted, {
 				from: ownerAccount,
 			});
 			await hUSDContract.transfer(account2, hUSDAmount, { from: ownerAccount });
-			await tribeone.exchange(hUSD, amountToExchange, hBTC, { from: account2 });
+			await rwaone.exchange(hUSD, amountToExchange, hBTC, { from: account2 });
 		});
 		describe('totalTribesInKey', () => {
 			it('should return the total balance of tribes into the specified currency key', async () => {

@@ -45,9 +45,9 @@ const verify = async ({ buildPath, deploymentPath, network, useOvm }) => {
 	if (missingDeployments.length) {
 		throw Error(
 			`Cannot use existing contracts for verification as addresses not found for the following contracts on ${network}:\n` +
-				missingDeployments.join('\n') +
-				'\n' +
-				gray(`Used: ${deploymentFile} as source`)
+			missingDeployments.join('\n') +
+			'\n' +
+			gray(`Used: ${deploymentFile} as source`)
 		);
 	}
 
@@ -153,15 +153,14 @@ const verify = async ({ buildPath, deploymentPath, network, useOvm }) => {
 						}
 						return (
 							`\nThe proxy for this contract can be found here:\n\n` +
-							`https://contracts.tribeone.io/${network !== 'mainnet' ? network + '/' : ''}${
-								useOvm ? '/ovm' : ''
+							`https://contracts.rwaone.io/${network !== 'mainnet' ? network + '/' : ''}${useOvm ? '/ovm' : ''
 							}${`Proxy${name}`}`
 						);
 					};
 					return (
 						`/*\n\n⚠⚠⚠ WARNING WARNING WARNING ⚠⚠⚠\n\n` +
 						`This is a TARGET contract - DO NOT CONNECT TO IT DIRECTLY IN YOUR CONTRACTS or DAPPS!\n` +
-						`\nThis contract has an associated PROXY that MUST be used for all integrations - this TARGET will be REPLACED in an upcoming Tribeone release!` +
+						`\nThis contract has an associated PROXY that MUST be used for all integrations - this TARGET will be REPLACED in an upcoming Rwaone release!` +
 						`${optionalProxyLink()}\n\n*/`
 					);
 				}

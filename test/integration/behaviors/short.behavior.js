@@ -22,20 +22,20 @@ function itCanOpenAndCloseShort({ ctx }) {
 		const shortableTribe = toBytes32('hETH');
 
 		let user, owner;
-		let CollateralShort, CollateralManager, Tribeone, TribehUSD, interactionDelay;
+		let CollateralShort, CollateralManager, Rwaone, TribehUSD, interactionDelay;
 
 		before('target contracts and users', () => {
-			({ CollateralShort, CollateralManager, Tribeone, TribehUSD } = ctx.contracts);
+			({ CollateralShort, CollateralManager, Rwaone, TribehUSD } = ctx.contracts);
 
 			user = ctx.users.someUser;
 			owner = ctx.users.owner;
 
 			CollateralManager = CollateralManager.connect(owner);
 			CollateralShort = CollateralShort.connect(user);
-			Tribeone = Tribeone.connect(user);
+			Rwaone = Rwaone.connect(user);
 		});
 
-		before('skip if opening shorts disabled', async function() {
+		before('skip if opening shorts disabled', async function () {
 			const canOpenLoans = await CollateralShort.canOpenLoans();
 
 			if (!canOpenLoans) {
@@ -74,7 +74,7 @@ function itCanOpenAndCloseShort({ ctx }) {
 				let tx, loan, loanId;
 
 				describe('open a loan, deposit and withdraw collateral, draw, and close the loan', () => {
-					before('skip if max borrowing power reached', async function() {
+					before('skip if max borrowing power reached', async function () {
 						const maxBorrowingPower = await CollateralShort.maxLoan(
 							amountToDeposit,
 							shortableTribe
@@ -184,7 +184,7 @@ function itCanOpenAndCloseShort({ ctx }) {
 						});
 
 						before('settle', async () => {
-							const tx = await Tribeone.settle(shortableTribe);
+							const tx = await Rwaone.settle(shortableTribe);
 							await tx.wait();
 						});
 

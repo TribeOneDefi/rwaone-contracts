@@ -4,7 +4,7 @@ import "./SignedSafeMath.sol";
 
 // TODO: Test suite
 
-// https://docs.tribeone.io/contracts/SignedSafeDecimalMath
+// https://docs.rwaone.io/contracts/SignedSafeDecimalMath
 library SignedSafeDecimalMath {
     using SignedSafeMath for int;
 
@@ -13,11 +13,11 @@ library SignedSafeDecimalMath {
     uint8 public constant highPrecisionDecimals = 27;
 
     /* The number representing 1.0. */
-    int public constant UNIT = int(10**uint(decimals));
+    int public constant UNIT = int(10 ** uint(decimals));
 
     /* The number representing 1.0 for higher fidelity numbers. */
-    int public constant PRECISE_UNIT = int(10**uint(highPrecisionDecimals));
-    int private constant UNIT_TO_HIGH_PRECISION_CONVERSION_FACTOR = int(10**uint(highPrecisionDecimals - decimals));
+    int public constant PRECISE_UNIT = int(10 ** uint(highPrecisionDecimals));
+    int private constant UNIT_TO_HIGH_PRECISION_CONVERSION_FACTOR = int(10 ** uint(highPrecisionDecimals - decimals));
 
     /**
      * @return Provides an interface to UNIT.
@@ -75,11 +75,7 @@ library SignedSafeDecimalMath {
      * Rounding is useful when you need to retain fidelity for small decimal numbers
      * (eg. small fractions or percentages).
      */
-    function _multiplyDecimalRound(
-        int x,
-        int y,
-        int precisionUnit
-    ) private pure returns (int) {
+    function _multiplyDecimalRound(int x, int y, int precisionUnit) private pure returns (int) {
         /* Divide by UNIT to remove the extra factor introduced by the product. */
         int quotientTimesTen = x.mul(y) / (precisionUnit / 10);
         return _roundDividingByTen(quotientTimesTen);
@@ -139,11 +135,7 @@ library SignedSafeDecimalMath {
      * is evaluated, so the product of x and the specified precision unit must
      * be less than 2**256. The result is rounded to the nearest increment.
      */
-    function _divideDecimalRound(
-        int x,
-        int y,
-        int precisionUnit
-    ) private pure returns (int) {
+    function _divideDecimalRound(int x, int y, int precisionUnit) private pure returns (int) {
         int resultTimesTen = x.mul(precisionUnit * 10).div(y);
         return _roundDividingByTen(resultTimesTen);
     }

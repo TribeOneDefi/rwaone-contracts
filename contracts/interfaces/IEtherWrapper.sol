@@ -2,7 +2,7 @@ pragma solidity >=0.4.24;
 
 import "./IWETH.sol";
 
-// https://docs.tribeone.io/contracts/source/interfaces/ietherwrapper
+// https://docs.rwaone.io/contracts/source/interfaces/ietherwrapper
 contract IEtherWrapper {
     function mint(uint amount) external;
 

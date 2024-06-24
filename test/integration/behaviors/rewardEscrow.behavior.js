@@ -10,10 +10,10 @@ function itDoesRewardEscrow({ ctx, contract }) {
 		const fakeAmount = ethers.utils.parseEther('1');
 
 		let owner, someUser, otherUser;
-		let AddressResolver, RewardEscrowV2Frozen, RewardEscrowV2, Tribeone;
+		let AddressResolver, RewardEscrowV2Frozen, RewardEscrowV2, Rwaone;
 
 		before('target contracts and users and setup', async () => {
-			({ AddressResolver, RewardEscrowV2, Tribeone } = ctx.contracts);
+			({ AddressResolver, RewardEscrowV2, Rwaone } = ctx.contracts);
 
 			({ owner, someUser, otherUser } = ctx.users);
 
@@ -35,8 +35,8 @@ function itDoesRewardEscrow({ ctx, contract }) {
 			await RewardEscrowV2Frozen.connect(owner).rebuildCache();
 
 			// allow owner to create entries
-			await Tribeone.connect(owner).approve(RewardEscrowV2.address, ethers.constants.MaxUint256);
-			await Tribeone.connect(owner).approve(
+			await Rwaone.connect(owner).approve(RewardEscrowV2.address, ethers.constants.MaxUint256);
+			await Rwaone.connect(owner).approve(
 				RewardEscrowV2Frozen.address,
 				ethers.constants.MaxUint256
 			);
@@ -66,8 +66,8 @@ function itDoesRewardEscrow({ ctx, contract }) {
 			});
 
 			describe('layer 1 specific methods', () => {
-				before('skip on l2', async function() {
-					if (!ctx.contracts.TribeoneBridgeToOptimism) {
+				before('skip on l2', async function () {
+					if (!ctx.contracts.RwaoneBridgeToOptimism) {
 						this.skip();
 					}
 				});
@@ -119,7 +119,7 @@ function itDoesRewardEscrow({ ctx, contract }) {
 				it('reverts on call to burnForMigration', async () => {
 					await assert.revert(
 						RewardEscrowV2Frozen.burnForMigration(otherUser.address, [fakeAmount]),
-						'Can only be invoked by TribeoneBridgeToOptimism contract'
+						'Can only be invoked by RwaoneBridgeToOptimism contract'
 					);
 				});
 			});
@@ -145,12 +145,12 @@ function itDoesRewardEscrow({ ctx, contract }) {
 				// skip a small amount of time so that in optimism ops tool (CI L2 integration tests) entries are vestable
 				await skipLiquidationDelay({ ctx });
 
-				const balanceBefore = await Tribeone.balanceOf(someUser.address);
+				const balanceBefore = await Rwaone.balanceOf(someUser.address);
 				const escrowBefore = await RewardEscrowV2.balanceOf(someUser.address);
 
 				await (await RewardEscrowV2.connect(someUser).vest([newEntryId])).wait();
 
-				const balanceAfter = await Tribeone.balanceOf(someUser.address);
+				const balanceAfter = await Rwaone.balanceOf(someUser.address);
 				const escrowAfter = await RewardEscrowV2.balanceOf(someUser.address);
 
 				assert.bnEqual(balanceAfter.sub(balanceBefore), fakeAmount);

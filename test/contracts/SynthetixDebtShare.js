@@ -17,7 +17,7 @@ const {
 
 const ethers = require('ethers');
 
-contract('TribeoneDebtShare', async accounts => {
+contract('RwaoneDebtShare', async accounts => {
 	const [owner, issuer, account1, account2] = accounts;
 
 	let addressResolver, tribeetixDebtShare;
@@ -32,7 +32,7 @@ contract('TribeoneDebtShare', async accounts => {
 		tribeetixDebtShare = await setupContract({
 			accounts,
 			args: [owner, addressResolver.address],
-			contract: 'TribeoneDebtShare',
+			contract: 'RwaoneDebtShare',
 		});
 
 		await addressResolver.importAddresses([toBytes32('Issuer')], [issuer], { from: owner });
@@ -64,7 +64,7 @@ contract('TribeoneDebtShare', async accounts => {
 	it('should set constructor params on deployment', async () => {
 		const instance = await setupContract({
 			accounts,
-			contract: 'TribeoneDebtShare',
+			contract: 'RwaoneDebtShare',
 			args: [owner, addressResolver.address],
 		});
 
@@ -79,7 +79,7 @@ contract('TribeoneDebtShare', async accounts => {
 				accounts,
 				address: issuer,
 				skipPassCheck: true,
-				reason: 'TribeoneDebtShare: only issuer can mint/burn',
+				reason: 'RwaoneDebtShare: only issuer can mint/burn',
 			});
 		});
 
@@ -157,7 +157,7 @@ contract('TribeoneDebtShare', async accounts => {
 				args: [account2, toUnit('0.1')],
 				address: issuer,
 				accounts,
-				reason: 'TribeoneDebtShare: only issuer can mint/burn',
+				reason: 'RwaoneDebtShare: only issuer can mint/burn',
 			});
 		});
 
@@ -210,7 +210,7 @@ contract('TribeoneDebtShare', async accounts => {
 				args: [toUnit('10')],
 				address: issuer,
 				accounts,
-				reason: 'TribeoneDebtShare: not authorized to snapshot',
+				reason: 'RwaoneDebtShare: not authorized to snapshot',
 			});
 		});
 
@@ -355,7 +355,7 @@ contract('TribeoneDebtShare', async accounts => {
 					address: owner,
 					args: [account1, account2, toUnit('0.1')],
 					accounts,
-					reason: 'TribeoneDebtShare: only brokers can transferFrom',
+					reason: 'RwaoneDebtShare: only brokers can transferFrom',
 				});
 			});
 
@@ -507,7 +507,7 @@ contract('TribeoneDebtShare', async accounts => {
 			it('reverts on oldest period', async () => {
 				await assert.revert(
 					tribeetixDebtShare.balanceOfOnPeriod(account1, 10),
-					'TribeoneDebtShare: not found in recent history'
+					'RwaoneDebtShare: not found in recent history'
 				);
 			});
 		});

@@ -78,7 +78,7 @@ contract('PerpsV2MarketSettings', accounts => {
 				'ExchangeRates',
 				'SystemStatus',
 				'SystemSettings',
-				'Tribeone',
+				'Rwaone',
 				'DebtCache',
 				'CollateralManager',
 			],

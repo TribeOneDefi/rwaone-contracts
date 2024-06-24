@@ -18,11 +18,11 @@ describe('staking & claiming integration tests (L1, L2)', () => {
 		const amountToIssueAndBurnhUSD = ethers.utils.parseEther('1');
 
 		let user;
-		let Tribeone, TribehUSD, FeePool;
+		let Rwaone, TribehUSD, FeePool;
 		let balancehUSD, debthUSD;
 
 		before('target contracts and users', () => {
-			({ Tribeone, TribehUSD, FeePool } = ctx.l1.contracts);
+			({ Rwaone, TribehUSD, FeePool } = ctx.l1.contracts);
 
 			user = ctx.l1.users.someUser;
 		});
@@ -37,9 +37,9 @@ describe('staking & claiming integration tests (L1, L2)', () => {
 			});
 
 			before('issue hUSD', async () => {
-				Tribeone = Tribeone.connect(user);
+				Rwaone = Rwaone.connect(user);
 
-				const tx = await Tribeone.issueTribes(amountToIssueAndBurnhUSD);
+				const tx = await Rwaone.issueTribes(amountToIssueAndBurnhUSD);
 				const { gasUsed } = await tx.wait();
 				console.log(`issueTribes() gas used: ${Math.round(gasUsed / 1000).toString()}k`);
 			});
@@ -94,19 +94,19 @@ describe('staking & claiming integration tests (L1, L2)', () => {
 				});
 
 				before('record debt', async () => {
-					debthUSD = await Tribeone.debtBalanceOf(user.address, toBytes32('hUSD'));
+					debthUSD = await Rwaone.debtBalanceOf(user.address, toBytes32('hUSD'));
 				});
 
 				before('burn hUSD', async () => {
-					Tribeone = Tribeone.connect(user);
+					Rwaone = Rwaone.connect(user);
 
-					const tx = await Tribeone.burnTribes(amountToIssueAndBurnhUSD);
+					const tx = await Rwaone.burnTribes(amountToIssueAndBurnhUSD);
 					const { gasUsed } = await tx.wait();
 					console.log(`burnTribes() gas used: ${Math.round(gasUsed / 1000).toString()}k`);
 				});
 
 				it('reduced the expected amount of debt', async () => {
-					const newDebthUSD = await Tribeone.debtBalanceOf(user.address, toBytes32('hUSD'));
+					const newDebthUSD = await Rwaone.debtBalanceOf(user.address, toBytes32('hUSD'));
 					const debtReduction = debthUSD.sub(newDebthUSD);
 
 					const tolerance = ethers.utils.parseUnits('0.01', 'ether');

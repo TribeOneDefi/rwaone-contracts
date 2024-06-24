@@ -10,7 +10,7 @@ import "./SafeDecimalMath.sol";
 // Internal references
 import "./TokenState.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/externstatetoken
+// https://docs.rwaone.io/contracts/source/contracts/externstatetoken
 contract ExternStateToken is Owned, Proxyable {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -73,11 +73,7 @@ contract ExternStateToken is Owned, Proxyable {
         emitTokenStateUpdated(address(_tokenState));
     }
 
-    function _internalTransfer(
-        address from,
-        address to,
-        uint value
-    ) internal returns (bool) {
+    function _internalTransfer(address from, address to, uint value) internal returns (bool) {
         /* Disallow transfers to irretrievable-addresses. */
         require(to != address(0) && to != address(this) && to != address(proxy), "Cannot transfer to this address");
 
@@ -95,11 +91,7 @@ contract ExternStateToken is Owned, Proxyable {
      * @dev Perform an ERC20 token transfer. Designed to be called by transfer functions possessing
      * the onlyProxy or optionalProxy modifiers.
      */
-    function _transferByProxy(
-        address from,
-        address to,
-        uint value
-    ) internal returns (bool) {
+    function _transferByProxy(address from, address to, uint value) internal returns (bool) {
         return _internalTransfer(from, to, value);
     }
 
@@ -107,12 +99,7 @@ contract ExternStateToken is Owned, Proxyable {
      * @dev Perform an ERC20 token transferFrom. Designed to be called by transferFrom functions
      * possessing the optionalProxy or optionalProxy modifiers.
      */
-    function _transferFromByProxy(
-        address sender,
-        address from,
-        address to,
-        uint value
-    ) internal returns (bool) {
+    function _transferFromByProxy(address sender, address from, address to, uint value) internal returns (bool) {
         /* Insufficient allowance will be handled by the safe subtraction. */
         tokenState.setAllowance(from, sender, tokenState.allowance(from, sender).sub(value));
         return _internalTransfer(from, to, value);
@@ -137,22 +124,14 @@ contract ExternStateToken is Owned, Proxyable {
     event Transfer(address indexed from, address indexed to, uint value);
     bytes32 internal constant TRANSFER_SIG = keccak256("Transfer(address,address,uint256)");
 
-    function emitTransfer(
-        address from,
-        address to,
-        uint value
-    ) internal {
+    function emitTransfer(address from, address to, uint value) internal {
         proxy._emit(abi.encode(value), 3, TRANSFER_SIG, addressToBytes32(from), addressToBytes32(to), 0);
     }
 
     event Approval(address indexed owner, address indexed spender, uint value);
     bytes32 internal constant APPROVAL_SIG = keccak256("Approval(address,address,uint256)");
 
-    function emitApproval(
-        address owner,
-        address spender,
-        uint value
-    ) internal {
+    function emitApproval(address owner, address spender, uint value) internal {
         proxy._emit(abi.encode(value), 3, APPROVAL_SIG, addressToBytes32(owner), addressToBytes32(spender), 0);
     }
 

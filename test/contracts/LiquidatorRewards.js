@@ -15,7 +15,7 @@ const { toUnit, fastForward } = require('../utils')();
 
 contract('LiquidatorRewards', accounts => {
 	const [sAUD, sEUR, wHAKA, hETH, ETH] = ['sAUD', 'sEUR', 'wHAKA', 'hETH', 'ETH'].map(toBytes32);
-	const [, owner, , , stakingAccount1, stakingAccount2, mockTribeone] = accounts;
+	const [, owner, , , stakingAccount1, stakingAccount2, mockRwaone] = accounts;
 
 	let addressResolver,
 		debtCache,
@@ -23,7 +23,7 @@ contract('LiquidatorRewards', accounts => {
 		exchangeRates,
 		liquidatorRewards,
 		tribes,
-		tribeone,
+		rwaone,
 		tribeetixProxy,
 		tribeetixDebtShare,
 		systemSettings;
@@ -32,13 +32,13 @@ contract('LiquidatorRewards', accounts => {
 
 	const setupStakers = async () => {
 		const snxCollateral = toUnit('1000');
-		await tribeone.transfer(stakingAccount1, snxCollateral, { from: owner });
-		await tribeone.transfer(stakingAccount2, snxCollateral, { from: owner });
+		await rwaone.transfer(stakingAccount1, snxCollateral, { from: owner });
+		await rwaone.transfer(stakingAccount2, snxCollateral, { from: owner });
 
-		await tribeone.issueMaxTribes({ from: stakingAccount1 });
-		await tribeone.issueMaxTribes({ from: stakingAccount2 });
+		await rwaone.issueMaxTribes({ from: stakingAccount1 });
+		await rwaone.issueMaxTribes({ from: stakingAccount2 });
 
-		await addressResolver.importAddresses(['Tribeone'].map(toBytes32), [mockTribeone], {
+		await addressResolver.importAddresses(['Rwaone'].map(toBytes32), [mockRwaone], {
 			from: owner,
 		});
 		await liquidatorRewards.rebuildCache();
@@ -46,13 +46,13 @@ contract('LiquidatorRewards', accounts => {
 
 	const setupReward = async () => {
 		const rewardValue = toUnit('1000');
-		await tribeone.transfer(liquidatorRewards.address, rewardValue, { from: owner });
+		await rwaone.transfer(liquidatorRewards.address, rewardValue, { from: owner });
 
 		await liquidatorRewards.notifyRewardAmount(rewardValue, {
-			from: mockTribeone,
+			from: mockRwaone,
 		});
 
-		await addressResolver.importAddresses(['Tribeone'].map(toBytes32), [tribeone.address], {
+		await addressResolver.importAddresses(['Rwaone'].map(toBytes32), [rwaone.address], {
 			from: owner,
 		});
 		await liquidatorRewards.rebuildCache();
@@ -68,9 +68,9 @@ contract('LiquidatorRewards', accounts => {
 			DebtCache: debtCache,
 			ExchangeRates: exchangeRates,
 			LiquidatorRewards: liquidatorRewards,
-			Tribeone: tribeone,
-			ProxyERC20Tribeone: tribeetixProxy,
-			TribeoneDebtShare: tribeetixDebtShare,
+			Rwaone: rwaone,
+			ProxyERC20Rwaone: tribeetixProxy,
+			RwaoneDebtShare: tribeetixDebtShare,
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
@@ -86,14 +86,14 @@ contract('LiquidatorRewards', accounts => {
 				'Liquidator',
 				'LiquidatorRewards',
 				'RewardEscrowV2',
-				'Tribeone',
-				'TribeoneDebtShare',
+				'Rwaone',
+				'RwaoneDebtShare',
 				'SystemSettings',
 			],
 		}));
 
 		// use implementation ABI on the proxy address to simplify calling
-		tribeone = await artifacts.require('Tribeone').at(tribeetixProxy.address);
+		rwaone = await artifacts.require('Rwaone').at(tribeetixProxy.address);
 
 		await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, hETH, ETH]);
 	});
@@ -125,7 +125,7 @@ contract('LiquidatorRewards', accounts => {
 			assert.equal(ownerAddress, owner);
 		});
 		it('reward balance should be zero', async () => {
-			const rewardsBalance = await tribeone.balanceOf(liquidatorRewards.address);
+			const rewardsBalance = await rwaone.balanceOf(liquidatorRewards.address);
 			assert.bnEqual(rewardsBalance, ZERO_BN);
 
 			const accumulatedRewardsPerShare = await liquidatorRewards.accumulatedRewardsPerShare();
@@ -136,27 +136,27 @@ contract('LiquidatorRewards', accounts => {
 	describe('Function permissions', () => {
 		const rewardValue = toUnit('100');
 
-		it('only tribeone can call notifyRewardAmount', async () => {
+		it('only rwaone can call notifyRewardAmount', async () => {
 			await onlyGivenAddressCanInvoke({
 				fnc: liquidatorRewards.notifyRewardAmount,
 				accounts,
 				args: [rewardValue],
-				address: tribeone.address,
+				address: rwaone.address,
 				skipPassCheck: true,
-				reason: 'Tribeone only',
+				reason: 'Rwaone only',
 			});
 		});
 	});
 
 	describe('earned()', () => {
 		it('should be 0 when not staking', async () => {
-			await addressResolver.importAddresses(['Tribeone'].map(toBytes32), [mockTribeone], {
+			await addressResolver.importAddresses(['Rwaone'].map(toBytes32), [mockRwaone], {
 				from: owner,
 			});
 			await liquidatorRewards.rebuildCache();
 
 			const rewardValue = toUnit('100');
-			await tribeone.transfer(liquidatorRewards.address, rewardValue, { from: owner });
+			await rwaone.transfer(liquidatorRewards.address, rewardValue, { from: owner });
 
 			assert.bnEqual(await liquidatorRewards.earned(stakingAccount1), ZERO_BN);
 		});
@@ -165,10 +165,10 @@ contract('LiquidatorRewards', accounts => {
 			await setupStakers();
 
 			const rewardValue = toUnit('100');
-			await tribeone.transfer(liquidatorRewards.address, rewardValue, { from: owner });
+			await rwaone.transfer(liquidatorRewards.address, rewardValue, { from: owner });
 
 			await liquidatorRewards.notifyRewardAmount(rewardValue, {
-				from: mockTribeone,
+				from: mockRwaone,
 			});
 
 			const earned = await liquidatorRewards.earned(stakingAccount1);
@@ -179,21 +179,21 @@ contract('LiquidatorRewards', accounts => {
 			await setupStakers();
 
 			const earnedBalanceBefore = await liquidatorRewards.earned(stakingAccount1);
-			const rewardsBalanceBefore = await tribeone.balanceOf(liquidatorRewards.address);
+			const rewardsBalanceBefore = await rwaone.balanceOf(liquidatorRewards.address);
 			const accumulatedRewardsBefore = await liquidatorRewards.accumulatedRewardsPerShare();
 
 			const newRewards = toUnit('5000');
-			await tribeone.transfer(liquidatorRewards.address, newRewards, { from: owner });
+			await rwaone.transfer(liquidatorRewards.address, newRewards, { from: owner });
 
 			await liquidatorRewards.notifyRewardAmount(newRewards, {
-				from: mockTribeone,
+				from: mockRwaone,
 			});
 
 			const earnedBalanceAfter = await liquidatorRewards.earned(stakingAccount1);
 			assert.bnEqual(earnedBalanceBefore, ZERO_BN);
 			assert.bnGt(earnedBalanceAfter, earnedBalanceBefore);
 
-			const rewardsBalanceAfter = await tribeone.balanceOf(liquidatorRewards.address);
+			const rewardsBalanceAfter = await rwaone.balanceOf(liquidatorRewards.address);
 			assert.bnEqual(rewardsBalanceBefore, ZERO_BN);
 			assert.bnEqual(rewardsBalanceAfter, rewardsBalanceBefore.add(newRewards));
 
@@ -212,10 +212,10 @@ contract('LiquidatorRewards', accounts => {
 				await setupStakers();
 
 				const rewardValue = toUnit('100');
-				await tribeone.transfer(liquidatorRewards.address, rewardValue, { from: owner });
+				await rwaone.transfer(liquidatorRewards.address, rewardValue, { from: owner });
 
 				await liquidatorRewards.notifyRewardAmount(rewardValue, {
-					from: mockTribeone,
+					from: mockRwaone,
 				});
 			});
 
@@ -224,8 +224,8 @@ contract('LiquidatorRewards', accounts => {
 				const beforeDebtShareBalance = await tribeetixDebtShare.balanceOf(stakingAccount2);
 				const beforeDebtSharesSupply = await tribeetixDebtShare.totalSupply();
 
-				await tribeone.transfer(stakingAccount2, toUnit('1000'), { from: owner });
-				await tribeone.issueMaxTribes({ from: stakingAccount2 });
+				await rwaone.transfer(stakingAccount2, toUnit('1000'), { from: owner });
+				await rwaone.issueMaxTribes({ from: stakingAccount2 });
 
 				const afterEarnedValue = await liquidatorRewards.earned(stakingAccount1);
 				const afterDebtShareBalance = await tribeetixDebtShare.balanceOf(stakingAccount2);
@@ -245,7 +245,7 @@ contract('LiquidatorRewards', accounts => {
 				await systemSettings.setMinimumStakeTime(10, { from: owner });
 				await fastForward(10);
 
-				await tribeone.burnTribes(toUnit('100'), { from: stakingAccount2 });
+				await rwaone.burnTribes(toUnit('100'), { from: stakingAccount2 });
 
 				const afterEarnedValue = await liquidatorRewards.earned(stakingAccount1);
 				const afterDebtShareBalance = await tribeetixDebtShare.balanceOf(stakingAccount2);
@@ -270,11 +270,11 @@ contract('LiquidatorRewards', accounts => {
 			const postEarnedBal = await liquidatorRewards.earned(stakingAccount1);
 			assert.bnEqual(postEarnedBal, ZERO_BN);
 
-			const collateralBefore = await tribeone.collateral(stakingAccount1);
+			const collateralBefore = await rwaone.collateral(stakingAccount1);
 
 			await liquidatorRewards.getReward(stakingAccount1, { from: stakingAccount1 });
 
-			const collateralAfter = await tribeone.collateral(stakingAccount1);
+			const collateralAfter = await rwaone.collateral(stakingAccount1);
 
 			assert.bnEqual(collateralAfter, collateralBefore);
 		});
@@ -283,7 +283,7 @@ contract('LiquidatorRewards', accounts => {
 			await setupReward();
 
 			const initialEarnedBal = await liquidatorRewards.earned(stakingAccount1);
-			const rewardsBalanceBeforeClaim = await tribeone.balanceOf(liquidatorRewards.address);
+			const rewardsBalanceBeforeClaim = await rwaone.balanceOf(liquidatorRewards.address);
 
 			const tx = await liquidatorRewards.getReward(stakingAccount1, { from: stakingAccount1 });
 
@@ -295,7 +295,7 @@ contract('LiquidatorRewards', accounts => {
 			const postEarnedBal = await liquidatorRewards.earned(stakingAccount1);
 			assert.bnEqual(postEarnedBal, ZERO_BN);
 
-			const rewardsBalanceAfterClaim = await tribeone.balanceOf(liquidatorRewards.address);
+			const rewardsBalanceAfterClaim = await rwaone.balanceOf(liquidatorRewards.address);
 			assert.bnEqual(rewardsBalanceAfterClaim, rewardsBalanceBeforeClaim.sub(initialEarnedBal));
 		});
 
@@ -303,20 +303,20 @@ contract('LiquidatorRewards', accounts => {
 			await setupReward();
 
 			const initialEarnedBal = await liquidatorRewards.earned(stakingAccount1);
-			const rewardsBalanceBeforeClaim = await tribeone.balanceOf(liquidatorRewards.address);
+			const rewardsBalanceBeforeClaim = await rwaone.balanceOf(liquidatorRewards.address);
 
 			// claim rewards for the first time
 			await liquidatorRewards.getReward(stakingAccount1, { from: stakingAccount1 });
 
-			const rewardsBalanceAfterClaim = await tribeone.balanceOf(liquidatorRewards.address);
+			const rewardsBalanceAfterClaim = await rwaone.balanceOf(liquidatorRewards.address);
 			assert.bnEqual(rewardsBalanceAfterClaim, rewardsBalanceBeforeClaim.sub(initialEarnedBal));
 
-			const collateralBefore = await tribeone.collateral(stakingAccount1);
+			const collateralBefore = await rwaone.collateral(stakingAccount1);
 
 			// attempt to claim rewards again before any new rewards come in
 			await liquidatorRewards.getReward(stakingAccount1, { from: stakingAccount1 });
 
-			const collateralAfter = await tribeone.collateral(stakingAccount1);
+			const collateralAfter = await rwaone.collateral(stakingAccount1);
 
 			assert.bnEqual(collateralAfter, collateralBefore);
 		});

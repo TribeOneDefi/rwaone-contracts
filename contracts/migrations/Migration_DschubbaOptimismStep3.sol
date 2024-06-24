@@ -7,7 +7,7 @@ import "../FuturesMarketManager.sol";
 import "../PerpsV2MarketSettings.sol";
 import "../SystemStatus.sol";
 
-interface ITribeoneNamedContract {
+interface IRwaoneNamedContract {
     // solhint-disable func-name-mixedcase
     function CONTRACT_NAME() external view returns (bytes32);
 }
@@ -18,7 +18,7 @@ contract Migration_DschubbaOptimismStep3 is BaseMigration {
     address public constant OWNER = 0x6d4a64C57612841c2C6745dB2a4E4db34F002D20;
 
     // ----------------------------
-    // EXISTING TRIBEONEETIX CONTRACTS
+    // EXISTING RWAONEETIX CONTRACTS
     // ----------------------------
 
     // https://explorer.optimism.io/address/0x91a4F7125A6F7ec14c41d39F0AC681e8e387DA1C

@@ -1,6 +1,6 @@
 pragma solidity >=0.4.24;
 
-// https://docs.tribeone.io/contracts/source/interfaces/itradingrewards
+// https://docs.rwaone.io/contracts/source/interfaces/itradingrewards
 interface ITradingRewards {
     /* ========== VIEWS ========== */
 
@@ -28,10 +28,10 @@ interface ITradingRewards {
 
     function getAvailableRewardsForAccountForPeriod(address account, uint periodID) external view returns (uint);
 
-    function getAvailableRewardsForAccountForPeriods(address account, uint[] calldata periodIDs)
-        external
-        view
-        returns (uint totalRewards);
+    function getAvailableRewardsForAccountForPeriods(
+        address account,
+        uint[] calldata periodIDs
+    ) external view returns (uint totalRewards);
 
     /* ========== MUTATIVE FUNCTIONS ========== */
 

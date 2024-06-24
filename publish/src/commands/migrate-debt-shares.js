@@ -78,11 +78,11 @@ const migrateDebtShares = async ({
 
 	console.log(gray(`Using account with public key ${signer.address}`));
 
-	const { address: debtSharesAddress } = deployment.targets['TribeoneDebtShare'];
+	const { address: debtSharesAddress } = deployment.targets['RwaoneDebtShare'];
 	const { abi: debtSharesABI } = deployment.sources[
-		deployment.targets['TribeoneDebtShare'].source
+		deployment.targets['RwaoneDebtShare'].source
 	];
-	const TribeoneDebtShare = new ethers.Contract(debtSharesAddress, debtSharesABI, signer);
+	const RwaoneDebtShare = new ethers.Contract(debtSharesAddress, debtSharesABI, signer);
 
 	// get a list of addresses
 	const addrs = fs.readFileSync(etherscanAddressCsv).toString('utf8');
@@ -105,7 +105,7 @@ const migrateDebtShares = async ({
 		}
 
 		try {
-			const debtBalanceOf = await TribeoneDebtShare.balanceOf(address);
+			const debtBalanceOf = await RwaoneDebtShare.balanceOf(address);
 
 			if (debtBalanceOf.gt(ethers.utils.parseEther(threshold))) {
 				const debtAfter = debtBalanceOf.mul(factor).div(ONE);
@@ -144,14 +144,14 @@ const migrateDebtShares = async ({
 		console.log('write action for import of addresses', i, 'through', i + batchSize);
 
 		await performTransactionalStep({
-			contract: 'TribeoneDebtShare',
+			contract: 'RwaoneDebtShare',
 			// encodeABI: network === 'mainnet',
 			// maxFeePerGas,
 			// maxPriorityFeePerGas:  //ethers.utils.parseUnits('5', 'gwei'),
 			ownerActions,
 			ownerActionsFile,
 			signer,
-			target: TribeoneDebtShare,
+			target: RwaoneDebtShare,
 			write: 'importAddresses',
 			writeArg: [addrs, amounts], // explicitly pass array of args so array not splat as params
 		});

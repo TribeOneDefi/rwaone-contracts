@@ -8,7 +8,7 @@ import "./interfaces/IPerpsV2MarketBaseTypes.sol";
 import "./interfaces/IPerpsV2MarketSettings.sol";
 import "./interfaces/IAddressResolver.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/PerpsV2MarketData
+// https://docs.rwaone.io/contracts/source/contracts/PerpsV2MarketData
 // A utility contract to allow the front end to query market data in a single call.
 contract PerpsV2MarketData {
     /* ========== TYPES ========== */
@@ -204,11 +204,9 @@ contract PerpsV2MarketData {
         return _marketSummaries(_futuresMarketManager().allMarkets(true));
     }
 
-    function _fundingParameters(IPerpsV2MarketSettings.Parameters memory params)
-        internal
-        pure
-        returns (FundingParameters memory)
-    {
+    function _fundingParameters(
+        IPerpsV2MarketSettings.Parameters memory params
+    ) internal pure returns (FundingParameters memory) {
         return FundingParameters(params.maxFundingVelocity, params.skewScale);
     }
 
@@ -253,11 +251,10 @@ contract PerpsV2MarketData {
         return _marketDetails(IPerpsV2MarketViews(_futuresMarketManager().marketForKey(marketKey)));
     }
 
-    function _position(IPerpsV2MarketViews market, address account)
-        internal
-        view
-        returns (IPerpsV2MarketBaseTypes.Position memory)
-    {
+    function _position(
+        IPerpsV2MarketViews market,
+        address account
+    ) internal view returns (IPerpsV2MarketBaseTypes.Position memory) {
         return market.positions(account);
     }
 

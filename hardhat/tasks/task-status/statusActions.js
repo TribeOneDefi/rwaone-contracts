@@ -6,9 +6,9 @@ const { green, cyan, bgRed } = require('chalk');
 const { wrap } = require('../../..');
 
 const ActionNames = {
-	getTribeone: 'Tribeone',
+	getRwaone: 'Rwaone',
 	getDebtCache: 'DebtCache',
-	getTribeoneState: 'TribeoneState',
+	getRwaoneState: 'RwaoneState',
 	getSupplySchedule: 'SupplySchedule',
 	getFeePool: 'FeePool',
 	getFeePoolState: 'FeePoolState',
@@ -51,36 +51,36 @@ const logHeader = ({ statusConf }) => {
 };
 
 const actions = {
-	[ActionNames.getTribeone]: async function({
+	[ActionNames.getRwaone]: async function ({
 		useOvm,
 		network,
 		provider,
 		deploymentPath,
 		blockOptions,
 	}) {
-		logSection('Tribeone');
+		logSection('Rwaone');
 
-		const Tribeone = getContract({
-			contract: 'Tribeone',
-			source: useOvm ? 'MintableTribeone' : 'Tribeone',
+		const Rwaone = getContract({
+			contract: 'Rwaone',
+			source: useOvm ? 'MintableRwaone' : 'Rwaone',
 			network,
 			useOvm,
 			provider,
 			deploymentPath,
 		});
 
-		const anyTribeOrHAKARateIsInvalid = await Tribeone.anyTribeOrHAKARateIsInvalid(blockOptions);
+		const anyTribeOrHAKARateIsInvalid = await Rwaone.anyTribeOrHAKARateIsInvalid(blockOptions);
 		logItem(
-			'Tribeone.anyTribeOrHAKARateIsInvalid',
+			'Rwaone.anyTribeOrHAKARateIsInvalid',
 			anyTribeOrHAKARateIsInvalid,
 			1,
 			anyTribeOrHAKARateIsInvalid ? bgRed : undefined
 		);
 
-		logItem('Tribeone.totalSupply', (await Tribeone.totalSupply(blockOptions)).toString() / 1e18);
+		logItem('Rwaone.totalSupply', (await Rwaone.totalSupply(blockOptions)).toString() / 1e18);
 	},
 
-	[ActionNames.getDebtCache]: async function({ useOvm, network, provider, deploymentPath }) {
+	[ActionNames.getDebtCache]: async function ({ useOvm, network, provider, deploymentPath }) {
 		logSection('DebtCache');
 
 		const DebtCache = getContract({
@@ -99,7 +99,7 @@ const actions = {
 		logItem('DebtCache.info.isStale', info.isStale, 1, info.isStale ? bgRed : undefined);
 	},
 
-	[ActionNames.getTribeoneState]: async function({
+	[ActionNames.getRwaoneState]: async function ({
 		useOvm,
 		network,
 		provider,
@@ -107,11 +107,11 @@ const actions = {
 		blockOptions,
 		addresses,
 	}) {
-		logSection('TribeoneState');
+		logSection('RwaoneState');
 
-		const TribeoneState = getContract({
-			contract: 'TribeoneState',
-			source: useOvm ? 'TribeoneStateWithLimitedSetup' : 'TribeoneState',
+		const RwaoneState = getContract({
+			contract: 'RwaoneState',
+			source: useOvm ? 'RwaoneStateWithLimitedSetup' : 'RwaoneState',
 			network,
 			useOvm,
 			provider,
@@ -125,12 +125,12 @@ const actions = {
 		for (const address of addresses) {
 			console.log(green('  Address:'), address);
 
-			const data = await TribeoneState.issuanceData(address, blockOptions);
-			logItem('TribeoneState.issuanceData(address)', data.toString());
+			const data = await RwaoneState.issuanceData(address, blockOptions);
+			logItem('RwaoneState.issuanceData(address)', data.toString());
 		}
 	},
 
-	[ActionNames.getSupplySchedule]: async function({
+	[ActionNames.getSupplySchedule]: async function ({
 		useOvm,
 		network,
 		provider,
@@ -157,7 +157,7 @@ const actions = {
 		}
 	},
 
-	[ActionNames.getFeePool]: async function({
+	[ActionNames.getFeePool]: async function ({
 		useOvm,
 		network,
 		provider,
@@ -222,7 +222,7 @@ const actions = {
 		}
 	},
 
-	[ActionNames.getFeePoolState]: async function({
+	[ActionNames.getFeePoolState]: async function ({
 		useOvm,
 		network,
 		provider,
@@ -255,7 +255,7 @@ const actions = {
 		}
 	},
 
-	[ActionNames.getAddressResolver]: async function({
+	[ActionNames.getAddressResolver]: async function ({
 		useOvm,
 		network,
 		provider,
@@ -282,7 +282,7 @@ const actions = {
 		await getAddress({ contract: 'RewardsDistribution' });
 	},
 
-	[ActionNames.getSystemSettings]: async function({ useOvm, network, provider, deploymentPath }) {
+	[ActionNames.getSystemSettings]: async function ({ useOvm, network, provider, deploymentPath }) {
 		logSection('SystemSettings');
 
 		const SystemSettings = getContract({
@@ -298,7 +298,7 @@ const actions = {
 		logItem('rateStalePeriod', rateStalePeriod.toString());
 	},
 
-	[ActionNames.getExchangeRates]: async function({
+	[ActionNames.getExchangeRates]: async function ({
 		useOvm,
 		network,
 		provider,

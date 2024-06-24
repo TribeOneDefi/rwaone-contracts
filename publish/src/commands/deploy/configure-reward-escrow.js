@@ -12,7 +12,7 @@ module.exports = async ({ addressOf, deployer, runStep }) => {
 		// AddressResolver,
 		RewardEscrowV2,
 		RewardsDistribution,
-		// Tribeone,
+		// Rwaone,
 		RewardEscrowV2Storage,
 		RewardEscrowV2Frozen,
 	} = deployer.deployedContracts;
@@ -51,17 +51,17 @@ module.exports = async ({ addressOf, deployer, runStep }) => {
 
 	// // move wHAKA balances if needed
 	// // this breaks vesting
-	// const migratableBalance = await Tribeone.balanceOf(frozenOrPreviousEscrow.address);
+	// const migratableBalance = await Rwaone.balanceOf(frozenOrPreviousEscrow.address);
 	// if (migratableBalance.gt(0)) {
 	// 	await runStep({
-	// 		contract: 'Tribeone',
-	// 		target: Tribeone,
+	// 		contract: 'Rwaone',
+	// 		target: Rwaone,
 	// 		write: 'migrateEscrowContractBalance',
 	// 		comment: 'Ensure that old escrow wHAKA balance is migrated to new contract',
 	// 	});
 	// } else {
 	// 	console.log(
-	// 		gray('Skipping Tribeone.migrateEscrowContractBalance as frozen contract has no wHAKA balance.')
+	// 		gray('Skipping Rwaone.migrateEscrowContractBalance as frozen contract has no wHAKA balance.')
 	// 	);
 	// }
 

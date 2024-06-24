@@ -14,13 +14,13 @@ import "./interfaces/IExchanger.sol";
 import "./interfaces/IIssuer.sol";
 import "./interfaces/IFuturesMarketManager.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/tribe
+// https://docs.rwaone.io/contracts/source/contracts/tribe
 contract Tribe is Owned, IERC20, ExternStateToken, MixinResolver, ITribe {
     bytes32 public constant CONTRACT_NAME = "Tribe";
 
     /* ========== STATE VARIABLES ========== */
 
-    // Currency key which identifies this Tribe to the Tribeone system
+    // Currency key which identifies this Tribe to the Rwaone system
     bytes32 public currencyKey;
 
     uint8 public constant DECIMALS = 18;
@@ -93,21 +93,13 @@ contract Tribe is Owned, IERC20, ExternStateToken, MixinResolver, ITribe {
         return super._internalTransfer(messageSender, to, value);
     }
 
-    function transferFrom(
-        address from,
-        address to,
-        uint value
-    ) public onlyProxyOrInternal returns (bool) {
+    function transferFrom(address from, address to, uint value) public onlyProxyOrInternal returns (bool) {
         _ensureCanTransfer(from, value);
 
         return _internalTransferFrom(from, to, value);
     }
 
-    function transferFromAndSettle(
-        address from,
-        address to,
-        uint value
-    ) public onlyProxyOrInternal returns (bool) {
+    function transferFromAndSettle(address from, address to, uint value) public onlyProxyOrInternal returns (bool) {
         // Exchanger.settle() ensures tribe is active
         (, , uint numEntriesSettled) = exchanger().settle(from, currencyKey);
 
@@ -240,11 +232,7 @@ contract Tribe is Owned, IERC20, ExternStateToken, MixinResolver, ITribe {
 
     /* ========== INTERNAL FUNCTIONS ========== */
 
-    function _internalTransferFrom(
-        address from,
-        address to,
-        uint value
-    ) internal returns (bool) {
+    function _internalTransferFrom(address from, address to, uint value) internal returns (bool) {
         // Skip allowance update in case of infinite allowance
         if (tokenState.allowance(from, messageSender) != uint(-1)) {
             // Reduce the allowance by the amount we're transferring.
@@ -270,7 +258,7 @@ contract Tribe is Owned, IERC20, ExternStateToken, MixinResolver, ITribe {
         _;
     }
 
-    modifier onlyProxyOrInternal {
+    modifier onlyProxyOrInternal() {
         _onlyProxyOrInternal();
         _;
     }

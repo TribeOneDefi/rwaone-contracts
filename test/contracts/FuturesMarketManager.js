@@ -23,7 +23,7 @@ contract('FuturesMarketManager', accounts => {
 		circuitBreaker,
 		hUSD,
 		debtCache,
-		tribeone,
+		rwaone,
 		addressResolver;
 	const owner = accounts[1];
 	const trader = accounts[2];
@@ -46,7 +46,7 @@ contract('FuturesMarketManager', accounts => {
 			CircuitBreaker: circuitBreaker,
 			TribehUSD: hUSD,
 			DebtCache: debtCache,
-			Tribeone: tribeone,
+			Rwaone: rwaone,
 			AddressResolver: addressResolver,
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
@@ -63,7 +63,7 @@ contract('FuturesMarketManager', accounts => {
 				'ExchangeCircuitBreaker',
 				'SystemStatus',
 				'SystemSettings',
-				'Tribeone',
+				'Rwaone',
 				'Exchanger',
 				'DebtCache',
 				'CollateralManager',
@@ -405,11 +405,11 @@ contract('FuturesMarketManager', accounts => {
 
 		it('burning respects settlement', async () => {
 			// Set up a mock exchanger
-			const mockExchanger = await MockExchanger.new(tribeone.address);
+			const mockExchanger = await MockExchanger.new(rwaone.address);
 			await addressResolver.importAddresses(['Exchanger'].map(toBytes32), [mockExchanger.address], {
 				from: owner,
 			});
-			await tribeone.rebuildCache();
+			await rwaone.rebuildCache();
 			await futuresMarketManager.rebuildCache();
 
 			await mockExchanger.setReclaim(toUnit('10'));

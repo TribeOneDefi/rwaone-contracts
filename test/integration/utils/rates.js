@@ -54,9 +54,9 @@ async function _isCacheInvalid({ ctx }) {
 }
 
 async function _areRatesInvalid({ ctx }) {
-	const { Tribeone } = ctx.contracts;
+	const { Rwaone } = ctx.contracts;
 
-	return Tribeone.anyTribeOrHAKARateIsInvalid();
+	return Rwaone.anyTribeOrHAKARateIsInvalid();
 }
 
 async function _printCacheInfo({ ctx }) {

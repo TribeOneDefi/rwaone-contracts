@@ -50,13 +50,13 @@
 	"SupplySchedule": {
 		"deploy": false
 	},
-	"Tribeone": {
+	"Rwaone": {
 		"deploy": false
 	},
-	"TribeoneEscrow": {
+	"RwaoneEscrow": {
 		"deploy": false
 	},
-	"TribeoneState": {
+	"RwaoneState": {
 		"deploy": false
 	},
 	"SystemStatus": {
@@ -74,7 +74,7 @@
 	"ProxyFeePool": {
 		"deploy": false
 	},
-	"ProxyTribeone": {
+	"ProxyRwaone": {
 		"deploy": false
 	},
 	"ProxyhUSD": {
@@ -86,7 +86,7 @@
 	"Math": {
 		"deploy": false
 	},
-	"TokenStateTribeone": {
+	"TokenStateRwaone": {
 		"deploy": false
 	},
 	"TokenStatehUSD": {
@@ -131,13 +131,13 @@
 	"RewardEscrowV2": {
 		"deploy": false
 	},
-	"TribeoneBridgeToOptimism": {
+	"RwaoneBridgeToOptimism": {
 		"deploy": false
 	},
 	"VirtualTribeMastercopy": {
 		"deploy": false
 	},
-	"TribeoneBridgeEscrow": {
+	"RwaoneBridgeEscrow": {
 		"deploy": false
 	},
 	"EtherWrapper": {
@@ -158,7 +158,7 @@
 	"SystemSettingsLib": {
 		"deploy": false
 	},
-	"TribeoneDebtShare": {
+	"RwaoneDebtShare": {
 		"deploy": false
 	},
 	"ExchangeCircuitBreaker": {

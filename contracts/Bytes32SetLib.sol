@@ -1,6 +1,6 @@
 pragma solidity ^0.5.16;
 
-// https://docs.tribeone.io/contracts/source/libraries/bytes32setlib/
+// https://docs.rwaone.io/contracts/source/libraries/bytes32setlib/
 library Bytes32SetLib {
     struct Bytes32Set {
         bytes32[] elements;
@@ -15,11 +15,7 @@ library Bytes32SetLib {
         return index != 0 || set.elements[0] == candidate;
     }
 
-    function getPage(
-        Bytes32Set storage set,
-        uint index,
-        uint pageSize
-    ) internal view returns (bytes32[] memory) {
+    function getPage(Bytes32Set storage set, uint index, uint pageSize) internal view returns (bytes32[] memory) {
         // NOTE: This implementation should be converted to slice operators if the compiler is updated to v0.6.0+
         uint endIndex = index + pageSize; // The check below that endIndex <= index handles overflow.
 

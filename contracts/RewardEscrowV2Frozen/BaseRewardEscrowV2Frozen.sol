@@ -13,10 +13,10 @@ import "../SafeDecimalMath.sol";
 // Internal references
 import "../interfaces/IERC20.sol";
 import "../interfaces/IFeePool.sol";
-import "../interfaces/ITribeone.sol";
+import "../interfaces/IRwaone.sol";
 import "../interfaces/IIssuer.sol";
 
-// https://docs.tribeone.io/contracts/RewardEscrow
+// https://docs.rwaone.io/contracts/RewardEscrow
 /// SIP-252: this is the source for the base of immutable V2 escrow (renamed with suffix Frozen).
 /// These sources need to exist here and match on-chain frozen contracts for tests and reference.
 /// The reason for the naming mess is that the immutable LiquidatorRewards expects a working
@@ -33,16 +33,16 @@ contract BaseRewardEscrowV2Frozen is Owned, IRewardEscrowV2Frozen, LimitedSetup(
     /*Counter for new vesting entry ids. */
     uint256 public nextEntryId;
 
-    /* An account's total escrowed tribeone balance to save recomputing this for fee extraction purposes. */
+    /* An account's total escrowed rwaone balance to save recomputing this for fee extraction purposes. */
     mapping(address => uint256) public totalEscrowedAccountBalance;
 
-    /* An account's total vested reward tribeone. */
+    /* An account's total vested reward rwaone. */
     mapping(address => uint256) public totalVestedAccountBalance;
 
     /* Mapping of nominated address to recieve account merging */
     mapping(address => address) public nominatedReceiver;
 
-    /* The total remaining escrowed balance, for verifying the actual tribeone balance of this contract against. */
+    /* The total remaining escrowed balance, for verifying the actual rwaone balance of this contract against. */
     uint256 public totalEscrowedBalance;
 
     /* Max escrow duration */
@@ -59,7 +59,7 @@ contract BaseRewardEscrowV2Frozen is Owned, IRewardEscrowV2Frozen, LimitedSetup(
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
-    bytes32 private constant CONTRACT_TRIBEONEETIX = "Tribeone";
+    bytes32 private constant CONTRACT_RWAONEETIX = "Rwaone";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_FEEPOOL = "FeePool";
 
@@ -75,8 +75,8 @@ contract BaseRewardEscrowV2Frozen is Owned, IRewardEscrowV2Frozen, LimitedSetup(
         return IFeePool(requireAndGetAddress(CONTRACT_FEEPOOL));
     }
 
-    function tribeone() internal view returns (ITribeone) {
-        return ITribeone(requireAndGetAddress(CONTRACT_TRIBEONEETIX));
+    function rwaone() internal view returns (IRwaone) {
+        return IRwaone(requireAndGetAddress(CONTRACT_RWAONEETIX));
     }
 
     function issuer() internal view returns (IIssuer) {
@@ -92,7 +92,7 @@ contract BaseRewardEscrowV2Frozen is Owned, IRewardEscrowV2Frozen, LimitedSetup(
     // Note: use public visibility so that it can be invoked in a subclass
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         addresses = new bytes32[](3);
-        addresses[0] = CONTRACT_TRIBEONEETIX;
+        addresses[0] = CONTRACT_RWAONEETIX;
         addresses[1] = CONTRACT_FEEPOOL;
         addresses[2] = CONTRACT_ISSUER;
     }
@@ -241,15 +241,11 @@ contract BaseRewardEscrowV2Frozen is Owned, IRewardEscrowV2Frozen, LimitedSetup(
      * @dev This call expects that the depositor (msg.sender) has already approved the Reward escrow contract
      to spend the the amount being escrowed.
      */
-    function createEscrowEntry(
-        address beneficiary,
-        uint256 deposit,
-        uint256 duration
-    ) external {
+    function createEscrowEntry(address beneficiary, uint256 deposit, uint256 duration) external {
         require(beneficiary != address(0), "Cannot create escrow with address(0)");
 
         /* Transfer wHAKA from msg.sender */
-        require(IERC20(address(tribeone())).transferFrom(msg.sender, address(this), deposit), "token transfer failed");
+        require(IERC20(address(rwaone())).transferFrom(msg.sender, address(this), deposit), "token transfer failed");
 
         /* Append vesting entry for the beneficiary address */
         _appendVestingEntry(beneficiary, deposit, duration);
@@ -257,17 +253,13 @@ contract BaseRewardEscrowV2Frozen is Owned, IRewardEscrowV2Frozen, LimitedSetup(
 
     /**
      * @notice Add a new vesting entry at a given time and quantity to an account's schedule.
-     * @dev A call to this should accompany a previous successful call to tribeone.transfer(rewardEscrow, amount),
+     * @dev A call to this should accompany a previous successful call to rwaone.transfer(rewardEscrow, amount),
      * to ensure that when the funds are withdrawn, there is enough balance.
      * @param account The account to append a new vesting entry to.
      * @param quantity The quantity of wHAKA that will be escrowed.
      * @param duration The duration that wHAKA will be emitted.
      */
-    function appendVestingEntry(
-        address account,
-        uint256 quantity,
-        uint256 duration
-    ) external onlyFeePool {
+    function appendVestingEntry(address account, uint256 quantity, uint256 duration) external onlyFeePool {
         _appendVestingEntry(account, quantity, duration);
     }
 
@@ -275,7 +267,7 @@ contract BaseRewardEscrowV2Frozen is Owned, IRewardEscrowV2Frozen, LimitedSetup(
     function _transferVestedTokens(address _account, uint256 _amount) internal {
         _reduceAccountEscrowBalances(_account, _amount);
         totalVestedAccountBalance[_account] = totalVestedAccountBalance[_account].add(_amount);
-        IERC20(address(tribeone())).transfer(_account, _amount);
+        IERC20(address(rwaone())).transfer(_account, _amount);
         emit Vested(_account, block.timestamp, _amount);
     }
 
@@ -376,11 +368,7 @@ contract BaseRewardEscrowV2Frozen is Owned, IRewardEscrowV2Frozen, LimitedSetup(
         _notImplemented();
     }
 
-    function migrateAccountEscrowBalances(
-        address[] calldata,
-        uint256[] calldata,
-        uint256[] calldata
-    ) external {
+    function migrateAccountEscrowBalances(address[] calldata, uint256[] calldata, uint256[] calldata) external {
         _notImplemented();
     }
 
@@ -390,21 +378,13 @@ contract BaseRewardEscrowV2Frozen is Owned, IRewardEscrowV2Frozen, LimitedSetup(
         _notImplemented();
     }
 
-    function importVestingEntries(
-        address,
-        uint256,
-        VestingEntries.VestingEntry[] calldata
-    ) external {
+    function importVestingEntries(address, uint256, VestingEntries.VestingEntry[] calldata) external {
         _notImplemented();
     }
 
     /* ========== INTERNALS ========== */
 
-    function _appendVestingEntry(
-        address account,
-        uint256 quantity,
-        uint256 duration
-    ) internal {
+    function _appendVestingEntry(address account, uint256 quantity, uint256 duration) internal {
         /* No empty or already-passed vesting entries allowed. */
         require(quantity != 0, "Quantity cannot be zero");
         require(duration > 0 && duration <= max_duration, "Cannot escrow with 0 duration OR above max_duration");
@@ -413,7 +393,7 @@ contract BaseRewardEscrowV2Frozen is Owned, IRewardEscrowV2Frozen, LimitedSetup(
         totalEscrowedBalance = totalEscrowedBalance.add(quantity);
 
         require(
-            totalEscrowedBalance <= IERC20(address(tribeone())).balanceOf(address(this)),
+            totalEscrowedBalance <= IERC20(address(rwaone())).balanceOf(address(this)),
             "Must be enough balance in the contract to provide for the vesting entry"
         );
 

@@ -26,7 +26,7 @@ import "./../interfaces/IERC20.sol";
  * continually tallied against this margin. If a user's margin runs out, then their position is closed
  * by a liquidation keeper, which is rewarded with a flat fee extracted from the margin.
  *
- * The Tribeone debt pool is effectively the counterparty to each trade, so if a particular position
+ * The Rwaone debt pool is effectively the counterparty to each trade, so if a particular position
  * is in profit, then the debt pool pays by issuing hUSD into their margin account,
  * while if the position makes a loss then the debt pool burns hUSD from the margin, reducing the
  * debt load in the system.
@@ -77,7 +77,7 @@ interface IFuturesMarketManagerInternal {
     function payFee(uint amount) external;
 }
 
-// https://docs.tribeone.io/contracts/source/contracts/FuturesMarket
+// https://docs.rwaone.io/contracts/source/contracts/FuturesMarket
 contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseTypes {
     /* ========== LIBRARIES ========== */
 
@@ -89,7 +89,7 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
     /* ========== CONSTANTS ========== */
 
     // This is the same unit as used inside `SignedSafeDecimalMath`.
-    int private constant _UNIT = int(10**uint(18));
+    int private constant _UNIT = int(10 ** uint(18));
 
     //slither-disable-next-line naming-convention
     bytes32 internal constant hUSD = "hUSD";
@@ -162,11 +162,7 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
 
     /* ========== CONSTRUCTOR ========== */
 
-    constructor(
-        address _resolver,
-        bytes32 _baseAsset,
-        bytes32 _marketKey
-    ) public MixinFuturesMarketSettings(_resolver) {
+    constructor(address _resolver, bytes32 _baseAsset, bytes32 _marketKey) public MixinFuturesMarketSettings(_resolver) {
         baseAsset = _baseAsset;
         marketKey = _marketKey;
 
@@ -268,11 +264,7 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
     /*
      * Determines whether a change in a position's size would violate the max market value constraint.
      */
-    function _orderSizeTooLarge(
-        uint maxSize,
-        int oldSize,
-        int newSize
-    ) internal view returns (bool) {
+    function _orderSizeTooLarge(uint maxSize, int oldSize, int newSize) internal view returns (bool) {
         // Allow users to reduce an order no matter the market conditions.
         if (_sameSide(oldSize, newSize) && _abs(newSize) <= _abs(oldSize)) {
             return false;
@@ -467,15 +459,10 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
         return fundingSequence.length.sub(1); // at least one element is pushed in constructor
     }
 
-    function _postTradeDetails(Position memory oldPos, TradeParams memory params)
-        internal
-        view
-        returns (
-            Position memory newPosition,
-            uint fee,
-            Status tradeStatus
-        )
-    {
+    function _postTradeDetails(
+        Position memory oldPos,
+        TradeParams memory params
+    ) internal view returns (Position memory newPosition, uint fee, Status tradeStatus) {
         // Reverts if the user is trying to submit a size-zero order.
         if (params.sizeDelta == 0) {
             return (oldPos, 0, Status.NilOrder);
@@ -503,14 +490,13 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
         }
 
         // construct new position
-        Position memory newPos =
-            Position({
-                id: oldPos.id,
-                lastFundingIndex: uint64(_latestFundingIndex()),
-                margin: uint128(newMargin),
-                lastPrice: uint128(params.price),
-                size: int128(int(oldPos.size).add(params.sizeDelta))
-            });
+        Position memory newPos = Position({
+            id: oldPos.id,
+            lastFundingIndex: uint64(_latestFundingIndex()),
+            margin: uint128(newMargin),
+            lastPrice: uint128(params.price),
+            size: int128(int(oldPos.size).add(params.sizeDelta))
+        });
 
         // always allow to decrease a position, otherwise a margin of minInitialMargin can never
         // decrease a position as the price goes against them.
@@ -697,7 +683,7 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
         debt. This is needed for keeping track of the _marketDebt() in an efficient manner to allow O(1) marketDebt
         calculation in _marketDebt().
 
-        Explanation of the full market debt calculation from the SIP https://sips.tribeone.io/sips/sip-80/:
+        Explanation of the full market debt calculation from the SIP https://sips.rwaone.io/sips/sip-80/:
 
         The overall market debt is the sum of the remaining margin in all positions. The intuition is that
         the debt of a single position is the value withdrawn upon closing that position.
@@ -744,11 +730,7 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
         _entryDebtCorrection = int128(int(_entryDebtCorrection).add(newCorrection).sub(oldCorrection));
     }
 
-    function _transferMargin(
-        int marginDelta,
-        uint price,
-        address sender
-    ) internal {
+    function _transferMargin(int marginDelta, uint price, address sender) internal {
         // Transfer no tokens if marginDelta is 0
         uint absDelta = _abs(marginDelta);
         if (marginDelta > 0) {
@@ -779,11 +761,7 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
     }
 
     // updates the stored position margin in place (on the stored position)
-    function _updatePositionMargin(
-        Position storage position,
-        uint price,
-        int marginDelta
-    ) internal {
+    function _updatePositionMargin(Position storage position, uint price, int marginDelta) internal {
         Position memory oldPosition = position;
         // Determine new margin, ensuring that the result is positive.
         (uint margin, Status status) = _recomputeMarginWithDelta(oldPosition, price, marginDelta);
@@ -961,11 +939,7 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
         );
     }
 
-    function _liquidatePosition(
-        address account,
-        address liquidator,
-        uint price
-    ) internal {
+    function _liquidatePosition(address account, address liquidator, uint price) internal {
         Position storage position = positions[account];
 
         // get remaining margin for sending any leftover buffer to fee pool

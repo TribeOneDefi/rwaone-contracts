@@ -19,7 +19,7 @@ import "@chainlink/contracts-0.0.10/src/v0.5/interfaces/AggregatorV2V3Interface.
 import "@chainlink/contracts-0.0.10/src/v0.5/interfaces/FlagsInterface.sol";
 import "./interfaces/ICircuitBreaker.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/exchangerates
+// https://docs.rwaone.io/contracts/source/contracts/exchangerates
 contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -51,7 +51,7 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     function setEnableUpdateOracle(bytes32 _currencyKey, bool _enableUpdateOracle) external onlyOwner {
         enableUpdateOracle[_currencyKey] = _enableUpdateOracle;
     }
-    
+
     function addAggregator(bytes32 currencyKey, address aggregatorAddress) external onlyOwner {
         AggregatorV2V3Interface aggregator = AggregatorV2V3Interface(aggregatorAddress);
         // This check tries to make sure that a valid aggregator is being added.
@@ -91,14 +91,7 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         require(success, "Call to setLatestAnswer failed");
     }
 
-    function rateWithSafetyChecks(bytes32 currencyKey)
-        external
-        returns (
-            uint rate,
-            bool broken,
-            bool staleOrInvalid
-        )
-    {
+    function rateWithSafetyChecks(bytes32 currencyKey) external returns (uint rate, bool broken, bool staleOrInvalid) {
         address aggregatorAddress = address(aggregators[currencyKey]);
         require(currencyKey == hUSD || aggregatorAddress != address(0), "No aggregator for asset");
 
@@ -185,15 +178,7 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         bytes32 destinationCurrencyKey,
         uint roundIdForSrc,
         uint roundIdForDest
-    )
-        external
-        view
-        returns (
-            uint value,
-            uint sourceRate,
-            uint destinationRate
-        )
-    {
+    ) external view returns (uint value, uint sourceRate, uint destinationRate) {
         (sourceRate, ) = _getRateAndTimestampAtRound(sourceCurrencyKey, roundIdForSrc);
         // If there's no change in the currency, then just return the amount they gave us
         if (sourceCurrencyKey == destinationCurrencyKey) {
@@ -239,15 +224,7 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         bytes32 sourceCurrencyKey,
         uint sourceAmount,
         bytes32 destinationCurrencyKey
-    )
-        external
-        view
-        returns (
-            uint value,
-            uint sourceRate,
-            uint destinationRate
-        )
-    {
+    ) external view returns (uint value, uint sourceRate, uint destinationRate) {
         return _effectiveValueAndRates(sourceCurrencyKey, sourceAmount, destinationCurrencyKey);
     }
 
@@ -256,16 +233,7 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         bytes32,
         uint,
         bytes32
-    )
-        public
-        view
-        returns (
-            uint value,
-            uint systemValue,
-            uint systemSourceRate,
-            uint systemDestinationRate
-        )
-    {
+    ) public view returns (uint value, uint systemValue, uint systemSourceRate, uint systemDestinationRate) {
         _notImplemented();
     }
 
@@ -274,16 +242,7 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         uint,
         IDirectIntegrationManager.ParameterIntegrationSettings memory,
         IDirectIntegrationManager.ParameterIntegrationSettings memory
-    )
-        public
-        view
-        returns (
-            uint value,
-            uint systemValue,
-            uint systemSourceRate,
-            uint systemDestinationRate
-        )
-    {
+    ) public view returns (uint value, uint systemValue, uint systemSourceRate, uint systemDestinationRate) {
         _notImplemented();
     }
 
@@ -343,11 +302,9 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         );
     }
 
-    function ratesAndInvalidForCurrencies(bytes32[] calldata currencyKeys)
-        external
-        view
-        returns (uint[] memory rates, bool anyRateInvalid)
-    {
+    function ratesAndInvalidForCurrencies(
+        bytes32[] calldata currencyKeys
+    ) external view returns (uint[] memory rates, bool anyRateInvalid) {
         rates = new uint[](currencyKeys.length);
 
         uint256 _rateStalePeriod = getRateStalePeriod();
@@ -408,11 +365,10 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     /// this method checks whether any rate is:
     /// 1. flagged
     /// 2. stale with respect to current time (now)
-    function anyRateIsInvalidAtRound(bytes32[] calldata currencyKeys, uint[] calldata roundIds)
-        external
-        view
-        returns (bool)
-    {
+    function anyRateIsInvalidAtRound(
+        bytes32[] calldata currencyKeys,
+        uint[] calldata roundIds
+    ) external view returns (bool) {
         // Loop through each key and check whether the data point is stale.
 
         require(roundIds.length == currencyKeys.length, "roundIds must be the same length as currencyKeys");
@@ -442,11 +398,9 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         _notImplemented();
     }
 
-    function tribeTooVolatileForAtomicExchange(IDirectIntegrationManager.ParameterIntegrationSettings memory)
-        public
-        view
-        returns (bool)
-    {
+    function tribeTooVolatileForAtomicExchange(
+        IDirectIntegrationManager.ParameterIntegrationSettings memory
+    ) public view returns (bool) {
         _notImplemented();
     }
 
@@ -496,11 +450,11 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
             // do not convert for 0 (part of implicit interface), and not needed for 18
         } else if (decimals < 18) {
             // increase precision to 18
-            uint multiplier = 10**(18 - decimals); // SafeMath not needed since decimals is small
+            uint multiplier = 10 ** (18 - decimals); // SafeMath not needed since decimals is small
             result = result.mul(multiplier);
         } else if (decimals > 18) {
             // decrease precision to 18
-            uint divisor = 10**(decimals - 18); // SafeMath not needed since decimals is small
+            uint divisor = 10 ** (decimals - 18); // SafeMath not needed since decimals is small
             result = result.div(divisor);
         }
         return result;
@@ -521,8 +475,10 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
                 (bool success, bytes memory returnData) = address(aggregator).staticcall(payload);
 
                 if (success) {
-                    (, int256 answer, , uint256 updatedAt, ) =
-                        abi.decode(returnData, (uint80, int256, uint256, uint256, uint80));
+                    (, int256 answer, , uint256 updatedAt, ) = abi.decode(
+                        returnData,
+                        (uint80, int256, uint256, uint256, uint80)
+                    );
                     return
                         RateAndUpdatedTime({
                             rate: uint216(_formatAggregatorAnswer(currencyKey, answer)),
@@ -559,8 +515,10 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
                 (bool success, bytes memory returnData) = address(aggregator).staticcall(payload);
 
                 if (success) {
-                    (, int256 answer, , uint256 updatedAt, ) =
-                        abi.decode(returnData, (uint80, int256, uint256, uint256, uint80));
+                    (, int256 answer, , uint256 updatedAt, ) = abi.decode(
+                        returnData,
+                        (uint80, int256, uint256, uint256, uint80)
+                    );
                     return (_formatAggregatorAnswer(currencyKey, answer), updatedAt);
                 } // else return defaults, to avoid reverting in views
             } // else return defaults, to avoid reverting in views
@@ -579,15 +537,7 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         bytes32 sourceCurrencyKey,
         uint sourceAmount,
         bytes32 destinationCurrencyKey
-    )
-        internal
-        view
-        returns (
-            uint value,
-            uint sourceRate,
-            uint destinationRate
-        )
-    {
+    ) internal view returns (uint value, uint sourceRate, uint destinationRate) {
         sourceRate = _getRate(sourceCurrencyKey);
         // If there's no change in the currency, then just return the amount they gave us
         if (sourceCurrencyKey == destinationCurrencyKey) {

@@ -33,7 +33,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 		accounts,
 	});
 
-	const callAsTribeone = args => [...args, { from: this.mocks.Tribeone.address }];
+	const callAsRwaone = args => [...args, { from: this.mocks.Rwaone.address }];
 
 	before(async () => {
 		ExchangerWithFeeRecAlternatives = artifacts.require('ExchangerWithFeeRecAlternatives');
@@ -224,7 +224,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 						destinationCurrencyKey = destinationCurrency,
 						destinationAddress = owner,
 						trackingCode = toBytes32(),
-						asTribeone = true,
+						asRwaone = true,
 					} = {}) => {
 						const args = [
 							from, // exchangeForAddress
@@ -238,7 +238,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 							trackingCode,
 						];
 
-						return asTribeone ? callAsTribeone(args) : args;
+						return asRwaone ? callAsRwaone(args) : args;
 					};
 
 					describe('failure modes', () => {
@@ -365,7 +365,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 						destinationCurrencyKey = destinationCurrency,
 						destinationAddress = owner,
 						trackingCode = toBytes32(),
-						asTribeone = true,
+						asRwaone = true,
 						minAmount = toDecimal(0),
 					} = {}) => {
 						const args = [
@@ -378,7 +378,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 							minAmount,
 						];
 
-						return asTribeone ? callAsTribeone(args) : args;
+						return asRwaone ? callAsRwaone(args) : args;
 					};
 
 					describe('when called by unauthorized', async () => {
@@ -386,10 +386,10 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 							it('it reverts when called by regular accounts', async () => {
 								await onlyGivenAddressCanInvoke({
 									fnc: this.instance.exchangeAtomically,
-									args: getExchangeArgs({ asTribeone: false }),
-									accounts: accounts.filter(a => a !== this.mocks.Tribeone.address),
-									reason: 'Exchanger: Only tribeone or a tribe contract can perform this action',
-									// address: this.mocks.Tribeone.address (doesnt work as this reverts due to lack of mocking setup)
+									args: getExchangeArgs({ asRwaone: false }),
+									accounts: accounts.filter(a => a !== this.mocks.Rwaone.address),
+									reason: 'Exchanger: Only rwaone or a tribe contract can perform this action',
+									// address: this.mocks.Rwaone.address (doesnt work as this reverts due to lack of mocking setup)
 								});
 							});
 						});
@@ -694,8 +694,8 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 																							lastEthRate,
 																						]);
 																					});
-																					it('asked Tribeone to emit an exchange event', () => {
-																						const tribeetixEmitExchangeCall = this.mocks.Tribeone
+																					it('asked Rwaone to emit an exchange event', () => {
+																						const tribeetixEmitExchangeCall = this.mocks.Rwaone
 																							.emitTribeExchange;
 																						assert.equal(
 																							tribeetixEmitExchangeCall.calls[0][0],
@@ -722,9 +722,9 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 																							owner
 																						);
 																					});
-																					it('asked Tribeone to emit an atomic exchange event', () => {
+																					it('asked Rwaone to emit an atomic exchange event', () => {
 																						const tribeetixEmitAtomicExchangeCall = this.mocks
-																							.Tribeone.emitAtomicTribeExchange;
+																							.Rwaone.emitAtomicTribeExchange;
 																						assert.equal(
 																							tribeetixEmitAtomicExchangeCall.calls[0][0],
 																							owner
@@ -800,16 +800,16 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 																						});
 																					}
 																					if (!trackingCode) {
-																						it('did not ask Tribeone to emit tracking event', () => {
+																						it('did not ask Rwaone to emit tracking event', () => {
 																							assert.equal(
-																								this.mocks.Tribeone.emitExchangeTracking.calls
+																								this.mocks.Rwaone.emitExchangeTracking.calls
 																									.length,
 																								0
 																							);
 																						});
 																					} else {
-																						it('asked Tribeone to emit tracking event', () => {
-																							const tribeetixEmitTrackingCall = this.mocks.Tribeone
+																						it('asked Rwaone to emit tracking event', () => {
+																							const tribeetixEmitTrackingCall = this.mocks.Rwaone
 																								.emitExchangeTracking;
 																							assert.equal(
 																								tribeetixEmitTrackingCall.calls[0][0],

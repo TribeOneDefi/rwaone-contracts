@@ -4,7 +4,7 @@ const path = require('path');
 
 const ethers = require('ethers');
 
-const tribeone = require('../..');
+const rwaone = require('../..');
 
 const {
 	loadAndCheckRequiredSources,
@@ -12,8 +12,8 @@ const {
 } = require('../../publish/src/util');
 
 subtask('interact:load-contracts').setAction(async (args, hre, runSuper) => {
-	// Wrap Tribeone utils for current network
-	const { getPathToNetwork, getTarget, getSource, getPerpsV2ProxiedMarkets } = tribeone.wrap({
+	// Wrap Rwaone utils for current network
+	const { getPathToNetwork, getTarget, getSource, getPerpsV2ProxiedMarkets } = rwaone.wrap({
 		network: hre.network.name,
 		useOvm: false,
 		fs,
@@ -21,7 +21,7 @@ subtask('interact:load-contracts').setAction(async (args, hre, runSuper) => {
 	});
 
 	// Derive target build path and retrieve deployment artifacts
-	const file = tribeone.constants.DEPLOYMENT_FILENAME;
+	const file = rwaone.constants.DEPLOYMENT_FILENAME;
 
 	const deploymentPath = getPathToNetwork({ network: hre.network.name, useOvm: false });
 	const deploymentFilePath = path.join(deploymentPath, file);
@@ -70,7 +70,7 @@ subtask('interact:load-contracts').setAction(async (args, hre, runSuper) => {
 });
 
 subtask('interact:stage-txn').setAction(async ({ txn, contract, functionSignature, args }, hre) => {
-	const { getPathToNetwork } = tribeone.wrap({
+	const { getPathToNetwork } = rwaone.wrap({
 		network: hre.network.name,
 		useOvm: false,
 		fs,

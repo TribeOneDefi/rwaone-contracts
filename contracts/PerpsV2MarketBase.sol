@@ -33,7 +33,7 @@ interface IFuturesMarketManagerInternal {
     function isEndorsed(address account) external view returns (bool);
 }
 
-// https://docs.tribeone.io/contracts/source/contracts/PerpsV2MarketBase
+// https://docs.rwaone.io/contracts/source/contracts/PerpsV2MarketBase
 contract PerpsV2MarketBase is Owned, MixinPerpsV2MarketSettings, IPerpsV2MarketBaseTypes {
     /* ========== LIBRARIES ========== */
 
@@ -45,7 +45,7 @@ contract PerpsV2MarketBase is Owned, MixinPerpsV2MarketSettings, IPerpsV2MarketB
     /* ========== CONSTANTS ========== */
 
     // This is the same unit as used inside `SignedSafeDecimalMath`.
-    int private constant _UNIT = int(10**uint(18));
+    int private constant _UNIT = int(10 ** uint(18));
 
     //slither-disable-next-line naming-convention
     bytes32 internal constant hUSD = "hUSD";
@@ -229,11 +229,7 @@ contract PerpsV2MarketBase is Owned, MixinPerpsV2MarketSettings, IPerpsV2MarketB
     /*
      * Determines whether a change in a position's size would violate the max market value constraint.
      */
-    function _orderSizeTooLarge(
-        uint maxSize,
-        int oldSize,
-        int newSize
-    ) internal view returns (bool) {
+    function _orderSizeTooLarge(uint maxSize, int oldSize, int newSize) internal view returns (bool) {
         // Allow users to reduce an order no matter the market conditions.
         if (_sameSide(oldSize, newSize) && _abs(newSize) <= _abs(oldSize)) {
             return false;
@@ -389,8 +385,9 @@ contract PerpsV2MarketBase is Owned, MixinPerpsV2MarketSettings, IPerpsV2MarketB
      * account's margin.
      */
     function _liquidationMargin(int positionSize, uint price) internal view returns (uint lMargin) {
-        uint liquidationBuffer =
-            _abs(positionSize).multiplyDecimal(price).multiplyDecimal(_liquidationBufferRatio(_marketKey()));
+        uint liquidationBuffer = _abs(positionSize).multiplyDecimal(price).multiplyDecimal(
+            _liquidationBufferRatio(_marketKey())
+        );
         return liquidationBuffer.add(_liquidationFee(positionSize, price)).add(_keeperLiquidationFee());
     }
 
@@ -497,15 +494,10 @@ contract PerpsV2MarketBase is Owned, MixinPerpsV2MarketSettings, IPerpsV2MarketB
         return marketState.fundingSequenceLength().sub(1); // at least one element is pushed in constructor
     }
 
-    function _postTradeDetails(Position memory oldPos, TradeParams memory params)
-        internal
-        view
-        returns (
-            Position memory newPosition,
-            uint fee,
-            Status tradeStatus
-        )
-    {
+    function _postTradeDetails(
+        Position memory oldPos,
+        TradeParams memory params
+    ) internal view returns (Position memory newPosition, uint fee, Status tradeStatus) {
         // Reverts if the user is trying to submit a size-zero order.
         if (params.sizeDelta == 0) {
             return (oldPos, 0, Status.NilOrder);
@@ -533,14 +525,13 @@ contract PerpsV2MarketBase is Owned, MixinPerpsV2MarketSettings, IPerpsV2MarketB
         }
 
         // construct new position
-        Position memory newPos =
-            Position({
-                id: oldPos.id,
-                lastFundingIndex: uint64(_latestFundingIndex()),
-                margin: uint128(newMargin),
-                lastPrice: uint128(params.fillPrice),
-                size: int128(int(oldPos.size).add(params.sizeDelta))
-            });
+        Position memory newPos = Position({
+            id: oldPos.id,
+            lastFundingIndex: uint64(_latestFundingIndex()),
+            margin: uint128(newMargin),
+            lastPrice: uint128(params.fillPrice),
+            size: int128(int(oldPos.size).add(params.sizeDelta))
+        });
 
         // always allow to decrease a position, otherwise a margin of minInitialMargin can never
         // decrease a position as the price goes against them.

@@ -10,7 +10,7 @@ const { setupAllContracts } = require('./setup');
 const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 const { getDecodedLogs, decodedEventEqual, updateAggregatorRates } = require('./helpers');
 
-contract('PerpsV2Market PerpsV2MarketDelayedOrders', accounts => {	
+contract('PerpsV2Market PerpsV2MarketDelayedOrders', accounts => {
 	let perpsV2MarketSettings,
 		perpsV2Market,
 		perpsV2MarketHelper,
@@ -29,7 +29,7 @@ contract('PerpsV2Market PerpsV2MarketDelayedOrders', accounts => {
 	const trader3 = accounts[4];
 
 	console.log(accounts);
-		
+
 	const traderInitialBalance = toUnit(1000000);
 
 	const marketKeySuffix = '-perp';
@@ -92,12 +92,12 @@ contract('PerpsV2Market PerpsV2MarketDelayedOrders', accounts => {
 				'CircuitBreaker',
 				'SystemStatus',
 				'SystemSettings',
-				'Tribeone',
+				'Rwaone',
 				'CollateralManager',
 				'DebtCache',
 			],
 		}));
-		console.log("------------------------------")		
+		console.log("------------------------------")
 
 		// use implementation ABI on the proxy address to simplify calling
 		perpsV2Market = await PerpsV2Market.at(perpsV2Market.address);

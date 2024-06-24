@@ -1,6 +1,6 @@
 pragma solidity ^0.5.16;
 
-// https://docs.tribeone.io/contracts/source/contracts/owned
+// https://docs.rwaone.io/contracts/source/contracts/owned
 contract Owned {
     address public owner;
     address public nominatedOwner;
@@ -23,7 +23,7 @@ contract Owned {
         nominatedOwner = address(0);
     }
 
-    modifier onlyOwner {
+    modifier onlyOwner() {
         _onlyOwner();
         _;
     }

@@ -2,7 +2,7 @@ pragma solidity >=0.4.24;
 
 import "./IERC20.sol";
 
-// https://docs.tribeone.io/contracts/source/interfaces/iwrapper
+// https://docs.rwaone.io/contracts/source/interfaces/iwrapper
 interface IWrapper {
     function mint(uint amount) external;
 

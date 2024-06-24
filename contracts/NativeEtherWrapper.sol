@@ -13,10 +13,10 @@ import "./interfaces/IERC20.sol";
 import "./MixinResolver.sol";
 import "./interfaces/IEtherWrapper.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/nativeetherwrapper
+// https://docs.rwaone.io/contracts/source/contracts/nativeetherwrapper
 contract NativeEtherWrapper is Owned, MixinResolver {
     bytes32 private constant CONTRACT_ETHER_WRAPPER = "EtherWrapper";
-    bytes32 private constant CONTRACT_TRIBEONEHETH = "TribehETH";
+    bytes32 private constant CONTRACT_RWAONEHETH = "TribehETH";
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinResolver(_resolver) {}
 
@@ -26,7 +26,7 @@ contract NativeEtherWrapper is Owned, MixinResolver {
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory addresses = new bytes32[](2);
         addresses[0] = CONTRACT_ETHER_WRAPPER;
-        addresses[1] = CONTRACT_TRIBEONEHETH;
+        addresses[1] = CONTRACT_RWAONEHETH;
         return addresses;
     }
 
@@ -39,7 +39,7 @@ contract NativeEtherWrapper is Owned, MixinResolver {
     }
 
     function tribehETH() internal view returns (IERC20) {
-        return IERC20(requireAndGetAddress(CONTRACT_TRIBEONEHETH));
+        return IERC20(requireAndGetAddress(CONTRACT_RWAONEHETH));
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */

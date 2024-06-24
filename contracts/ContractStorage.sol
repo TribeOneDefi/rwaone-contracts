@@ -3,7 +3,7 @@ pragma solidity ^0.5.16;
 // Internal References
 import "./interfaces/IAddressResolver.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/contractstorage
+// https://docs.rwaone.io/contracts/source/contracts/contractstorage
 contract ContractStorage {
     IAddressResolver public resolverProxy;
 
@@ -49,8 +49,10 @@ contract ContractStorage {
     /* ========== MODIFIERS ========== */
 
     modifier onlyContract(bytes32 contractName) {
-        address callingContract =
-            resolverProxy.requireAndGetAddress(contractName, "Cannot find contract in Address Resolver");
+        address callingContract = resolverProxy.requireAndGetAddress(
+            contractName,
+            "Cannot find contract in Address Resolver"
+        );
         require(callingContract == msg.sender, "Can only be invoked by the configured contract");
         _;
     }

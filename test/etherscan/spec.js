@@ -72,11 +72,11 @@ describe(`Etherscan on ${network}`, () => {
 						delete output.internalType;
 					});
 
-					// Special edge-case: TokenStateTribeone on mainnet has older
+					// Special edge-case: TokenStateRwaone on mainnet has older
 					// method name "nominateOwner" over "nominateNewOwner"
 					if (
 						network === 'mainnet' &&
-						name === 'TokenStateTribeone' &&
+						name === 'TokenStateRwaone' &&
 						entry.name === 'nominateOwner'
 					) {
 						entry.name = 'nominateNewOwner';

@@ -109,7 +109,7 @@ const purgeTribes = async ({
 				cyan(
 					`${yellow(
 						'⚠ WARNING'
-					)}: This action will purge the following tribes from the Tribeone contract on ${network}:\n- ${tribesToPurge.join(
+					)}: This action will purge the following tribes from the Rwaone contract on ${network}:\n- ${tribesToPurge.join(
 						'\n- '
 					)}`
 				) + '\nDo you want to continue? (y/n) '
@@ -120,9 +120,9 @@ const purgeTribes = async ({
 		}
 	}
 
-	const { address: tribeetixAddress, source } = deployment.targets['Tribeone'];
+	const { address: tribeetixAddress, source } = deployment.targets['Rwaone'];
 	const { abi: tribeetixABI } = deployment.sources[source];
-	const Tribeone = new ethers.Contract(tribeetixAddress, tribeetixABI, wallet);
+	const Rwaone = new ethers.Contract(tribeetixAddress, tribeetixABI, wallet);
 
 	let totalBatches = 0;
 	for (const currencyKey of tribesToPurge) {
@@ -147,12 +147,12 @@ const purgeTribes = async ({
 			)
 		);
 
-		const currentTribeInHAKA = await Tribeone.tribes(toBytes32(currencyKey));
+		const currentTribeInHAKA = await Rwaone.tribes(toBytes32(currencyKey));
 
 		if (tribeAddress !== currentTribeInHAKA) {
 			console.error(
 				red(
-					`Tribe address in Tribeone for ${currencyKey} is different from what's deployed in Tribeone to the local ${DEPLOYMENT_FILENAME} of ${network} \ndeployed: ${yellow(
+					`Tribe address in Rwaone for ${currencyKey} is different from what's deployed in Rwaone to the local ${DEPLOYMENT_FILENAME} of ${network} \ndeployed: ${yellow(
 						currentTribeInHAKA
 					)}\nlocal:    ${yellow(tribeAddress)}`
 				)
@@ -224,8 +224,8 @@ const purgeTribes = async ({
 			console.log(
 				yellow(
 					`⚠⚠⚠ WARNING: totalSupply is not 0 after purge of ${currencyKey}. It is ${totalSupply}. ` +
-						`Were there 100 or 1000 holders noted above? If so then we have likely hit the tokenHolder ` +
-						`API limit; another purge is required for this tribe.`
+					`Were there 100 or 1000 holders noted above? If so then we have likely hit the tokenHolder ` +
+					`API limit; another purge is required for this tribe.`
 				)
 			);
 		}

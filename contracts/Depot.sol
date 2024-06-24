@@ -14,7 +14,7 @@ import "./SafeDecimalMath.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/IExchangeRates.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/depot
+// https://docs.rwaone.io/contracts/source/contracts/depot
 contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -72,9 +72,9 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
-    bytes32 private constant CONTRACT_TRIBEONEHUSD = "TribehUSD";
+    bytes32 private constant CONTRACT_RWAONEHUSD = "TribehUSD";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
-    bytes32 private constant CONTRACT_TRIBEONEETIX = "Tribeone";
+    bytes32 private constant CONTRACT_RWAONEETIX = "Rwaone";
 
     /* ========== CONSTRUCTOR ========== */
 
@@ -171,7 +171,7 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
                     // Transfer the ETH to the depositor. Send is used instead of transfer
                     // so a non payable contract won't block the FIFO queue on a failed
                     // ETH payable for tribes transaction. The proceeds to be sent to the
-                    // tribeone foundation funds wallet. This is to protect all depositors
+                    // rwaone foundation funds wallet. This is to protect all depositors
                     // in the queue in this rare case that may occur.
                     ethToSend = remainingToFulfill.divideDecimal(exchangeRates().rateForCurrency(ETH));
 
@@ -206,7 +206,7 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
                     // Now fulfill by transfering the ETH to the depositor. Send is used instead of transfer
                     // so a non payable contract won't block the FIFO queue on a failed
                     // ETH payable for tribes transaction. The proceeds to be sent to the
-                    // tribeone foundation funds wallet. This is to protect all depositors
+                    // rwaone foundation funds wallet. This is to protect all depositors
                     // in the queue in this rare case that may occur.
                     ethToSend = deposit.amount.divideDecimal(exchangeRates().rateForCurrency(ETH));
 
@@ -257,7 +257,9 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
      *         exchange while protecting against frontrunning by the contract owner on the exchange rate.
      * @param guaranteedRate The exchange rate (ether price) which must be honored or the call will revert.
      */
-    function exchangeEtherForTribesAtRate(uint guaranteedRate)
+    function exchangeEtherForTribesAtRate(
+        uint guaranteedRate
+    )
         external
         payable
         rateNotInvalid(ETH)
@@ -279,7 +281,7 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
         fundsWallet.transfer(msg.value);
 
         // And send them the wHAKA.
-        tribeone().transfer(msg.sender, tribeetixToSend);
+        rwaone().transfer(msg.sender, tribeetixToSend);
 
         emit Exchange("ETH", msg.value, "wHAKA", tribeetixToSend);
 
@@ -306,9 +308,12 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
      * @notice Exchange ETH to wHAKA while insisting on a particular set of rates. This allows a user to
      *         exchange while protecting against frontrunning by the contract owner on the exchange rates.
      * @param guaranteedEtherRate The ether exchange rate which must be honored or the call will revert.
-     * @param guaranteedTribeoneRate The tribeone exchange rate which must be honored or the call will revert.
+     * @param guaranteedRwaoneRate The rwaone exchange rate which must be honored or the call will revert.
      */
-    function exchangeEtherForHAKAAtRate(uint guaranteedEtherRate, uint guaranteedTribeoneRate)
+    function exchangeEtherForHAKAAtRate(
+        uint guaranteedEtherRate,
+        uint guaranteedRwaoneRate
+    )
         external
         payable
         rateNotInvalid(wHAKA)
@@ -320,8 +325,8 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
     {
         require(guaranteedEtherRate == exchangeRates().rateForCurrency(ETH), "Guaranteed ether rate would not be received");
         require(
-            guaranteedTribeoneRate == exchangeRates().rateForCurrency(wHAKA),
-            "Guaranteed tribeone rate would not be received"
+            guaranteedRwaoneRate == exchangeRates().rateForCurrency(wHAKA),
+            "Guaranteed rwaone rate would not be received"
         );
 
         return _exchangeEtherForHAKA();
@@ -337,7 +342,7 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
         tribehUSD().transferFrom(msg.sender, fundsWallet, tribeAmount);
 
         // And send them the wHAKA.
-        tribeone().transfer(msg.sender, tribeetixToSend);
+        rwaone().transfer(msg.sender, tribeetixToSend);
 
         emit Exchange("hUSD", tribeAmount, "wHAKA", tribeetixToSend);
 
@@ -348,7 +353,9 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
      * @notice Exchange hUSD for wHAKA
      * @param tribeAmount The amount of tribes the user wishes to exchange.
      */
-    function exchangeTribesForHAKA(uint tribeAmount)
+    function exchangeTribesForHAKA(
+        uint tribeAmount
+    )
         external
         rateNotInvalid(wHAKA)
         notPaused
@@ -363,9 +370,12 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
      * @notice Exchange hUSD for wHAKA while insisting on a particular rate. This allows a user to
      *         exchange while protecting against frontrunning by the contract owner on the exchange rate.
      * @param tribeAmount The amount of tribes the user wishes to exchange.
-     * @param guaranteedRate A rate (tribeone price) the caller wishes to insist upon.
+     * @param guaranteedRate A rate (rwaone price) the caller wishes to insist upon.
      */
-    function exchangeTribesForHAKAAtRate(uint tribeAmount, uint guaranteedRate)
+    function exchangeTribesForHAKAAtRate(
+        uint tribeAmount,
+        uint guaranteedRate
+    )
         external
         rateNotInvalid(wHAKA)
         notPaused
@@ -382,12 +392,12 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
      * @notice Allows the owner to withdraw wHAKA from this contract if needed.
      * @param amount The amount of wHAKA to attempt to withdraw (in 18 decimal places).
      */
-    function withdrawTribeone(uint amount) external onlyOwner {
-        tribeone().transfer(owner, amount);
+    function withdrawRwaone(uint amount) external onlyOwner {
+        rwaone().transfer(owner, amount);
 
         // We don't emit our own events here because we assume that anyone
         // who wants to watch what the Depot is doing can
-        // just watch ERC20 events from the Tribe and/or Tribeone contracts
+        // just watch ERC20 events from the Tribe and/or Rwaone contracts
         // filtered to our address.
     }
 
@@ -464,9 +474,9 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         addresses = new bytes32[](3);
-        addresses[0] = CONTRACT_TRIBEONEHUSD;
+        addresses[0] = CONTRACT_RWAONEHUSD;
         addresses[1] = CONTRACT_EXRATES;
-        addresses[2] = CONTRACT_TRIBEONEETIX;
+        addresses[2] = CONTRACT_RWAONEETIX;
     }
 
     /**
@@ -505,11 +515,11 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
     /* ========== INTERNAL VIEWS ========== */
 
     function tribehUSD() internal view returns (IERC20) {
-        return IERC20(requireAndGetAddress(CONTRACT_TRIBEONEHUSD));
+        return IERC20(requireAndGetAddress(CONTRACT_RWAONEHUSD));
     }
 
-    function tribeone() internal view returns (IERC20) {
-        return IERC20(requireAndGetAddress(CONTRACT_TRIBEONEETIX));
+    function rwaone() internal view returns (IERC20) {
+        return IERC20(requireAndGetAddress(CONTRACT_RWAONEETIX));
     }
 
     function exchangeRates() internal view returns (IExchangeRates) {

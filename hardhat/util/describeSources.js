@@ -31,7 +31,7 @@ async function _collectSourcesAndAsts({ hre }) {
 		const buildInfo = JSON.parse(fs.readFileSync(buildInfoPath, 'utf8'));
 
 		// Build the contract key to find the associated ast from the path
-		// i.e. 'contracts/Tribeone'
+		// i.e. 'contracts/Rwaone'
 		const reducedPath = dbgPath.replace(`${hre.config.paths.artifacts}/`, '');
 		const pathComponents = reducedPath.split('/');
 

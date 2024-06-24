@@ -9,7 +9,7 @@ import "./interfaces/IFuturesMarketSettings.sol";
 import "./interfaces/IFuturesMarketManager.sol";
 import "./interfaces/IFuturesMarket.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/FuturesMarketSettings
+// https://docs.rwaone.io/contracts/source/contracts/FuturesMarketSettings
 contract FuturesMarketSettings is Owned, MixinFuturesMarketSettings, IFuturesMarketSettings {
     /* ========== CONSTANTS ========== */
 
@@ -99,7 +99,9 @@ contract FuturesMarketSettings is Owned, MixinFuturesMarketSettings, IFuturesMar
         return _skewScaleUSD(_marketKey);
     }
 
-    function parameters(bytes32 _marketKey)
+    function parameters(
+        bytes32 _marketKey
+    )
         external
         view
         returns (
@@ -160,11 +162,7 @@ contract FuturesMarketSettings is Owned, MixinFuturesMarketSettings, IFuturesMar
 
     /* ---------- Setters --------- */
 
-    function _setParameter(
-        bytes32 _marketKey,
-        bytes32 key,
-        uint value
-    ) internal {
+    function _setParameter(bytes32 _marketKey, bytes32 key, uint value) internal {
         _flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, keccak256(abi.encodePacked(_marketKey, key)), value);
         emit ParameterUpdated(_marketKey, key, value);
     }

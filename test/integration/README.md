@@ -1,6 +1,6 @@
 # Integration tests
 
-These tests deploy real instances of Tribeone in local evm and/or ovm chains, using the same deploy script used in production and test the main features of the system, such as staking, exchanging etc. Coverage is low, but all tests are run against realistic or integrated environments.
+These tests deploy real instances of Rwaone in local evm and/or ovm chains, using the same deploy script used in production and test the main features of the system, such as staking, exchanging etc. Coverage is low, but all tests are run against realistic or integrated environments.
 
 ## Basic usage
 

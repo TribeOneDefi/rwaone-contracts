@@ -80,7 +80,7 @@ const constants = {
 	CONFIG_FILENAME: 'config.json',
 	RELEASES_FILENAME: 'releases.json',
 	PARAMS_FILENAME: 'params.json',
-	TRIBEONES_FILENAME: 'tribes.json',
+	RWAONES_FILENAME: 'tribes.json',
 	STAKING_REWARDS_FILENAME: 'rewards.json',
 	SHORTING_REWARDS_FILENAME: 'shorting-rewards.json',
 	OWNER_ACTIONS_FILENAME: 'owner-actions.json',
@@ -149,7 +149,7 @@ const defaults = {
 		equities: w3utils.toWei('0.003'),
 		crypto: w3utils.toWei('0.01'),
 		index: w3utils.toWei('0.01'),
-		realEstate:w3utils.toWei('0.01')
+		realEstate: w3utils.toWei('0.01')
 	},
 	EXCHANGE_DYNAMIC_FEE_THRESHOLD: w3utils.toWei('0.0025'),
 	EXCHANGE_DYNAMIC_FEE_WEIGHT_DECAY: w3utils.toWei('0.95'), // dynamic fee weight decay for each round
@@ -351,11 +351,11 @@ const getFeeds = ({ network, path, fs, deploymentPath, useOvm = false } = {}) =>
 		const pathToFeeds = deploymentPath
 			? path.join(deploymentPath, constants.FEEDS_FILENAME)
 			: getPathToNetwork({
-					network,
-					path,
-					useOvm,
-					file: constants.FEEDS_FILENAME,
-			  });
+				network,
+				path,
+				useOvm,
+				file: constants.FEEDS_FILENAME,
+			});
 		if (!fs.existsSync(pathToFeeds)) {
 			throw Error(`Cannot find feeds file.`);
 		}
@@ -376,11 +376,11 @@ const getOffchainFeeds = ({ network, path, fs, deploymentPath, useOvm = false } 
 		const pathToFeeds = deploymentPath
 			? path.join(deploymentPath, constants.OFFCHAIN_FEEDS_FILENAME)
 			: getPathToNetwork({
-					network,
-					path,
-					useOvm,
-					file: constants.OFFCHAIN_FEEDS_FILENAME,
-			  });
+				network,
+				path,
+				useOvm,
+				file: constants.OFFCHAIN_FEEDS_FILENAME,
+			});
 		if (!fs.existsSync(pathToFeeds)) {
 			throw Error(`Cannot find off-chain feeds file.`);
 		}
@@ -406,8 +406,8 @@ const getTribes = ({
 		tribes = data[getFolderNameForNetwork({ network, useOvm })].tribes;
 	} else {
 		const pathToTribeList = deploymentPath
-			? path.join(deploymentPath, constants.TRIBEONES_FILENAME)
-			: getPathToNetwork({ network, useOvm, path, file: constants.TRIBEONES_FILENAME });
+			? path.join(deploymentPath, constants.RWAONES_FILENAME)
+			: getPathToNetwork({ network, useOvm, path, file: constants.RWAONES_FILENAME });
 		if (!fs.existsSync(pathToTribeList)) {
 			throw Error(`Cannot find tribe list.`);
 		}
@@ -466,11 +466,11 @@ const getFuturesMarkets = ({
 		const pathToFuturesMarketsList = deploymentPath
 			? path.join(deploymentPath, constants.FUTURES_MARKETS_FILENAME)
 			: getPathToNetwork({
-					network,
-					path,
-					useOvm,
-					file: constants.FUTURES_MARKETS_FILENAME,
-			  });
+				network,
+				path,
+				useOvm,
+				file: constants.FUTURES_MARKETS_FILENAME,
+			});
 		if (!fs.existsSync(pathToFuturesMarketsList)) {
 			futuresMarkets = [];
 		} else {
@@ -507,11 +507,11 @@ const getPerpsMarkets = ({
 		const pathToPerpsMarketsList = deploymentPath
 			? path.join(deploymentPath, constants.PERPS_V2_MARKETS_FILENAME)
 			: getPathToNetwork({
-					network,
-					path,
-					useOvm,
-					file: constants.PERPS_V2_MARKETS_FILENAME,
-			  });
+				network,
+				path,
+				useOvm,
+				file: constants.PERPS_V2_MARKETS_FILENAME,
+			});
 
 		if (!fs.existsSync(pathToPerpsMarketsList)) {
 			perpsMarkets = [];
@@ -667,11 +667,11 @@ const getStakingRewards = ({
 	const pathToStakingRewardsList = deploymentPath
 		? path.join(deploymentPath, constants.STAKING_REWARDS_FILENAME)
 		: getPathToNetwork({
-				network,
-				path,
-				useOvm,
-				file: constants.STAKING_REWARDS_FILENAME,
-		  });
+			network,
+			path,
+			useOvm,
+			file: constants.STAKING_REWARDS_FILENAME,
+		});
 	if (!fs.existsSync(pathToStakingRewardsList)) {
 		return [];
 	}
@@ -695,11 +695,11 @@ const getShortingRewards = ({
 	const pathToShortingRewardsList = deploymentPath
 		? path.join(deploymentPath, constants.SHORTING_REWARDS_FILENAME)
 		: getPathToNetwork({
-				network,
-				path,
-				useOvm,
-				file: constants.SHORTING_REWARDS_FILENAME,
-		  });
+			network,
+			path,
+			useOvm,
+			file: constants.SHORTING_REWARDS_FILENAME,
+		});
 	if (!fs.existsSync(pathToShortingRewardsList)) {
 		return [];
 	}
@@ -802,10 +802,10 @@ const getSuspensionReasons = ({ code = undefined } = {}) => {
 		2: 'Market Closure',
 		4: 'iTribe Reprice',
 		6: 'Index Rebalance',
-		55: 'Circuit Breaker (Phase one)', // https://sips.tribeone.io/SIPS/sip-55
-		65: 'Decentralized Circuit Breaker (Phase two)', // https://sips.tribeone.io/SIPS/sip-65
+		55: 'Circuit Breaker (Phase one)', // https://sips.rwaone.io/SIPS/sip-55
+		65: 'Decentralized Circuit Breaker (Phase two)', // https://sips.rwaone.io/SIPS/sip-65
 		80: 'Futures configuration', // pausing according to deployment configuration
-		231: 'Latency Breaker', // https://sips.tribeone.io/sips/sip-231/
+		231: 'Latency Breaker', // https://sips.rwaone.io/sips/sip-231/
 		99999: 'Emergency',
 	};
 
@@ -813,7 +813,7 @@ const getSuspensionReasons = ({ code = undefined } = {}) => {
 };
 
 /**
- * Retrieve the list of tokens used in the Tribeone protocol
+ * Retrieve the list of tokens used in the Rwaone protocol
  */
 const getTokens = ({ network = 'mainnet', path, fs, useOvm = false } = {}) => {
 	const tribes = getTribes({ network, useOvm, path, fs });
@@ -825,8 +825,8 @@ const getTokens = ({ network = 'mainnet', path, fs, useOvm = false } = {}) => {
 			{
 				symbol: 'wHAKA',
 				asset: 'wHAKA',
-				name: 'Tribeone',
-				address: targets.ProxyTribeone.address,
+				name: 'Rwaone',
+				address: targets.ProxyRwaone.address,
 				decimals: 18,
 			},
 			feeds['wHAKA'].feed ? { feed: feeds['wHAKA'].feed } : {}

@@ -19,7 +19,7 @@ import "./MixinSystemSettings.sol";
 // Libraries
 import "./SafeDecimalMath.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/wrapper
+// https://docs.rwaone.io/contracts/source/contracts/wrapper
 contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrapper {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -29,7 +29,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
     bytes32 internal constant hUSD = "hUSD";
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
-    bytes32 private constant CONTRACT_TRIBEONE_HUSD = "TribehUSD";
+    bytes32 private constant CONTRACT_RWAONE_HUSD = "TribehUSD";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
     bytes32 private constant CONTRACT_SYSTEMSTATUS = "SystemStatus";
@@ -62,7 +62,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](6);
-        newAddresses[0] = CONTRACT_TRIBEONE_HUSD;
+        newAddresses[0] = CONTRACT_RWAONE_HUSD;
         newAddresses[1] = tribeContractName;
         newAddresses[2] = CONTRACT_EXRATES;
         newAddresses[3] = CONTRACT_DEBTCACHE;
@@ -74,7 +74,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
 
     /* ========== INTERNAL VIEWS ========== */
     function tribehUSD() internal view returns (ITribe) {
-        return ITribe(requireAndGetAddress(CONTRACT_TRIBEONE_HUSD));
+        return ITribe(requireAndGetAddress(CONTRACT_RWAONE_HUSD));
     }
 
     function tribe() internal view returns (ITribe) {
@@ -294,24 +294,24 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
             }
 
             switch mload(0x00)
-                case 0xff {
-                    // token is not fully ERC20 compatible, didn't return anything, assume it was successful
-                    success := 1
-                }
-                case 0x01 {
-                    success := 1
-                }
-                case 0x00 {
-                    success := 0
-                }
-                default {
-                    // unexpected value, what could this be?
-                    revert(0, 0)
-                }
+            case 0xff {
+                // token is not fully ERC20 compatible, didn't return anything, assume it was successful
+                success := 1
+            }
+            case 0x01 {
+                success := 1
+            }
+            case 0x00 {
+                success := 0
+            }
+            default {
+                // unexpected value, what could this be?
+                revert(0, 0)
+            }
         }
     }
 
-    modifier issuanceActive {
+    modifier issuanceActive() {
         systemStatus().requireIssuanceActive();
         _;
     }

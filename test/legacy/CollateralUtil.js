@@ -106,7 +106,7 @@ contract('CollateralUtil', async accounts => {
 			accounts,
 			tribes,
 			contracts: [
-				'Tribeone',
+				'Rwaone',
 				'FeePool',
 				'AddressResolver',
 				'ExchangeRates',

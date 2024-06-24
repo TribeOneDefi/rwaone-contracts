@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import "./Owned.sol";
 import "./MixinResolver.sol";
 import "./MixinSystemSettings.sol";
-import "./interfaces/IBaseTribeoneBridge.sol";
+import "./interfaces/IBaseRwaoneBridge.sol";
 
 // Libraries
 import "./Math.sol";
@@ -13,7 +13,7 @@ import "./SafeDecimalMath.sol";
 import "openzeppelin-solidity-2.3.0/contracts/token/ERC20/SafeERC20.sol";
 
 // Internal references
-import "./interfaces/ITribeone.sol";
+import "./interfaces/IRwaone.sol";
 import "./interfaces/IRewardEscrowV2.sol";
 import "./interfaces/IIssuer.sol";
 import "@eth-optimism/contracts/iOVM/bridge/messaging/iAbs_BaseCrossDomainMessenger.sol";
@@ -30,7 +30,7 @@ contract BaseDebtMigrator is Owned, MixinSystemSettings {
 
     bytes32 private constant CONTRACT_EXT_MESSENGER = "ext:Messenger";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
-    bytes32 internal constant CONTRACT_TRIBEONEETIX = "Tribeone";
+    bytes32 internal constant CONTRACT_RWAONEETIX = "Rwaone";
     bytes32 private constant CONTRACT_REWARDESCROW = "RewardEscrowV2";
 
     bytes32 private constant DEBT_TRANSFER_NAMESPACE = "DebtTransfer";
@@ -59,7 +59,7 @@ contract BaseDebtMigrator is Owned, MixinSystemSettings {
     }
 
     function _tribeetixERC20() internal view returns (IERC20) {
-        return IERC20(requireAndGetAddress(CONTRACT_TRIBEONEETIX));
+        return IERC20(requireAndGetAddress(CONTRACT_RWAONEETIX));
     }
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
@@ -68,7 +68,7 @@ contract BaseDebtMigrator is Owned, MixinSystemSettings {
         newAddresses[0] = CONTRACT_EXT_MESSENGER;
         newAddresses[1] = CONTRACT_REWARDESCROW;
         newAddresses[2] = CONTRACT_ISSUER;
-        newAddresses[3] = CONTRACT_TRIBEONEETIX;
+        newAddresses[3] = CONTRACT_RWAONEETIX;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 

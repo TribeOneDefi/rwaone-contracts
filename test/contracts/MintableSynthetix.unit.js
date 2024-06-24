@@ -6,15 +6,15 @@ const { toBytes32 } = require('../..');
 const BN = require('bn.js');
 const { smock } = require('@defi-wonderland/smock');
 
-const MintableTribeone = artifacts.require('MintableTribeone');
+const MintableRwaone = artifacts.require('MintableRwaone');
 
-contract('MintableTribeone (unit tests)', accounts => {
+contract('MintableRwaone (unit tests)', accounts => {
 	const [owner, tribeetixBridgeToBase, user1, mockAddress] = accounts;
 
 	it('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
-			abi: MintableTribeone.abi,
-			ignoreParents: ['BaseTribeone'],
+			abi: MintableRwaone.abi,
+			ignoreParents: ['BaseRwaone'],
 			expected: [],
 		});
 	});
@@ -26,7 +26,7 @@ contract('MintableTribeone (unit tests)', accounts => {
 		let rewardsDistribution;
 		let systemStatus;
 		let rewardEscrowV2;
-		const TRIBEONEETIX_TOTAL_SUPPLY = toWei('100000000');
+		const RWAONEETIX_TOTAL_SUPPLY = toWei('100000000');
 
 		beforeEach(async () => {
 			tokenState = await smock.fake('TokenState');
@@ -37,7 +37,7 @@ contract('MintableTribeone (unit tests)', accounts => {
 			rewardEscrowV2 = await smock.fake('IRewardEscrowV2');
 			await resolver.importAddresses(
 				[
-					'TribeoneBridgeToBase',
+					'RwaoneBridgeToBase',
 					'SystemStatus',
 					'Exchanger',
 					'Issuer',
@@ -64,9 +64,9 @@ contract('MintableTribeone (unit tests)', accounts => {
 
 		beforeEach(async () => {
 			// stubs
-			tokenState.setBalanceOf.returns(() => {});
+			tokenState.setBalanceOf.returns(() => { });
 			tokenState.balanceOf.returns(() => web3.utils.toWei('1'));
-			proxy._emit.returns(() => {});
+			proxy._emit.returns(() => { });
 			rewardsDistribution.distributeRewards.returns(() => true);
 		});
 
@@ -74,8 +74,8 @@ contract('MintableTribeone (unit tests)', accounts => {
 			let instance;
 			beforeEach(async () => {
 				instance = await artifacts
-					.require('MintableTribeone')
-					.new(proxy.address, tokenState.address, owner, TRIBEONEETIX_TOTAL_SUPPLY, resolver.address);
+					.require('MintableRwaone')
+					.new(proxy.address, tokenState.address, owner, RWAONEETIX_TOTAL_SUPPLY, resolver.address);
 				await instance.rebuildCache();
 			});
 
@@ -83,13 +83,13 @@ contract('MintableTribeone (unit tests)', accounts => {
 				assert.equal(await instance.proxy(), proxy.address);
 				assert.equal(await instance.tokenState(), tokenState.address);
 				assert.equal(await instance.owner(), owner);
-				assert.equal(await instance.totalSupply(), TRIBEONEETIX_TOTAL_SUPPLY);
+				assert.equal(await instance.totalSupply(), RWAONEETIX_TOTAL_SUPPLY);
 				assert.equal(await instance.resolver(), resolver.address);
 			});
 
 			describe('mintSecondary()', async () => {
 				describe('failure modes', () => {
-					it('should only allow TribeoneBridgeToBase to call mintSecondary()', async () => {
+					it('should only allow RwaoneBridgeToBase to call mintSecondary()', async () => {
 						await onlyGivenAddressCanInvoke({
 							fnc: instance.mintSecondary,
 							args: [user1, 100],
@@ -109,7 +109,7 @@ contract('MintableTribeone (unit tests)', accounts => {
 					});
 
 					it('should increase the total supply', async () => {
-						const newSupply = new BN(TRIBEONEETIX_TOTAL_SUPPLY).add(new BN(amount));
+						const newSupply = new BN(RWAONEETIX_TOTAL_SUPPLY).add(new BN(amount));
 						assert.bnEqual(await instance.totalSupply(), newSupply);
 					});
 				});
@@ -118,7 +118,7 @@ contract('MintableTribeone (unit tests)', accounts => {
 			describe('mintSecondaryRewards()', async () => {
 				const amount = 100;
 				describe('failure modes', () => {
-					it('should only allow TribeoneBridgeToBase to call mintSecondaryRewards()', async () => {
+					it('should only allow RwaoneBridgeToBase to call mintSecondaryRewards()', async () => {
 						await onlyGivenAddressCanInvoke({
 							fnc: instance.mintSecondaryRewards,
 							args: [amount],
@@ -137,7 +137,7 @@ contract('MintableTribeone (unit tests)', accounts => {
 					});
 
 					it('should increase the total supply', async () => {
-						const newSupply = new BN(TRIBEONEETIX_TOTAL_SUPPLY).add(new BN(amount));
+						const newSupply = new BN(RWAONEETIX_TOTAL_SUPPLY).add(new BN(amount));
 						assert.bnEqual(await instance.totalSupply(), newSupply);
 					});
 				});
@@ -146,7 +146,7 @@ contract('MintableTribeone (unit tests)', accounts => {
 			describe('burnSecondary()', async () => {
 				const amount = 100;
 				describe('failure modes', () => {
-					it('should only allow TribeoneBridgeToBase to call burnSecondary()', async () => {
+					it('should only allow RwaoneBridgeToBase to call burnSecondary()', async () => {
 						await onlyGivenAddressCanInvoke({
 							fnc: instance.burnSecondary,
 							args: [user1, amount],
@@ -164,7 +164,7 @@ contract('MintableTribeone (unit tests)', accounts => {
 					});
 
 					it('should decrease the total supply', async () => {
-						const newSupply = new BN(TRIBEONEETIX_TOTAL_SUPPLY).sub(new BN(amount));
+						const newSupply = new BN(RWAONEETIX_TOTAL_SUPPLY).sub(new BN(amount));
 						assert.bnEqual(await instance.totalSupply(), newSupply);
 					});
 				});

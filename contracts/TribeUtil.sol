@@ -2,16 +2,16 @@ pragma solidity ^0.5.16;
 
 // Inheritance
 import "./interfaces/ITribe.sol";
-import "./interfaces/ITribeone.sol";
+import "./interfaces/IRwaone.sol";
 import "./interfaces/IExchangeRates.sol";
 import "./interfaces/IAddressResolver.sol";
 import "./interfaces/IERC20.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/tribeutil
+// https://docs.rwaone.io/contracts/source/contracts/tribeutil
 contract TribeUtil {
     IAddressResolver public addressResolverProxy;
 
-    bytes32 internal constant CONTRACT_TRIBEONEETIX = "Tribeone";
+    bytes32 internal constant CONTRACT_RWAONEETIX = "Rwaone";
     bytes32 internal constant CONTRACT_EXRATES = "ExchangeRates";
     bytes32 internal constant HUSD = "hUSD";
 
@@ -19,8 +19,8 @@ contract TribeUtil {
         addressResolverProxy = IAddressResolver(resolver);
     }
 
-    function _tribeetix() internal view returns (ITribeone) {
-        return ITribeone(addressResolverProxy.requireAndGetAddress(CONTRACT_TRIBEONEETIX, "Missing Tribeone address"));
+    function _tribeetix() internal view returns (IRwaone) {
+        return IRwaone(addressResolverProxy.requireAndGetAddress(CONTRACT_RWAONEETIX, "Missing Rwaone address"));
     }
 
     function _exchangeRates() internal view returns (IExchangeRates) {
@@ -28,11 +28,11 @@ contract TribeUtil {
     }
 
     function totalTribesInKey(address account, bytes32 currencyKey) external view returns (uint total) {
-        ITribeone tribeone = _tribeetix();
+        IRwaone rwaone = _tribeetix();
         IExchangeRates exchangeRates = _exchangeRates();
-        uint numTribes = tribeone.availableTribeCount();
+        uint numTribes = rwaone.availableTribeCount();
         for (uint i = 0; i < numTribes; i++) {
-            ITribe tribe = tribeone.availableTribes(i);
+            ITribe tribe = rwaone.availableTribes(i);
             total += exchangeRates.effectiveValue(
                 tribe.currencyKey(),
                 IERC20(address(tribe)).balanceOf(account),
@@ -42,23 +42,15 @@ contract TribeUtil {
         return total;
     }
 
-    function tribesBalances(address account)
-        external
-        view
-        returns (
-            bytes32[] memory,
-            uint[] memory,
-            uint[] memory
-        )
-    {
-        ITribeone tribeone = _tribeetix();
+    function tribesBalances(address account) external view returns (bytes32[] memory, uint[] memory, uint[] memory) {
+        IRwaone rwaone = _tribeetix();
         IExchangeRates exchangeRates = _exchangeRates();
-        uint numTribes = tribeone.availableTribeCount();
+        uint numTribes = rwaone.availableTribeCount();
         bytes32[] memory currencyKeys = new bytes32[](numTribes);
         uint[] memory balances = new uint[](numTribes);
         uint[] memory hUSDBalances = new uint[](numTribes);
         for (uint i = 0; i < numTribes; i++) {
-            ITribe tribe = tribeone.availableTribes(i);
+            ITribe tribe = rwaone.availableTribes(i);
             currencyKeys[i] = tribe.currencyKey();
             balances[i] = IERC20(address(tribe)).balanceOf(account);
             hUSDBalances[i] = exchangeRates.effectiveValue(currencyKeys[i], balances[i], HUSD);
@@ -71,24 +63,16 @@ contract TribeUtil {
         return (currencyKeys, _exchangeRates().ratesForCurrencies(currencyKeys));
     }
 
-    function tribesTotalSupplies()
-        external
-        view
-        returns (
-            bytes32[] memory,
-            uint256[] memory,
-            uint256[] memory
-        )
-    {
-        ITribeone tribeone = _tribeetix();
+    function tribesTotalSupplies() external view returns (bytes32[] memory, uint256[] memory, uint256[] memory) {
+        IRwaone rwaone = _tribeetix();
         IExchangeRates exchangeRates = _exchangeRates();
 
-        uint256 numTribes = tribeone.availableTribeCount();
+        uint256 numTribes = rwaone.availableTribeCount();
         bytes32[] memory currencyKeys = new bytes32[](numTribes);
         uint256[] memory balances = new uint256[](numTribes);
         uint256[] memory hUSDBalances = new uint256[](numTribes);
         for (uint256 i = 0; i < numTribes; i++) {
-            ITribe tribe = tribeone.availableTribes(i);
+            ITribe tribe = rwaone.availableTribes(i);
             currencyKeys[i] = tribe.currencyKey();
             balances[i] = IERC20(address(tribe)).totalSupply();
             hUSDBalances[i] = exchangeRates.effectiveValue(currencyKeys[i], balances[i], HUSD);

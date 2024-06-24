@@ -12,7 +12,7 @@ import "./SafeDecimalMath.sol";
 
 // Internal references
 import "./interfaces/ITribe.sol";
-import "./interfaces/ITribeoneDebtShare.sol";
+import "./interfaces/IRwaoneDebtShare.sol";
 import "./interfaces/IExchanger.sol";
 import "./interfaces/IDelegateApprovals.sol";
 import "./interfaces/IExchangeRates.sol";
@@ -40,20 +40,12 @@ interface IIssuerInternalDebtCache {
 
     function totalNonSnxBackedDebt() external view returns (uint excludedDebt, bool isInvalid);
 
-    function cacheInfo()
-        external
-        view
-        returns (
-            uint cachedDebt,
-            uint timestamp,
-            bool isInvalid,
-            bool isStale
-        );
+    function cacheInfo() external view returns (uint cachedDebt, uint timestamp, bool isInvalid, bool isStale);
 
     function updateCachedhUSDDebt(int amount) external;
 }
 
-// https://docs.tribeone.io/contracts/source/contracts/issuer
+// https://docs.rwaone.io/contracts/source/contracts/issuer
 contract Issuer is Owned, MixinSystemSettings, IIssuer {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -76,24 +68,24 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
-    bytes32 private constant CONTRACT_TRIBEONEETIX = "Tribeone";
+    bytes32 private constant CONTRACT_RWAONEETIX = "Rwaone";
     bytes32 private constant CONTRACT_EXCHANGER = "Exchanger";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
     bytes32 private constant CONTRACT_CIRCUIT_BREAKER = "CircuitBreaker";
-    bytes32 private constant CONTRACT_TRIBEONEETIXDEBTSHARE = "TribeoneDebtShare";
+    bytes32 private constant CONTRACT_RWAONEETIXDEBTSHARE = "RwaoneDebtShare";
     bytes32 private constant CONTRACT_FEEPOOL = "FeePool";
     bytes32 private constant CONTRACT_DELEGATEAPPROVALS = "DelegateApprovals";
     bytes32 private constant CONTRACT_REWARDESCROW_V2 = "RewardEscrowV2";
     bytes32 private constant CONTRACT_LIQUIDATOR = "Liquidator";
     bytes32 private constant CONTRACT_LIQUIDATOR_REWARDS = "LiquidatorRewards";
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
-    bytes32 private constant CONTRACT_TRIBEONEREDEEMER = "TribeRedeemer";
-    bytes32 private constant CONTRACT_TRIBEONEETIXBRIDGETOOPTIMISM = "TribeoneBridgeToOptimism";
-    bytes32 private constant CONTRACT_TRIBEONEETIXBRIDGETOBASE = "TribeoneBridgeToBase";
+    bytes32 private constant CONTRACT_RWAONEREDEEMER = "TribeRedeemer";
+    bytes32 private constant CONTRACT_RWAONEETIXBRIDGETOOPTIMISM = "RwaoneBridgeToOptimism";
+    bytes32 private constant CONTRACT_RWAONEETIXBRIDGETOBASE = "RwaoneBridgeToBase";
     bytes32 private constant CONTRACT_DEBT_MIGRATOR_ON_ETHEREUM = "DebtMigratorOnEthereum";
     bytes32 private constant CONTRACT_DEBT_MIGRATOR_ON_OPTIMISM = "DebtMigratorOnOptimism";
 
-    bytes32 private constant CONTRACT_EXT_AGGREGATOR_ISSUED_TRIBEONES = "ext:AggregatorIssuedTribes";
+    bytes32 private constant CONTRACT_EXT_AGGREGATOR_ISSUED_RWAONES = "ext:AggregatorIssuedTribes";
     bytes32 private constant CONTRACT_EXT_AGGREGATOR_DEBT_RATIO = "ext:AggregatorDebtRatio";
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinSystemSettings(_resolver) {}
@@ -102,25 +94,25 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](14);
-        newAddresses[0] = CONTRACT_TRIBEONEETIX;
+        newAddresses[0] = CONTRACT_RWAONEETIX;
         newAddresses[1] = CONTRACT_EXCHANGER;
         newAddresses[2] = CONTRACT_EXRATES;
         newAddresses[3] = CONTRACT_CIRCUIT_BREAKER;
-        newAddresses[4] = CONTRACT_TRIBEONEETIXDEBTSHARE;
+        newAddresses[4] = CONTRACT_RWAONEETIXDEBTSHARE;
         newAddresses[5] = CONTRACT_FEEPOOL;
         newAddresses[6] = CONTRACT_DELEGATEAPPROVALS;
         newAddresses[7] = CONTRACT_REWARDESCROW_V2;
         newAddresses[8] = CONTRACT_LIQUIDATOR;
         newAddresses[9] = CONTRACT_LIQUIDATOR_REWARDS;
         newAddresses[10] = CONTRACT_DEBTCACHE;
-        newAddresses[11] = CONTRACT_TRIBEONEREDEEMER;
-        newAddresses[12] = CONTRACT_EXT_AGGREGATOR_ISSUED_TRIBEONES;
+        newAddresses[11] = CONTRACT_RWAONEREDEEMER;
+        newAddresses[12] = CONTRACT_EXT_AGGREGATOR_ISSUED_RWAONES;
         newAddresses[13] = CONTRACT_EXT_AGGREGATOR_DEBT_RATIO;
         return combineArrays(existingAddresses, newAddresses);
     }
 
     function tribeetixERC20() internal view returns (IERC20) {
-        return IERC20(requireAndGetAddress(CONTRACT_TRIBEONEETIX));
+        return IERC20(requireAndGetAddress(CONTRACT_RWAONEETIX));
     }
 
     function exchanger() internal view returns (IExchanger) {
@@ -135,8 +127,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return ICircuitBreaker(requireAndGetAddress(CONTRACT_CIRCUIT_BREAKER));
     }
 
-    function tribeetixDebtShare() internal view returns (ITribeoneDebtShare) {
-        return ITribeoneDebtShare(requireAndGetAddress(CONTRACT_TRIBEONEETIXDEBTSHARE));
+    function tribeetixDebtShare() internal view returns (IRwaoneDebtShare) {
+        return IRwaoneDebtShare(requireAndGetAddress(CONTRACT_RWAONEETIXDEBTSHARE));
     }
 
     function liquidator() internal view returns (ILiquidator) {
@@ -160,20 +152,13 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     }
 
     function tribeRedeemer() internal view returns (ITribeRedeemer) {
-        return ITribeRedeemer(requireAndGetAddress(CONTRACT_TRIBEONEREDEEMER));
+        return ITribeRedeemer(requireAndGetAddress(CONTRACT_RWAONEREDEEMER));
     }
 
-    function allNetworksDebtInfo()
-        public
-        view
-        returns (
-            uint256 debt,
-            uint256 sharesSupply,
-            bool isStale
-        )
-    {
-        (, int256 rawIssuedTribes, , uint issuedTribesUpdatedAt, ) =
-            _latestRoundData(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_ISSUED_TRIBEONES));
+    function allNetworksDebtInfo() public view returns (uint256 debt, uint256 sharesSupply, bool isStale) {
+        (, int256 rawIssuedTribes, , uint issuedTribesUpdatedAt, ) = _latestRoundData(
+            requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_ISSUED_RWAONES)
+        );
 
         (uint rawRatio, uint ratioUpdatedAt) = _rawDebtRatioAndUpdatedAt();
 
@@ -195,23 +180,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return exchangeRates().rateAndInvalid(currencyKey);
     }
 
-    function _latestRoundData(address aggregator)
-        internal
-        view
-        returns (
-            uint80,
-            int256,
-            uint256,
-            uint256,
-            uint80
-        )
-    {
+    function _latestRoundData(address aggregator) internal view returns (uint80, int256, uint256, uint256, uint80) {
         return AggregatorV2V3Interface(aggregator).latestRoundData();
     }
 
     function _rawDebtRatioAndUpdatedAt() internal view returns (uint, uint) {
-        (, int256 rawRatioInt, , uint ratioUpdatedAt, ) =
-            _latestRoundData(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_DEBT_RATIO));
+        (, int256 rawRatioInt, , uint ratioUpdatedAt, ) = _latestRoundData(
+            requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_DEBT_RATIO)
+        );
         return (uint(rawRatioInt), ratioUpdatedAt);
     }
 
@@ -253,11 +229,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     // Returns the total value of the debt pool in currency specified by `currencyKey`.
     // To return only the wHAKA-backed debt, set `excludeCollateral` to true.
-    function _totalIssuedTribes(bytes32 currencyKey, bool excludeCollateral)
-        internal
-        view
-        returns (uint totalIssued, bool anyRateIsInvalid)
-    {
+    function _totalIssuedTribes(
+        bytes32 currencyKey,
+        bool excludeCollateral
+    ) internal view returns (uint totalIssued, bool anyRateIsInvalid) {
         (uint debt, , bool cacheIsInvalid, bool cacheIsStale) = debtCache().cacheInfo();
         anyRateIsInvalid = cacheIsInvalid || cacheIsStale;
 
@@ -276,15 +251,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return (debt.divideDecimalRound(currencyRate), anyRateIsInvalid || currencyRateInvalid);
     }
 
-    function _debtBalanceOfAndTotalDebt(uint debtShareBalance, bytes32 currencyKey)
-        internal
-        view
-        returns (
-            uint debtBalance,
-            uint totalSystemValue,
-            bool anyRateIsInvalid
-        )
-    {
+    function _debtBalanceOfAndTotalDebt(
+        uint debtShareBalance,
+        bytes32 currencyKey
+    ) internal view returns (uint debtBalance, uint totalSystemValue, bool anyRateIsInvalid) {
         // What's the total value of the system excluding ETH backed tribes in their requested currency?
         (uint snxBackedAmount, , bool debtInfoStale) = allNetworksDebtInfo();
 
@@ -310,16 +280,9 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return flexibleStorage().getUIntValue(CONTRACT_NAME, keccak256(abi.encodePacked(LAST_ISSUE_EVENT, account)));
     }
 
-    function _remainingIssuableTribes(address _issuer)
-        internal
-        view
-        returns (
-            uint maxIssuable,
-            uint alreadyIssued,
-            uint totalSystemDebt,
-            bool anyRateIsInvalid
-        )
-    {
+    function _remainingIssuableTribes(
+        address _issuer
+    ) internal view returns (uint maxIssuable, uint alreadyIssued, uint totalSystemDebt, bool anyRateIsInvalid) {
         (alreadyIssued, totalSystemDebt, anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_debtShareBalanceOf(_issuer), hUSD);
         (uint issuable, bool isInvalid) = _maxIssuableTribes(_issuer);
         maxIssuable = issuable;
@@ -350,14 +313,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     }
 
     function _collateralisationRatio(address _issuer) internal view returns (uint, bool) {
-        uint totalOwnedTribeone = _collateral(_issuer);
+        uint totalOwnedRwaone = _collateral(_issuer);
 
         (uint debtBalance, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_debtShareBalanceOf(_issuer), wHAKA);
 
         // it's more gas intensive to put this check here if they have 0 wHAKA, but it complies with the interface
-        if (totalOwnedTribeone == 0) return (0, anyRateIsInvalid);
+        if (totalOwnedRwaone == 0) return (0, anyRateIsInvalid);
 
-        return (debtBalance.divideDecimalRound(totalOwnedTribeone), anyRateIsInvalid);
+        return (debtBalance.divideDecimalRound(totalOwnedRwaone), anyRateIsInvalid);
     }
 
     function _collateral(address account) internal view returns (uint) {
@@ -396,11 +359,9 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (cratio, ) = _collateralisationRatio(_issuer);
     }
 
-    function collateralisationRatioAndAnyRatesInvalid(address _issuer)
-        external
-        view
-        returns (uint cratio, bool anyRateIsInvalid)
-    {
+    function collateralisationRatioAndAnyRatesInvalid(
+        address _issuer
+    ) external view returns (uint cratio, bool anyRateIsInvalid) {
         return _collateralisationRatio(_issuer);
     }
 
@@ -418,15 +379,9 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (debtBalance, , ) = _debtBalanceOfAndTotalDebt(debtShareBalance, currencyKey);
     }
 
-    function remainingIssuableTribes(address _issuer)
-        external
-        view
-        returns (
-            uint maxIssuable,
-            uint alreadyIssued,
-            uint totalSystemDebt
-        )
-    {
+    function remainingIssuableTribes(
+        address _issuer
+    ) external view returns (uint maxIssuable, uint alreadyIssued, uint totalSystemDebt) {
         (maxIssuable, alreadyIssued, totalSystemDebt, ) = _remainingIssuableTribes(_issuer);
     }
 
@@ -435,11 +390,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return maxIssuable;
     }
 
-    function transferableTribeoneAndAnyRateIsInvalid(address account, uint balance)
-        external
-        view
-        returns (uint transferable, bool anyRateIsInvalid)
-    {
+    function transferableRwaoneAndAnyRateIsInvalid(
+        address account,
+        uint balance
+    ) external view returns (uint transferable, bool anyRateIsInvalid) {
         // How many wHAKA do they have, excluding escrow?
         // Note: We're excluding escrow here because we're interested in their transferable amount
         // and escrowed wHAKA are not transferable.
@@ -447,16 +401,16 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // How many of those will be locked by the amount they've issued?
         // Assuming issuance ratio is 20%, then issuing 20 wHAKA of value would require
         // 100 wHAKA to be locked in their wallet to maintain their collateralisation ratio
-        // The locked tribeone value can exceed their balance.
+        // The locked rwaone value can exceed their balance.
         uint debtBalance;
         (debtBalance, , anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_debtShareBalanceOf(account), wHAKA);
-        uint lockedTribeoneValue = debtBalance.divideDecimalRound(getIssuanceRatio());
+        uint lockedRwaoneValue = debtBalance.divideDecimalRound(getIssuanceRatio());
 
         // If we exceed the balance, no wHAKA are transferable, otherwise the difference is.
-        if (lockedTribeoneValue >= balance) {
+        if (lockedRwaoneValue >= balance) {
             transferable = 0;
         } else {
-            transferable = balance.sub(lockedTribeoneValue);
+            transferable = balance.sub(lockedRwaoneValue);
         }
     }
 
@@ -471,23 +425,17 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return addresses;
     }
 
-    /// @notice Provide the results that would be returned by the mutative liquidateAccount() method (that's reserved to Tribeone)
+    /// @notice Provide the results that would be returned by the mutative liquidateAccount() method (that's reserved to Rwaone)
     /// @param account The account to be liquidated
     /// @param isSelfLiquidation boolean to determine if this is a forced or self-invoked liquidation
     /// @return totalRedeemed the total amount of collateral (wHAKA) to redeem (liquid and escrow)
     /// @return debtToRemove the amount of debt (hUSD) to burn in order to fix the account's c-ratio
     /// @return escrowToLiquidate the amount of escrow wHAKA that will be revoked during liquidation
     /// @return initialDebtBalance the amount of initial (hUSD) debt the account has
-    function liquidationAmounts(address account, bool isSelfLiquidation)
-        external
-        view
-        returns (
-            uint totalRedeemed,
-            uint debtToRemove,
-            uint escrowToLiquidate,
-            uint initialDebtBalance
-        )
-    {
+    function liquidationAmounts(
+        address account,
+        bool isSelfLiquidation
+    ) external view returns (uint totalRedeemed, uint debtToRemove, uint escrowToLiquidate, uint initialDebtBalance) {
         return _liquidationAmounts(account, isSelfLiquidation);
     }
 
@@ -531,8 +479,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint tribeSupply = IERC20(tribeToRemove).totalSupply();
 
         if (tribeSupply > 0) {
-            (uint amountOfhUSD, uint rateToRedeem, ) =
-                exchangeRates().effectiveValueAndRates(currencyKey, tribeSupply, "hUSD");
+            (uint amountOfhUSD, uint rateToRedeem, ) = exchangeRates().effectiveValueAndRates(
+                currencyKey,
+                tribeSupply,
+                "hUSD"
+            );
             require(rateToRedeem > 0, "Cannot remove without rate");
             ITribeRedeemer _tribeRedeemer = tribeRedeemer();
             tribes[hUSD].issue(address(_tribeRedeemer), amountOfhUSD);
@@ -640,7 +591,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
      * @param amount The amount of debt shares moving across layers
      */
     function modifyDebtSharesForMigration(address account, uint amount) external onlyTrustedMigrators {
-        ITribeoneDebtShare sds = tribeetixDebtShare();
+        IRwaoneDebtShare sds = tribeetixDebtShare();
 
         if (msg.sender == resolver.getAddress(CONTRACT_DEBT_MIGRATOR_ON_ETHEREUM)) {
             sds.burnShare(account, amount);
@@ -663,62 +614,50 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         tribes[hUSD].burn(short, amount);
     }
 
-    function issueTribes(address from, uint amount) external onlyTribeone {
+    function issueTribes(address from, uint amount) external onlyRwaone {
         require(amount > 0, "cannot issue 0 tribes");
 
         _issueTribes(from, amount, false);
     }
 
-    function issueMaxTribes(address from) external onlyTribeone {
+    function issueMaxTribes(address from) external onlyRwaone {
         _issueTribes(from, 0, true);
     }
 
-    function issueTribesOnBehalf(
-        address issueForAddress,
-        address from,
-        uint amount
-    ) external onlyTribeone {
+    function issueTribesOnBehalf(address issueForAddress, address from, uint amount) external onlyRwaone {
         _requireCanIssueOnBehalf(issueForAddress, from);
         _issueTribes(issueForAddress, amount, false);
     }
 
-    function issueMaxTribesOnBehalf(address issueForAddress, address from) external onlyTribeone {
+    function issueMaxTribesOnBehalf(address issueForAddress, address from) external onlyRwaone {
         _requireCanIssueOnBehalf(issueForAddress, from);
         _issueTribes(issueForAddress, 0, true);
     }
 
-    function burnTribes(address from, uint amount) external onlyTribeone {
+    function burnTribes(address from, uint amount) external onlyRwaone {
         _voluntaryBurnTribes(from, amount, false);
     }
 
-    function burnTribesOnBehalf(
-        address burnForAddress,
-        address from,
-        uint amount
-    ) external onlyTribeone {
+    function burnTribesOnBehalf(address burnForAddress, address from, uint amount) external onlyRwaone {
         _requireCanBurnOnBehalf(burnForAddress, from);
         _voluntaryBurnTribes(burnForAddress, amount, false);
     }
 
-    function burnTribesToTarget(address from) external onlyTribeone {
+    function burnTribesToTarget(address from) external onlyRwaone {
         _voluntaryBurnTribes(from, 0, true);
     }
 
-    function burnTribesToTargetOnBehalf(address burnForAddress, address from) external onlyTribeone {
+    function burnTribesToTargetOnBehalf(address burnForAddress, address from) external onlyRwaone {
         _requireCanBurnOnBehalf(burnForAddress, from);
         _voluntaryBurnTribes(burnForAddress, 0, true);
     }
 
-    function burnForRedemption(
-        address deprecatedTribeProxy,
-        address account,
-        uint balance
-    ) external onlyTribeRedeemer {
+    function burnForRedemption(address deprecatedTribeProxy, address account, uint balance) external onlyTribeRedeemer {
         ITribe(IProxy(deprecatedTribeProxy).target()).burn(account, balance);
     }
 
     // SIP-148: Upgraded Liquidation Mechanism
-    /// @notice This is where the core internal liquidation logic resides. This function can only be invoked by Tribeone.
+    /// @notice This is where the core internal liquidation logic resides. This function can only be invoked by Rwaone.
     /// Reverts if liquidator().isLiquidationOpen() returns false (e.g. c-ratio is too high, delay hasn't passed,
     ///     account wasn't flagged etc)
     /// @param account The account to be liquidated
@@ -726,15 +665,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     /// @return totalRedeemed the total amount of collateral (wHAKA) to redeem (liquid and escrow)
     /// @return debtRemoved the amount of debt (hUSD) to burn in order to fix the account's c-ratio
     /// @return escrowToLiquidate the amount of escrow wHAKA that will be revoked during liquidation
-    function liquidateAccount(address account, bool isSelfLiquidation)
-        external
-        onlyTribeone
-        returns (
-            uint totalRedeemed,
-            uint debtRemoved,
-            uint escrowToLiquidate
-        )
-    {
+    function liquidateAccount(
+        address account,
+        bool isSelfLiquidation
+    ) external onlyRwaone returns (uint totalRedeemed, uint debtRemoved, uint escrowToLiquidate) {
         require(liquidator().isLiquidationOpen(account, isSelfLiquidation), "Not open for liquidation");
 
         // liquidationAmounts checks isLiquidationOpen for the account
@@ -754,16 +688,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // Note: To remove the flag after self liquidation, burn to target and then call Liquidator.checkAndRemoveAccountInLiquidation(account).
     }
 
-    function _liquidationAmounts(address account, bool isSelfLiquidation)
-        internal
-        view
-        returns (
-            uint totalRedeemed,
-            uint debtToRemove,
-            uint escrowToLiquidate,
-            uint debtBalance
-        )
-    {
+    function _liquidationAmounts(
+        address account,
+        bool isSelfLiquidation
+    ) internal view returns (uint totalRedeemed, uint debtToRemove, uint escrowToLiquidate, uint debtBalance) {
         // Get the account's debt balance
         bool anyRateIsInvalid;
         (debtBalance, , anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_debtShareBalanceOf(account), hUSD);
@@ -852,7 +780,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function setCurrentPeriodId(uint128 periodId) external {
         require(msg.sender == requireAndGetAddress(CONTRACT_FEEPOOL), "Must be fee pool");
 
-        ITribeoneDebtShare sds = tribeetixDebtShare();
+        IRwaoneDebtShare sds = tribeetixDebtShare();
 
         if (sds.currentPeriodId() < periodId) {
             sds.takeSnapshot(periodId);
@@ -873,11 +801,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         require(delegateApprovals().canBurnFor(burnForAddress, from), "Not approved to act on behalf");
     }
 
-    function _issueTribes(
-        address from,
-        uint amount,
-        bool issueMax
-    ) internal {
+    function _issueTribes(address from, uint amount, bool issueMax) internal {
         if (_verifyCircuitBreakers()) {
             return;
         }
@@ -933,11 +857,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     // If burning to target, `amount` is ignored, and the correct quantity of hUSD is burnt to reach the target
     // c-ratio, allowing fees to be claimed. In this case, pending settlements will be skipped as the user
     // will still have debt remaining after reaching their target.
-    function _voluntaryBurnTribes(
-        address from,
-        uint amount,
-        bool burnToTarget
-    ) internal {
+    function _voluntaryBurnTribes(address from, uint amount, bool burnToTarget) internal {
         if (_verifyCircuitBreakers()) {
             return;
         }
@@ -983,7 +903,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // important: this has to happen before any updates to user's debt shares
         liquidatorRewards().updateEntry(from);
 
-        ITribeoneDebtShare sds = tribeetixDebtShare();
+        IRwaoneDebtShare sds = tribeetixDebtShare();
 
         // it is possible (eg in tests, system initialized with extra debt) to have issued debt without any shares issued
         // in which case, the first account to mint gets the debt. yw.
@@ -995,15 +915,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
     }
 
-    function _removeFromDebtRegister(
-        address from,
-        uint debtToRemove,
-        uint existingDebt
-    ) internal {
+    function _removeFromDebtRegister(address from, uint debtToRemove, uint existingDebt) internal {
         // important: this has to happen before any updates to user's debt shares
         liquidatorRewards().updateEntry(from);
 
-        ITribeoneDebtShare sds = tribeetixDebtShare();
+        IRwaoneDebtShare sds = tribeetixDebtShare();
 
         uint currentDebtShare = _debtShareBalanceOf(from);
 
@@ -1025,14 +941,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     }
 
     /* ========== MODIFIERS ========== */
-    modifier onlyTribeone() {
-        require(msg.sender == address(tribeetixERC20()), "Only Tribeone");
+    modifier onlyRwaone() {
+        require(msg.sender == address(tribeetixERC20()), "Only Rwaone");
         _;
     }
 
     modifier onlyTrustedMinters() {
-        address bridgeL1 = resolver.getAddress(CONTRACT_TRIBEONEETIXBRIDGETOOPTIMISM);
-        address bridgeL2 = resolver.getAddress(CONTRACT_TRIBEONEETIXBRIDGETOBASE);
+        address bridgeL1 = resolver.getAddress(CONTRACT_RWAONEETIXBRIDGETOOPTIMISM);
+        address bridgeL2 = resolver.getAddress(CONTRACT_RWAONEETIXBRIDGETOBASE);
         address feePool = resolver.getAddress(CONTRACT_FEEPOOL);
         require(msg.sender == bridgeL1 || msg.sender == bridgeL2 || msg.sender == feePool, "only trusted minters");
         _;

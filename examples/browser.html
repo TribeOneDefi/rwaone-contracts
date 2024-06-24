@@ -16,17 +16,17 @@
     <script type="text/javascript" src="../browser.js"></script>
     <script>
       const network = "mainnet";
-      const sources = tribeone.getSource({network});
+      const sources = rwaone.getSource({ network });
       console.log("sources", sources);
-      const targets = tribeone.getTarget({network});
+      const targets = rwaone.getTarget({ network });
       console.log("targets", targets);
-      const tribes = tribeone.getTribes({network});
+      const tribes = rwaone.getTribes({ network });
       console.log("tribes", tribes);
-      const users = tribeone.getUsers({network});
+      const users = rwaone.getUsers({ network });
       console.log("users", users);
       console.log(
-        "tribeone.toBytes32 correct?",
-        tribeone.toBytes32("wHAKA") ===
+        "rwaone.toBytes32 correct?",
+        rwaone.toBytes32("wHAKA") ===
           "0x534e580000000000000000000000000000000000000000000000000000000000"
       );
       const hETHContract = new ethers.Contract(

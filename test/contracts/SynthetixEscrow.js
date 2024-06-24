@@ -12,13 +12,13 @@ const {
 	constants: { ZERO_ADDRESS },
 } = require('../..');
 
-contract('TribeoneEscrow', async accounts => {
+contract('RwaoneEscrow', async accounts => {
 	const DAY = 86400;
 	const WEEK = 604800;
 	const YEAR = 31556926;
 
 	const [, owner, , account1, account2] = accounts;
-	let escrow, tribeone;
+	let escrow, rwaone;
 
 	const getYearFromNow = async () => {
 		const timestamp = await currentTime();
@@ -33,13 +33,13 @@ contract('TribeoneEscrow', async accounts => {
 	// Run once at beginning - snapshots will take care of resetting this before each test
 	before(async () => {
 		// Mock wHAKA
-		({ token: tribeone } = await mockToken({ accounts, name: 'Tribeone', symbol: 'wHAKA' }));
+		({ token: rwaone } = await mockToken({ accounts, name: 'Rwaone', symbol: 'wHAKA' }));
 
 		escrow = await setupContract({
 			accounts,
-			contract: 'TribeoneEscrow',
+			contract: 'RwaoneEscrow',
 			cache: {
-				Tribeone: tribeone,
+				Rwaone: rwaone,
 			},
 		});
 	});
@@ -47,9 +47,9 @@ contract('TribeoneEscrow', async accounts => {
 	addSnapshotBeforeRestoreAfterEach();
 
 	describe('Constructor & Settings ', async () => {
-		it('should set tribeone on contructor', async () => {
-			const tribeetixAddress = await escrow.tribeone();
-			assert.equal(tribeetixAddress, tribeone.address);
+		it('should set rwaone on contructor', async () => {
+			const tribeetixAddress = await escrow.rwaone();
+			assert.equal(tribeetixAddress, rwaone.address);
 		});
 
 		it('should set owner on contructor', async () => {
@@ -57,9 +57,9 @@ contract('TribeoneEscrow', async accounts => {
 			assert.equal(ownerAddress, owner);
 		});
 
-		it('should allow owner to set tribeone', async () => {
-			await escrow.setTribeone(ZERO_ADDRESS, { from: owner });
-			const tribeetixAddress = await escrow.tribeone();
+		it('should allow owner to set rwaone', async () => {
+			await escrow.setRwaone(ZERO_ADDRESS, { from: owner });
+			const tribeetixAddress = await escrow.rwaone();
 			assert.equal(tribeetixAddress, ZERO_ADDRESS);
 		});
 	});
@@ -67,7 +67,7 @@ contract('TribeoneEscrow', async accounts => {
 	describe('Only During Setup', async () => {
 		it('should allow owner to purgeAccount', async () => {
 			// Transfer of wHAKA to the escrow must occur before creating an entry
-			await tribeone.transfer(escrow.address, toUnit('1000'), {
+			await rwaone.transfer(escrow.address, toUnit('1000'), {
 				from: owner,
 			});
 			await escrow.appendVestingEntry(account1, await getYearFromNow(), toUnit('1000'), {
@@ -84,7 +84,7 @@ contract('TribeoneEscrow', async accounts => {
 		});
 		it('should allow owner to call addVestingSchedule', async () => {
 			// Transfer of wHAKA to the escrow must occur before creating an entry
-			await tribeone.transfer(escrow.address, toUnit('200'), {
+			await rwaone.transfer(escrow.address, toUnit('200'), {
 				from: owner,
 			});
 
@@ -119,7 +119,7 @@ contract('TribeoneEscrow', async accounts => {
 		describe('Vesting Schedule Writes', async () => {
 			it('should not create a vesting entry with a zero amount', async () => {
 				// Transfer of wHAKA to the escrow must occur before creating an entry
-				await tribeone.transfer(escrow.address, toUnit('1'), {
+				await rwaone.transfer(escrow.address, toUnit('1'), {
 					from: owner,
 				});
 
@@ -130,7 +130,7 @@ contract('TribeoneEscrow', async accounts => {
 
 			it('should not create a vesting entry if there is not enough wHAKA in the contracts balance', async () => {
 				// Transfer of wHAKA to the escrow must occur before creating an entry
-				await tribeone.transfer(escrow.address, toUnit('1'), {
+				await rwaone.transfer(escrow.address, toUnit('1'), {
 					from: owner,
 				});
 				await assert.revert(
@@ -142,7 +142,7 @@ contract('TribeoneEscrow', async accounts => {
 		describe('Vesting Schedule Reads ', async () => {
 			beforeEach(async () => {
 				// Transfer of wHAKA to the escrow must occur before creating a vestinng entry
-				await tribeone.transfer(escrow.address, toUnit('6000'), {
+				await rwaone.transfer(escrow.address, toUnit('6000'), {
 					from: owner,
 				});
 
@@ -161,7 +161,7 @@ contract('TribeoneEscrow', async accounts => {
 			});
 
 			it('should append a vesting entry and increase the contracts balance', async () => {
-				const balanceOfRewardEscrow = await tribeone.balanceOf(escrow.address);
+				const balanceOfRewardEscrow = await rwaone.balanceOf(escrow.address);
 				assert.bnEqual(balanceOfRewardEscrow, toUnit('6000'));
 			});
 
@@ -204,7 +204,7 @@ contract('TribeoneEscrow', async accounts => {
 		describe('Partial Vesting', async () => {
 			beforeEach(async () => {
 				// Transfer of wHAKA to the escrow must occur before creating a vestinng entry
-				await tribeone.transfer(escrow.address, toUnit('6000'), {
+				await rwaone.transfer(escrow.address, toUnit('6000'), {
 					from: owner,
 				});
 
@@ -251,7 +251,7 @@ contract('TribeoneEscrow', async accounts => {
 		describe('Vesting', async () => {
 			beforeEach(async () => {
 				// Transfer of wHAKA to the escrow must occur before creating a vestinng entry
-				await tribeone.transfer(escrow.address, toUnit('6000'), {
+				await rwaone.transfer(escrow.address, toUnit('6000'), {
 					from: owner,
 				});
 
@@ -276,10 +276,10 @@ contract('TribeoneEscrow', async accounts => {
 				await escrow.vest({ from: account1 });
 
 				// Check user has all their vested wHAKA
-				assert.bnEqual(await tribeone.balanceOf(account1), toUnit('6000'));
+				assert.bnEqual(await rwaone.balanceOf(account1), toUnit('6000'));
 
 				// Check escrow does not have any wHAKA
-				assert.bnEqual(await tribeone.balanceOf(escrow.address), toUnit('0'));
+				assert.bnEqual(await rwaone.balanceOf(escrow.address), toUnit('0'));
 			});
 
 			it('should vest and emit a Vest event', async () => {
@@ -295,10 +295,10 @@ contract('TribeoneEscrow', async accounts => {
 		});
 
 		describe('Transfering', async () => {
-			it('should not allow transfer of tribeone in escrow', async () => {
-				// Ensure the transfer fails as all the tribeone are in escrow
+			it('should not allow transfer of rwaone in escrow', async () => {
+				// Ensure the transfer fails as all the rwaone are in escrow
 				await assert.revert(
-					tribeone.transfer(account2, toUnit('1000'), {
+					rwaone.transfer(account2, toUnit('1000'), {
 						from: account1,
 					})
 				);

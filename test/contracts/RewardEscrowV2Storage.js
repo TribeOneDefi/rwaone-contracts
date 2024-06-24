@@ -19,22 +19,22 @@ contract('RewardEscrowV2Storage', async accounts => {
 	const entry1Amount = toUnit(1);
 
 	const [, owner, writeAccount, user1, user2, user3, user4] = accounts;
-	let instance, resolver, frozenRewardEscrowV2, tribeone, firstNonFallbackId, user3NumEntries;
+	let instance, resolver, frozenRewardEscrowV2, rwaone, firstNonFallbackId, user3NumEntries;
 
 	// Run once at beginning - snapshots will take care of resetting this before each test
 	before(async () => {
 		({
 			RewardEscrowV2Frozen: frozenRewardEscrowV2,
-			Tribeone: tribeone,
+			Rwaone: rwaone,
 			AddressResolver: resolver,
 		} = await setupAllContracts({
 			accounts,
-			contracts: ['RewardEscrowV2Frozen', 'MintableTribeone'],
+			contracts: ['RewardEscrowV2Frozen', 'MintableRwaone'],
 		}));
 
 		// allow owner to write to create entries in old contract
 		await resolver.importAddresses(
-			['FeePool', 'TribeoneBridgeToBase', 'TribeoneBridgeToOptimism'].map(toBytes32),
+			['FeePool', 'RwaoneBridgeToBase', 'RwaoneBridgeToOptimism'].map(toBytes32),
 			[owner, owner, owner],
 			{ from: owner }
 		);
@@ -45,9 +45,9 @@ contract('RewardEscrowV2Storage', async accounts => {
 			{ from: owner }
 		);
 		await frozenRewardEscrowV2.rebuildCache();
-		await tribeone.rebuildCache();
+		await rwaone.rebuildCache();
 		// mint some snx into it
-		await tribeone.mintSecondary(frozenRewardEscrowV2.address, toUnit(1000), {
+		await rwaone.mintSecondary(frozenRewardEscrowV2.address, toUnit(1000), {
 			from: owner,
 		});
 
@@ -67,7 +67,7 @@ contract('RewardEscrowV2Storage', async accounts => {
 		await resolver.importAddresses(['RewardEscrowV2'].map(toBytes32), [writeAccount], {
 			from: owner,
 		});
-		await tribeone.rebuildCache();
+		await rwaone.rebuildCache();
 
 		// create new instance, controlled by writeAccount
 		// we're not using the instance created in setupAllContracts because it had its fallback set already

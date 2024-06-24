@@ -20,7 +20,7 @@ import "./interfaces/IPerpsV2MarketBaseTypes.sol";
  without either introducing free (or cheap) optionality to cause cancellations, and without large
  sacrifices to the UX / risk of the traders (e.g. blocking all actions, or penalizing failures too much).
  */
-// https://docs.tribeone.io/contracts/source/contracts/PerpsV2MarketDelayedIntent
+// https://docs.rwaone.io/contracts/source/contracts/PerpsV2MarketDelayedIntent
 contract PerpsV2MarketDelayedIntent is IPerpsV2MarketDelayedIntent, PerpsV2MarketProxyable {
     /* ========== CONSTRUCTOR ========== */
 
@@ -33,11 +33,10 @@ contract PerpsV2MarketDelayedIntent is IPerpsV2MarketDelayedIntent, PerpsV2Marke
 
     ///// Mutative methods
 
-    function submitCloseOffchainDelayedOrderWithTracking(uint desiredFillPrice, bytes32 trackingCode)
-        external
-        onlyProxy
-        notFlagged(messageSender)
-    {
+    function submitCloseOffchainDelayedOrderWithTracking(
+        uint desiredFillPrice,
+        bytes32 trackingCode
+    ) external onlyProxy notFlagged(messageSender) {
         _submitCloseDelayedOrder(0, desiredFillPrice, trackingCode, IPerpsV2MarketBaseTypes.OrderType.Offchain);
     }
 
@@ -184,16 +183,15 @@ contract PerpsV2MarketDelayedIntent is IPerpsV2MarketDelayedIntent, PerpsV2Marke
         uint fillPrice = _fillPrice(sizeDelta, price);
         uint fundingIndex = _recomputeFunding(price);
 
-        TradeParams memory params =
-            TradeParams({
-                sizeDelta: sizeDelta,
-                oraclePrice: price,
-                fillPrice: fillPrice,
-                takerFee: isOffchain ? _takerFeeOffchainDelayedOrder(marketKey) : _takerFeeDelayedOrder(marketKey),
-                makerFee: isOffchain ? _makerFeeOffchainDelayedOrder(marketKey) : _makerFeeDelayedOrder(marketKey),
-                desiredFillPrice: desiredFillPrice,
-                trackingCode: trackingCode
-            });
+        TradeParams memory params = TradeParams({
+            sizeDelta: sizeDelta,
+            oraclePrice: price,
+            fillPrice: fillPrice,
+            takerFee: isOffchain ? _takerFeeOffchainDelayedOrder(marketKey) : _takerFeeDelayedOrder(marketKey),
+            makerFee: isOffchain ? _makerFeeOffchainDelayedOrder(marketKey) : _makerFeeDelayedOrder(marketKey),
+            desiredFillPrice: desiredFillPrice,
+            trackingCode: trackingCode
+        });
 
         // stack too deep
         {
@@ -217,18 +215,17 @@ contract PerpsV2MarketDelayedIntent is IPerpsV2MarketDelayedIntent, PerpsV2Marke
         );
 
         uint targetRoundId = _exchangeRates().getCurrentRoundId(_baseAsset()) + 1; // next round
-        DelayedOrder memory order =
-            DelayedOrder({
-                isOffchain: isOffchain,
-                sizeDelta: int128(sizeDelta),
-                desiredFillPrice: uint128(desiredFillPrice),
-                targetRoundId: isOffchain ? 0 : uint128(targetRoundId),
-                commitDeposit: 0, // note: legacy as no longer charge a commitFee on submit
-                keeperDeposit: uint128(keeperDeposit), // offchain orders do _not_ have an executableAtTime as it's based on price age.
-                executableAtTime: isOffchain ? 0 : block.timestamp + desiredTimeDelta, // zero out - not used and minimise confusion.
-                intentionTime: block.timestamp,
-                trackingCode: trackingCode
-            });
+        DelayedOrder memory order = DelayedOrder({
+            isOffchain: isOffchain,
+            sizeDelta: int128(sizeDelta),
+            desiredFillPrice: uint128(desiredFillPrice),
+            targetRoundId: isOffchain ? 0 : uint128(targetRoundId),
+            commitDeposit: 0, // note: legacy as no longer charge a commitFee on submit
+            keeperDeposit: uint128(keeperDeposit), // offchain orders do _not_ have an executableAtTime as it's based on price age.
+            executableAtTime: isOffchain ? 0 : block.timestamp + desiredTimeDelta, // zero out - not used and minimise confusion.
+            intentionTime: block.timestamp,
+            trackingCode: trackingCode
+        });
 
         emitDelayedOrderSubmitted(messageSender, order);
         marketState.updateDelayedOrder(

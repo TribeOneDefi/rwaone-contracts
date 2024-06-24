@@ -9,10 +9,10 @@ import "./interfaces/IDirectIntegrationManager.sol";
 
 /*
  * SIP-267: Direct Integration
- * https://sips.tribeone.io/sips/sip-267/
+ * https://sips.rwaone.io/sips/sip-267/
  *
- * Used by the Spartan Council to approve an external contract, (i.e. one which is not owned or managed by the Tribeone protocol),
- * to interact with Tribeone's core exchange functionalities with overridden parameters.
+ * Used by the Spartan Council to approve an external contract, (i.e. one which is not owned or managed by the Rwaone protocol),
+ * to interact with Rwaone's core exchange functionalities with overridden parameters.
  * If no parameter overrides are specified, then the prevailing parameter configuration will be automatically used.
  */
 contract DirectIntegrationManager is Owned, MixinSystemSettings, IDirectIntegrationManager {
@@ -41,11 +41,10 @@ contract DirectIntegrationManager is Owned, MixinSystemSettings, IDirectIntegrat
      * Used to read the configured overridden values for a given integration.
      * @param integration the address of the external integrator's contract
      */
-    function getExchangeParameters(address integration, bytes32 currencyKey)
-        external
-        view
-        returns (ParameterIntegrationSettings memory overrides)
-    {
+    function getExchangeParameters(
+        address integration,
+        bytes32 currencyKey
+    ) external view returns (ParameterIntegrationSettings memory overrides) {
         ParameterIntegrationSettings memory storedOverrides = _settings[integration][currencyKey];
 
         return
@@ -92,12 +91,12 @@ contract DirectIntegrationManager is Owned, MixinSystemSettings, IDirectIntegrat
 
     /* ========== MUTATIVE FUNCTIONS ========== */
     /**
-     * Sets an override to be used for a given direct integration that supersedes the default Tribeone parameter value.
+     * Sets an override to be used for a given direct integration that supersedes the default Rwaone parameter value.
      * @param integration the address of the external integrator's contract
      * @param settings a collection of parameters to be overridden
      * @dev Invoking this function will overwrite whatever overrides were previously set. Set overrides to zero to "remove" them.
      * @notice This will require a SIP and a presentation, given the importance of clearly presenting
-     * external interactions with Tribeone contracts and the parameter overrides that would be implemented.
+     * external interactions with Rwaone contracts and the parameter overrides that would be implemented.
      */
     function setExchangeParameters(
         address integration,

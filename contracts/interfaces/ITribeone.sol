@@ -3,8 +3,8 @@ pragma solidity >=0.4.24;
 import "./ITribe.sol";
 import "./IVirtualTribe.sol";
 
-// https://docs.tribeone.io/contracts/source/interfaces/itribeetix
-interface ITribeone {
+// https://docs.rwaone.io/contracts/source/interfaces/itribeetix
+interface IRwaone {
     // Views
     function anyTribeOrHAKARateIsInvalid() external view returns (bool anyRateInvalid);
 
@@ -24,14 +24,9 @@ interface ITribeone {
 
     function maxIssuableTribes(address issuer) external view returns (uint maxIssuable);
 
-    function remainingIssuableTribes(address issuer)
-        external
-        view
-        returns (
-            uint maxIssuable,
-            uint alreadyIssued,
-            uint totalSystemDebt
-        );
+    function remainingIssuableTribes(
+        address issuer
+    ) external view returns (uint maxIssuable, uint alreadyIssued, uint totalSystemDebt);
 
     function tribes(bytes32 currencyKey) external view returns (ITribe);
 
@@ -41,7 +36,7 @@ interface ITribeone {
 
     function totalIssuedTribesExcludeOtherCollateral(bytes32 currencyKey) external view returns (uint);
 
-    function transferableTribeone(address account) external view returns (uint transferable);
+    function transferableRwaone(address account) external view returns (uint transferable);
 
     function getFirstNonZeroEscrowIndex(address account) external view returns (uint);
 
@@ -117,13 +112,7 @@ interface ITribeone {
 
     function mint() external returns (bool);
 
-    function settle(bytes32 currencyKey)
-        external
-        returns (
-            uint reclaimed,
-            uint refunded,
-            uint numEntries
-        );
+    function settle(bytes32 currencyKey) external returns (uint reclaimed, uint refunded, uint numEntries);
 
     // Liquidations
     function liquidateDelinquentAccount(address account) external returns (bool);

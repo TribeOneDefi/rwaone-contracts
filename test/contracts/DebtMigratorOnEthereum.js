@@ -10,7 +10,7 @@ contract('DebtMigratorOnEthereum', accounts => {
 	const owner = accounts[1];
 	const user = accounts[2];
 
-	let debtMigratorOnEthereum, resolver, rewardEscrowV2, tribes, tribeone, tribeetixDebtShare;
+	let debtMigratorOnEthereum, resolver, rewardEscrowV2, tribes, rwaone, tribeetixDebtShare;
 
 	before(async () => {
 		tribes = ['hUSD', 'hETH'];
@@ -18,8 +18,8 @@ contract('DebtMigratorOnEthereum', accounts => {
 			AddressResolver: resolver,
 			DebtMigratorOnEthereum: debtMigratorOnEthereum,
 			RewardEscrowV2: rewardEscrowV2,
-			Tribeone: tribeone,
-			TribeoneDebtShare: tribeetixDebtShare,
+			Rwaone: rwaone,
+			RwaoneDebtShare: tribeetixDebtShare,
 		} = await setupAllContracts({
 			accounts,
 			tribes,
@@ -30,9 +30,9 @@ contract('DebtMigratorOnEthereum', accounts => {
 				'Liquidator',
 				'LiquidatorRewards',
 				'RewardEscrowV2',
-				'Tribeone',
-				'TribeoneBridgeToOptimism',
-				'TribeoneDebtShare',
+				'Rwaone',
+				'RwaoneBridgeToOptimism',
+				'RwaoneDebtShare',
 				'SystemSettings',
 			],
 		}));
@@ -155,16 +155,16 @@ contract('DebtMigratorOnEthereum', accounts => {
 				from: owner,
 			});
 			await rewardEscrowV2.rebuildCache();
-			await tribeone.transfer(rewardEscrowV2.address, entryAmount, { from: owner });
+			await rwaone.transfer(rewardEscrowV2.address, entryAmount, { from: owner });
 			await rewardEscrowV2.appendVestingEntry(owner, entryAmount, 1, { from: owner });
 		});
 
 		before('issue some debt', async () => {
-			await tribeone.issueTribes(amountToIssue, { from: owner });
+			await rwaone.issueTribes(amountToIssue, { from: owner });
 		});
 
 		before('record balances', async () => {
-			liquidHAKABalance = await tribeone.balanceOf(owner);
+			liquidHAKABalance = await rwaone.balanceOf(owner);
 			escrowedHAKABalance = await rewardEscrowV2.balanceOf(owner);
 			debtShareBalance = await tribeetixDebtShare.balanceOf(owner);
 			debtTransferSentBefore = await debtMigratorOnEthereum.debtTransferSent();
@@ -196,9 +196,9 @@ contract('DebtMigratorOnEthereum', accounts => {
 			});
 
 			it('zeroes the balances on L1', async () => {
-				assert.bnEqual(await tribeone.collateral(owner), 0);
-				assert.bnEqual(await tribeone.balanceOf(owner), 0);
-				assert.bnEqual(await tribeone.debtBalanceOf(owner, hUSD), 0);
+				assert.bnEqual(await rwaone.collateral(owner), 0);
+				assert.bnEqual(await rwaone.balanceOf(owner), 0);
+				assert.bnEqual(await rwaone.debtBalanceOf(owner, hUSD), 0);
 				assert.bnEqual(await rewardEscrowV2.balanceOf(owner), 0);
 				assert.bnEqual(await tribeetixDebtShare.balanceOf(owner), 0);
 			});

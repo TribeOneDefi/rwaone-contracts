@@ -8,7 +8,7 @@ import "./interfaces/ICollateralManager.sol";
 import "./interfaces/IEtherWrapper.sol";
 import "./interfaces/IWrapperFactory.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/multicollateraltribe
+// https://docs.rwaone.io/contracts/source/contracts/multicollateraltribe
 contract MultiCollateralTribe is Tribe {
     bytes32 public constant CONTRACT_NAME = "MultiCollateralTribe";
 

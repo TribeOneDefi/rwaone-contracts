@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import "./IRewardEscrowV2.sol";
 
-interface ITribeoneBridgeToBase {
+interface IRwaoneBridgeToBase {
     // invoked by the xDomain messenger on L2
     function finalizeEscrowMigration(
         address account,

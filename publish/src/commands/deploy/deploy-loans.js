@@ -10,7 +10,7 @@ module.exports = async ({ account, addressOf, deployer, getDeployParameter, netw
 
 	await deployer.deployContract({
 		name: 'Depot',
-		deps: ['ProxyTribeone', 'TribehUSD', 'FeePool'],
+		deps: ['ProxyRwaone', 'TribehUSD', 'FeePool'],
 		args: [account, account, addressOf(ReadProxyAddressResolver)],
 	});
 

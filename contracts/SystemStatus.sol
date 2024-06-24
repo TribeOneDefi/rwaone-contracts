@@ -4,7 +4,7 @@ pragma solidity ^0.5.16;
 import "./Owned.sol";
 import "./interfaces/ISystemStatus.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/systemstatus
+// https://docs.rwaone.io/contracts/source/contracts/systemstatus
 contract SystemStatus is Owned, ISystemStatus {
     mapping(bytes32 => mapping(address => Status)) public accessControl;
 
@@ -14,8 +14,8 @@ contract SystemStatus is Owned, ISystemStatus {
     bytes32 public constant SECTION_ISSUANCE = "Issuance";
     bytes32 public constant SECTION_EXCHANGE = "Exchange";
     bytes32 public constant SECTION_FUTURES = "Futures";
-    bytes32 public constant SECTION_TRIBEONE_EXCHANGE = "TribeExchange";
-    bytes32 public constant SECTION_TRIBEONE = "Tribe";
+    bytes32 public constant SECTION_RWAONE_EXCHANGE = "TribeExchange";
+    bytes32 public constant SECTION_RWAONE = "Tribe";
 
     bytes32 public constant CONTRACT_NAME = "SystemStatus";
 
@@ -117,11 +117,9 @@ contract SystemStatus is Owned, ISystemStatus {
         return systemSuspension.suspended && systemSuspension.reason == SUSPENSION_REASON_UPGRADE;
     }
 
-    function getTribeExchangeSuspensions(bytes32[] calldata tribes)
-        external
-        view
-        returns (bool[] memory exchangeSuspensions, uint256[] memory reasons)
-    {
+    function getTribeExchangeSuspensions(
+        bytes32[] calldata tribes
+    ) external view returns (bool[] memory exchangeSuspensions, uint256[] memory reasons) {
         exchangeSuspensions = new bool[](tribes.length);
         reasons = new uint256[](tribes.length);
 
@@ -131,11 +129,9 @@ contract SystemStatus is Owned, ISystemStatus {
         }
     }
 
-    function getTribeSuspensions(bytes32[] calldata tribes)
-        external
-        view
-        returns (bool[] memory suspensions, uint256[] memory reasons)
-    {
+    function getTribeSuspensions(
+        bytes32[] calldata tribes
+    ) external view returns (bool[] memory suspensions, uint256[] memory reasons) {
         suspensions = new bool[](tribes.length);
         reasons = new uint256[](tribes.length);
 
@@ -146,11 +142,9 @@ contract SystemStatus is Owned, ISystemStatus {
     }
 
     /// @notice marketKey doesn't necessarily correspond to asset key
-    function getFuturesMarketSuspensions(bytes32[] calldata marketKeys)
-        external
-        view
-        returns (bool[] memory suspensions, uint256[] memory reasons)
-    {
+    function getFuturesMarketSuspensions(
+        bytes32[] calldata marketKeys
+    ) external view returns (bool[] memory suspensions, uint256[] memory reasons) {
         suspensions = new bool[](marketKeys.length);
         reasons = new uint256[](marketKeys.length);
 
@@ -161,12 +155,7 @@ contract SystemStatus is Owned, ISystemStatus {
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
-    function updateAccessControl(
-        bytes32 section,
-        address account,
-        bool canSuspend,
-        bool canResume
-    ) external onlyOwner {
+    function updateAccessControl(bytes32 section, address account, bool canSuspend, bool canResume) external onlyOwner {
         _internalUpdateAccessControl(section, account, canSuspend, canResume);
     }
 
@@ -321,8 +310,8 @@ contract SystemStatus is Owned, ISystemStatus {
         require(
             !systemSuspension.suspended,
             systemSuspension.reason == SUSPENSION_REASON_UPGRADE
-                ? "Tribeone is suspended, upgrade in progress... please stand by"
-                : "Tribeone is suspended. Operation prohibited"
+                ? "Rwaone is suspended, upgrade in progress... please stand by"
+                : "Rwaone is suspended. Operation prohibited"
         );
     }
 
@@ -351,7 +340,7 @@ contract SystemStatus is Owned, ISystemStatus {
     }
 
     function _internalSuspendTribes(bytes32[] memory currencyKeys, uint256 reason) internal {
-        _requireAccessToSuspend(SECTION_TRIBEONE);
+        _requireAccessToSuspend(SECTION_RWAONE);
         for (uint i = 0; i < currencyKeys.length; i++) {
             bytes32 currencyKey = currencyKeys[i];
             tribeSuspension[currencyKey].suspended = true;
@@ -361,7 +350,7 @@ contract SystemStatus is Owned, ISystemStatus {
     }
 
     function _internalResumeTribes(bytes32[] memory currencyKeys) internal {
-        _requireAccessToResume(SECTION_TRIBEONE);
+        _requireAccessToResume(SECTION_RWAONE);
         for (uint i = 0; i < currencyKeys.length; i++) {
             bytes32 currencyKey = currencyKeys[i];
             emit TribeResumed(currencyKey, uint256(tribeSuspension[currencyKey].reason));
@@ -370,7 +359,7 @@ contract SystemStatus is Owned, ISystemStatus {
     }
 
     function _internalSuspendTribeExchange(bytes32[] memory currencyKeys, uint256 reason) internal {
-        _requireAccessToSuspend(SECTION_TRIBEONE_EXCHANGE);
+        _requireAccessToSuspend(SECTION_RWAONE_EXCHANGE);
         for (uint i = 0; i < currencyKeys.length; i++) {
             bytes32 currencyKey = currencyKeys[i];
             tribeExchangeSuspension[currencyKey].suspended = true;
@@ -380,7 +369,7 @@ contract SystemStatus is Owned, ISystemStatus {
     }
 
     function _internalResumeTribesExchange(bytes32[] memory currencyKeys) internal {
-        _requireAccessToResume(SECTION_TRIBEONE_EXCHANGE);
+        _requireAccessToResume(SECTION_RWAONE_EXCHANGE);
         for (uint i = 0; i < currencyKeys.length; i++) {
             bytes32 currencyKey = currencyKeys[i];
             emit TribeExchangeResumed(currencyKey, uint256(tribeExchangeSuspension[currencyKey].reason));
@@ -407,19 +396,14 @@ contract SystemStatus is Owned, ISystemStatus {
         }
     }
 
-    function _internalUpdateAccessControl(
-        bytes32 section,
-        address account,
-        bool canSuspend,
-        bool canResume
-    ) internal {
+    function _internalUpdateAccessControl(bytes32 section, address account, bool canSuspend, bool canResume) internal {
         require(
             section == SECTION_SYSTEM ||
                 section == SECTION_ISSUANCE ||
                 section == SECTION_EXCHANGE ||
                 section == SECTION_FUTURES ||
-                section == SECTION_TRIBEONE_EXCHANGE ||
-                section == SECTION_TRIBEONE,
+                section == SECTION_RWAONE_EXCHANGE ||
+                section == SECTION_RWAONE,
             "Invalid section supplied"
         );
         accessControl[section][account].canSuspend = canSuspend;

@@ -17,17 +17,17 @@ const { toBytes32 } = require('../../index');
 
 contract('ImportableRewardEscrowV2', async accounts => {
 	const [, owner, account1] = accounts;
-	let rewardEscrowV2, resolver, tribeone;
+	let rewardEscrowV2, resolver, rwaone;
 
 	// Run once at beginning - snapshots will take care of resetting this before each test
 	before(async () => {
 		({
 			RewardEscrowV2: rewardEscrowV2,
 			AddressResolver: resolver,
-			Tribeone: tribeone,
+			Rwaone: rwaone,
 		} = await setupAllContracts({
 			accounts,
-			contracts: ['ImportableRewardEscrowV2', 'MintableTribeone'],
+			contracts: ['ImportableRewardEscrowV2', 'MintableRwaone'],
 		}));
 	});
 
@@ -62,17 +62,17 @@ contract('ImportableRewardEscrowV2', async accounts => {
 				rewardEscrowV2.importVestingEntries(owner, total, entries, {
 					from: owner,
 				}),
-				'TribeoneBridgeToBase'
+				'RwaoneBridgeToBase'
 			);
 		});
 
 		describe('when called by the bridge', async () => {
 			before(async () => {
-				await resolver.importAddresses([toBytes32('TribeoneBridgeToBase')], [account1], {
+				await resolver.importAddresses([toBytes32('RwaoneBridgeToBase')], [account1], {
 					from: owner,
 				});
 				await rewardEscrowV2.rebuildCache();
-				await tribeone.rebuildCache();
+				await rwaone.rebuildCache();
 			});
 
 			it('reverts on insufficient balance', async () => {
@@ -86,7 +86,7 @@ contract('ImportableRewardEscrowV2', async accounts => {
 
 			describe('when balance is sufficient', async () => {
 				before(async () => {
-					await tribeone.mintSecondary(rewardEscrowV2.address, total, {
+					await rwaone.mintSecondary(rewardEscrowV2.address, total, {
 						from: account1,
 					});
 					await rewardEscrowV2.rebuildCache();

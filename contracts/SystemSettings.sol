@@ -6,7 +6,7 @@ import "./MixinSystemSettings.sol";
 import "./interfaces/ISystemSettings.sol";
 import "./SystemSettingsLib.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/systemsettings
+// https://docs.rwaone.io/contracts/source/contracts/systemsettings
 contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     // SystemSettingsLib is a way to split out the setters to reduce contract size
     using SystemSettingsLib for IFlexibleStorage;
@@ -265,10 +265,10 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
 
     // ========== RESTRICTED ==========
 
-    function setCrossDomainMessageGasLimit(CrossDomainMessageGasLimits _gasLimitType, uint _crossDomainMessageGasLimit)
-        external
-        onlyOwner
-    {
+    function setCrossDomainMessageGasLimit(
+        CrossDomainMessageGasLimits _gasLimitType,
+        uint _crossDomainMessageGasLimit
+    ) external onlyOwner {
         flexibleStorage().setCrossDomainMessageGasLimit(_getGasLimitSetting(_gasLimitType), _crossDomainMessageGasLimit);
         emit CrossDomainMessageGasLimitChanged(_gasLimitType, _crossDomainMessageGasLimit);
     }
@@ -359,10 +359,10 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     }
 
     /* ========== Exchange Fees Related ========== */
-    function setExchangeFeeRateForTribes(bytes32[] calldata tribeKeys, uint256[] calldata exchangeFeeRates)
-        external
-        onlyOwner
-    {
+    function setExchangeFeeRateForTribes(
+        bytes32[] calldata tribeKeys,
+        uint256[] calldata exchangeFeeRates
+    ) external onlyOwner {
         flexibleStorage().setExchangeFeeRateForTribes(SETTING_EXCHANGE_FEE_RATE, tribeKeys, exchangeFeeRates);
         for (uint i = 0; i < tribeKeys.length; i++) {
             emit ExchangeFeeUpdated(tribeKeys[i], exchangeFeeRates[i]);
@@ -525,7 +525,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     }
 
     function setCrossChainTribeTransferEnabled(bytes32 _currencyKey, uint _value) external onlyOwner {
-        flexibleStorage().setCrossChainTribeTransferEnabled(SETTING_CROSS_TRIBEONE_TRANSFER_ENABLED, _currencyKey, _value);
+        flexibleStorage().setCrossChainTribeTransferEnabled(SETTING_CROSS_RWAONE_TRANSFER_ENABLED, _currencyKey, _value);
         emit CrossChainTribeTransferEnabledUpdated(_currencyKey, _value);
     }
 

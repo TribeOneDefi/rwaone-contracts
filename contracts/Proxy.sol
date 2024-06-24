@@ -6,7 +6,7 @@ import "./Owned.sol";
 // Internal references
 import "./Proxyable.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/proxy
+// https://docs.rwaone.io/contracts/source/contracts/proxy
 contract Proxy is Owned {
     Proxyable public target;
 
@@ -35,21 +35,21 @@ contract Proxy is Owned {
              * This means moving call_data across 32 bytes guarantees we correctly access
              * the data itself. */
             switch numTopics
-                case 0 {
-                    log0(add(_callData, 32), size)
-                }
-                case 1 {
-                    log1(add(_callData, 32), size, topic1)
-                }
-                case 2 {
-                    log2(add(_callData, 32), size, topic1, topic2)
-                }
-                case 3 {
-                    log3(add(_callData, 32), size, topic1, topic2, topic3)
-                }
-                case 4 {
-                    log4(add(_callData, 32), size, topic1, topic2, topic3, topic4)
-                }
+            case 0 {
+                log0(add(_callData, 32), size)
+            }
+            case 1 {
+                log1(add(_callData, 32), size, topic1)
+            }
+            case 2 {
+                log2(add(_callData, 32), size, topic1, topic2)
+            }
+            case 3 {
+                log3(add(_callData, 32), size, topic1, topic2, topic3)
+            }
+            case 4 {
+                log4(add(_callData, 32), size, topic1, topic2, topic3, topic4)
+            }
         }
     }
 
@@ -73,7 +73,7 @@ contract Proxy is Owned {
         }
     }
 
-    modifier onlyTarget {
+    modifier onlyTarget() {
         require(Proxyable(msg.sender) == target, "Must be proxy target");
         _;
     }

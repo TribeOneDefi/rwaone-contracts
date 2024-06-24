@@ -6,7 +6,7 @@ const {
 
 function collectContractBytesCodes() {
 	// Where hardhat puts compiled contract artifacts
-	// Should be tribeone/build/artifacts/contracts/
+	// Should be rwaone/build/artifacts/contracts/
 	const builtContractsPath = path.resolve(
 		__dirname,
 		'../../',
@@ -18,7 +18,7 @@ function collectContractBytesCodes() {
 	// Read all sub-folders within this folder
 	// Discard folders that don't end with ".sol"
 	// Eg:
-	//   artifacts/contracts/Tribeone.sol/
+	//   artifacts/contracts/Rwaone.sol/
 	//   artifacts/contracts/Exchanger.sol/
 	//   ...
 
@@ -32,7 +32,7 @@ function collectContractBytesCodes() {
 				// Read json files within each folder,
 				// and collect them in a combined object.
 				// Eg:
-				//   artifacts/contracts/Tribeone.sol/Tribeone.json
+				//   artifacts/contracts/Rwaone.sol/Rwaone.json
 				//   artifacts/contracts/Exchanger.sol/Exchanger.json
 				//   ...
 				const contractName = path.basename(contractFolder, '.sol');

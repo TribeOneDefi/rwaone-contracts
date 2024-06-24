@@ -12,7 +12,7 @@ function itCanRedeem({ ctx }) {
 	describe('redemption of deprecated tribes', () => {
 		let owner;
 		let someUser;
-		let Tribeone, Issuer, TribeToRedeem, TribehUSD, TribeToRedeemProxy, TribeRedeemer;
+		let Rwaone, Issuer, TribeToRedeem, TribehUSD, TribeToRedeemProxy, TribeRedeemer;
 		let totalDebtBeforeRemoval;
 		let tribe;
 
@@ -22,7 +22,7 @@ function itCanRedeem({ ctx }) {
 			tribe = 'hETHBTC';
 
 			({
-				Tribeone,
+				Rwaone,
 				Issuer,
 				[`Tribe${tribe}`]: TribeToRedeem,
 				[`Proxy${tribe}`]: TribeToRedeemProxy,
@@ -79,7 +79,7 @@ function itCanRedeem({ ctx }) {
 				);
 			});
 			it(`and the tribe is removed from the system`, async () => {
-				assert.equal(await Tribeone.tribes(toBytes32(tribe)), ZERO_ADDRESS);
+				assert.equal(await Rwaone.tribes(toBytes32(tribe)), ZERO_ADDRESS);
 			});
 			describe('user redemption', () => {
 				let hUSDBeforeRedemption;

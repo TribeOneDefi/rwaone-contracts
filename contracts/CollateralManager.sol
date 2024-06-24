@@ -33,7 +33,7 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
 
     // Flexible storage names
     bytes32 public constant CONTRACT_NAME = "CollateralManager";
-    bytes32 internal constant COLLATERAL_TRIBEONES = "collateralTribe";
+    bytes32 internal constant COLLATERAL_RWAONES = "collateralTribe";
 
     /* ========== STATE VARIABLES ========== */
 
@@ -270,29 +270,16 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         shortRate = maxSkewLimit.add(baseShortRate);
     }
 
-    function getRatesAndTime(uint index)
-        public
-        view
-        returns (
-            uint entryRate,
-            uint lastRate,
-            uint lastUpdated,
-            uint newIndex
-        )
-    {
+    function getRatesAndTime(
+        uint index
+    ) public view returns (uint entryRate, uint lastRate, uint lastUpdated, uint newIndex) {
         (entryRate, lastRate, lastUpdated, newIndex) = state.getRatesAndTime(index);
     }
 
-    function getShortRatesAndTime(bytes32 currency, uint index)
-        public
-        view
-        returns (
-            uint entryRate,
-            uint lastRate,
-            uint lastUpdated,
-            uint newIndex
-        )
-    {
+    function getShortRatesAndTime(
+        bytes32 currency,
+        uint index
+    ) public view returns (uint entryRate, uint lastRate, uint lastUpdated, uint newIndex) {
         (entryRate, lastRate, lastUpdated, newIndex) = state.getShortRatesAndTime(currency, index);
     }
 
@@ -377,11 +364,10 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         rebuildCache();
     }
 
-    function areTribesAndCurrenciesSet(bytes32[] calldata requiredTribeNamesInResolver, bytes32[] calldata tribeKeys)
-        external
-        view
-        returns (bool)
-    {
+    function areTribesAndCurrenciesSet(
+        bytes32[] calldata requiredTribeNamesInResolver,
+        bytes32[] calldata tribeKeys
+    ) external view returns (bool) {
         if (_tribes.elements.length != requiredTribeNamesInResolver.length) {
             return false;
         }
@@ -413,10 +399,10 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         }
     }
 
-    function addShortableTribes(bytes32[] calldata requiredTribeNamesInResolver, bytes32[] calldata tribeKeys)
-        external
-        onlyOwner
-    {
+    function addShortableTribes(
+        bytes32[] calldata requiredTribeNamesInResolver,
+        bytes32[] calldata tribeKeys
+    ) external onlyOwner {
         require(requiredTribeNamesInResolver.length == tribeKeys.length, "Input array length mismatch");
 
         for (uint i = 0; i < requiredTribeNamesInResolver.length; i++) {
@@ -438,11 +424,10 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         rebuildCache();
     }
 
-    function areShortableTribesSet(bytes32[] calldata requiredTribeNamesInResolver, bytes32[] calldata tribeKeys)
-        external
-        view
-        returns (bool)
-    {
+    function areShortableTribesSet(
+        bytes32[] calldata requiredTribeNamesInResolver,
+        bytes32[] calldata tribeKeys
+    ) external view returns (bool) {
         require(requiredTribeNamesInResolver.length == tribeKeys.length, "Input array length mismatch");
 
         if (_shortableTribes.elements.length != requiredTribeNamesInResolver.length) {
@@ -516,8 +501,9 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         bool isShort
     ) external onlyCollateral returns (uint difference, uint index) {
         // 1. Get the rates we need.
-        (uint entryRate, uint lastRate, uint lastUpdated, uint newIndex) =
-            isShort ? getShortRatesAndTime(currency, interestIndex) : getRatesAndTime(interestIndex);
+        (uint entryRate, uint lastRate, uint lastUpdated, uint newIndex) = isShort
+            ? getShortRatesAndTime(currency, interestIndex)
+            : getRatesAndTime(interestIndex);
 
         // 2. Get the instantaneous rate.
         (uint rate, bool invalid) = isShort ? getShortRate(currency) : getBorrowRate();
@@ -541,7 +527,7 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
 
     /* ========== MODIFIERS ========== */
 
-    modifier onlyCollateral {
+    modifier onlyCollateral() {
         bool isMultiCollateral = hasCollateral(msg.sender);
 
         require(isMultiCollateral, "Only collateral contracts");

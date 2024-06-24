@@ -1,6 +1,6 @@
 # Publisher
 
-This script can `build` (compile and flatten), `deploy` and `verify` (on Etherscan) the Tribeone code to a testnet or mainnet.
+This script can `build` (compile and flatten), `deploy` and `verify` (on Etherscan) the Rwaone code to a testnet or mainnet.
 
 ## 1. Build
 
@@ -89,7 +89,7 @@ node publish nominate # "--help" for options
 ### Example
 
 ```bash
-node publish nominate -n goerli -d publish/deployed/goerli -g 3 -c Tribeone -c ProxyhUSD -o 0x0000000000000000000000000000000000000000
+node publish nominate -n goerli -d publish/deployed/goerli -g 3 -c Rwaone -c ProxyhUSD -o 0x0000000000000000000000000000000000000000
 node publish nominate -o 0xB64fF7a4a33Acdf48d97dab0D764afD0F6176882 -n goerli -c ProxyhUSD -d publish/deployed/goerli -g 20
 ```
 
@@ -103,7 +103,7 @@ node publish owner # "--help" for options
 
 ## 6. Remove Tribes
 
-Will attempt to remove all given tribes from the `Tribeone` contract (as long as they have `totalSupply` of `0`) and update the `config.json` and `tribes.json` for the deployment folder.
+Will attempt to remove all given tribes from the `Rwaone` contract (as long as they have `totalSupply` of `0`) and update the `config.json` and `tribes.json` for the deployment folder.
 
 ```bash
 node publish remove-tribes # "--help" for options
@@ -133,7 +133,7 @@ node publish purge-tribes # "--help" for options
 
 ## 8. Release
 
-Will initiate the tribeone release process, publishing the tribeone `npm` module and updating all dependent projects in GitHub and `npm`.
+Will initiate the rwaone release process, publishing the rwaone `npm` module and updating all dependent projects in GitHub and `npm`.
 
 ```bash
 node publish release # "--help" for options
@@ -163,7 +163,7 @@ node publish release --version 2.22.0 --branch master --release Altair
 
 ### Branching
 
-For `tribeone` repo, we are using the following branch mapping:
+For `rwaone` repo, we are using the following branch mapping:
 
 - `alpha` is `GOERLI`
 - `master` is `MAINNET`

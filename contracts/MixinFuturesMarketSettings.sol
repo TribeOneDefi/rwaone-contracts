@@ -5,7 +5,7 @@ import "./MixinResolver.sol";
 // Internal references
 import "./interfaces/IFlexibleStorage.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/MixinFuturesMarketSettings
+// https://docs.rwaone.io/contracts/source/contracts/MixinFuturesMarketSettings
 contract MixinFuturesMarketSettings is MixinResolver {
     /* ========== CONSTANTS ========== */
 

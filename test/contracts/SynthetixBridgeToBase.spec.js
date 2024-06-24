@@ -11,20 +11,20 @@ const {
 	},
 } = require('../../');
 
-contract('TribeoneBridgeToBase (spec tests) @ovm-skip', accounts => {
+contract('RwaoneBridgeToBase (spec tests) @ovm-skip', accounts => {
 	const [, owner, user, randomAddress] = accounts;
 
-	let mintableTribeone, tribeetixBridgeToBase, systemSettings;
+	let mintableRwaone, tribeetixBridgeToBase, systemSettings;
 
 	describe('when deploying the system', () => {
 		before('deploy all contracts', async () => {
 			({
-				Tribeone: mintableTribeone, // we request Tribeone instead of MintableTribeone because it is renamed in setup.js
-				TribeoneBridgeToBase: tribeetixBridgeToBase,
+				Rwaone: mintableRwaone, // we request Rwaone instead of MintableRwaone because it is renamed in setup.js
+				RwaoneBridgeToBase: tribeetixBridgeToBase,
 				SystemSettings: systemSettings,
 			} = await setupAllContracts({
 				accounts,
-				contracts: ['MintableTribeone', 'TribeoneBridgeToBase', 'SystemSettings'],
+				contracts: ['MintableRwaone', 'RwaoneBridgeToBase', 'SystemSettings'],
 			}));
 		});
 
@@ -70,8 +70,8 @@ contract('TribeoneBridgeToBase (spec tests) @ovm-skip', accounts => {
 
 			describe('when requesting a withdrawal', () => {
 				before('record user balance and initial total supply', async () => {
-					userBalanceBefore = await mintableTribeone.balanceOf(owner);
-					initialSupply = await mintableTribeone.totalSupply();
+					userBalanceBefore = await mintableRwaone.balanceOf(owner);
+					initialSupply = await mintableRwaone.totalSupply();
 				});
 
 				before('initiate a withdrawal', async () => {
@@ -81,20 +81,20 @@ contract('TribeoneBridgeToBase (spec tests) @ovm-skip', accounts => {
 				});
 
 				it('reduces the user balance', async () => {
-					const userBalanceAfter = await mintableTribeone.balanceOf(owner);
+					const userBalanceAfter = await mintableRwaone.balanceOf(owner);
 					assert.bnEqual(userBalanceBefore.sub(toBN(amountToWithdraw)), userBalanceAfter);
 				});
 
 				it('reduces the total supply', async () => {
-					const supplyAfter = await mintableTribeone.totalSupply();
+					const supplyAfter = await mintableRwaone.totalSupply();
 					assert.bnEqual(initialSupply.sub(toBN(amountToWithdraw)), supplyAfter);
 				});
 			});
 
 			describe('when requesting a withdrawal to a different address', () => {
 				before('record user balance and initial total supply', async () => {
-					userBalanceBefore = await mintableTribeone.balanceOf(owner);
-					initialSupply = await mintableTribeone.totalSupply();
+					userBalanceBefore = await mintableRwaone.balanceOf(owner);
+					initialSupply = await mintableRwaone.totalSupply();
 				});
 
 				before('initiate a withdrawal', async () => {
@@ -104,12 +104,12 @@ contract('TribeoneBridgeToBase (spec tests) @ovm-skip', accounts => {
 				});
 
 				it('reduces the user balance', async () => {
-					const userBalanceAfter = await mintableTribeone.balanceOf(owner);
+					const userBalanceAfter = await mintableRwaone.balanceOf(owner);
 					assert.bnEqual(userBalanceBefore.sub(toBN(amountToWithdraw)), userBalanceAfter);
 				});
 
 				it('reduces the total supply', async () => {
-					const supplyAfter = await mintableTribeone.totalSupply();
+					const supplyAfter = await mintableRwaone.totalSupply();
 					assert.bnEqual(initialSupply.sub(toBN(amountToWithdraw)), supplyAfter);
 				});
 			});

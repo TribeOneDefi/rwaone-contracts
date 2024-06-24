@@ -8,7 +8,7 @@ import "../ProxyPerpsV2.sol";
 import "../FuturesMarketManager.sol";
 import "../PerpsV2MarketSettings.sol";
 
-interface ITribeoneNamedContract {
+interface IRwaoneNamedContract {
     // solhint-disable func-name-mixedcase
     function CONTRACT_NAME() external view returns (bytes32);
 }
@@ -19,7 +19,7 @@ contract Migration_CaphOptimismStep10 is BaseMigration {
     address public constant OWNER = 0x6d4a64C57612841c2C6745dB2a4E4db34F002D20;
 
     // ----------------------------
-    // EXISTING TRIBEONEETIX CONTRACTS
+    // EXISTING RWAONEETIX CONTRACTS
     // ----------------------------
 
     // https://explorer.optimism.io/address/0xE8c41bE1A167314ABAF2423b72Bf8da826943FFD

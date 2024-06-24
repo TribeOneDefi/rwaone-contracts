@@ -80,7 +80,7 @@ contract('PerpsV2MarketData', accounts => {
 				'CircuitBreaker',
 				'SystemStatus',
 				'SystemSettings',
-				'Tribeone',
+				'Rwaone',
 				'CollateralManager',
 				{ contract: 'FuturesMarketBTC', properties: { perpSuffix: keySuffix } },
 			],

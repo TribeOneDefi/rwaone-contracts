@@ -221,7 +221,7 @@ module.exports = {
 
 	// Helper function that can issue tribes directly to a user without having to have them exchange anything
 	async issueTribesToUser({ owner, issuer, addressResolver, tribeContract, user, amount }) {
-		// First override the resolver to make it seem the owner is the Tribeone contract
+		// First override the resolver to make it seem the owner is the Rwaone contract
 		await addressResolver.importAddresses(['Issuer'].map(toBytes32), [owner], {
 			from: owner,
 		});

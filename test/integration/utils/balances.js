@@ -89,19 +89,19 @@ async function _getWETH({ ctx, user, amount }) {
 }
 
 async function _getHAKA({ ctx, user, amount }) {
-	const { ProxyTribeone } = ctx.contracts;
-	let { Tribeone } = ctx.contracts;
+	const { ProxyRwaone } = ctx.contracts;
+	let { Rwaone } = ctx.contracts;
 
 	// connect via proxy
-	Tribeone = new ethers.Contract(ProxyTribeone.address, Tribeone.interface, ctx.provider);
+	Rwaone = new ethers.Contract(ProxyRwaone.address, Rwaone.interface, ctx.provider);
 
-	const ownerTransferable = await Tribeone.transferableTribeone(ctx.users.owner.address);
+	const ownerTransferable = await Rwaone.transferableRwaone(ctx.users.owner.address);
 	if (ownerTransferable.lt(amount)) {
 		await _getHAKAForOwner({ ctx, amount: amount.sub(ownerTransferable) });
 	}
 
-	Tribeone = Tribeone.connect(ctx.users.owner);
-	const tx = await Tribeone.transfer(user.address, amount);
+	Rwaone = Rwaone.connect(ctx.users.owner);
+	const tx = await Rwaone.transfer(user.address, amount);
 	await tx.wait();
 }
 
@@ -124,9 +124,9 @@ async function _getHAKAForOwnerOnL2ByDepositing({ ctx, amount }) {
 async function _getHAKAForOwnerOnL2ByHackMinting({ ctx, amount }) {
 	const owner = ctx.users.owner;
 
-	let { Tribeone, AddressResolver } = ctx.contracts;
+	let { Rwaone, AddressResolver } = ctx.contracts;
 
-	const bridgeName = toBytes32('TribeoneBridgeToBase');
+	const bridgeName = toBytes32('RwaoneBridgeToBase');
 	const bridgeAddress = await AddressResolver.getAddress(bridgeName);
 
 	let tx;
@@ -134,25 +134,25 @@ async function _getHAKAForOwnerOnL2ByHackMinting({ ctx, amount }) {
 	AddressResolver = AddressResolver.connect(owner);
 	tx = await AddressResolver.importAddresses([bridgeName], [owner.address]);
 	await tx.wait();
-	tx = await AddressResolver.rebuildCaches([Tribeone.address]);
+	tx = await AddressResolver.rebuildCaches([Rwaone.address]);
 	await tx.wait();
 
-	Tribeone = Tribeone.connect(owner);
-	tx = await Tribeone.mintSecondary(owner.address, amount);
+	Rwaone = Rwaone.connect(owner);
+	tx = await Rwaone.mintSecondary(owner.address, amount);
 	await tx.wait();
 
 	tx = await AddressResolver.importAddresses([bridgeName], [bridgeAddress]);
 	await tx.wait();
-	tx = await AddressResolver.rebuildCaches([Tribeone.address]);
+	tx = await AddressResolver.rebuildCaches([Rwaone.address]);
 	await tx.wait();
 }
 
 async function _gethUSD({ ctx, user, amount }) {
-	const { ProxyTribeone, ProxyhUSD } = ctx.contracts;
-	let { Tribeone, TribehUSD } = ctx.contracts;
+	const { ProxyRwaone, ProxyhUSD } = ctx.contracts;
+	let { Rwaone, TribehUSD } = ctx.contracts;
 
 	// connect via proxy
-	Tribeone = new ethers.Contract(ProxyTribeone.address, Tribeone.interface, ctx.provider);
+	Rwaone = new ethers.Contract(ProxyRwaone.address, Rwaone.interface, ctx.provider);
 	TribehUSD = new ethers.Contract(ProxyhUSD.address, TribehUSD.interface, ctx.provider);
 
 	let tx;
@@ -160,7 +160,7 @@ async function _gethUSD({ ctx, user, amount }) {
 	const requiredHAKA = await _getHAKAAmountRequiredForhUSDAmount({ ctx, amount });
 	await ensureBalance({ ctx, symbol: 'wHAKA', user, balance: requiredHAKA });
 
-	Tribeone = Tribeone.connect(ctx.users.owner);
+	Rwaone = Rwaone.connect(ctx.users.owner);
 
 	const tmpWallet = await ethers.Wallet.createRandom().connect(ctx.provider);
 
@@ -171,15 +171,15 @@ async function _gethUSD({ ctx, user, amount }) {
 		amount: ethers.utils.parseEther('1'),
 	});
 
-	const availableOwnerHAKA = await Tribeone.transferableTribeone(ctx.users.owner.address);
+	const availableOwnerHAKA = await Rwaone.transferableRwaone(ctx.users.owner.address);
 	if (availableOwnerHAKA.lt(requiredHAKA.mul(2))) {
 		await _getHAKAForOwner({ ctx, amount: requiredHAKA.mul(2).sub(availableOwnerHAKA) });
 	}
 
-	tx = await Tribeone.transfer(tmpWallet.address, requiredHAKA.mul(2));
+	tx = await Rwaone.transfer(tmpWallet.address, requiredHAKA.mul(2));
 	await tx.wait();
 
-	tx = await Tribeone.connect(tmpWallet).issueTribes(amount);
+	tx = await Rwaone.connect(tmpWallet).issueTribes(amount);
 	await tx.wait();
 
 	tx = await TribehUSD.connect(tmpWallet).transfer(user.address, amount);
@@ -237,13 +237,13 @@ async function _getHAKAAmountRequiredForhUSDAmount({ ctx, amount }) {
 
 function _getTokenFromSymbol({ ctx, symbol }) {
 	if (symbol === 'wHAKA') {
-		const { ProxyTribeone } = ctx.contracts;
-		let { Tribeone } = ctx.contracts;
+		const { ProxyRwaone } = ctx.contracts;
+		let { Rwaone } = ctx.contracts;
 
 		// connect via proxy
-		Tribeone = new ethers.Contract(ProxyTribeone.address, Tribeone.interface, ctx.provider);
+		Rwaone = new ethers.Contract(ProxyRwaone.address, Rwaone.interface, ctx.provider);
 
-		return Tribeone;
+		return Rwaone;
 	} else if (symbol === 'WETH') {
 		return ctx.contracts.WETH;
 	} else {

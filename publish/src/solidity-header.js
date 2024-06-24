@@ -32,9 +32,9 @@ module.exports = {
 		);
 
 		return `
-/* Tribeone: ${contract}
-* Latest source (may be newer): https://github.com/TribeOneDefi/tribeone-v3-contracts/blob/master/contracts/${contract}
-* Docs: https://docs.tribeone.io/contracts/${contract.split(/\./)[0]}
+/* Rwaone: ${contract}
+* Latest source (may be newer): https://github.com/RwaOneDefi/rwaone-v3-contracts/blob/master/contracts/${contract}
+* Docs: https://docs.rwaone.io/contracts/${contract.split(/\./)[0]}
 *
 * Contract Dependencies: ${deps.length ? '\n*\t- ' + deps.join('\n*\t- ') : '(none)'}
 * Libraries: ${libraries.length ? '\n*\t- ' + libraries.join('\n*\t- ') : '(none)'}
@@ -42,7 +42,7 @@ module.exports = {
 * MIT License
 * ===========
 *
-* Copyright (c) ${new Date().getFullYear()} Tribeone
+* Copyright (c) ${new Date().getFullYear()} Rwaone
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal

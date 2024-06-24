@@ -8,7 +8,7 @@ import "../TokenState.sol";
 import "../RewardsDistribution.sol";
 import "../Issuer.sol";
 
-interface ITribeoneNamedContract {
+interface IRwaoneNamedContract {
     // solhint-disable func-name-mixedcase
     function CONTRACT_NAME() external view returns (bytes32);
 }
@@ -19,7 +19,7 @@ contract Migration_NaosOptimism is BaseMigration {
     address public constant OWNER = 0x6d4a64C57612841c2C6745dB2a4E4db34F002D20;
 
     // ----------------------------
-    // EXISTING TRIBEONEETIX CONTRACTS
+    // EXISTING RWAONEETIX CONTRACTS
     // ----------------------------
 
     // https://explorer.optimism.io/address/0x95A6a3f44a70172E7d50a9e28c85Dfd712756B8C
@@ -41,7 +41,7 @@ contract Migration_NaosOptimism is BaseMigration {
     // ----------------------------------
 
     // https://explorer.optimism.io/address/0xfF5c26abD36078C768C40847672202eC343AC5ad
-    address public constant new_Tribeone_contract = 0xfF5c26abD36078C768C40847672202eC343AC5ad;
+    address public constant new_Rwaone_contract = 0xfF5c26abD36078C768C40847672202eC343AC5ad;
     // https://explorer.optimism.io/address/0xEb66Fc1BFdF3284Cb0CA1dE57149dcf3cEFa5453
     address public constant new_Issuer_contract = 0xEb66Fc1BFdF3284Cb0CA1dE57149dcf3cEFa5453;
 
@@ -66,14 +66,14 @@ contract Migration_NaosOptimism is BaseMigration {
         addressresolver_importAddresses_0();
         // Rebuild the resolver caches in all MixinResolver contracts - batch 1;
         addressresolver_rebuildCaches_1();
-        // Ensure the wHAKA proxy has the correct Tribeone target set;
-        proxytribeetix_i.setTarget(Proxyable(new_Tribeone_contract));
+        // Ensure the wHAKA proxy has the correct Rwaone target set;
+        proxytribeetix_i.setTarget(Proxyable(new_Rwaone_contract));
         // Ensure Issuer contract can suspend issuance - see SIP-165;
         systemstatus_i.updateAccessControl("Issuance", new_Issuer_contract, true, false);
-        // Ensure the Tribeone contract can write to its TokenState contract;
-        tokenstatetribeetix_i.setAssociatedContract(new_Tribeone_contract);
-        // Ensure the RewardsDistribution has Tribeone set as its authority for distribution;
-        rewardsdistribution_i.setAuthority(new_Tribeone_contract);
+        // Ensure the Rwaone contract can write to its TokenState contract;
+        tokenstatetribeetix_i.setAssociatedContract(new_Rwaone_contract);
+        // Ensure the RewardsDistribution has Rwaone set as its authority for distribution;
+        rewardsdistribution_i.setAuthority(new_Rwaone_contract);
         // Add tribes to the Issuer contract - batch 1;
         issuer_addTribes_8();
 
@@ -97,10 +97,10 @@ contract Migration_NaosOptimism is BaseMigration {
 
     function addressresolver_importAddresses_0() internal {
         bytes32[] memory addressresolver_importAddresses_names_0_0 = new bytes32[](2);
-        addressresolver_importAddresses_names_0_0[0] = bytes32("Tribeone");
+        addressresolver_importAddresses_names_0_0[0] = bytes32("Rwaone");
         addressresolver_importAddresses_names_0_0[1] = bytes32("Issuer");
         address[] memory addressresolver_importAddresses_destinations_0_1 = new address[](2);
-        addressresolver_importAddresses_destinations_0_1[0] = address(new_Tribeone_contract);
+        addressresolver_importAddresses_destinations_0_1[0] = address(new_Rwaone_contract);
         addressresolver_importAddresses_destinations_0_1[1] = address(new_Issuer_contract);
         addressresolver_i.importAddresses(
             addressresolver_importAddresses_names_0_0,
@@ -117,7 +117,7 @@ contract Migration_NaosOptimism is BaseMigration {
         addressresolver_rebuildCaches_destinations_1_0[4] = MixinResolver(new_Issuer_contract);
         addressresolver_rebuildCaches_destinations_1_0[5] = MixinResolver(0x2DcAD1A019fba8301b77810Ae14007cc88ED004B);
         addressresolver_rebuildCaches_destinations_1_0[6] = MixinResolver(0x136b1EC699c62b0606854056f02dC7Bb80482d63);
-        addressresolver_rebuildCaches_destinations_1_0[7] = MixinResolver(new_Tribeone_contract);
+        addressresolver_rebuildCaches_destinations_1_0[7] = MixinResolver(new_Rwaone_contract);
         addressresolver_rebuildCaches_destinations_1_0[8] = MixinResolver(0x45c55BF488D3Cb8640f12F63CbeDC027E8261E79);
         addressresolver_rebuildCaches_destinations_1_0[9] = MixinResolver(0xf9FE3607e6d19D8dC690DD976061a91D4A0db30B);
         addressresolver_rebuildCaches_destinations_1_0[10] = MixinResolver(0x17628A557d1Fc88D1c35989dcBAC3f3e275E2d2B);

@@ -3,7 +3,7 @@ pragma solidity ^0.5.16;
 import "../BaseMigration.sol";
 import "../AddressResolver.sol";
 
-interface ITribeoneNamedContract {
+interface IRwaoneNamedContract {
     // solhint-disable func-name-mixedcase
     function CONTRACT_NAME() external view returns (bytes32);
 }
@@ -14,7 +14,7 @@ contract Migration_Caph is BaseMigration {
     address public constant OWNER = 0xEb3107117FEAd7de89Cd14D463D340A2E6917769;
 
     // ----------------------------
-    // EXISTING TRIBEONEETIX CONTRACTS
+    // EXISTING RWAONEETIX CONTRACTS
     // ----------------------------
 
     // https://etherscan.io/address/0x823bE81bbF96BEc0e25CA13170F5AaCb5B79ba83

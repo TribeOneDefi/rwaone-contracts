@@ -8,8 +8,8 @@ import "./BaseDebtMigrator.sol";
 import "./interfaces/IDebtMigrator.sol";
 import "./interfaces/ILiquidator.sol";
 import "./interfaces/ILiquidatorRewards.sol";
-import "./interfaces/ITribeoneBridgeToOptimism.sol";
-import "./interfaces/ITribeoneDebtShare.sol";
+import "./interfaces/IRwaoneBridgeToOptimism.sol";
+import "./interfaces/IRwaoneDebtShare.sol";
 
 contract DebtMigratorOnEthereum is BaseDebtMigrator {
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
@@ -17,8 +17,8 @@ contract DebtMigratorOnEthereum is BaseDebtMigrator {
     bytes32 private constant CONTRACT_OVM_DEBT_MIGRATOR_ON_OPTIMISM = "ovm:DebtMigratorOnOptimism";
     bytes32 private constant CONTRACT_LIQUIDATOR = "Liquidator";
     bytes32 private constant CONTRACT_LIQUIDATOR_REWARDS = "LiquidatorRewards";
-    bytes32 private constant CONTRACT_TRIBEONEETIX_BRIDGE_TO_OPTIMISM = "TribeoneBridgeToOptimism";
-    bytes32 private constant CONTRACT_TRIBEONEETIX_DEBT_SHARE = "TribeoneDebtShare";
+    bytes32 private constant CONTRACT_RWAONEETIX_BRIDGE_TO_OPTIMISM = "RwaoneBridgeToOptimism";
+    bytes32 private constant CONTRACT_RWAONEETIX_DEBT_SHARE = "RwaoneDebtShare";
 
     function CONTRACT_NAME() public pure returns (bytes32) {
         return "DebtMigratorOnEthereum";
@@ -44,12 +44,12 @@ contract DebtMigratorOnEthereum is BaseDebtMigrator {
         return ILiquidatorRewards(requireAndGetAddress(CONTRACT_LIQUIDATOR_REWARDS));
     }
 
-    function _tribeetixBridgeToOptimism() internal view returns (ITribeoneBridgeToOptimism) {
-        return ITribeoneBridgeToOptimism(requireAndGetAddress(CONTRACT_TRIBEONEETIX_BRIDGE_TO_OPTIMISM));
+    function _tribeetixBridgeToOptimism() internal view returns (IRwaoneBridgeToOptimism) {
+        return IRwaoneBridgeToOptimism(requireAndGetAddress(CONTRACT_RWAONEETIX_BRIDGE_TO_OPTIMISM));
     }
 
-    function _tribeetixDebtShare() internal view returns (ITribeoneDebtShare) {
-        return ITribeoneDebtShare(requireAndGetAddress(CONTRACT_TRIBEONEETIX_DEBT_SHARE));
+    function _tribeetixDebtShare() internal view returns (IRwaoneDebtShare) {
+        return IRwaoneDebtShare(requireAndGetAddress(CONTRACT_RWAONEETIX_DEBT_SHARE));
     }
 
     function _initiatingActive() internal view {
@@ -71,8 +71,8 @@ contract DebtMigratorOnEthereum is BaseDebtMigrator {
         newAddresses[0] = CONTRACT_OVM_DEBT_MIGRATOR_ON_OPTIMISM;
         newAddresses[1] = CONTRACT_LIQUIDATOR;
         newAddresses[2] = CONTRACT_LIQUIDATOR_REWARDS;
-        newAddresses[3] = CONTRACT_TRIBEONEETIX_BRIDGE_TO_OPTIMISM;
-        newAddresses[4] = CONTRACT_TRIBEONEETIX_DEBT_SHARE;
+        newAddresses[3] = CONTRACT_RWAONEETIX_BRIDGE_TO_OPTIMISM;
+        newAddresses[4] = CONTRACT_RWAONEETIX_DEBT_SHARE;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -92,7 +92,7 @@ contract DebtMigratorOnEthereum is BaseDebtMigrator {
         _liquidatorRewards().getReward(_account);
 
         // First, remove all debt shares on L1
-        ITribeoneDebtShare sds = _tribeetixDebtShare();
+        IRwaoneDebtShare sds = _tribeetixDebtShare();
         uint totalDebtShares = sds.balanceOf(_account);
         require(totalDebtShares > 0, "No debt to migrate");
 
@@ -101,8 +101,8 @@ contract DebtMigratorOnEthereum is BaseDebtMigrator {
         _issuer().modifyDebtSharesForMigration(_account, totalDebtShares);
 
         // Deposit all of the liquid & revoked escrowed wHAKA to the migrator on L2
-        (uint totalEscrowRevoked, uint totalLiquidBalance) =
-            ITribeone(requireAndGetAddress(CONTRACT_TRIBEONEETIX)).migrateAccountBalances(_account);
+        (uint totalEscrowRevoked, uint totalLiquidBalance) = IRwaone(requireAndGetAddress(CONTRACT_RWAONEETIX))
+            .migrateAccountBalances(_account);
         uint totalAmountToDeposit = totalLiquidBalance.add(totalEscrowRevoked);
 
         require(totalAmountToDeposit > 0, "Cannot migrate zero balances");
@@ -122,20 +122,22 @@ contract DebtMigratorOnEthereum is BaseDebtMigrator {
 
         // Create the data payloads to be relayed on L2
         IIssuer issuer;
-        bytes memory _debtPayload =
-            abi.encodeWithSelector(issuer.modifyDebtSharesForMigration.selector, _account, totalDebtShares);
+        bytes memory _debtPayload = abi.encodeWithSelector(
+            issuer.modifyDebtSharesForMigration.selector,
+            _account,
+            totalDebtShares
+        );
 
         // Send a message with the debt & escrow payloads to L2 to finalize the migration
         IDebtMigrator debtMigratorOnOptimism;
-        bytes memory messageData =
-            abi.encodeWithSelector(
-                debtMigratorOnOptimism.finalizeDebtMigration.selector,
-                _account,
-                totalDebtShares,
-                totalEscrowRevoked,
-                totalLiquidBalance,
-                _debtPayload
-            );
+        bytes memory messageData = abi.encodeWithSelector(
+            debtMigratorOnOptimism.finalizeDebtMigration.selector,
+            _account,
+            totalDebtShares,
+            totalEscrowRevoked,
+            totalLiquidBalance,
+            _debtPayload
+        );
         _messenger().sendMessage(_debtMigratorOnOptimism(), messageData, _getCrossDomainGasLimit(0)); // passing zero will use the system setting default
 
         emit MigrationInitiated(_account, totalDebtShares, totalEscrowRevoked, totalLiquidBalance);

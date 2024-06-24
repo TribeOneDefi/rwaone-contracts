@@ -58,7 +58,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 		circuitBreaker,
 		addressResolver,
 		hUSD,
-		tribeone,
+		rwaone,
 		feePool,
 		debtCache,
 		systemSettings,
@@ -201,7 +201,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			CircuitBreaker: circuitBreaker,
 			AddressResolver: addressResolver,
 			TribehUSD: hUSD,
-			Tribeone: tribeone,
+			Rwaone: rwaone,
 			FeePool: feePool,
 			DebtCache: debtCache,
 			SystemStatus: systemStatus,
@@ -223,7 +223,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 				'CircuitBreaker',
 				'SystemStatus',
 				'SystemSettings',
-				'Tribeone',
+				'Rwaone',
 				'CollateralManager',
 				'DebtCache',
 			],
@@ -1334,7 +1334,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 
 			it('fee reclamation is respected', async () => {
 				// Set up a mock exchanger
-				const mockExchanger = await MockExchanger.new(tribeone.address);
+				const mockExchanger = await MockExchanger.new(rwaone.address);
 				await addressResolver.importAddresses(
 					['Exchanger'].map(toBytes32),
 					[mockExchanger.address],
@@ -1342,7 +1342,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 						from: owner,
 					}
 				);
-				await tribeone.rebuildCache();
+				await rwaone.rebuildCache();
 				await futuresMarketManager.rebuildCache();
 
 				// Set up a starting balance
@@ -1476,7 +1476,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			// should revert
 			await assert.revert(
 				perpsV2Market.transferMargin(toUnit('-1000'), { from: trader }),
-				'Tribeone is suspended'
+				'Rwaone is suspended'
 			);
 
 			// resume
@@ -1869,7 +1869,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			// should revert modifying position
 			await assert.revert(
 				perpsV2Market.modifyPosition(size, desiredFillPrice, { from: trader }),
-				'Tribeone is suspended'
+				'Rwaone is suspended'
 			);
 
 			// resume
@@ -3263,7 +3263,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 					// should revert
 					await assert.revert(
 						perpsV2Market.withdrawAllMargin({ from: trader }),
-						'Tribeone is suspended'
+						'Rwaone is suspended'
 					);
 
 					// resume

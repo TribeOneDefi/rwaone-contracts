@@ -5,7 +5,7 @@ import "./Owned.sol";
 import "./State.sol";
 import "./interfaces/IExchangeState.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/exchangestate
+// https://docs.rwaone.io/contracts/source/contracts/exchangestate
 contract ExchangeState is Owned, State, IExchangeState {
     mapping(address => mapping(bytes32 => IExchangeState.ExchangeEntry[])) public exchanges;
 

@@ -20,7 +20,7 @@ import "./MixinSystemSettings.sol";
 import "openzeppelin-solidity-2.3.0/contracts/math/SafeMath.sol";
 import "./SafeDecimalMath.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/etherwrapper
+// https://docs.rwaone.io/contracts/source/contracts/etherwrapper
 contract EtherWrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IEtherWrapper {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -35,8 +35,8 @@ contract EtherWrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IE
     bytes32 internal constant wHAKA = "wHAKA";
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
-    bytes32 private constant CONTRACT_TRIBEONEHETH = "TribehETH";
-    bytes32 private constant CONTRACT_TRIBEONEHUSD = "TribehUSD";
+    bytes32 private constant CONTRACT_RWAONEHETH = "TribehETH";
+    bytes32 private constant CONTRACT_RWAONEHUSD = "TribehUSD";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
     bytes32 private constant CONTRACT_FEEPOOL = "FeePool";
@@ -60,8 +60,8 @@ contract EtherWrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IE
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](5);
-        newAddresses[0] = CONTRACT_TRIBEONEHETH;
-        newAddresses[1] = CONTRACT_TRIBEONEHUSD;
+        newAddresses[0] = CONTRACT_RWAONEHETH;
+        newAddresses[1] = CONTRACT_RWAONEHUSD;
         newAddresses[2] = CONTRACT_EXRATES;
         newAddresses[3] = CONTRACT_ISSUER;
         newAddresses[4] = CONTRACT_FEEPOOL;
@@ -71,11 +71,11 @@ contract EtherWrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IE
 
     /* ========== INTERNAL VIEWS ========== */
     function tribehUSD() internal view returns (ITribe) {
-        return ITribe(requireAndGetAddress(CONTRACT_TRIBEONEHUSD));
+        return ITribe(requireAndGetAddress(CONTRACT_RWAONEHUSD));
     }
 
     function tribehETH() internal view returns (ITribe) {
-        return ITribe(requireAndGetAddress(CONTRACT_TRIBEONEHETH));
+        return ITribe(requireAndGetAddress(CONTRACT_RWAONEHETH));
     }
 
     function feePool() internal view returns (IFeePool) {

@@ -10,14 +10,14 @@ import "./SafeDecimalMath.sol";
 // Internal references
 import "./interfaces/IERC20.sol";
 import "./interfaces/IFeePool.sol";
-import "./interfaces/ITribeone.sol";
+import "./interfaces/IRwaone.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/rewardescrow
+// https://docs.rwaone.io/contracts/source/contracts/rewardescrow
 contract RewardEscrow is Owned, IRewardEscrow {
     using SafeMath for uint;
 
-    /* The corresponding Tribeone contract. */
-    ITribeone public tribeone;
+    /* The corresponding Rwaone contract. */
+    IRwaone public rwaone;
 
     IFeePool public feePool;
 
@@ -25,13 +25,13 @@ contract RewardEscrow is Owned, IRewardEscrow {
      * These are the times at which each given quantity of wHAKA vests. */
     mapping(address => uint[2][]) public vestingSchedules;
 
-    /* An account's total escrowed tribeone balance to save recomputing this for fee extraction purposes. */
+    /* An account's total escrowed rwaone balance to save recomputing this for fee extraction purposes. */
     mapping(address => uint) public totalEscrowedAccountBalance;
 
-    /* An account's total vested reward tribeone. */
+    /* An account's total vested reward rwaone. */
     mapping(address => uint) public totalVestedAccountBalance;
 
-    /* The total remaining escrowed balance, for verifying the actual tribeone balance of this contract against. */
+    /* The total remaining escrowed balance, for verifying the actual rwaone balance of this contract against. */
     uint public totalEscrowedBalance;
 
     uint internal constant TIME_INDEX = 0;
@@ -43,23 +43,19 @@ contract RewardEscrow is Owned, IRewardEscrow {
 
     /* ========== CONSTRUCTOR ========== */
 
-    constructor(
-        address _owner,
-        ITribeone _tribeetix,
-        IFeePool _feePool
-    ) public Owned(_owner) {
-        tribeone = _tribeetix;
+    constructor(address _owner, IRwaone _tribeetix, IFeePool _feePool) public Owned(_owner) {
+        rwaone = _tribeetix;
         feePool = _feePool;
     }
 
     /* ========== SETTERS ========== */
 
     /**
-     * @notice set the tribeone contract address as we need to transfer wHAKA when the user vests
+     * @notice set the rwaone contract address as we need to transfer wHAKA when the user vests
      */
-    function setTribeone(ITribeone _tribeetix) external onlyOwner {
-        tribeone = _tribeetix;
-        emit TribeoneUpdated(address(_tribeetix));
+    function setRwaone(IRwaone _tribeetix) external onlyOwner {
+        rwaone = _tribeetix;
+        emit RwaoneUpdated(address(_tribeetix));
     }
 
     /**
@@ -93,7 +89,7 @@ contract RewardEscrow is Owned, IRewardEscrow {
 
     /**
      * @notice Get a particular schedule entry for an account.
-     * @return A pair of uints: (timestamp, tribeone quantity).
+     * @return A pair of uints: (timestamp, rwaone quantity).
      */
     function getVestingScheduleEntry(address account, uint index) public view returns (uint[2] memory) {
         return vestingSchedules[account][index];
@@ -128,7 +124,7 @@ contract RewardEscrow is Owned, IRewardEscrow {
 
     /**
      * @notice Obtain the next schedule entry that will vest for a given user.
-     * @return A pair of uints: (timestamp, tribeone quantity). */
+     * @return A pair of uints: (timestamp, rwaone quantity). */
     function getNextVestingEntry(address account) public view returns (uint[2] memory) {
         uint index = getNextVestingIndex(account);
         if (index == _numVestingEntries(account)) {
@@ -177,7 +173,7 @@ contract RewardEscrow is Owned, IRewardEscrow {
         /* There must be enough balance in the contract to provide for the vesting entry. */
         totalEscrowedBalance = totalEscrowedBalance.add(quantity);
         require(
-            totalEscrowedBalance <= IERC20(address(tribeone)).balanceOf(address(this)),
+            totalEscrowedBalance <= IERC20(address(rwaone)).balanceOf(address(this)),
             "Must be enough balance in the contract to provide for the vesting entry"
         );
 
@@ -207,7 +203,7 @@ contract RewardEscrow is Owned, IRewardEscrow {
 
     /**
      * @notice Add a new vesting entry at a given time and quantity to an account's schedule.
-     * @dev A call to this should accompany a previous successful call to tribeone.transfer(rewardEscrow, amount),
+     * @dev A call to this should accompany a previous successful call to rwaone.transfer(rewardEscrow, amount),
      * to ensure that when the funds are withdrawn, there is enough balance.
      * Note; although this function could technically be used to produce unbounded
      * arrays, it's only withinn the 4 year period of the weekly inflation schedule.
@@ -241,7 +237,7 @@ contract RewardEscrow is Owned, IRewardEscrow {
             totalEscrowedBalance = totalEscrowedBalance.sub(total);
             totalEscrowedAccountBalance[msg.sender] = totalEscrowedAccountBalance[msg.sender].sub(total);
             totalVestedAccountBalance[msg.sender] = totalVestedAccountBalance[msg.sender].add(total);
-            IERC20(address(tribeone)).transfer(msg.sender, total);
+            IERC20(address(rwaone)).transfer(msg.sender, total);
             emit Vested(msg.sender, now, total);
         }
     }
@@ -257,7 +253,7 @@ contract RewardEscrow is Owned, IRewardEscrow {
 
     /* ========== EVENTS ========== */
 
-    event TribeoneUpdated(address newTribeone);
+    event RwaoneUpdated(address newRwaone);
 
     event FeePoolUpdated(address newFeePool);
 

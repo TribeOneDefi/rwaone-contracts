@@ -114,7 +114,7 @@ const removeTribes = async ({
 				cyan(
 					`${yellow(
 						'⚠ WARNING'
-					)}: This action will remove the following tribes from the Tribeone contract on ${network}:\n- ${tribesToRemove.join(
+					)}: This action will remove the following tribes from the Rwaone contract on ${network}:\n- ${tribesToRemove.join(
 						'\n- '
 					)}`
 				) + '\nDo you want to continue? (y/n) '
@@ -125,8 +125,8 @@ const removeTribes = async ({
 		}
 	}
 
-	const Tribeone = getContract({
-		contract: 'Tribeone',
+	const Rwaone = getContract({
+		contract: 'Rwaone',
 		network,
 		deploymentPath,
 		wallet,
@@ -165,12 +165,12 @@ const removeTribes = async ({
 		const { abi: tribeABI } = deployment.sources[tribeSource];
 		const Tribe = new ethers.Contract(tribeAddress, tribeABI, wallet);
 
-		const currentTribeInHAKA = await Tribeone.tribes(toBytes32(currencyKey));
+		const currentTribeInHAKA = await Rwaone.tribes(toBytes32(currencyKey));
 
 		if (tribeAddress !== currentTribeInHAKA) {
 			console.error(
 				red(
-					`Tribe address in Tribeone for ${currencyKey} is different from what's deployed in Tribeone to the local ${DEPLOYMENT_FILENAME} of ${network} \ndeployed: ${yellow(
+					`Tribe address in Rwaone for ${currencyKey} is different from what's deployed in Rwaone to the local ${DEPLOYMENT_FILENAME} of ${network} \ndeployed: ${yellow(
 						currentTribeInHAKA
 					)}\nlocal:    ${yellow(tribeAddress)}`
 				)
@@ -179,7 +179,7 @@ const removeTribes = async ({
 			return;
 		}
 
-		// now check total supply (is required in Tribeone.removeTribe)
+		// now check total supply (is required in Rwaone.removeTribe)
 		const totalSupply = ethers.utils.formatEther(await Tribe.totalSupply());
 		if (Number(totalSupply) > 0) {
 			const totalSupplyInUSD = ethers.utils.formatEther(
@@ -203,7 +203,7 @@ const removeTribes = async ({
 			}
 		}
 
-		// perform transaction if owner of Tribeone or append to owner actions list
+		// perform transaction if owner of Rwaone or append to owner actions list
 		if (dryRun) {
 			console.log(green('Would attempt to remove the tribe:', currencyKey));
 		} else {

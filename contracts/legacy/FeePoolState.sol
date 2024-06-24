@@ -10,7 +10,7 @@ import "../SafeDecimalMath.sol";
 // Internal references
 import "../interfaces/IFeePool.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/feepoolstate
+// https://docs.rwaone.io/contracts/source/contracts/feepoolstate
 contract FeePoolState is Owned, LimitedSetup {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -52,11 +52,10 @@ contract FeePoolState is Owned, LimitedSetup {
      * @param account users account
      * @param index Index in the array to retrieve. Upto FEE_PERIOD_LENGTH
      */
-    function getAccountsDebtEntry(address account, uint index)
-        public
-        view
-        returns (uint debtPercentage, uint debtEntryIndex)
-    {
+    function getAccountsDebtEntry(
+        address account,
+        uint index
+    ) public view returns (uint debtPercentage, uint debtEntryIndex) {
         require(index < FEE_PERIOD_LENGTH, "index exceeds the FEE_PERIOD_LENGTH");
 
         debtPercentage = accountIssuanceLedger[account][index].debtPercentage;
@@ -86,9 +85,9 @@ contract FeePoolState is Owned, LimitedSetup {
      * @notice Logs an accounts issuance data in the current fee period which is then stored historically
      * @param account Message.Senders account address
      * @param debtRatio Debt of this account as a percentage of the global debt.
-     * @param debtEntryIndex The index in the global debt ledger. tribeone.tribeetixState().issuanceData(account)
+     * @param debtEntryIndex The index in the global debt ledger. rwaone.tribeetixState().issuanceData(account)
      * @param currentPeriodStartDebtIndex The startingDebtIndex of the current fee period
-     * @dev onlyFeePool to call me on tribeone.issue() & tribeone.burn() calls to store the locked wHAKA
+     * @dev onlyFeePool to call me on rwaone.issue() & rwaone.burn() calls to store the locked wHAKA
      * per fee period so we know to allocate the correct proportions of fees and rewards per period
       accountIssuanceLedger[account][0] has the latest locked amount for the current period. This can be update as many time
       accountIssuanceLedger[account][1-2] has the last locked amount for a previous period they minted or burned
@@ -149,7 +148,7 @@ contract FeePoolState is Owned, LimitedSetup {
 
     /* ========== MODIFIERS ========== */
 
-    modifier onlyFeePool {
+    modifier onlyFeePool() {
         require(msg.sender == address(feePool), "Only the FeePool contract can perform this action");
         _;
     }

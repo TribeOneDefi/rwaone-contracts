@@ -1,6 +1,6 @@
 pragma solidity >=0.4.24;
 
-// https://docs.tribeone.io/contracts/source/interfaces/iflexiblestorage
+// https://docs.rwaone.io/contracts/source/interfaces/iflexiblestorage
 interface IFlexibleStorage {
     // Views
     function getUIntValue(bytes32 contractName, bytes32 record) external view returns (uint);
@@ -34,63 +34,23 @@ interface IFlexibleStorage {
 
     function deleteBytes32Value(bytes32 contractName, bytes32 record) external;
 
-    function setUIntValue(
-        bytes32 contractName,
-        bytes32 record,
-        uint value
-    ) external;
+    function setUIntValue(bytes32 contractName, bytes32 record, uint value) external;
 
-    function setUIntValues(
-        bytes32 contractName,
-        bytes32[] calldata records,
-        uint[] calldata values
-    ) external;
+    function setUIntValues(bytes32 contractName, bytes32[] calldata records, uint[] calldata values) external;
 
-    function setIntValue(
-        bytes32 contractName,
-        bytes32 record,
-        int value
-    ) external;
+    function setIntValue(bytes32 contractName, bytes32 record, int value) external;
 
-    function setIntValues(
-        bytes32 contractName,
-        bytes32[] calldata records,
-        int[] calldata values
-    ) external;
+    function setIntValues(bytes32 contractName, bytes32[] calldata records, int[] calldata values) external;
 
-    function setAddressValue(
-        bytes32 contractName,
-        bytes32 record,
-        address value
-    ) external;
+    function setAddressValue(bytes32 contractName, bytes32 record, address value) external;
 
-    function setAddressValues(
-        bytes32 contractName,
-        bytes32[] calldata records,
-        address[] calldata values
-    ) external;
+    function setAddressValues(bytes32 contractName, bytes32[] calldata records, address[] calldata values) external;
 
-    function setBoolValue(
-        bytes32 contractName,
-        bytes32 record,
-        bool value
-    ) external;
+    function setBoolValue(bytes32 contractName, bytes32 record, bool value) external;
 
-    function setBoolValues(
-        bytes32 contractName,
-        bytes32[] calldata records,
-        bool[] calldata values
-    ) external;
+    function setBoolValues(bytes32 contractName, bytes32[] calldata records, bool[] calldata values) external;
 
-    function setBytes32Value(
-        bytes32 contractName,
-        bytes32 record,
-        bytes32 value
-    ) external;
+    function setBytes32Value(bytes32 contractName, bytes32 record, bytes32 value) external;
 
-    function setBytes32Values(
-        bytes32 contractName,
-        bytes32[] calldata records,
-        bytes32[] calldata values
-    ) external;
+    function setBytes32Values(bytes32 contractName, bytes32[] calldata records, bytes32[] calldata values) external;
 }

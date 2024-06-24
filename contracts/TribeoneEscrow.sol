@@ -10,23 +10,23 @@ import "./SafeDecimalMath.sol";
 
 // Internal references
 import "./interfaces/IERC20.sol";
-import "./interfaces/ITribeone.sol";
+import "./interfaces/IRwaone.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/tribeetixescrow
-contract TribeoneEscrow is Owned, LimitedSetup(8 weeks), IHasBalance {
+// https://docs.rwaone.io/contracts/source/contracts/tribeetixescrow
+contract RwaoneEscrow is Owned, LimitedSetup(8 weeks), IHasBalance {
     using SafeMath for uint;
 
-    /* The corresponding Tribeone contract. */
-    ITribeone public tribeone;
+    /* The corresponding Rwaone contract. */
+    IRwaone public rwaone;
 
     /* Lists of (timestamp, quantity) pairs per account, sorted in ascending time order.
      * These are the times at which each given quantity of wHAKA vests. */
     mapping(address => uint[2][]) public vestingSchedules;
 
-    /* An account's total vested tribeone balance to save recomputing this for fee extraction purposes. */
+    /* An account's total vested rwaone balance to save recomputing this for fee extraction purposes. */
     mapping(address => uint) public totalVestedAccountBalance;
 
-    /* The total remaining vested balance, for verifying the actual tribeone balance of this contract against. */
+    /* The total remaining vested balance, for verifying the actual rwaone balance of this contract against. */
     uint public totalVestedBalance;
 
     uint public constant TIME_INDEX = 0;
@@ -37,15 +37,15 @@ contract TribeoneEscrow is Owned, LimitedSetup(8 weeks), IHasBalance {
 
     /* ========== CONSTRUCTOR ========== */
 
-    constructor(address _owner, ITribeone _tribeetix) public Owned(_owner) {
-        tribeone = _tribeetix;
+    constructor(address _owner, IRwaone _tribeetix) public Owned(_owner) {
+        rwaone = _tribeetix;
     }
 
     /* ========== SETTERS ========== */
 
-    function setTribeone(ITribeone _tribeetix) external onlyOwner {
-        tribeone = _tribeetix;
-        emit TribeoneUpdated(address(_tribeetix));
+    function setRwaone(IRwaone _tribeetix) external onlyOwner {
+        rwaone = _tribeetix;
+        emit RwaoneUpdated(address(_tribeetix));
     }
 
     /* ========== VIEW FUNCTIONS ========== */
@@ -66,7 +66,7 @@ contract TribeoneEscrow is Owned, LimitedSetup(8 weeks), IHasBalance {
 
     /**
      * @notice Get a particular schedule entry for an account.
-     * @return A pair of uints: (timestamp, tribeone quantity).
+     * @return A pair of uints: (timestamp, rwaone quantity).
      */
     function getVestingScheduleEntry(address account, uint index) public view returns (uint[2] memory) {
         return vestingSchedules[account][index];
@@ -101,7 +101,7 @@ contract TribeoneEscrow is Owned, LimitedSetup(8 weeks), IHasBalance {
 
     /**
      * @notice Obtain the next schedule entry that will vest for a given user.
-     * @return A pair of uints: (timestamp, tribeone quantity). */
+     * @return A pair of uints: (timestamp, rwaone quantity). */
     function getNextVestingEntry(address account) public view returns (uint[2] memory) {
         uint index = getNextVestingIndex(account);
         if (index == numVestingEntries(account)) {
@@ -138,7 +138,7 @@ contract TribeoneEscrow is Owned, LimitedSetup(8 weeks), IHasBalance {
     /**
      * @notice Add a new vesting entry at a given time and quantity to an account's schedule.
      * @dev A call to this should be accompanied by either enough balance already available
-     * in this contract, or a corresponding call to tribeone.endow(), to ensure that when
+     * in this contract, or a corresponding call to rwaone.endow(), to ensure that when
      * the funds are withdrawn, there is enough balance, as well as correctly calculating
      * the fees.
      * This may only be called by the owner during the contract's setup period.
@@ -148,11 +148,7 @@ contract TribeoneEscrow is Owned, LimitedSetup(8 weeks), IHasBalance {
      * @param time The absolute unix timestamp after which the vested quantity may be withdrawn.
      * @param quantity The quantity of wHAKA that will vest.
      */
-    function appendVestingEntry(
-        address account,
-        uint time,
-        uint quantity
-    ) public onlyOwner onlyDuringSetup {
+    function appendVestingEntry(address account, uint time, uint quantity) public onlyOwner onlyDuringSetup {
         /* No empty or already-passed vesting entries allowed. */
         require(now < time, "Time must be in the future");
         require(quantity != 0, "Quantity cannot be zero");
@@ -160,7 +156,7 @@ contract TribeoneEscrow is Owned, LimitedSetup(8 weeks), IHasBalance {
         /* There must be enough balance in the contract to provide for the vesting entry. */
         totalVestedBalance = totalVestedBalance.add(quantity);
         require(
-            totalVestedBalance <= IERC20(address(tribeone)).balanceOf(address(this)),
+            totalVestedBalance <= IERC20(address(rwaone)).balanceOf(address(this)),
             "Must be enough balance in the contract to provide for the vesting entry"
         );
 
@@ -222,14 +218,14 @@ contract TribeoneEscrow is Owned, LimitedSetup(8 weeks), IHasBalance {
         if (total != 0) {
             totalVestedBalance = totalVestedBalance.sub(total);
             totalVestedAccountBalance[msg.sender] = totalVestedAccountBalance[msg.sender].sub(total);
-            IERC20(address(tribeone)).transfer(msg.sender, total);
+            IERC20(address(rwaone)).transfer(msg.sender, total);
             emit Vested(msg.sender, now, total);
         }
     }
 
     /* ========== EVENTS ========== */
 
-    event TribeoneUpdated(address newTribeone);
+    event RwaoneUpdated(address newRwaone);
 
     event Vested(address indexed beneficiary, uint time, uint value);
 }

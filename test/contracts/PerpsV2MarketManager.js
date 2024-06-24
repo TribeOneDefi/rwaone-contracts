@@ -32,7 +32,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 		hUSD,
 		debtCache,
 		feePool,
-		tribeone,
+		rwaone,
 		addressResolver;
 
 	const owner = accounts[1];
@@ -82,7 +82,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 			TribehUSD: hUSD,
 			DebtCache: debtCache,
 			FeePool: feePool,
-			Tribeone: tribeone,
+			Rwaone: rwaone,
 			AddressResolver: addressResolver,
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
@@ -100,7 +100,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 				'ExchangeCircuitBreaker',
 				'SystemStatus',
 				'SystemSettings',
-				'Tribeone',
+				'Rwaone',
 				'Exchanger',
 				'DebtCache',
 				'CollateralManager',
@@ -532,11 +532,11 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 
 		it('burning respects settlement', async () => {
 			// Set up a mock exchanger
-			const mockExchanger = await MockExchanger.new(tribeone.address);
+			const mockExchanger = await MockExchanger.new(rwaone.address);
 			await addressResolver.importAddresses(['Exchanger'].map(toBytes32), [mockExchanger.address], {
 				from: owner,
 			});
-			await tribeone.rebuildCache();
+			await rwaone.rebuildCache();
 			await futuresMarketManager.rebuildCache();
 
 			await mockExchanger.setReclaim(toUnit('10'));

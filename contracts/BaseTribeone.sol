@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import "./interfaces/IERC20.sol";
 import "./ExternStateToken.sol";
 import "./MixinResolver.sol";
-import "./interfaces/ITribeone.sol";
+import "./interfaces/IRwaone.sol";
 
 // Internal references
 import "./interfaces/ITribe.sol";
@@ -19,11 +19,11 @@ import "./interfaces/ILiquidatorRewards.sol";
 import "./interfaces/IVirtualTribe.sol";
 import "./interfaces/IRewardEscrowV2.sol";
 
-contract BaseTribeone is IERC20, ExternStateToken, MixinResolver, ITribeone {
+contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
     // ========== STATE VARIABLES ==========
 
     // Available Tribes which can be used with the system
-    string public constant TOKEN_NAME = "Tribeone Network Wrap Token";
+    string public constant TOKEN_NAME = "Rwaone Network Wrap Token";
     string public constant TOKEN_SYMBOL = "wHAKA";
     uint8 public constant DECIMALS = 18;
     bytes32 public constant hUSD = "hUSD";
@@ -139,15 +139,9 @@ contract BaseTribeone is IERC20, ExternStateToken, MixinResolver, ITribeone {
         return issuer().maxIssuableTribes(account);
     }
 
-    function remainingIssuableTribes(address account)
-        external
-        view
-        returns (
-            uint maxIssuable,
-            uint alreadyIssued,
-            uint totalSystemDebt
-        )
-    {
+    function remainingIssuableTribes(
+        address account
+    ) external view returns (uint maxIssuable, uint alreadyIssued, uint totalSystemDebt) {
         return issuer().remainingIssuableTribes(account);
     }
 
@@ -159,8 +153,8 @@ contract BaseTribeone is IERC20, ExternStateToken, MixinResolver, ITribeone {
         return issuer().collateral(account);
     }
 
-    function transferableTribeone(address account) external view returns (uint transferable) {
-        (transferable, ) = issuer().transferableTribeoneAndAnyRateIsInvalid(account, tokenState.balanceOf(account));
+    function transferableRwaone(address account) external view returns (uint transferable) {
+        (transferable, ) = issuer().transferableRwaoneAndAnyRateIsInvalid(account, tokenState.balanceOf(account));
     }
 
     /// the index of the first non zero RewardEscrowV2 entry for an account in order of iteration over accountVestingEntryIDs.
@@ -189,8 +183,10 @@ contract BaseTribeone is IERC20, ExternStateToken, MixinResolver, ITribeone {
         }
 
         if (issuer().debtBalanceOf(account, hUSD) > 0) {
-            (uint transferable, bool anyRateIsInvalid) =
-                issuer().transferableTribeoneAndAnyRateIsInvalid(account, tokenState.balanceOf(account));
+            (uint transferable, bool anyRateIsInvalid) = issuer().transferableRwaoneAndAnyRateIsInvalid(
+                account,
+                tokenState.balanceOf(account)
+            );
             require(value <= transferable, "Cannot transfer staked or escrowed wHAKA");
             require(!anyRateIsInvalid, "A tribe or wHAKA rate is invalid");
         }
@@ -237,15 +233,9 @@ contract BaseTribeone is IERC20, ExternStateToken, MixinResolver, ITribeone {
         );
     }
 
-    function settle(bytes32 currencyKey)
-        external
-        optionalProxy
-        returns (
-            uint reclaimed,
-            uint refunded,
-            uint numEntriesSettled
-        )
-    {
+    function settle(
+        bytes32 currencyKey
+    ) external optionalProxy returns (uint reclaimed, uint refunded, uint numEntriesSettled) {
         return exchanger().settle(messageSender, currencyKey);
     }
 
@@ -300,11 +290,7 @@ contract BaseTribeone is IERC20, ExternStateToken, MixinResolver, ITribeone {
         return true;
     }
 
-    function transferFrom(
-        address from,
-        address to,
-        uint value
-    ) external onlyProxyOrInternal systemActive returns (bool) {
+    function transferFrom(address from, address to, uint value) external onlyProxyOrInternal systemActive returns (bool) {
         // Ensure they're not trying to exceed their locked amount -- only if they have debt.
         _canTransfer(from, value);
 
@@ -368,12 +354,10 @@ contract BaseTribeone is IERC20, ExternStateToken, MixinResolver, ITribeone {
 
     /// @param escrowStartIndex: index into the account's vesting entries list to start iterating from
     /// when liquidating from escrow in order to save gas (the default method uses 0 as default)
-    function liquidateDelinquentAccountEscrowIndex(address account, uint escrowStartIndex)
-        external
-        systemActive
-        optionalProxy
-        returns (bool)
-    {
+    function liquidateDelinquentAccountEscrowIndex(
+        address account,
+        uint escrowStartIndex
+    ) external systemActive optionalProxy returns (bool) {
         return _liquidateDelinquentAccount(account, escrowStartIndex, messageSender);
     }
 
@@ -458,11 +442,9 @@ contract BaseTribeone is IERC20, ExternStateToken, MixinResolver, ITribeone {
         rewardEscrowV2().revokeFrom(account, legacyMarketAddress, rewardEscrowV2().totalEscrowedAccountBalance(account), 0);
     }
 
-    function migrateAccountBalances(address account)
-        external
-        systemActive
-        returns (uint totalEscrowRevoked, uint totalLiquidBalance)
-    {
+    function migrateAccountBalances(
+        address account
+    ) external systemActive returns (uint totalEscrowRevoked, uint totalLiquidBalance) {
         address debtMigratorOnEthereum = resolver.getAddress(CONTRACT_DEBT_MIGRATOR_ON_ETHEREUM);
         require(msg.sender == debtMigratorOnEthereum, "Only L1 DebtMigrator");
 
@@ -480,32 +462,15 @@ contract BaseTribeone is IERC20, ExternStateToken, MixinResolver, ITribeone {
         }
     }
 
-    function exchangeWithTrackingForInitiator(
-        bytes32,
-        uint,
-        bytes32,
-        address,
-        bytes32
-    ) external returns (uint) {
+    function exchangeWithTrackingForInitiator(bytes32, uint, bytes32, address, bytes32) external returns (uint) {
         _notImplemented();
     }
 
-    function exchangeWithVirtual(
-        bytes32,
-        uint,
-        bytes32,
-        bytes32
-    ) external returns (uint, IVirtualTribe) {
+    function exchangeWithVirtual(bytes32, uint, bytes32, bytes32) external returns (uint, IVirtualTribe) {
         _notImplemented();
     }
 
-    function exchangeAtomically(
-        bytes32,
-        uint,
-        bytes32,
-        bytes32,
-        uint
-    ) external returns (uint) {
+    function exchangeAtomically(bytes32, uint, bytes32, bytes32, uint) external returns (uint) {
         _notImplemented();
     }
 
@@ -567,7 +532,7 @@ contract BaseTribeone is IERC20, ExternStateToken, MixinResolver, ITribeone {
         require(msg.sender == address(exchanger()), "Only Exchanger can invoke this");
     }
 
-    modifier onlyProxyOrInternal {
+    modifier onlyProxyOrInternal() {
         _onlyProxyOrInternal();
         _;
     }
@@ -591,12 +556,12 @@ contract BaseTribeone is IERC20, ExternStateToken, MixinResolver, ITribeone {
         // e.g. due to not being available on L2 or at some future point in time.
         return
             // ordered to reduce gas for more frequent calls, bridge first, vesting and migrating after, legacy last
-            caller == resolver.getAddress("TribeoneBridgeToOptimism") ||
+            caller == resolver.getAddress("RwaoneBridgeToOptimism") ||
             caller == resolver.getAddress("RewardEscrowV2") ||
             caller == resolver.getAddress("DebtMigratorOnOptimism") ||
             // legacy contracts
             caller == resolver.getAddress("RewardEscrow") ||
-            caller == resolver.getAddress("TribeoneEscrow") ||
+            caller == resolver.getAddress("RwaoneEscrow") ||
             caller == resolver.getAddress("Depot");
     }
 
@@ -628,7 +593,7 @@ contract BaseTribeone is IERC20, ExternStateToken, MixinResolver, ITribeone {
         uint256 toAmount,
         address toAddress
     );
-    bytes32 internal constant TRIBEONE_EXCHANGE_SIG =
+    bytes32 internal constant RWAONE_EXCHANGE_SIG =
         keccak256("TribeExchange(address,bytes32,uint256,bytes32,uint256,address)");
 
     function emitTribeExchange(
@@ -642,7 +607,7 @@ contract BaseTribeone is IERC20, ExternStateToken, MixinResolver, ITribeone {
         proxy._emit(
             abi.encode(fromCurrencyKey, fromAmount, toCurrencyKey, toAmount, toAddress),
             2,
-            TRIBEONE_EXCHANGE_SIG,
+            RWAONE_EXCHANGE_SIG,
             addressToBytes32(account),
             0,
             0
@@ -664,22 +629,14 @@ contract BaseTribeone is IERC20, ExternStateToken, MixinResolver, ITribeone {
     event ExchangeReclaim(address indexed account, bytes32 currencyKey, uint amount);
     bytes32 internal constant EXCHANGERECLAIM_SIG = keccak256("ExchangeReclaim(address,bytes32,uint256)");
 
-    function emitExchangeReclaim(
-        address account,
-        bytes32 currencyKey,
-        uint256 amount
-    ) external onlyExchanger {
+    function emitExchangeReclaim(address account, bytes32 currencyKey, uint256 amount) external onlyExchanger {
         proxy._emit(abi.encode(currencyKey, amount), 2, EXCHANGERECLAIM_SIG, addressToBytes32(account), 0, 0);
     }
 
     event ExchangeRebate(address indexed account, bytes32 currencyKey, uint amount);
     bytes32 internal constant EXCHANGEREBATE_SIG = keccak256("ExchangeRebate(address,bytes32,uint256)");
 
-    function emitExchangeRebate(
-        address account,
-        bytes32 currencyKey,
-        uint256 amount
-    ) external onlyExchanger {
+    function emitExchangeRebate(address account, bytes32 currencyKey, uint256 amount) external onlyExchanger {
         proxy._emit(abi.encode(currencyKey, amount), 2, EXCHANGEREBATE_SIG, addressToBytes32(account), 0, 0);
     }
 }

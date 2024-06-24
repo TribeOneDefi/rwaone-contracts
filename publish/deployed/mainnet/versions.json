@@ -68,7 +68,7 @@
 				"status": "current",
 				"keccak256": "0xa4731706c3292ed368ded616be2fcf28877d8a853cbce27be7d78e6a57636e9f"
 			},
-			"ProxyTribeone": {
+			"ProxyRwaone": {
 				"address": "0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F",
 				"status": "current"
 			},
@@ -76,16 +76,16 @@
 				"address": "0x84D626B2BB4D0F064067e4BF80FCe7055d8F3E7B",
 				"status": "current"
 			},
-			"Tribeone": {
+			"Rwaone": {
 				"address": "0xd0dA9cBeA9C3852C5d63A95F9ABCC4f6eA0F9032",
 				"status": "current",
 				"keccak256": "0xfb54a46c4b98896c043ae676b3925f939533f43203c14f2662f7b0e042b0ac55"
 			},
-			"TribeoneEscrow": {
+			"RwaoneEscrow": {
 				"address": "0x971e78e0C92392A4E39099835cF7E6aB535b2227",
 				"status": "current"
 			},
-			"TribeoneState": {
+			"RwaoneState": {
 				"address": "0x4b9Ca5607f1fF8019c1C6A3c2f0CC8de622D5B82",
 				"status": "current"
 			},
@@ -159,7 +159,7 @@
 				"status": "current",
 				"keccak256": "0x10a63d041fa9899b429b12dddcf047b55c23fe62019c08abbba9fa1f603738d3"
 			},
-			"TokenStateTribeone": {
+			"TokenStateRwaone": {
 				"address": "0x5b1b5fEa1b99D83aD479dF0C222F0492385381dD",
 				"status": "current"
 			},
@@ -386,7 +386,7 @@
 				"status": "current",
 				"keccak256": "0x3d38255a60ff43faeff6ac6a330213f7bdc77882cfc71ce3fa26f6f93418f5cc"
 			},
-			"TribeoneBridgeToOptimism": {
+			"RwaoneBridgeToOptimism": {
 				"address": "0x39Ea01a0298C315d149a490E34B59Dbf2EC7e48F",
 				"status": "current",
 				"keccak256": "0xdff9df88e885c9026ab62c879f5378f213292e70ca6e99106893271b0ca9109a"
@@ -491,7 +491,7 @@
 				"status": "current",
 				"keccak256": "0x0c1b57cb46f37ca9ffd36bbc5cd02433219539106c33a9937724e682f6fc3516"
 			},
-			"TribeoneBridgeEscrow": {
+			"RwaoneBridgeEscrow": {
 				"address": "0x5Fd79D46EBA7F351fe49BFF9E87cdeA6c821eF9f",
 				"status": "current",
 				"keccak256": "0xb2c7f7c807bc4783ed66f959cb3335f1b77727bf4d074e3319992842eca64235"
@@ -541,7 +541,7 @@
 				"status": "current",
 				"keccak256": "0xc4e328478f9c625bb34c4f019040afd62b9dfb8f03882727e39888d3173f09a9"
 			},
-			"TribeoneDebtShare": {
+			"RwaoneDebtShare": {
 				"address": "0x89FCb32F29e509cc42d0C8b6f058C993013A843F",
 				"status": "current",
 				"keccak256": "0x403192bc309d6eee98ddbfaeed166b50c2665df94167c6970e785a65b71dd0e3"

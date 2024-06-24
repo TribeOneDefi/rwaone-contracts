@@ -25,14 +25,14 @@ module.exports = async ({
 		FeePoolEternalStorage,
 		Issuer,
 		ProxyFeePool,
-		ProxyTribeone,
+		ProxyRwaone,
 		RewardEscrow,
 		RewardsDistribution,
 		SupplySchedule,
-		Tribeone,
-		TribeoneEscrow,
+		Rwaone,
+		RwaoneEscrow,
 		SystemStatus,
-		TokenStateTribeone,
+		TokenStateRwaone,
 	} = deployer.deployedContracts;
 
 	// now configure everything
@@ -91,24 +91,24 @@ module.exports = async ({
 		});
 	}
 
-	if (ProxyTribeone && Tribeone) {
+	if (ProxyRwaone && Rwaone) {
 		await runStep({
-			contract: 'ProxyTribeone',
-			target: ProxyTribeone,
+			contract: 'ProxyRwaone',
+			target: ProxyRwaone,
 			read: 'target',
-			expected: input => input === addressOf(Tribeone),
+			expected: input => input === addressOf(Rwaone),
 			write: 'setTarget',
-			writeArg: addressOf(Tribeone),
-			comment: 'Ensure the wHAKA proxy has the correct Tribeone target set',
+			writeArg: addressOf(Rwaone),
+			comment: 'Ensure the wHAKA proxy has the correct Rwaone target set',
 		});
 		await runStep({
-			contract: 'Tribeone',
-			target: Tribeone,
+			contract: 'Rwaone',
+			target: Rwaone,
 			read: 'proxy',
-			expected: input => input === addressOf(ProxyTribeone),
+			expected: input => input === addressOf(ProxyRwaone),
 			write: 'setProxy',
-			writeArg: addressOf(ProxyTribeone),
-			comment: 'Ensure the Tribeone contract has the correct ERC20 proxy set',
+			writeArg: addressOf(ProxyRwaone),
+			comment: 'Ensure the Rwaone contract has the correct ERC20 proxy set',
 		});
 	}
 
@@ -154,42 +154,42 @@ module.exports = async ({
 	}
 
 	// only reset token state if redeploying
-	if (TokenStateTribeone && config['TokenStateTribeone'].deploy) {
+	if (TokenStateRwaone && config['TokenStateRwaone'].deploy) {
 		const initialIssuance = await getDeployParameter('INITIAL_ISSUANCE');
 		await runStep({
-			contract: 'TokenStateTribeone',
-			target: TokenStateTribeone,
+			contract: 'TokenStateRwaone',
+			target: TokenStateRwaone,
 			read: 'balanceOf',
 			readArg: account,
 			expected: input => input === initialIssuance,
 			write: 'setBalanceOf',
 			writeArg: [account, initialIssuance],
 			comment:
-				'Ensure the TokenStateTribeone contract has the correct initial issuance (WARNING: only for new deploys)',
+				'Ensure the TokenStateRwaone contract has the correct initial issuance (WARNING: only for new deploys)',
 		});
 	}
 
-	if (TokenStateTribeone && Tribeone) {
+	if (TokenStateRwaone && Rwaone) {
 		await runStep({
-			contract: 'TokenStateTribeone',
-			target: TokenStateTribeone,
+			contract: 'TokenStateRwaone',
+			target: TokenStateRwaone,
 			read: 'associatedContract',
-			expected: input => input === addressOf(Tribeone),
+			expected: input => input === addressOf(Rwaone),
 			write: 'setAssociatedContract',
-			writeArg: addressOf(Tribeone),
-			comment: 'Ensure the Tribeone contract can write to its TokenState contract',
+			writeArg: addressOf(Rwaone),
+			comment: 'Ensure the Rwaone contract can write to its TokenState contract',
 		});
 	}
 
-	if (RewardEscrow && Tribeone) {
+	if (RewardEscrow && Rwaone) {
 		await runStep({
 			contract: 'RewardEscrow',
 			target: RewardEscrow,
-			read: 'tribeone',
-			expected: input => input === addressOf(Tribeone),
-			write: 'setTribeone',
-			writeArg: addressOf(Tribeone),
-			comment: 'Ensure the legacy RewardEscrow contract is connected to the Tribeone contract',
+			read: 'rwaone',
+			expected: input => input === addressOf(Rwaone),
+			write: 'setRwaone',
+			writeArg: addressOf(Rwaone),
+			comment: 'Ensure the legacy RewardEscrow contract is connected to the Rwaone contract',
 		});
 	}
 
@@ -205,68 +205,68 @@ module.exports = async ({
 		});
 	}
 
-	if (SupplySchedule && Tribeone) {
+	if (SupplySchedule && Rwaone) {
 		await runStep({
 			contract: 'SupplySchedule',
 			target: SupplySchedule,
 			read: 'tribeetixProxy',
-			expected: input => input === addressOf(ProxyTribeone),
-			write: 'setTribeoneProxy',
-			writeArg: addressOf(ProxyTribeone),
+			expected: input => input === addressOf(ProxyRwaone),
+			write: 'setRwaoneProxy',
+			writeArg: addressOf(ProxyRwaone),
 			comment: 'Ensure the SupplySchedule is connected to the wHAKA proxy for reading',
 		});
 	}
 
-	if (Tribeone && RewardsDistribution) {
+	if (Rwaone && RewardsDistribution) {
 		await runStep({
 			contract: 'RewardsDistribution',
 			target: RewardsDistribution,
 			read: 'authority',
-			expected: input => input === addressOf(Tribeone),
+			expected: input => input === addressOf(Rwaone),
 			write: 'setAuthority',
-			writeArg: addressOf(Tribeone),
-			comment: 'Ensure the RewardsDistribution has Tribeone set as its authority for distribution',
+			writeArg: addressOf(Rwaone),
+			comment: 'Ensure the RewardsDistribution has Rwaone set as its authority for distribution',
 		});
 
 		await runStep({
 			contract: 'RewardsDistribution',
 			target: RewardsDistribution,
 			read: 'tribeetixProxy',
-			expected: input => input === addressOf(ProxyTribeone),
-			write: 'setTribeoneProxy',
-			writeArg: addressOf(ProxyTribeone),
-			comment: 'Ensure the RewardsDistribution can find the Tribeone proxy to read and transfer',
+			expected: input => input === addressOf(ProxyRwaone),
+			write: 'setRwaoneProxy',
+			writeArg: addressOf(ProxyRwaone),
+			comment: 'Ensure the RewardsDistribution can find the Rwaone proxy to read and transfer',
 		});
 	}
 
 	// ----------------
-	// Setting ProxyTribeone Tribeone for TribeoneEscrow
+	// Setting ProxyRwaone Rwaone for RwaoneEscrow
 	// ----------------
 
 	// Skip setting unless redeploying either of these,
-	if (config['Tribeone'].deploy || config['TribeoneEscrow'].deploy) {
-		// Note: currently on mainnet TribeoneEscrow.Tribeone() does NOT exist
+	if (config['Rwaone'].deploy || config['RwaoneEscrow'].deploy) {
+		// Note: currently on mainnet RwaoneEscrow.Rwaone() does NOT exist
 		// it is "havven" and the ABI we have here is not sufficient
 		if (network === 'mainnet' && !useOvm) {
 			await runStep({
-				contract: 'TribeoneEscrow',
-				target: TribeoneEscrow,
+				contract: 'RwaoneEscrow',
+				target: RwaoneEscrow,
 				read: 'havven',
-				expected: input => input === addressOf(ProxyTribeone),
+				expected: input => input === addressOf(ProxyRwaone),
 				write: 'setHavven',
-				writeArg: addressOf(ProxyTribeone),
+				writeArg: addressOf(ProxyRwaone),
 				comment:
-					'Ensure the legacy token sale escrow can find the Tribeone proxy to read and transfer',
+					'Ensure the legacy token sale escrow can find the Rwaone proxy to read and transfer',
 			});
 		} else {
 			await runStep({
-				contract: 'TribeoneEscrow',
-				target: TribeoneEscrow,
-				read: 'tribeone',
-				expected: input => input === addressOf(ProxyTribeone),
-				write: 'setTribeone',
-				writeArg: addressOf(ProxyTribeone),
-				comment: 'Ensure the token sale escrow can find the Tribeone proxy to read and transfer',
+				contract: 'RwaoneEscrow',
+				target: RwaoneEscrow,
+				read: 'rwaone',
+				expected: input => input === addressOf(ProxyRwaone),
+				write: 'setRwaone',
+				writeArg: addressOf(ProxyRwaone),
+				comment: 'Ensure the token sale escrow can find the Rwaone proxy to read and transfer',
 			});
 		}
 	}

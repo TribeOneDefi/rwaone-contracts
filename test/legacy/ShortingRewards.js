@@ -36,7 +36,7 @@ contract('ShortingRewards', accounts => {
 	const hBTC = toBytes32('hBTC');
 	const iBTC = toBytes32('iBTC');
 
-	// Tribeone is the rewardsToken
+	// Rwaone is the rewardsToken
 	let rewardsToken,
 		rewardsTokenProxy,
 		exchangeRates,
@@ -120,14 +120,14 @@ contract('ShortingRewards', accounts => {
 			Issuer: issuer,
 			DebtCache: debtCache,
 			RewardsDistribution: rewardsDistribution,
-			Tribeone: rewardsToken,
-			ProxyERC20Tribeone: rewardsTokenProxy,
+			Rwaone: rewardsToken,
+			ProxyERC20Rwaone: rewardsTokenProxy,
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
 			tribes,
 			contracts: [
-				'Tribeone',
+				'Rwaone',
 				'FeePool',
 				'AddressResolver',
 				'ExchangeRates',
@@ -135,7 +135,7 @@ contract('ShortingRewards', accounts => {
 				'Issuer',
 				'DebtCache',
 				'RewardsDistribution',
-				'Tribeone',
+				'Rwaone',
 				'SystemSettings',
 				'Exchanger',
 				'CollateralUtil',
@@ -143,7 +143,7 @@ contract('ShortingRewards', accounts => {
 		}));
 
 		// use implementation ABI on the proxy address to simplify calling
-		rewardsToken = await artifacts.require('Tribeone').at(rewardsTokenProxy.address);
+		rewardsToken = await artifacts.require('Rwaone').at(rewardsTokenProxy.address);
 
 		await setupPriceAggregators(exchangeRates, owner, [hBTC, iBTC, hETH, iETH]);
 
@@ -215,7 +215,7 @@ contract('ShortingRewards', accounts => {
 		await Promise.all([
 			rewardsDistribution.setAuthority(authority, { from: owner }),
 			rewardsDistribution.setRewardEscrow(rewardEscrowAddress, { from: owner }),
-			rewardsDistribution.setTribeoneProxy(rewardsToken.address, { from: owner }),
+			rewardsDistribution.setRwaoneProxy(rewardsToken.address, { from: owner }),
 			rewardsDistribution.setFeePoolProxy(feePool.address, { from: owner }),
 		]);
 
@@ -794,7 +794,7 @@ contract('ShortingRewards', accounts => {
 			// Transfer Rewards to the RewardsDistribution contract address
 			await rewardsToken.transfer(rewardsDistribution.address, totalToDistribute, { from: owner });
 
-			// Distribute Rewards called from Tribeone contract as the authority to distribute
+			// Distribute Rewards called from Rwaone contract as the authority to distribute
 			await rewardsDistribution.distributeRewards(totalToDistribute, {
 				from: authority,
 			});

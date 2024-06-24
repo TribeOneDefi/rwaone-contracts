@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import "./Proxyable.sol";
 import "./PerpsV2MarketBase.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/PerpsV2MarketProxyable
+// https://docs.rwaone.io/contracts/source/contracts/PerpsV2MarketProxyable
 contract PerpsV2MarketProxyable is PerpsV2MarketBase, Proxyable {
     /* ========== CONSTRUCTOR ========== */
 
@@ -38,7 +38,7 @@ contract PerpsV2MarketProxyable is PerpsV2MarketBase, Proxyable {
         debt. This is needed for keeping track of the marketDebt() in an efficient manner to allow O(1) marketDebt
         calculation in marketDebt().
 
-        Explanation of the full market debt calculation from the SIP https://sips.tribeone.io/sips/sip-80/:
+        Explanation of the full market debt calculation from the SIP https://sips.rwaone.io/sips/sip-80/:
 
         The overall market debt is the sum of the remaining margin in all positions. The intuition is that
         the debt of a single position is the value withdrawn upon closing that position.
@@ -95,11 +95,7 @@ contract PerpsV2MarketProxyable is PerpsV2MarketBase, Proxyable {
     }
 
     /** TODO: Docs */
-    function _assertFillPrice(
-        uint fillPrice,
-        uint desiredFillPrice,
-        int sizeDelta
-    ) internal view returns (uint) {
+    function _assertFillPrice(uint fillPrice, uint desiredFillPrice, int sizeDelta) internal view returns (uint) {
         _revertIfError(
             sizeDelta > 0 ? fillPrice > desiredFillPrice : fillPrice < desiredFillPrice,
             Status.PriceImpactToleranceExceeded
@@ -166,8 +162,8 @@ contract PerpsV2MarketProxyable is PerpsV2MarketBase, Proxyable {
                 // To account for this, a check on `positionDecreasing` ensures that we can always perform this action
                 // so long as we're reducing the position size and not liquidatable.
                 int newPositionSize = int(position.size).add(orderSizeDelta);
-                bool positionDecreasing =
-                    _sameSide(position.size, newPositionSize) && _abs(newPositionSize) < _abs(position.size);
+                bool positionDecreasing = _sameSide(position.size, newPositionSize) &&
+                    _abs(newPositionSize) < _abs(position.size);
 
                 if (!positionDecreasing) {
                     _revertIfError(
@@ -192,14 +188,13 @@ contract PerpsV2MarketProxyable is PerpsV2MarketBase, Proxyable {
 
     function _trade(address sender, TradeParams memory params) internal notFlagged(sender) {
         Position memory position = marketState.positions(sender);
-        Position memory oldPosition =
-            Position({
-                id: position.id,
-                lastFundingIndex: position.lastFundingIndex,
-                margin: position.margin,
-                lastPrice: position.lastPrice,
-                size: position.size
-            });
+        Position memory oldPosition = Position({
+            id: position.id,
+            lastFundingIndex: position.lastFundingIndex,
+            margin: position.margin,
+            lastPrice: position.lastPrice,
+            size: position.size
+        });
 
         // Compute the new position after performing the trade
         (Position memory newPosition, uint fee, Status status) = _postTradeDetails(oldPosition, params);
@@ -315,12 +310,7 @@ contract PerpsV2MarketProxyable is PerpsV2MarketBase, Proxyable {
     event FundingRecomputed(int funding, int fundingRate, uint index, uint timestamp);
     bytes32 internal constant FUNDINGRECOMPUTED_SIG = keccak256("FundingRecomputed(int256,int256,uint256,uint256)");
 
-    function emitFundingRecomputed(
-        int funding,
-        int fundingRate,
-        uint index,
-        uint timestamp
-    ) internal {
+    function emitFundingRecomputed(int funding, int fundingRate, uint index, uint timestamp) internal {
         proxy._emit(abi.encode(funding, fundingRate, index, timestamp), 1, FUNDINGRECOMPUTED_SIG, 0, 0, 0);
     }
 

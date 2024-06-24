@@ -4,10 +4,10 @@ pragma experimental ABIEncoderV2;
 // Inheritance
 import "./BaseRewardEscrowV2.sol";
 
-// https://docs.tribeone.io/contracts/RewardEscrow
+// https://docs.rwaone.io/contracts/RewardEscrow
 contract ImportableRewardEscrowV2 is BaseRewardEscrowV2 {
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
-    bytes32 private constant CONTRACT_TRIBEONEETIX_BRIDGE_BASE = "TribeoneBridgeToBase";
+    bytes32 private constant CONTRACT_RWAONEETIX_BRIDGE_BASE = "RwaoneBridgeToBase";
 
     /* ========== CONSTRUCTOR ========== */
 
@@ -18,12 +18,12 @@ contract ImportableRewardEscrowV2 is BaseRewardEscrowV2 {
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = BaseRewardEscrowV2.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](1);
-        newAddresses[0] = CONTRACT_TRIBEONEETIX_BRIDGE_BASE;
+        newAddresses[0] = CONTRACT_RWAONEETIX_BRIDGE_BASE;
         return combineArrays(existingAddresses, newAddresses);
     }
 
     function tribeetixBridgeToBase() internal view returns (address) {
-        return requireAndGetAddress(CONTRACT_TRIBEONEETIX_BRIDGE_BASE);
+        return requireAndGetAddress(CONTRACT_RWAONEETIX_BRIDGE_BASE);
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
@@ -32,7 +32,7 @@ contract ImportableRewardEscrowV2 is BaseRewardEscrowV2 {
         address account,
         uint256 escrowedAmount,
         VestingEntries.VestingEntry[] calldata vestingEntries
-    ) external onlyTribeoneBridge {
+    ) external onlyRwaoneBridge {
         // add escrowedAmount to account and total aggregates
         state().updateEscrowAccountBalance(account, SafeCast.toInt256(escrowedAmount));
 
@@ -47,8 +47,8 @@ contract ImportableRewardEscrowV2 is BaseRewardEscrowV2 {
         }
     }
 
-    modifier onlyTribeoneBridge() {
-        require(msg.sender == tribeetixBridgeToBase(), "Can only be invoked by TribeoneBridgeToBase contract");
+    modifier onlyRwaoneBridge() {
+        require(msg.sender == tribeetixBridgeToBase(), "Can only be invoked by RwaoneBridgeToBase contract");
         _;
     }
 }

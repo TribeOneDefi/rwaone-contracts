@@ -12,10 +12,10 @@ describe('depositReward() integration tests (L1, L2)', () => {
 
 	let owner;
 	let FeePoolL2,
-		Tribeone,
-		TribeoneL2,
-		TribeoneBridgeEscrow,
-		TribeoneBridgeToOptimism,
+		Rwaone,
+		RwaoneL2,
+		RwaoneBridgeEscrow,
+		RwaoneBridgeToOptimism,
 		RewardEscrowV2L2;
 
 	let depositReceipt, escrowBalance;
@@ -23,11 +23,11 @@ describe('depositReward() integration tests (L1, L2)', () => {
 
 	describe('when the owner deposits wHAKA for rewards', () => {
 		before('target contracts and users', () => {
-			({ Tribeone, TribeoneBridgeEscrow, TribeoneBridgeToOptimism } = ctx.l1.contracts);
+			({ Rwaone, RwaoneBridgeEscrow, RwaoneBridgeToOptimism } = ctx.l1.contracts);
 			({
 				FeePool: FeePoolL2,
 				RewardEscrowV2: RewardEscrowV2L2,
-				Tribeone: TribeoneL2,
+				Rwaone: RwaoneL2,
 			} = ctx.l2.contracts);
 
 			owner = ctx.l1.users.owner;
@@ -35,29 +35,29 @@ describe('depositReward() integration tests (L1, L2)', () => {
 
 		before('approve if needed', async () => {
 			await approveIfNeeded({
-				token: Tribeone,
+				token: Rwaone,
 				owner,
-				beneficiary: TribeoneBridgeToOptimism,
+				beneficiary: RwaoneBridgeToOptimism,
 				amount: rewardsToDeposit,
 			});
 		});
 
 		before('record values', async () => {
-			escrowBalance = await Tribeone.balanceOf(TribeoneBridgeEscrow.address);
+			escrowBalance = await Rwaone.balanceOf(RwaoneBridgeEscrow.address);
 
-			rewardEscrowBalanceL2 = await TribeoneL2.balanceOf(RewardEscrowV2L2.address);
+			rewardEscrowBalanceL2 = await RwaoneL2.balanceOf(RewardEscrowV2L2.address);
 			currentFeePeriodRewards = (await FeePoolL2.recentFeePeriods(0)).rewardsToDistribute;
 		});
 
 		before('deposit rewards', async () => {
-			TribeoneBridgeToOptimism = TribeoneBridgeToOptimism.connect(owner);
+			RwaoneBridgeToOptimism = RwaoneBridgeToOptimism.connect(owner);
 
-			const tx = await TribeoneBridgeToOptimism.depositReward(rewardsToDeposit);
+			const tx = await RwaoneBridgeToOptimism.depositReward(rewardsToDeposit);
 			depositReceipt = await tx.wait();
 		});
 
 		it('increases the escrow balance', async () => {
-			const newEscrowBalance = await Tribeone.balanceOf(TribeoneBridgeEscrow.address);
+			const newEscrowBalance = await Rwaone.balanceOf(RwaoneBridgeEscrow.address);
 
 			assert.bnEqual(newEscrowBalance, escrowBalance.add(rewardsToDeposit));
 		});
@@ -69,7 +69,7 @@ describe('depositReward() integration tests (L1, L2)', () => {
 
 			it('increases the RewardEscrowV2 balance on L2', async () => {
 				assert.bnEqual(
-					await TribeoneL2.balanceOf(RewardEscrowV2L2.address),
+					await RwaoneL2.balanceOf(RewardEscrowV2L2.address),
 					rewardEscrowBalanceL2.add(rewardsToDeposit)
 				);
 			});

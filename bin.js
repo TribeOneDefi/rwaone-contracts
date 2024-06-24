@@ -80,7 +80,7 @@ program
 
 program
 	.command('decode <data> [target]')
-	.description('Decode a data payload from a Tribeone contract')
+	.description('Decode a data payload from a Rwaone contract')
 	.option('-n, --network <value>', 'The network to use', x => x.toLowerCase(), 'mainnet')
 	.option('-z, --use-ovm', 'Target deployment for the OVM (Optimism).')
 	.option('-m, --decode-migration', 'Decodes a migration contract execution call')
@@ -98,7 +98,7 @@ program
 
 program
 	.command('decode-multi-send <txsdata> [target]')
-	.description('Decode a data payload from a gnosis multi-send staged to Tribeone contracts')
+	.description('Decode a data payload from a gnosis multi-send staged to Rwaone contracts')
 	.option('-n, --network <value>', 'The network to use', x => x.toLowerCase(), 'mainnet')
 	.option('-z, --use-ovm', 'Target deployment for the OVM (Optimism).')
 	.option('-m, --decode-migration', 'Decodes a migration contract execution call')
@@ -181,7 +181,7 @@ program
 
 program
 	.command('decode-relay-batch <rawtxsdata> [target]')
-	.description('Decode data payload from a initiate relay batch staged to Tribeone contracts')
+	.description('Decode data payload from a initiate relay batch staged to Rwaone contracts')
 	.option('-n, --network <value>', 'The network to use', x => x.toLowerCase(), 'mainnet')
 	.option('-e, --enhance-decode', 'Enhance decoded data', false)
 	.action(async (rawtxsdata, target, { network, enhanceDecode }) => {
@@ -388,7 +388,7 @@ program
 
 program
 	.command('tokens')
-	.description('Get the list of ERC20 tokens in Tribeone')
+	.description('Get the list of ERC20 tokens in Rwaone')
 	.option('-n, --network <value>', 'The network to run off.', x => x.toLowerCase(), 'mainnet')
 	.option('-z, --use-ovm', 'Target deployment for the OVM (Optimism).')
 	.action(async ({ network, useOvm }) => {

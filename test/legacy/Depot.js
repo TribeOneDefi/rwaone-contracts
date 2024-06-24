@@ -26,7 +26,7 @@ const { toBytes32 } = require('../..');
 const { artifacts } = require('hardhat');
 
 contract('Depot', async accounts => {
-	let tribeone,
+	let rwaone,
 		tribeetixProxy,
 		tribe,
 		depot,
@@ -65,8 +65,8 @@ contract('Depot', async accounts => {
 			AddressResolver: addressResolver,
 			ExchangeRates: exchangeRates,
 			SystemStatus: systemStatus,
-			Tribeone: tribeone,
-			ProxyERC20Tribeone: tribeetixProxy,
+			Rwaone: rwaone,
+			ProxyERC20Rwaone: tribeetixProxy,
 		} = await setupAllContracts({
 			accounts,
 			mocks: {
@@ -78,13 +78,13 @@ contract('Depot', async accounts => {
 				'AddressResolver',
 				'ExchangeRates',
 				'SystemStatus',
-				'Tribeone',
+				'Rwaone',
 				'Issuer',
 			],
 		}));
 
 		// use implementation ABI on the proxy address to simplify calling
-		tribeone = await artifacts.require('Tribeone').at(tribeetixProxy.address);
+		rwaone = await artifacts.require('Rwaone').at(tribeetixProxy.address);
 
 		await setupPriceAggregators(exchangeRates, owner, [ETH]);
 	});
@@ -120,7 +120,7 @@ contract('Depot', async accounts => {
 					'setMaxEthPurchase',
 					'setMinimumDepositAmount',
 					'withdrawMyDepositedTribes',
-					'withdrawTribeone',
+					'withdrawRwaone',
 				],
 			});
 		});
@@ -808,7 +808,7 @@ contract('Depot', async accounts => {
 				const purchaseValueDollars = multiplyDecimal(ethToSend, ethRate);
 				snxToPurchase = divideDecimal(purchaseValueDollars, snxRate);
 				// Send some wHAKA to the Depot contract
-				await tribeone.transfer(depot.address, toUnit('1000000'), {
+				await rwaone.transfer(depot.address, toUnit('1000000'), {
 					from: owner,
 				});
 			});
@@ -828,13 +828,13 @@ contract('Depot', async accounts => {
 				it('when purchaser supplies a rate lower than the current rate', async () => {
 					await assert.revert(
 						depot.exchangeEtherForHAKAAtRate(ethRate, '99', ethToSendFromPurchaser),
-						'Guaranteed tribeone rate would not be received'
+						'Guaranteed rwaone rate would not be received'
 					);
 				});
 				it('when purchaser supplies a rate higher than the current rate', async () => {
 					await assert.revert(
 						depot.exchangeEtherForHAKAAtRate(ethRate, '9999', ethToSendFromPurchaser),
-						'Guaranteed tribeone rate would not be received'
+						'Guaranteed rwaone rate would not be received'
 					);
 				});
 				it('when the purchaser supplies a rate and the rate is changed in by the oracle', async () => {
@@ -862,13 +862,13 @@ contract('Depot', async accounts => {
 					from: owner,
 				});
 				// Send some wHAKA to the Token Depot contract
-				await tribeone.transfer(depot.address, depotHAKAAmount, {
+				await rwaone.transfer(depot.address, depotHAKAAmount, {
 					from: owner,
 				});
 
 				await tribe.approve(depot.address, tribesToSend, fromPurchaser);
 
-				const depotHAKABalance = await tribeone.balanceOf(depot.address);
+				const depotHAKABalance = await rwaone.balanceOf(depot.address);
 				assert.bnEqual(depotHAKABalance, depotHAKAAmount);
 
 				snxToPurchase = divideDecimal(tribesToSend, snxRate);
@@ -1115,7 +1115,7 @@ contract('Depot', async accounts => {
 
 		beforeEach(async () => {
 			// Send some wHAKA to the Depot contract
-			await tribeone.transfer(depot.address, toUnit('1000000'), {
+			await rwaone.transfer(depot.address, toUnit('1000000'), {
 				from: owner,
 			});
 		});
@@ -1150,7 +1150,7 @@ contract('Depot', async accounts => {
 		it('ensure user get the correct amount of wHAKA after sending ETH', async () => {
 			const ethToSend = toUnit('10');
 
-			const purchaserHAKAStartBalance = await tribeone.balanceOf(purchaser);
+			const purchaserHAKAStartBalance = await rwaone.balanceOf(purchaser);
 			// Purchaser should not have wHAKA yet
 			assert.equal(purchaserHAKAStartBalance, 0);
 
@@ -1161,16 +1161,16 @@ contract('Depot', async accounts => {
 			});
 
 			const purchaseValueInTribes = multiplyDecimal(ethToSend, ethRate);
-			const purchaseValueInTribeone = divideDecimal(purchaseValueInTribes, snxRate);
+			const purchaseValueInRwaone = divideDecimal(purchaseValueInTribes, snxRate);
 
-			const purchaserHAKAEndBalance = await tribeone.balanceOf(purchaser);
+			const purchaserHAKAEndBalance = await rwaone.balanceOf(purchaser);
 
 			// Purchaser wHAKA balance should be equal to the purchase value we calculated above
-			assert.bnEqual(purchaserHAKAEndBalance, purchaseValueInTribeone);
+			assert.bnEqual(purchaserHAKAEndBalance, purchaseValueInRwaone);
 		});
 	});
 
-	describe('Ensure user can exchange Tribes for Tribeone', async () => {
+	describe('Ensure user can exchange Tribes for Rwaone', async () => {
 		const purchaser = address1;
 		const purchaserTribeAmount = toUnit('2000');
 		const depotHAKAAmount = toUnit('1000000');
@@ -1182,13 +1182,13 @@ contract('Depot', async accounts => {
 				from: owner,
 			});
 			// We need to send some wHAKA to the Token Depot contract
-			await tribeone.transfer(depot.address, depotHAKAAmount, {
+			await rwaone.transfer(depot.address, depotHAKAAmount, {
 				from: owner,
 			});
 
 			await tribe.approve(depot.address, tribesToSend, { from: purchaser });
 
-			const depotHAKABalance = await tribeone.balanceOf(depot.address);
+			const depotHAKABalance = await rwaone.balanceOf(depot.address);
 			const purchaserTribeBalance = await tribe.balanceOf(purchaser);
 			assert.bnEqual(depotHAKABalance, depotHAKAAmount);
 			assert.bnEqual(purchaserTribeBalance, purchaserTribeAmount);
@@ -1220,7 +1220,7 @@ contract('Depot', async accounts => {
 		});
 
 		it('ensure user gets the correct amount of wHAKA after sending 10 hUSD', async () => {
-			const purchaserHAKAStartBalance = await tribeone.balanceOf(purchaser);
+			const purchaserHAKAStartBalance = await rwaone.balanceOf(purchaser);
 			// Purchaser should not have wHAKA yet
 			assert.equal(purchaserHAKAStartBalance, 0);
 
@@ -1229,12 +1229,12 @@ contract('Depot', async accounts => {
 				from: purchaser,
 			});
 
-			const purchaseValueInTribeone = divideDecimal(tribesToSend, snxRate);
+			const purchaseValueInRwaone = divideDecimal(tribesToSend, snxRate);
 
-			const purchaserHAKAEndBalance = await tribeone.balanceOf(purchaser);
+			const purchaserHAKAEndBalance = await rwaone.balanceOf(purchaser);
 
 			// Purchaser wHAKA balance should be equal to the purchase value we calculated above
-			assert.bnEqual(purchaserHAKAEndBalance, purchaseValueInTribeone);
+			assert.bnEqual(purchaserHAKAEndBalance, purchaseValueInRwaone);
 
 			// assert the exchange event
 			const exchangeEvent = txn.logs.find(log => log.event === 'Exchange');
@@ -1243,24 +1243,24 @@ contract('Depot', async accounts => {
 				fromCurrency: 'hUSD',
 				fromAmount: tribesToSend,
 				toCurrency: 'wHAKA',
-				toAmount: purchaseValueInTribeone,
+				toAmount: purchaseValueInRwaone,
 			});
 		});
 	});
 
-	describe('withdrawTribeone', () => {
+	describe('withdrawRwaone', () => {
 		const snxAmount = toUnit('1000000');
 
 		beforeEach(async () => {
 			// Send some wHAKA to the Depot contract
-			await tribeone.transfer(depot.address, snxAmount, {
+			await rwaone.transfer(depot.address, snxAmount, {
 				from: owner,
 			});
 		});
 
-		it('when non owner withdrawTribeone calls then revert', async () => {
+		it('when non owner withdrawRwaone calls then revert', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: depot.withdrawTribeone,
+				fnc: depot.withdrawRwaone,
 				args: [snxAmount],
 				accounts,
 				address: owner,
@@ -1268,14 +1268,14 @@ contract('Depot', async accounts => {
 			});
 		});
 
-		it('when owner calls withdrawTribeone then withdrawTribeone', async () => {
-			const depotHAKABalanceBefore = await tribeone.balanceOf(depot.address);
+		it('when owner calls withdrawRwaone then withdrawRwaone', async () => {
+			const depotHAKABalanceBefore = await rwaone.balanceOf(depot.address);
 
 			assert.bnEqual(depotHAKABalanceBefore, snxAmount);
 
-			await depot.withdrawTribeone(snxAmount, { from: owner });
+			await depot.withdrawRwaone(snxAmount, { from: owner });
 
-			const depotHAKABalanceAfter = await tribeone.balanceOf(depot.address);
+			const depotHAKABalanceAfter = await rwaone.balanceOf(depot.address);
 			assert.bnEqual(depotHAKABalanceAfter, toUnit('0'));
 		});
 	});

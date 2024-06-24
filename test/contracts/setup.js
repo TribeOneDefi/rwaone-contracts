@@ -62,7 +62,7 @@ const constantsOverrides = {
 };
 
 /**
- * Create a mock ExternStateToken - useful to mock Tribeone or a tribe
+ * Create a mock ExternStateToken - useful to mock Rwaone or a tribe
  */
 const mockToken = async ({
 	accounts,
@@ -280,11 +280,11 @@ const setupContract = async ({
 		FlexibleStorage: [tryGetAddressOf('AddressResolver')],
 		ExchangeRates: [owner, tryGetAddressOf('AddressResolver')],
 		ExchangeRatesWithDexPricing: [owner, tryGetAddressOf('AddressResolver')],
-		TribeoneState: [owner, ZERO_ADDRESS],
+		RwaoneState: [owner, ZERO_ADDRESS],
 		SupplySchedule: [owner, 0, 0],
 		Proxy: [owner],
 		ProxyERC20: [owner],
-		ProxyTribeone: [owner],
+		ProxyRwaone: [owner],
 		Depot: [owner, fundsWallet, tryGetAddressOf('AddressResolver')],
 		TribeUtil: [tryGetAddressOf('AddressResolver')],
 		DappMaintenance: [owner],
@@ -297,46 +297,46 @@ const setupContract = async ({
 		SystemSettings: [owner, tryGetAddressOf('AddressResolver')],
 		DirectIntegrationManager: [owner, tryGetAddressOf('AddressResolver')],
 		ExchangeState: [owner, tryGetAddressOf('Exchanger')],
-		TribeoneDebtShare: [owner, tryGetAddressOf('AddressResolver')],
-		BaseTribeone: [
-			tryGetAddressOf('ProxyERC20BaseTribeone'),
-			tryGetAddressOf('TokenStateBaseTribeone'),
+		RwaoneDebtShare: [owner, tryGetAddressOf('AddressResolver')],
+		BaseRwaone: [
+			tryGetAddressOf('ProxyERC20BaseRwaone'),
+			tryGetAddressOf('TokenStateBaseRwaone'),
 			owner,
 			SUPPLY_100M,
 			tryGetAddressOf('AddressResolver'),
 		],
-		Tribeone: [
-			tryGetAddressOf('ProxyERC20Tribeone'),
-			tryGetAddressOf('TokenStateTribeone'),
+		Rwaone: [
+			tryGetAddressOf('ProxyERC20Rwaone'),
+			tryGetAddressOf('TokenStateRwaone'),
 			owner,
 			SUPPLY_100M,
 			tryGetAddressOf('AddressResolver'),
 		],
-		MintableTribeone: [
-			tryGetAddressOf('ProxyERC20MintableTribeone'),
-			tryGetAddressOf('TokenStateMintableTribeone'),
+		MintableRwaone: [
+			tryGetAddressOf('ProxyERC20MintableRwaone'),
+			tryGetAddressOf('TokenStateMintableRwaone'),
 			owner,
 			SUPPLY_100M,
 			tryGetAddressOf('AddressResolver'),
 		],
-		TribeoneBridgeToOptimism: [owner, tryGetAddressOf('AddressResolver')],
-		TribeoneBridgeToBase: [owner, tryGetAddressOf('AddressResolver')],
-		TribeoneBridgeEscrow: [owner],
+		RwaoneBridgeToOptimism: [owner, tryGetAddressOf('AddressResolver')],
+		RwaoneBridgeToBase: [owner, tryGetAddressOf('AddressResolver')],
+		RwaoneBridgeEscrow: [owner],
 		RewardsDistribution: [
 			owner,
-			tryGetAddressOf('Tribeone'),
-			tryGetAddressOf('ProxyERC20Tribeone'),
+			tryGetAddressOf('Rwaone'),
+			tryGetAddressOf('ProxyERC20Rwaone'),
 			tryGetAddressOf('RewardEscrowV2'),
 			tryGetAddressOf('ProxyFeePool'),
 		],
-		RewardEscrow: [owner, tryGetAddressOf('Tribeone'), tryGetAddressOf('FeePool')],
+		RewardEscrow: [owner, tryGetAddressOf('Rwaone'), tryGetAddressOf('FeePool')],
 		BaseRewardEscrowV2Frozen: [owner, tryGetAddressOf('AddressResolver')],
 		RewardEscrowV2Frozen: [owner, tryGetAddressOf('AddressResolver')],
 		RewardEscrowV2Storage: [owner, ZERO_ADDRESS],
 		BaseRewardEscrowV2: [owner, tryGetAddressOf('AddressResolver')],
 		RewardEscrowV2: [owner, tryGetAddressOf('AddressResolver')],
 		ImportableRewardEscrowV2: [owner, tryGetAddressOf('AddressResolver')],
-		TribeoneEscrow: [owner, tryGetAddressOf('Tribeone')],
+		RwaoneEscrow: [owner, tryGetAddressOf('Rwaone')],
 		// use deployerAccount as associated contract to allow it to call setBalanceOf()
 		TokenState: [owner, deployerAccount],
 		EtherWrapper: [owner, tryGetAddressOf('AddressResolver'), tryGetAddressOf('WETH')],
@@ -530,36 +530,36 @@ const setupContract = async ({
 	}
 
 	const postDeployTasks = {
-		async Tribeone() {
+		async Rwaone() {
 			// first give all wHAKA supply to the owner (using the hack that the deployerAccount was setup as the associatedContract via
 			// the constructor args)
-			await cache['TokenStateTribeone'].setBalanceOf(owner, SUPPLY_100M, {
+			await cache['TokenStateRwaone'].setBalanceOf(owner, SUPPLY_100M, {
 				from: deployerAccount,
 			});
 
-			// then configure everything else (including setting the associated contract of TokenState back to the Tribeone contract)
+			// then configure everything else (including setting the associated contract of TokenState back to the Rwaone contract)
 			await Promise.all(
 				[
-					(cache['TokenStateTribeone'].setAssociatedContract(instance.address, { from: owner }),
-					cache['ProxyTribeone'].setTarget(instance.address, { from: owner }),
-					cache['ProxyERC20Tribeone'].setTarget(instance.address, { from: owner }),
-					instance.setProxy(cache['ProxyERC20Tribeone'].address, {
-						from: owner,
-					})),
+					(cache['TokenStateRwaone'].setAssociatedContract(instance.address, { from: owner }),
+						cache['ProxyRwaone'].setTarget(instance.address, { from: owner }),
+						cache['ProxyERC20Rwaone'].setTarget(instance.address, { from: owner }),
+						instance.setProxy(cache['ProxyERC20Rwaone'].address, {
+							from: owner,
+						})),
 				]
 					.concat(
 						// If there's a SupplySchedule and it has the method we need (i.e. isn't a mock)
 						tryInvocationIfNotMocked({
 							name: 'SupplySchedule',
-							fncName: 'setTribeoneProxy',
-							args: [cache['ProxyERC20Tribeone'].address],
+							fncName: 'setRwaoneProxy',
+							args: [cache['ProxyERC20Rwaone'].address],
 						}) || []
 					)
 					.concat(
 						// If there's an escrow that's not a mock
 						tryInvocationIfNotMocked({
-							name: 'TribeoneEscrow',
-							fncName: 'setTribeone',
+							name: 'RwaoneEscrow',
+							fncName: 'setRwaone',
 							args: [instance.address],
 						}) || []
 					)
@@ -567,7 +567,7 @@ const setupContract = async ({
 						// If there's a reward escrow that's not a mock
 						tryInvocationIfNotMocked({
 							name: 'RewardEscrow',
-							fncName: 'setTribeone',
+							fncName: 'setRwaone',
 							args: [instance.address],
 						}) || []
 					)
@@ -582,30 +582,30 @@ const setupContract = async ({
 					.concat(
 						tryInvocationIfNotMocked({
 							name: 'RewardsDistribution',
-							fncName: 'setTribeoneProxy',
-							args: [cache['ProxyERC20Tribeone'].address], // will fail if no Proxy instantiated for Tribeone
+							fncName: 'setRwaoneProxy',
+							args: [cache['ProxyERC20Rwaone'].address], // will fail if no Proxy instantiated for Rwaone
 						}) || []
 					)
 			);
 		},
-		async BaseTribeone() {
+		async BaseRwaone() {
 			// first give all wHAKA supply to the owner (using the hack that the deployerAccount was setup as the associatedContract via
 			// the constructor args)
-			await cache['TokenStateBaseTribeone'].setBalanceOf(owner, SUPPLY_100M, {
+			await cache['TokenStateBaseRwaone'].setBalanceOf(owner, SUPPLY_100M, {
 				from: deployerAccount,
 			});
 
-			// then configure everything else (including setting the associated contract of TokenState back to the Tribeone contract)
+			// then configure everything else (including setting the associated contract of TokenState back to the Rwaone contract)
 			await Promise.all(
 				[
-					(cache['TokenStateBaseTribeone'].setAssociatedContract(instance.address, {
+					(cache['TokenStateBaseRwaone'].setAssociatedContract(instance.address, {
 						from: owner,
 					}),
-					cache['ProxyBaseTribeone'].setTarget(instance.address, { from: owner }),
-					cache['ProxyERC20BaseTribeone'].setTarget(instance.address, { from: owner }),
-					instance.setProxy(cache['ProxyERC20BaseTribeone'].address, {
-						from: owner,
-					})),
+						cache['ProxyBaseRwaone'].setTarget(instance.address, { from: owner }),
+						cache['ProxyERC20BaseRwaone'].setTarget(instance.address, { from: owner }),
+						instance.setProxy(cache['ProxyERC20BaseRwaone'].address, {
+							from: owner,
+						})),
 				]
 					.concat(
 						// If there's a rewards distribution that's not a mock
@@ -618,30 +618,30 @@ const setupContract = async ({
 					.concat(
 						tryInvocationIfNotMocked({
 							name: 'RewardsDistribution',
-							fncName: 'setTribeoneProxy',
-							args: [cache['ProxyERC20BaseTribeone'].address], // will fail if no Proxy instantiated for BaseTribeone
+							fncName: 'setRwaoneProxy',
+							args: [cache['ProxyERC20BaseRwaone'].address], // will fail if no Proxy instantiated for BaseRwaone
 						}) || []
 					)
 			);
 		},
-		async MintableTribeone() {
+		async MintableRwaone() {
 			// first give all wHAKA supply to the owner (using the hack that the deployerAccount was setup as the associatedContract via
 			// the constructor args)
-			await cache['TokenStateMintableTribeone'].setBalanceOf(owner, SUPPLY_100M, {
+			await cache['TokenStateMintableRwaone'].setBalanceOf(owner, SUPPLY_100M, {
 				from: deployerAccount,
 			});
 
-			// then configure everything else (including setting the associated contract of TokenState back to the Tribeone contract)
+			// then configure everything else (including setting the associated contract of TokenState back to the Rwaone contract)
 			await Promise.all(
 				[
-					(cache['TokenStateMintableTribeone'].setAssociatedContract(instance.address, {
+					(cache['TokenStateMintableRwaone'].setAssociatedContract(instance.address, {
 						from: owner,
 					}),
-					cache['ProxyMintableTribeone'].setTarget(instance.address, { from: owner }),
-					cache['ProxyERC20MintableTribeone'].setTarget(instance.address, { from: owner }),
-					instance.setProxy(cache['ProxyERC20MintableTribeone'].address, {
-						from: owner,
-					})),
+						cache['ProxyMintableRwaone'].setTarget(instance.address, { from: owner }),
+						cache['ProxyERC20MintableRwaone'].setTarget(instance.address, { from: owner }),
+						instance.setProxy(cache['ProxyERC20MintableRwaone'].address, {
+							from: owner,
+						})),
 				]
 					.concat(
 						// If there's a rewards distribution that's not a mock
@@ -654,8 +654,8 @@ const setupContract = async ({
 					.concat(
 						tryInvocationIfNotMocked({
 							name: 'RewardsDistribution',
-							fncName: 'setTribeoneProxy',
-							args: [cache['ProxyERC20MintableTribeone'].address], // will fail if no Proxy instantiated for MintableTribeone
+							fncName: 'setRwaoneProxy',
+							args: [cache['ProxyERC20MintableRwaone'].address], // will fail if no Proxy instantiated for MintableRwaone
 						}) || []
 					)
 			);
@@ -975,7 +975,7 @@ const setupContract = async ({
 			]);
 		},
 		async GenericMock() {
-			if (mock === 'RewardEscrow' || mock === 'TribeoneEscrow') {
+			if (mock === 'RewardEscrow' || mock === 'RwaoneEscrow') {
 				await mockGenericContractFnc({ instance, mock, fncName: 'balanceOf', returns: ['0'] });
 			} else if (mock === 'EtherWrapper') {
 				await mockGenericContractFnc({
@@ -1128,64 +1128,64 @@ const setupAllContracts = async ({
 			deps: ['AddressResolver', 'SystemSettings', 'CircuitBreaker'],
 			mocks: ['ExchangeCircuitBreaker'],
 		},
-		{ contract: 'TribeoneDebtShare' },
+		{ contract: 'RwaoneDebtShare' },
 		{ contract: 'SupplySchedule' },
-		{ contract: 'ProxyERC20', forContract: 'Tribeone' },
-		{ contract: 'ProxyERC20', forContract: 'MintableTribeone' },
-		{ contract: 'ProxyERC20', forContract: 'BaseTribeone' },
+		{ contract: 'ProxyERC20', forContract: 'Rwaone' },
+		{ contract: 'ProxyERC20', forContract: 'MintableRwaone' },
+		{ contract: 'ProxyERC20', forContract: 'BaseRwaone' },
 		{ contract: 'ProxyERC20', forContract: 'Tribe' }, // for generic tribe
-		{ contract: 'Proxy', forContract: 'Tribeone' },
-		{ contract: 'Proxy', forContract: 'MintableTribeone' },
-		{ contract: 'Proxy', forContract: 'BaseTribeone' },
+		{ contract: 'Proxy', forContract: 'Rwaone' },
+		{ contract: 'Proxy', forContract: 'MintableRwaone' },
+		{ contract: 'Proxy', forContract: 'BaseRwaone' },
 		{ contract: 'Proxy', forContract: 'FeePool' },
-		{ contract: 'TokenState', forContract: 'Tribeone' },
-		{ contract: 'TokenState', forContract: 'MintableTribeone' },
-		{ contract: 'TokenState', forContract: 'BaseTribeone' },
+		{ contract: 'TokenState', forContract: 'Rwaone' },
+		{ contract: 'TokenState', forContract: 'MintableRwaone' },
+		{ contract: 'TokenState', forContract: 'BaseRwaone' },
 		{ contract: 'TokenState', forContract: 'Tribe' }, // for generic tribe
 		{ contract: 'RewardEscrow' },
 		{
 			contract: 'BaseRewardEscrowV2Frozen',
 			deps: ['AddressResolver'],
-			mocks: ['Tribeone', 'FeePool', 'Issuer'],
+			mocks: ['Rwaone', 'FeePool', 'Issuer'],
 		},
 		{
 			contract: 'RewardEscrowV2Frozen',
 			deps: ['AddressResolver'],
-			mocks: ['Tribeone', 'FeePool', 'Issuer'],
+			mocks: ['Rwaone', 'FeePool', 'Issuer'],
 		},
 		{
 			contract: 'RewardEscrowV2Storage',
 			deps: ['RewardEscrowV2Frozen'],
-			mocks: ['Tribeone', 'FeePool', 'RewardEscrow', 'TribeoneBridgeToOptimism', 'Issuer'],
+			mocks: ['Rwaone', 'FeePool', 'RewardEscrow', 'RwaoneBridgeToOptimism', 'Issuer'],
 		},
 		{
 			contract: 'BaseRewardEscrowV2',
 			deps: ['AddressResolver', 'RewardEscrowV2Storage'],
-			mocks: ['Tribeone', 'FeePool', 'Issuer'],
+			mocks: ['Rwaone', 'FeePool', 'Issuer'],
 		},
 		{
 			contract: 'RewardEscrowV2',
 			deps: ['AddressResolver', 'SystemStatus', 'RewardEscrowV2Storage'],
-			mocks: ['Tribeone', 'FeePool', 'RewardEscrow', 'TribeoneBridgeToOptimism', 'Issuer'],
+			mocks: ['Rwaone', 'FeePool', 'RewardEscrow', 'RwaoneBridgeToOptimism', 'Issuer'],
 		},
 		{
 			contract: 'ImportableRewardEscrowV2',
 			resolverAlias: `RewardEscrowV2`,
 			deps: ['AddressResolver', 'RewardEscrowV2Storage'],
-			mocks: ['Tribeone', 'FeePool', 'TribeoneBridgeToBase', 'Issuer'],
+			mocks: ['Rwaone', 'FeePool', 'RwaoneBridgeToBase', 'Issuer'],
 		},
-		{ contract: 'TribeoneEscrow' },
+		{ contract: 'RwaoneEscrow' },
 		{ contract: 'FeePoolEternalStorage' },
 		{ contract: 'EternalStorage', forContract: 'DelegateApprovals' },
 		{ contract: 'DelegateApprovals', deps: ['EternalStorage'] },
 		{ contract: 'EternalStorage', forContract: 'Liquidator' },
 		{
 			contract: 'Liquidator',
-			deps: ['AddressResolver', 'EternalStorage', 'FlexibleStorage', 'TribeoneEscrow'],
+			deps: ['AddressResolver', 'EternalStorage', 'FlexibleStorage', 'RwaoneEscrow'],
 		},
 		{
 			contract: 'LiquidatorRewards',
-			deps: ['AddressResolver', 'Liquidator', 'Issuer', 'RewardEscrowV2', 'Tribeone'],
+			deps: ['AddressResolver', 'Liquidator', 'Issuer', 'RewardEscrowV2', 'Rwaone'],
 		},
 		{
 			contract: 'DebtMigratorOnEthereum',
@@ -1195,21 +1195,21 @@ const setupAllContracts = async ({
 				'LiquidatorRewards',
 				'Issuer',
 				'RewardEscrowV2',
-				'Tribeone',
-				'TribeoneDebtShare',
-				'TribeoneBridgeToOptimism',
+				'Rwaone',
+				'RwaoneDebtShare',
+				'RwaoneBridgeToOptimism',
 				'SystemSettings',
 			],
 			mocks: ['ext:Messenger', 'ovm:DebtMigratorOnOptimism'],
 		},
 		{
 			contract: 'DebtMigratorOnOptimism',
-			deps: ['AddressResolver', 'Issuer', 'RewardEscrowV2', 'Tribeone'],
+			deps: ['AddressResolver', 'Issuer', 'RewardEscrowV2', 'Rwaone'],
 			mocks: ['ext:Messenger', 'base:DebtMigratorOnEthereum'],
 		},
 		{
 			contract: 'RewardsDistribution',
-			mocks: ['Tribeone', 'FeePool', 'RewardEscrow', 'RewardEscrowV2', 'ProxyFeePool'],
+			mocks: ['Rwaone', 'FeePool', 'RewardEscrow', 'RewardEscrowV2', 'ProxyFeePool'],
 		},
 		{ contract: 'Depot', deps: ['AddressResolver', 'SystemStatus'] },
 		{ contract: 'TribeUtil', deps: ['AddressResolver'] },
@@ -1244,7 +1244,7 @@ const setupAllContracts = async ({
 			contract: 'Issuer',
 			mocks: [
 				'CollateralManager',
-				'Tribeone',
+				'Rwaone',
 				'Exchanger',
 				'FeePool',
 				'DelegateApprovals',
@@ -1260,7 +1260,7 @@ const setupAllContracts = async ({
 				'SystemStatus',
 				'FlexibleStorage',
 				'DebtCache',
-				'TribeoneDebtShare',
+				'RwaoneDebtShare',
 			],
 		},
 		{
@@ -1270,12 +1270,12 @@ const setupAllContracts = async ({
 		},
 		{
 			contract: 'ExchangeCircuitBreaker',
-			mocks: ['Tribeone', 'FeePool', 'DelegateApprovals', 'VirtualTribeMastercopy'],
+			mocks: ['Rwaone', 'FeePool', 'DelegateApprovals', 'VirtualTribeMastercopy'],
 			deps: ['AddressResolver', 'SystemStatus', 'ExchangeRates', 'FlexibleStorage', 'Issuer'],
 		},
 		{
 			contract: 'Exchanger',
-			mocks: ['Tribeone', 'FeePool', 'DelegateApprovals'],
+			mocks: ['Rwaone', 'FeePool', 'DelegateApprovals'],
 			deps: [
 				'AddressResolver',
 				'DirectIntegrationManager',
@@ -1297,7 +1297,7 @@ const setupAllContracts = async ({
 			contract: 'ExchangerWithFeeRecAlternatives',
 			resolverAlias: 'Exchanger',
 			mocks: [
-				'Tribeone',
+				'Rwaone',
 				'CircuitBreaker',
 				'ExchangeRates',
 				'FeePool',
@@ -1322,13 +1322,13 @@ const setupAllContracts = async ({
 			deps: ['TokenState', 'ProxyERC20', 'SystemStatus', 'AddressResolver'],
 		}, // a generic tribe
 		{
-			contract: 'Tribeone',
+			contract: 'Rwaone',
 			mocks: [
 				'Exchanger',
 				'SupplySchedule',
 				'RewardEscrow',
 				'RewardEscrowV2',
-				'TribeoneEscrow',
+				'RwaoneEscrow',
 				'RewardsDistribution',
 				'Liquidator',
 				'LiquidatorRewards',
@@ -1336,13 +1336,13 @@ const setupAllContracts = async ({
 			deps: ['Issuer', 'Proxy', 'ProxyERC20', 'AddressResolver', 'TokenState', 'SystemStatus'],
 		},
 		{
-			contract: 'BaseTribeone',
-			resolverAlias: 'Tribeone',
+			contract: 'BaseRwaone',
+			resolverAlias: 'Rwaone',
 			mocks: [
 				'Exchanger',
 				'RewardEscrow',
 				'RewardEscrowV2',
-				'TribeoneEscrow',
+				'RwaoneEscrow',
 				'RewardsDistribution',
 				'Liquidator',
 				'LiquidatorRewards',
@@ -1350,16 +1350,16 @@ const setupAllContracts = async ({
 			deps: ['Issuer', 'Proxy', 'ProxyERC20', 'AddressResolver', 'TokenState', 'SystemStatus'],
 		},
 		{
-			contract: 'MintableTribeone',
-			resolverAlias: 'Tribeone',
+			contract: 'MintableRwaone',
+			resolverAlias: 'Rwaone',
 			mocks: [
 				'Exchanger',
-				'TribeoneEscrow',
+				'RwaoneEscrow',
 				'Liquidator',
 				'LiquidatorRewards',
 				'Issuer',
 				'SystemStatus',
-				'TribeoneBridgeToBase',
+				'RwaoneBridgeToBase',
 			],
 			deps: [
 				'Proxy',
@@ -1372,31 +1372,31 @@ const setupAllContracts = async ({
 			],
 		},
 		{
-			contract: 'TribeoneBridgeToOptimism',
+			contract: 'RwaoneBridgeToOptimism',
 			mocks: [
 				'ext:Messenger',
-				'ovm:TribeoneBridgeToBase',
+				'ovm:RwaoneBridgeToBase',
 				'FeePool',
-				'TribeoneBridgeEscrow',
+				'RwaoneBridgeEscrow',
 				'RewardsDistribution',
 			],
-			deps: ['AddressResolver', 'Issuer', 'RewardEscrowV2', 'Tribeone'],
+			deps: ['AddressResolver', 'Issuer', 'RewardEscrowV2', 'Rwaone'],
 		},
 		{
-			contract: 'TribeoneBridgeToBase',
-			mocks: ['ext:Messenger', 'base:TribeoneBridgeToOptimism', 'FeePool', 'RewardEscrowV2'],
-			deps: ['AddressResolver', 'Tribeone'],
+			contract: 'RwaoneBridgeToBase',
+			mocks: ['ext:Messenger', 'base:RwaoneBridgeToOptimism', 'FeePool', 'RewardEscrowV2'],
+			deps: ['AddressResolver', 'Rwaone'],
 		},
 		{
-			contract: 'TribeoneBridgeEscrow',
+			contract: 'RwaoneBridgeEscrow',
 			mocks: [],
 			deps: [],
 		},
-		{ contract: 'TradingRewards', deps: ['AddressResolver', 'Tribeone'] },
+		{ contract: 'TradingRewards', deps: ['AddressResolver', 'Rwaone'] },
 		{
 			contract: 'FeePool',
 			mocks: [
-				'Tribeone',
+				'Rwaone',
 				'Exchanger',
 				'Issuer',
 				'RewardEscrow',
@@ -1409,13 +1409,13 @@ const setupAllContracts = async ({
 				'EtherWrapper',
 				'FuturesMarketManager',
 				'WrapperFactory',
-				'TribeoneBridgeToOptimism',
+				'RwaoneBridgeToOptimism',
 			],
 			deps: [
 				'OneNetAggregatorIssuedTribes',
 				'OneNetAggregatorDebtRatio',
 				'SystemStatus',
-				'TribeoneDebtShare',
+				'RwaoneDebtShare',
 				'AddressResolver',
 			],
 		},
@@ -1825,7 +1825,7 @@ const setupAllContracts = async ({
 			})
 	);
 
-	// if deploying a real Tribeone, then we add the tribes
+	// if deploying a real Rwaone, then we add the tribes
 	if (returnObj['Issuer'] && !mocks['Issuer']) {
 		if (returnObj['Tribe']) {
 			returnObj['Issuer'].addTribe(returnObj['Tribe'].address, { from: owner });

@@ -19,12 +19,12 @@ contract('RewardEscrow', async accounts => {
 	const YEAR = 31556926;
 
 	const [, owner, feePoolAccount, account1, account2] = accounts;
-	let rewardEscrow, tribeone, feePool;
+	let rewardEscrow, rwaone, feePool;
 
 	// Run once at beginning - snapshots will take care of resetting this before each test
 	before(async () => {
 		// Mock wHAKA
-		({ token: tribeone } = await mockToken({ accounts, name: 'Tribeone', symbol: 'wHAKA' }));
+		({ token: rwaone } = await mockToken({ accounts, name: 'Rwaone', symbol: 'wHAKA' }));
 
 		feePool = { address: feePoolAccount }; // mock contract with address
 
@@ -33,7 +33,7 @@ contract('RewardEscrow', async accounts => {
 			contract: 'RewardEscrow',
 			cache: {
 				FeePool: feePool,
-				Tribeone: tribeone,
+				Rwaone: rwaone,
 			},
 		});
 	});
@@ -41,9 +41,9 @@ contract('RewardEscrow', async accounts => {
 	addSnapshotBeforeRestoreAfterEach();
 
 	describe('Constructor & Settings ', async () => {
-		it('should set tribeone on contructor', async () => {
-			const tribeetixAddress = await rewardEscrow.tribeone();
-			assert.equal(tribeetixAddress, tribeone.address);
+		it('should set rwaone on contructor', async () => {
+			const tribeetixAddress = await rewardEscrow.rwaone();
+			assert.equal(tribeetixAddress, rwaone.address);
 		});
 
 		it('should set feePool on contructor', async () => {
@@ -56,9 +56,9 @@ contract('RewardEscrow', async accounts => {
 			assert.equal(ownerAddress, owner);
 		});
 
-		it('should allow owner to set tribeone', async () => {
-			await rewardEscrow.setTribeone(ZERO_ADDRESS, { from: owner });
-			const tribeetixAddress = await rewardEscrow.tribeone();
+		it('should allow owner to set rwaone', async () => {
+			await rewardEscrow.setRwaone(ZERO_ADDRESS, { from: owner });
+			const tribeetixAddress = await rewardEscrow.rwaone();
 			assert.equal(tribeetixAddress, ZERO_ADDRESS);
 		});
 
@@ -95,7 +95,7 @@ contract('RewardEscrow', async accounts => {
 		describe('Vesting Schedule Writes', async () => {
 			it('should not create a vesting entry with a zero amount', async () => {
 				// Transfer of wHAKA to the escrow must occur before creating an entry
-				await tribeone.transfer(rewardEscrow.address, toUnit('1'), {
+				await rwaone.transfer(rewardEscrow.address, toUnit('1'), {
 					from: owner,
 				});
 
@@ -106,7 +106,7 @@ contract('RewardEscrow', async accounts => {
 
 			it('should not create a vesting entry if there is not enough wHAKA in the contracts balance', async () => {
 				// Transfer of wHAKA to the escrow must occur before creating an entry
-				await tribeone.transfer(rewardEscrow.address, toUnit('1'), {
+				await rwaone.transfer(rewardEscrow.address, toUnit('1'), {
 					from: owner,
 				});
 				await assert.revert(
@@ -118,7 +118,7 @@ contract('RewardEscrow', async accounts => {
 		describe('Vesting Schedule Reads ', async () => {
 			beforeEach(async () => {
 				// Transfer of wHAKA to the escrow must occur before creating a vestinng entry
-				await tribeone.transfer(rewardEscrow.address, toUnit('6000'), {
+				await rwaone.transfer(rewardEscrow.address, toUnit('6000'), {
 					from: owner,
 				});
 
@@ -131,7 +131,7 @@ contract('RewardEscrow', async accounts => {
 			});
 
 			it('should append a vesting entry and increase the contracts balance', async () => {
-				const balanceOfRewardEscrow = await tribeone.balanceOf(rewardEscrow.address);
+				const balanceOfRewardEscrow = await rwaone.balanceOf(rewardEscrow.address);
 				assert.bnEqual(balanceOfRewardEscrow, toUnit('6000'));
 			});
 
@@ -174,7 +174,7 @@ contract('RewardEscrow', async accounts => {
 		describe('Partial Vesting', async () => {
 			beforeEach(async () => {
 				// Transfer of wHAKA to the escrow must occur before creating a vestinng entry
-				await tribeone.transfer(rewardEscrow.address, toUnit('6000'), {
+				await rwaone.transfer(rewardEscrow.address, toUnit('6000'), {
 					from: owner,
 				});
 
@@ -215,7 +215,7 @@ contract('RewardEscrow', async accounts => {
 		describe('Vesting', async () => {
 			beforeEach(async () => {
 				// Transfer of wHAKA to the escrow must occur before creating a vestinng entry
-				await tribeone.transfer(rewardEscrow.address, toUnit('6000'), {
+				await rwaone.transfer(rewardEscrow.address, toUnit('6000'), {
 					from: owner,
 				});
 
@@ -234,10 +234,10 @@ contract('RewardEscrow', async accounts => {
 				await rewardEscrow.vest({ from: account1 });
 
 				// Check user has all their vested wHAKA
-				assert.bnEqual(await tribeone.balanceOf(account1), toUnit('6000'));
+				assert.bnEqual(await rwaone.balanceOf(account1), toUnit('6000'));
 
 				// Check rewardEscrow does not have any wHAKA
-				assert.bnEqual(await tribeone.balanceOf(rewardEscrow.address), toUnit('0'));
+				assert.bnEqual(await rwaone.balanceOf(rewardEscrow.address), toUnit('0'));
 			});
 
 			it('should vest and emit a Vest event', async () => {
@@ -289,7 +289,7 @@ contract('RewardEscrow', async accounts => {
 				const MAX_VESTING_ENTRIES = 260; // await rewardEscrow.MAX_VESTING_ENTRIES();
 
 				// Transfer of wHAKA to the escrow must occur before creating an entry
-				await tribeone.transfer(rewardEscrow.address, toUnit('260'), {
+				await rwaone.transfer(rewardEscrow.address, toUnit('260'), {
 					from: owner,
 				});
 
@@ -306,7 +306,7 @@ contract('RewardEscrow', async accounts => {
 
 			it('should be able to vest 52 week * 5 years vesting entries', async () => {
 				// Transfer of wHAKA to the escrow must occur before creating an entry
-				await tribeone.transfer(rewardEscrow.address, toUnit('260'), {
+				await rwaone.transfer(rewardEscrow.address, toUnit('260'), {
 					from: owner,
 				});
 
@@ -325,10 +325,10 @@ contract('RewardEscrow', async accounts => {
 				await rewardEscrow.vest({ from: account1 });
 
 				// Check user has all their vested wHAKA
-				assert.bnEqual(await tribeone.balanceOf(account1), toUnit('260'));
+				assert.bnEqual(await rwaone.balanceOf(account1), toUnit('260'));
 
 				// Check rewardEscrow does not have any wHAKA
-				assert.bnEqual(await tribeone.balanceOf(rewardEscrow.address), toUnit('0'));
+				assert.bnEqual(await rwaone.balanceOf(rewardEscrow.address), toUnit('0'));
 
 				// This account should have vested its whole amount
 				assert.bnEqual(await rewardEscrow.totalEscrowedAccountBalance(account1), toUnit('0'));
@@ -339,7 +339,7 @@ contract('RewardEscrow', async accounts => {
 
 			it('should be able to read an accounts schedule of 5 vesting entries', async () => {
 				// Transfer of wHAKA to the escrow must occur before creating an entry
-				await tribeone.transfer(rewardEscrow.address, toUnit('5'), {
+				await rwaone.transfer(rewardEscrow.address, toUnit('5'), {
 					from: owner,
 				});
 
@@ -365,7 +365,7 @@ contract('RewardEscrow', async accounts => {
 
 			it('should be able to read the full account schedule 52 week * 5 years vesting entries', async () => {
 				// Transfer of wHAKA to the escrow must occur before creating an entry
-				await tribeone.transfer(rewardEscrow.address, toUnit('260'), {
+				await rwaone.transfer(rewardEscrow.address, toUnit('260'), {
 					from: owner,
 				});
 
@@ -388,10 +388,10 @@ contract('RewardEscrow', async accounts => {
 		});
 
 		describe('Transfering', async () => {
-			it('should not allow transfer of tribeone in escrow', async () => {
-				// Ensure the transfer fails as all the tribeone are in escrow
+			it('should not allow transfer of rwaone in escrow', async () => {
+				// Ensure the transfer fails as all the rwaone are in escrow
 				await assert.revert(
-					tribeone.transfer(account2, toUnit('1000'), {
+					rwaone.transfer(account2, toUnit('1000'), {
 						from: account1,
 					})
 				);

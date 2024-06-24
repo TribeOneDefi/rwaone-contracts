@@ -1,6 +1,6 @@
 pragma solidity ^0.5.16;
 
-// https://docs.tribeone.io/contracts/source/contracts/limitedsetup
+// https://docs.rwaone.io/contracts/source/contracts/limitedsetup
 contract LimitedSetup {
     uint public setupExpiryTime;
 
@@ -12,7 +12,7 @@ contract LimitedSetup {
         setupExpiryTime = now + setupDuration;
     }
 
-    modifier onlyDuringSetup {
+    modifier onlyDuringSetup() {
         require(now < setupExpiryTime, "Can only perform this action during setup");
         _;
     }

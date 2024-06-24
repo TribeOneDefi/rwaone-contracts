@@ -7,16 +7,16 @@ const { smock } = require('@defi-wonderland/smock');
 
 const { toUnit } = require('../utils')();
 
-const BaseTribeoneBridge = artifacts.require('BaseTribeoneBridge');
+const BaseRwaoneBridge = artifacts.require('BaseRwaoneBridge');
 
-contract('BaseTribeoneBridge (unit tests)', accounts => {
+contract('BaseRwaoneBridge (unit tests)', accounts => {
 	const [, owner, user1, smockedMessenger] = accounts;
 
 	const [hUSD, hETH] = [toBytes32('hUSD'), toBytes32('hETH')];
 
 	it('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
-			abi: BaseTribeoneBridge.abi,
+			abi: BaseRwaoneBridge.abi,
 			ignoreParents: ['Owned', 'MixinResolver'],
 			expected: [
 				'resumeInitiation',
@@ -29,7 +29,7 @@ contract('BaseTribeoneBridge (unit tests)', accounts => {
 
 	describe('when all the deps are mocked', () => {
 		let messenger;
-		let tribeone;
+		let rwaone;
 		let resolver;
 		let issuer;
 		let exchangeRates;
@@ -47,8 +47,8 @@ contract('BaseTribeoneBridge (unit tests)', accounts => {
 				artifacts.require('contracts/interfaces/IRewardEscrowV2.sol:IRewardEscrowV2').abi
 			);
 
-			// can't use ITribeone as we need ERC20 functions as well
-			tribeone = await smock.fake('Tribeone');
+			// can't use IRwaone as we need ERC20 functions as well
+			rwaone = await smock.fake('Rwaone');
 
 			feePool = await smock.fake('FeePool');
 
@@ -62,18 +62,18 @@ contract('BaseTribeoneBridge (unit tests)', accounts => {
 			await resolver.importAddresses(
 				[
 					'ext:Messenger',
-					'Tribeone',
+					'Rwaone',
 					'RewardEscrowV2',
 					'FlexibleStorage',
 					'Issuer',
 					'ExchangeRates',
 					'FeePool',
-					'base:TribeoneBridgeToOptimism',
+					'base:RwaoneBridgeToOptimism',
 					'SystemStatus',
 				].map(toBytes32),
 				[
 					messenger.address,
-					tribeone.address,
+					rwaone.address,
 					rewardEscrow.address,
 					flexibleStorage.address,
 					issuer.address,
@@ -91,7 +91,7 @@ contract('BaseTribeoneBridge (unit tests)', accounts => {
 
 			beforeEach(async () => {
 				instance = await artifacts
-					.require('TribeoneBridgeToBase') // have to use a sub-contract becuase `BaseTribeoneBridge` is abstract
+					.require('RwaoneBridgeToBase') // have to use a sub-contract becuase `BaseRwaoneBridge` is abstract
 					.new(owner, resolver.address);
 
 				await instance.rebuildCache();

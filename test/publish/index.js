@@ -31,7 +31,7 @@ const {
 		STAKING_REWARDS_FILENAME,
 		CONFIG_FILENAME,
 		DEPLOYMENT_FILENAME,
-		TRIBEONES_FILENAME,
+		RWAONES_FILENAME,
 		FEEDS_FILENAME,
 	},
 	defaults: {
@@ -77,7 +77,7 @@ describe('publish scripts', () => {
 	// track these files to revert them later on
 	const rewardsJSONPath = path.join(deploymentPath, STAKING_REWARDS_FILENAME);
 	const rewardsJSON = fs.readFileSync(rewardsJSONPath);
-	const tribesJSONPath = path.join(deploymentPath, TRIBEONES_FILENAME);
+	const tribesJSONPath = path.join(deploymentPath, RWAONES_FILENAME);
 	const tribesJSON = fs.readFileSync(tribesJSONPath);
 	const configJSONPath = path.join(deploymentPath, CONFIG_FILENAME);
 	const configJSON = fs.readFileSync(configJSONPath);
@@ -173,7 +173,7 @@ describe('publish scripts', () => {
 			let sources;
 			let targets;
 			let tribes;
-			let Tribeone;
+			let Rwaone;
 			let timestamp;
 			let hUSDContract;
 			let hBTCContract;
@@ -247,7 +247,7 @@ describe('publish scripts', () => {
 				targets = getTarget();
 				tribes = getTribes().filter(({ name }) => name !== 'hUSD');
 
-				Tribeone = getContract({ target: 'ProxyTribeone', source: 'Tribeone' });
+				Rwaone = getContract({ target: 'ProxyRwaone', source: 'Rwaone' });
 				FeePool = getContract({ target: 'ProxyFeePool', source: 'FeePool' });
 				Exchanger = getContract({ target: 'Exchanger' });
 				DebtCache = getContract({ target: 'DebtCache' });
@@ -631,7 +631,7 @@ describe('publish scripts', () => {
 
 				const daysAgo = days => Math.round(Date.now() / 1000 - 3600 * 24 * days);
 
-				const redeployFeePeriodOnly = async function() {
+				const redeployFeePeriodOnly = async function () {
 					// read current config file version (if something has been removed,
 					// we don't want to include it here)
 					const currentConfigFile = JSON.parse(fs.readFileSync(configJSONPath));
@@ -772,7 +772,7 @@ describe('publish scripts', () => {
 				describe('when transferring 100k wHAKA to user1', () => {
 					beforeEach(async () => {
 						// transfer wHAKA to first account
-						const tx = await Tribeone.transfer(
+						const tx = await Rwaone.transfer(
 							accounts.first.address,
 							ethers.utils.parseEther('100000'),
 							overrides
@@ -782,9 +782,9 @@ describe('publish scripts', () => {
 
 					describe('when user1 issues all possible hUSD', () => {
 						beforeEach(async () => {
-							Tribeone = Tribeone.connect(accounts.first);
+							Rwaone = Rwaone.connect(accounts.first);
 
-							const tx = await Tribeone.issueMaxTribes(overrides);
+							const tx = await Rwaone.issueMaxTribes(overrides);
 							await tx.wait();
 						});
 						it('then the hUSD balanced must be 100k * 0.3 * 0.2 (default SystemSettings.issuanceRatio) = 6000', async () => {
@@ -800,7 +800,7 @@ describe('publish scripts', () => {
 						describe('when user1 exchange 1000 hUSD for hETH (the MultiCollateralTribe)', () => {
 							let hETHBalanceAfterExchange;
 							beforeEach(async () => {
-								await Tribeone.exchange(hUSD, ethers.utils.parseEther('1000'), hETH, overrides);
+								await Rwaone.exchange(hUSD, ethers.utils.parseEther('1000'), hETH, overrides);
 								hETHBalanceAfterExchange = await callMethodWithRetry(
 									hETHContract.balanceOf(accounts.first.address)
 								);
@@ -834,7 +834,7 @@ describe('publish scripts', () => {
 										await setAggregatorAnswer({ asset: 'ETH', rate: 20 });
 									});
 									it('when exchange occurs into that tribe, the tribe is suspended', async () => {
-										const tx = await Tribeone.exchange(
+										const tx = await Rwaone.exchange(
 											hUSD,
 											ethers.utils.parseEther('1'),
 											hETH,
@@ -853,7 +853,7 @@ describe('publish scripts', () => {
 						describe('when user1 exchange 1000 hUSD for hBTC', () => {
 							let hBTCBalanceAfterExchange;
 							beforeEach(async () => {
-								const tx = await Tribeone.exchange(
+								const tx = await Rwaone.exchange(
 									hUSD,
 									ethers.utils.parseEther('1000'),
 									hBTC,
@@ -893,7 +893,7 @@ describe('publish scripts', () => {
 									await tx.wait();
 
 									// burn
-									tx = await Tribeone.burnTribes(ethers.utils.parseEther('10'), overrides);
+									tx = await Rwaone.burnTribes(ethers.utils.parseEther('10'), overrides);
 									await tx.wait();
 								});
 								it('then their hUSD balance is 4990', async () => {
@@ -967,9 +967,9 @@ describe('publish scripts', () => {
 				beforeEach(async () => {
 					mockAggregator = await createMockAggregator();
 				});
-				describe('when Tribeone.anyTribeOrHAKARateIsInvalid() is invoked', () => {
+				describe('when Rwaone.anyTribeOrHAKARateIsInvalid() is invoked', () => {
 					it('then it returns true as expected', async () => {
-						const response = await Tribeone.anyTribeOrHAKARateIsInvalid();
+						const response = await Rwaone.anyTribeOrHAKARateIsInvalid();
 						assert.strictEqual(response, true, 'anyTribeOrHAKARateIsInvalid must be true');
 					});
 				});
@@ -1023,9 +1023,9 @@ describe('publish scripts', () => {
 									await setAggregatorAnswer({ asset, rate: 1 });
 								}
 							});
-							describe('when Tribeone.anyTribeOrHAKARateIsInvalid() is invoked', () => {
+							describe('when Rwaone.anyTribeOrHAKARateIsInvalid() is invoked', () => {
 								it('then it returns true as hBTC still is', async () => {
-									const response = await Tribeone.anyTribeOrHAKARateIsInvalid();
+									const response = await Rwaone.anyTribeOrHAKARateIsInvalid();
 									assert.strictEqual(response, true, 'anyTribeOrHAKARateIsInvalid must be true');
 								});
 							});
@@ -1051,9 +1051,9 @@ describe('publish scripts', () => {
 									});
 								});
 
-								describe('when Tribeone.anyTribeOrHAKARateIsInvalid() is invoked', () => {
+								describe('when Rwaone.anyTribeOrHAKARateIsInvalid() is invoked', () => {
 									it('then it returns false as expected', async () => {
-										const response = await Tribeone.anyTribeOrHAKARateIsInvalid();
+										const response = await Rwaone.anyTribeOrHAKARateIsInvalid();
 										assert.strictEqual(response, false, 'anyTribeOrHAKARateIsInvalid must be false');
 									});
 								});
@@ -1114,9 +1114,9 @@ describe('publish scripts', () => {
 									'RewardEscrow',
 									'RewardsDistribution',
 									'SupplySchedule',
-									'Tribeone',
-									'TribeoneDebtShare',
-									'TribeoneEscrow',
+									'Rwaone',
+									'RwaoneDebtShare',
+									'RwaoneEscrow',
 									'TribehETH',
 									'TribehUSD',
 									'SystemStatus',
@@ -1177,10 +1177,10 @@ describe('publish scripts', () => {
 
 							const contractsWithResolver = await Promise.all(
 								Object.entries(targets)
-									// Note: TribeoneBridgeToOptimism and TribeoneBridgeToBase  have ':' in their deps, instead of hardcoding the
+									// Note: RwaoneBridgeToOptimism and RwaoneBridgeToBase  have ':' in their deps, instead of hardcoding the
 									// address here we should look up all required contracts and ignore any that have
 									// ':' in it
-									.filter(([contract]) => !/^TribeoneBridge/.test(contract))
+									.filter(([contract]) => !/^RwaoneBridge/.test(contract))
 									// Same applies to the owner relays
 									.filter(([contract]) => !/^OwnerRelay/.test(contract))
 									// Same applies to the debt migrators

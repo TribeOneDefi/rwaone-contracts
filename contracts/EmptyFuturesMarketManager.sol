@@ -1,7 +1,7 @@
 pragma solidity ^0.5.16;
 
 // Empty contract for ether collateral placeholder for OVM
-// https://docs.tribeone.io/contracts/source/contracts/emptyethercollateral
+// https://docs.rwaone.io/contracts/source/contracts/emptyethercollateral
 
 import "./interfaces/IFuturesMarketManager.sol";
 
@@ -15,11 +15,7 @@ contract EmptyFuturesMarketManager is IFuturesMarketManager {
         return _markets;
     }
 
-    function markets(
-        uint index,
-        uint pageSize,
-        bool proxiedMarkets
-    ) external view returns (address[] memory) {
+    function markets(uint index, uint pageSize, bool proxiedMarkets) external view returns (address[] memory) {
         index;
         pageSize;
         proxiedMarkets;

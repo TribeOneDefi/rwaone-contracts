@@ -95,14 +95,14 @@ module.exports = async ({
 					Array.isArray(input)
 						? input.map(decodeBytes32IfRequired)
 						: /^0x[0-9a-fA-F]{64}/.test(input)
-						? `${safeParseBytes32Bytes(input)}`
-						: input;
+							? `${safeParseBytes32Bytes(input)}`
+							: input;
 				const useVariableForContractNameIfRequired = input =>
 					Array.isArray(input)
 						? input.map(useVariableForContractNameIfRequired)
 						: input in newContractsBeingAdded
-						? newContractVariableFunctor(newContractsBeingAdded[input].name)
-						: input;
+							? newContractVariableFunctor(newContractsBeingAdded[input].name)
+							: input;
 				const transformValueIfRequired = input =>
 					useVariableForContractNameIfRequired(decodeBytes32IfRequired(input));
 
@@ -110,9 +110,8 @@ module.exports = async ({
 					// arrays needs to be created in memory
 					const typeOfArrayElement = internalType.replace(/\[|\]/g, '').replace(/^contract /, '');
 
-					const variableName = `${contract.toLowerCase()}_${write}_${
-						inputArgumentName ? inputArgumentName + '_' : ''
-					}${runIndex}_${index}`;
+					const variableName = `${contract.toLowerCase()}_${write}_${inputArgumentName ? inputArgumentName + '_' : ''
+						}${runIndex}_${index}`;
 					internalInstructions.push(
 						`${typeOfArrayElement}[] memory ${variableName} = new ${typeOfArrayElement}[](${argument.length})`
 					);
@@ -192,15 +191,14 @@ pragma solidity ^0.5.16;
 
 import "../BaseMigration.sol";
 ${dedupedSourcesAddedToSolidity
-	.map(contractSource => {
-		// support legacy contracts in "legacy" subfolder
-		return `import "../${
-			/^Legacy/.test(contractSource) ? `legacy/${contractSource}` : contractSource
-		}.sol";`;
-	})
-	.join('\n')}
+			.map(contractSource => {
+				// support legacy contracts in "legacy" subfolder
+				return `import "../${/^Legacy/.test(contractSource) ? `legacy/${contractSource}` : contractSource
+					}.sol";`;
+			})
+			.join('\n')}
 
-interface ITribeoneNamedContract {
+interface IRwaoneNamedContract {
     // solhint-disable func-name-mixedcase
 	function CONTRACT_NAME() external view returns (bytes32);
 }
@@ -211,35 +209,35 @@ contract Migration_${releaseName}${stepName} is BaseMigration {
 	address public constant OWNER = ${ownerAddress};
 
 	// ----------------------------
-	// EXISTING TRIBEONEETIX CONTRACTS
+	// EXISTING RWAONEETIX CONTRACTS
 	// ----------------------------
 
 	${contractsAddedToSolidity
-		.map(contract => {
-			const sourceContract = customContracts[contract]
-				? customContracts[contract].source
-				: sourceOf(deployer.deployedContracts[contract]);
-			const address = customContracts[contract]
-				? customContracts[contract].address
-				: addressOf(deployer.deployedContracts[contract]);
-			return `${generateExplorerComment({
-				address,
-			})}\n\t${sourceContract} public constant ${contract.toLowerCase()}_i = ${sourceContract}(${address});`;
-		})
-		.join('\n\t')}
+			.map(contract => {
+				const sourceContract = customContracts[contract]
+					? customContracts[contract].source
+					: sourceOf(deployer.deployedContracts[contract]);
+				const address = customContracts[contract]
+					? customContracts[contract].address
+					: addressOf(deployer.deployedContracts[contract]);
+				return `${generateExplorerComment({
+					address,
+				})}\n\t${sourceContract} public constant ${contract.toLowerCase()}_i = ${sourceContract}(${address});`;
+			})
+			.join('\n\t')}
 
 	// ----------------------------------
 	// NEW CONTRACTS DEPLOYED TO BE ADDED
 	// ----------------------------------
 
 	${Object.entries(newContractsBeingAdded)
-		.map(
-			([address, { name }]) =>
-				`${generateExplorerComment({
-					address,
-				})}\n\taddress public constant ${newContractVariableFunctor(name)} = ${address};`
-		)
-		.join('\n\t')}
+			.map(
+				([address, { name }]) =>
+					`${generateExplorerComment({
+						address,
+					})}\n\taddress public constant ${newContractVariableFunctor(name)} = ${address};`
+			)
+			.join('\n\t')}
 
 	constructor() public BaseMigration(OWNER) {}
 
@@ -277,13 +275,13 @@ contract Migration_${releaseName}${stepName} is BaseMigration {
     }
 
 	${internalFunctions
-		.map(
-			({ name, instructions }) => `
+			.map(
+				({ name, instructions }) => `
 	function ${name}() internal {
 		${instructions.join(';\n\t\t')};
 	}`
-		)
-		.join('\n\n\t')}
+			)
+			.join('\n\n\t')}
 }
 `.replace(/\t/g, ' '.repeat(4)); // switch tabs to spaces for Solidity
 

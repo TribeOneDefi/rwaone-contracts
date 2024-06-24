@@ -6,7 +6,7 @@ import "./SafeDecimalMath.sol";
 // Inheritance
 import "./BaseDebtCache.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/debtcache
+// https://docs.rwaone.io/contracts/source/contracts/debtcache
 contract DebtCache is BaseDebtCache {
     using SafeDecimalMath for uint;
 
@@ -64,10 +64,10 @@ contract DebtCache is BaseDebtCache {
         _updateCachedTribeDebtsWithRates(tribeKeyArray, tribeRateArray, false);
     }
 
-    function updateCachedTribeDebtsWithRates(bytes32[] calldata currencyKeys, uint[] calldata currencyRates)
-        external
-        onlyIssuerOrExchanger
-    {
+    function updateCachedTribeDebtsWithRates(
+        bytes32[] calldata currencyKeys,
+        uint[] calldata currencyRates
+    ) external onlyIssuerOrExchanger {
         _updateCachedTribeDebtsWithRates(currencyKeys, currencyRates, false);
     }
 

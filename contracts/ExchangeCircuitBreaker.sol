@@ -24,7 +24,7 @@ import "./Proxyable.sol";
  * ExchangeCircuitBreaker is currently used within the system only as a compatibility measure for non-upgradable
  * contracts for the time being.
  *
- * https://docs.tribeone.io/contracts/source/contracts/ExchangeCircuitBreaker
+ * https://docs.rwaone.io/contracts/source/contracts/ExchangeCircuitBreaker
  */
 contract ExchangeCircuitBreaker is Owned, MixinSystemSettings, IExchangeCircuitBreaker {
     using SafeMath for uint;

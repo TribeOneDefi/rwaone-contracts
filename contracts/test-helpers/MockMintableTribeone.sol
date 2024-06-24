@@ -1,6 +1,6 @@
 pragma solidity ^0.5.16;
 
-contract MockMintableTribeone {
+contract MockMintableRwaone {
     address public mintSecondaryCallAccount;
     uint public mintSecondaryCallAmount;
 

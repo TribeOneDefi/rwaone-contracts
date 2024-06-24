@@ -10,7 +10,7 @@ describe('migrateEscrow() integration tests (L1, L2)', () => {
 	bootstrapDual({ ctx });
 
 	let user;
-	let Tribeone, RewardEscrowV2;
+	let Rwaone, RewardEscrowV2;
 
 	let initialParametersL1, initialParametersL2;
 	const snxAmount = ethers.utils.parseEther('100');
@@ -21,11 +21,11 @@ describe('migrateEscrow() integration tests (L1, L2)', () => {
 	});
 
 	before('approve reward escrow if needed', async () => {
-		({ Tribeone, RewardEscrowV2 } = ctx.l1.contracts);
+		({ Rwaone, RewardEscrowV2 } = ctx.l1.contracts);
 		user = ctx.l1.users.owner;
 
 		await approveIfNeeded({
-			token: Tribeone,
+			token: Rwaone,
 			owner: user,
 			beneficiary: RewardEscrowV2,
 			amount: snxAmount,
@@ -83,26 +83,26 @@ describe('migrateEscrow() integration tests (L1, L2)', () => {
 			let rewardEscrowBalanceL2;
 
 			before('target contracts and users', () => {
-				({ Tribeone, RewardEscrowV2 } = ctx.l2.contracts);
+				({ Rwaone, RewardEscrowV2 } = ctx.l2.contracts);
 
 				user = ctx.l2.users.owner;
 			});
 
 			before('record current values', async () => {
-				userBalanceL2 = await Tribeone.balanceOf(user.address);
-				totalSupplyL2 = await Tribeone.totalSupply();
-				rewardEscrowBalanceL2 = await Tribeone.balanceOf(RewardEscrowV2.address);
+				userBalanceL2 = await Rwaone.balanceOf(user.address);
+				totalSupplyL2 = await Rwaone.totalSupply();
+				rewardEscrowBalanceL2 = await Rwaone.balanceOf(RewardEscrowV2.address);
 			});
 
 			before('migrateEscrow', async () => {
-				let { TribeoneBridgeToOptimism } = ctx.l1.contracts;
+				let { RwaoneBridgeToOptimism } = ctx.l1.contracts;
 
-				TribeoneBridgeToOptimism = TribeoneBridgeToOptimism.connect(ctx.l1.users.owner);
+				RwaoneBridgeToOptimism = RwaoneBridgeToOptimism.connect(ctx.l1.users.owner);
 				// first test migrating a few entries using random extra invalid Ids!
 				const randomEntries = [escrowEntriesData.extraEntries, [0, 100, 3, 2]];
-				let tx = await TribeoneBridgeToOptimism.migrateEscrow(escrowEntriesData.userEntryBatch);
+				let tx = await RwaoneBridgeToOptimism.migrateEscrow(escrowEntriesData.userEntryBatch);
 				migrateEscrowReceipt = await tx.wait();
-				tx = await TribeoneBridgeToOptimism.migrateEscrow(randomEntries);
+				tx = await RwaoneBridgeToOptimism.migrateEscrow(randomEntries);
 				migrateEscrowReceiptExtra = await tx.wait();
 			});
 
@@ -161,20 +161,20 @@ describe('migrateEscrow() integration tests (L1, L2)', () => {
 					);
 				});
 
-				it('should update the L2 Tribeone state', async () => {
-					({ Tribeone, RewardEscrowV2 } = ctx.l2.contracts);
+				it('should update the L2 Rwaone state', async () => {
+					({ Rwaone, RewardEscrowV2 } = ctx.l2.contracts);
 
 					user = ctx.l2.users.owner;
 
 					// no change in user balance
-					assert.bnEqual(await Tribeone.balanceOf(user.address), userBalanceL2);
+					assert.bnEqual(await Rwaone.balanceOf(user.address), userBalanceL2);
 
 					assert.bnEqual(
-						await Tribeone.balanceOf(RewardEscrowV2.address),
+						await Rwaone.balanceOf(RewardEscrowV2.address),
 						rewardEscrowBalanceL2.add(escrowEntriesData.totalEscrowed)
 					);
 					assert.bnEqual(
-						await Tribeone.totalSupply(),
+						await Rwaone.totalSupply(),
 						totalSupplyL2.add(escrowEntriesData.totalEscrowed)
 					);
 				});

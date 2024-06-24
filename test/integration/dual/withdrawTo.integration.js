@@ -12,7 +12,7 @@ describe('withdrawTo() integration tests (L1, L2)', () => {
 	const amountToWithdraw = ethers.utils.parseEther('10');
 
 	let owner, user;
-	let Tribeone, TribeoneL1, TribeoneBridgeToBase;
+	let Rwaone, RwaoneL1, RwaoneBridgeToBase;
 
 	let ownerBalance, beneficiaryBalance;
 
@@ -20,33 +20,33 @@ describe('withdrawTo() integration tests (L1, L2)', () => {
 
 	describe('when the owner withdraws wHAKA for a user', () => {
 		before('target contracts and users', () => {
-			({ Tribeone, TribeoneBridgeToBase } = ctx.l2.contracts);
-			({ Tribeone: TribeoneL1 } = ctx.l1.contracts);
+			({ Rwaone, RwaoneBridgeToBase } = ctx.l2.contracts);
+			({ Rwaone: RwaoneL1 } = ctx.l1.contracts);
 
 			owner = ctx.l2.users.owner;
 			user = ctx.l2.users.someUser;
 		});
 
 		before('record balances', async () => {
-			ownerBalance = await Tribeone.balanceOf(owner.address);
-			beneficiaryBalance = await TribeoneL1.balanceOf(user.address);
+			ownerBalance = await Rwaone.balanceOf(owner.address);
+			beneficiaryBalance = await RwaoneL1.balanceOf(user.address);
 		});
 
 		before('make the withdrawal', async () => {
-			TribeoneBridgeToBase = TribeoneBridgeToBase.connect(owner);
+			RwaoneBridgeToBase = RwaoneBridgeToBase.connect(owner);
 
-			const tx = await TribeoneBridgeToBase.withdrawTo(user.address, amountToWithdraw);
+			const tx = await RwaoneBridgeToBase.withdrawTo(user.address, amountToWithdraw);
 			withdrawalReceipt = await tx.wait();
 		});
 
 		it('decreases the owner balance', async () => {
-			const newOwnerBalance = await Tribeone.balanceOf(owner.address);
+			const newOwnerBalance = await Rwaone.balanceOf(owner.address);
 
 			assert.bnEqual(newOwnerBalance, ownerBalance.sub(amountToWithdraw));
 		});
 
 		describe('when the withdrawal gets picked up in L1', () => {
-			before(function() {
+			before(function () {
 				if (!hre.config.debugOptimism) {
 					console.log(
 						chalk.yellow.bold(
@@ -68,7 +68,7 @@ describe('withdrawTo() integration tests (L1, L2)', () => {
 
 			it('increases the user balance', async () => {
 				assert.bnEqual(
-					await TribeoneL1.balanceOf(user.address),
+					await RwaoneL1.balanceOf(user.address),
 					beneficiaryBalance.add(amountToWithdraw)
 				);
 			});

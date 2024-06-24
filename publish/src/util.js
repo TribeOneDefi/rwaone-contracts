@@ -16,7 +16,7 @@ const {
 		PARAMS_FILENAME,
 		DEPLOYMENT_FILENAME,
 		OWNER_ACTIONS_FILENAME,
-		TRIBEONES_FILENAME,
+		RWAONES_FILENAME,
 		STAKING_REWARDS_FILENAME,
 		SHORTING_REWARDS_FILENAME,
 		VERSIONS_FILENAME,
@@ -76,7 +76,7 @@ const ensureDeploymentPath = deploymentPath => {
 // Load up all contracts in the flagged source, get their deployed addresses (if any) and compiled sources
 const loadAndCheckRequiredSources = ({ deploymentPath, network, freshDeploy }) => {
 	console.log(gray(`Loading the list of tribes for ${network.toUpperCase()}...`));
-	const tribesFile = path.join(deploymentPath, TRIBEONES_FILENAME);
+	const tribesFile = path.join(deploymentPath, RWAONES_FILENAME);
 	const tribes = getTribes({ network, deploymentPath });
 
 	console.log(gray(`Loading the list of staking rewards to deploy on ${network.toUpperCase()}...`));
@@ -162,9 +162,8 @@ const loadAndCheckRequiredSources = ({ deploymentPath, network, freshDeploy }) =
 };
 
 const getExplorerLinkPrefix = ({ network, useOvm }) => {
-	return network == 'sepolia-arbitrum' ? 'https://sepolia.arbiscan.io' : `https://${network !== 'mainnet' ? network + (useOvm ? '-' : '.') : ''}${
-		useOvm ? 'explorer.optimism' : 'etherscan'
-	}.io`;
+	return network == 'sepolia-arbitrum' ? 'https://sepolia.arbiscan.io' : `https://${network !== 'mainnet' ? network + (useOvm ? '-' : '.') : ''}${useOvm ? 'explorer.optimism' : 'etherscan'
+		}.io`;
 };
 
 const loadConnections = ({ network, useFork, useOvm }) => {
@@ -194,9 +193,8 @@ const loadConnections = ({ network, useFork, useOvm }) => {
 	const privateKey =
 		network === 'mainnet' ? process.env.DEPLOY_PRIVATE_KEY : process.env.TESTNET_DEPLOY_PRIVATE_KEY;
 
-	const etherscanUrl = network == 'sepolia-arbitrum' ? 'https://api-sepolia.arbiscan.io/api' : `https://api${network !== 'mainnet' ? `-${network}` : ''}${
-		useOvm ? '-optimistic' : ''
-	}.etherscan.io/api`;
+	const etherscanUrl = network == 'sepolia-arbitrum' ? 'https://api-sepolia.arbiscan.io/api' : `https://api${network !== 'mainnet' ? `-${network}` : ''}${useOvm ? '-optimistic' : ''
+		}.etherscan.io/api`;
 
 	const explorerLinkPrefix = getExplorerLinkPrefix({ network, useOvm });
 
@@ -288,7 +286,7 @@ const assignGasOptions = async ({ tx, provider, maxFeePerGas, maxPriorityFeePerG
 	let feeData = {};
 	try {
 		feeData = await provider.getFeeData();
-	} catch (_) {} // network does not support the `getFeeData` rpc call
+	} catch (_) { } // network does not support the `getFeeData` rpc call
 	if (feeData.maxFeePerGas) {
 		gasOptions.type = 2;
 		if (maxFeePerGas)

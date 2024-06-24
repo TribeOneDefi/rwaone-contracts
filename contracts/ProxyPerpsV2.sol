@@ -16,7 +16,7 @@ import "./Proxyable.sol";
  * some helper views to get the size of the route list (`getRoutesLength`), the list of routes (`getRoutesPage`),
  * and a list of all the targeted contracts.
  */
-// https://docs.tribeone.io/contracts/source/contracts/ProxyPerpsV2
+// https://docs.rwaone.io/contracts/source/contracts/ProxyPerpsV2
 contract ProxyPerpsV2 is Owned {
     /* ----- Dynamic router storage ----- */
     struct Route {
@@ -66,11 +66,7 @@ contract ProxyPerpsV2 is Owned {
         }
     }
 
-    function addRoute(
-        bytes4 selector,
-        address implementation,
-        bool isView
-    ) external onlyOwner {
+    function addRoute(bytes4 selector, address implementation, bool isView) external onlyOwner {
         require(selector != bytes4(0), "Invalid nil selector");
 
         if (_contains(selector)) {
@@ -185,21 +181,21 @@ contract ProxyPerpsV2 is Owned {
              * This means moving call_data across 32 bytes guarantees we correctly access
              * the data itself. */
             switch numTopics
-                case 0 {
-                    log0(add(_callData, 32), size)
-                }
-                case 1 {
-                    log1(add(_callData, 32), size, topic1)
-                }
-                case 2 {
-                    log2(add(_callData, 32), size, topic1, topic2)
-                }
-                case 3 {
-                    log3(add(_callData, 32), size, topic1, topic2, topic3)
-                }
-                case 4 {
-                    log4(add(_callData, 32), size, topic1, topic2, topic3, topic4)
-                }
+            case 0 {
+                log0(add(_callData, 32), size)
+            }
+            case 1 {
+                log1(add(_callData, 32), size, topic1)
+            }
+            case 2 {
+                log2(add(_callData, 32), size, topic1, topic2)
+            }
+            case 3 {
+                log3(add(_callData, 32), size, topic1, topic2, topic3)
+            }
+            case 4 {
+                log4(add(_callData, 32), size, topic1, topic2, topic3, topic4)
+            }
         }
     }
 
@@ -246,7 +242,7 @@ contract ProxyPerpsV2 is Owned {
         }
     }
 
-    modifier onlyTargets {
+    modifier onlyTargets() {
         require(_targetReferences[msg.sender] > 0, "Must be a proxy target");
         _;
     }

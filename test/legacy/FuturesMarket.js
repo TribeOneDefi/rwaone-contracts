@@ -41,7 +41,7 @@ contract('FuturesMarket', accounts => {
 		circuitBreaker,
 		addressResolver,
 		hUSD,
-		tribeone,
+		rwaone,
 		feePool,
 		debtCache,
 		systemSettings,
@@ -111,7 +111,7 @@ contract('FuturesMarket', accounts => {
 			CircuitBreaker: circuitBreaker,
 			AddressResolver: addressResolver,
 			TribehUSD: hUSD,
-			Tribeone: tribeone,
+			Rwaone: rwaone,
 			FeePool: feePool,
 			DebtCache: debtCache,
 			SystemStatus: systemStatus,
@@ -130,7 +130,7 @@ contract('FuturesMarket', accounts => {
 				'CircuitBreaker',
 				'SystemStatus',
 				'SystemSettings',
-				'Tribeone',
+				'Rwaone',
 				'CollateralManager',
 				'DebtCache',
 			],
@@ -652,7 +652,7 @@ contract('FuturesMarket', accounts => {
 
 			it('fee reclamation is respected', async () => {
 				// Set up a mock exchanger
-				const mockExchanger = await MockExchanger.new(tribeone.address);
+				const mockExchanger = await MockExchanger.new(rwaone.address);
 				await addressResolver.importAddresses(
 					['Exchanger'].map(toBytes32),
 					[mockExchanger.address],
@@ -660,7 +660,7 @@ contract('FuturesMarket', accounts => {
 						from: owner,
 					}
 				);
-				await tribeone.rebuildCache();
+				await rwaone.rebuildCache();
 				await futuresMarketManager.rebuildCache();
 
 				// Set up a starting balance
@@ -788,7 +788,7 @@ contract('FuturesMarket', accounts => {
 			// should revert
 			await assert.revert(
 				futuresMarket.transferMargin(toUnit('-1000'), { from: trader }),
-				'Tribeone is suspended'
+				'Rwaone is suspended'
 			);
 
 			// resume
@@ -973,7 +973,7 @@ contract('FuturesMarket', accounts => {
 			// should revert modifying position
 			await assert.revert(
 				futuresMarket.modifyPosition(size, { from: trader }),
-				'Tribeone is suspended'
+				'Rwaone is suspended'
 			);
 
 			// resume
@@ -2125,7 +2125,7 @@ contract('FuturesMarket', accounts => {
 					// should revert
 					await assert.revert(
 						futuresMarket.withdrawAllMargin({ from: trader }),
-						'Tribeone is suspended'
+						'Rwaone is suspended'
 					);
 
 					// resume

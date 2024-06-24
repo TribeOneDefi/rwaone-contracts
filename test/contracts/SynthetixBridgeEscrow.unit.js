@@ -4,14 +4,14 @@ const { onlyGivenAddressCanInvoke, ensureOnlyExpectedMutativeFunctions } = requi
 
 const { smock } = require('@defi-wonderland/smock');
 
-const TribeoneBridgeEscrow = artifacts.require('TribeoneBridgeEscrow');
+const RwaoneBridgeEscrow = artifacts.require('RwaoneBridgeEscrow');
 
-contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
+contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 	const [owner, snxBridgeToOptimism] = accounts;
 
 	it('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
-			abi: TribeoneBridgeEscrow.abi,
+			abi: RwaoneBridgeEscrow.abi,
 			ignoreParents: ['Owned'],
 			expected: ['approveBridge'],
 		});
@@ -21,7 +21,7 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 		let IERC20;
 
 		beforeEach(async () => {
-			// can't use ITribeone as we need ERC20 functions as well
+			// can't use IRwaone as we need ERC20 functions as well
 			IERC20 = await smock.fake('contracts/interfaces/IERC20.sol:IERC20');
 		});
 
@@ -37,7 +37,7 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 		describe('when the target is deployed', () => {
 			let instance;
 			beforeEach(async () => {
-				instance = await artifacts.require('TribeoneBridgeEscrow').new(owner);
+				instance = await artifacts.require('RwaoneBridgeEscrow').new(owner);
 			});
 
 			describe('approveBridge', () => {
@@ -66,7 +66,7 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 						assert.eventEqual(txn, 'BridgeApproval', [IERC20.address, snxBridgeToOptimism, amount]);
 					});
 
-					it('approve is called via Tribeone', async () => {
+					it('approve is called via Rwaone', async () => {
 						IERC20.approve.returnsAtCall(0, snxBridgeToOptimism);
 						IERC20.approve.returnsAtCall(1, amount);
 					});

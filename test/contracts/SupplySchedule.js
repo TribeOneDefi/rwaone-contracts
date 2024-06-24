@@ -20,7 +20,7 @@ contract('SupplySchedule', async accounts => {
 	const initialWeeklySupply = toUnit(800000); // 800,000
 	const inflationStartDate = inflationStartTimestampInSecs;
 
-	const [, owner, tribeone, account1, account2] = accounts;
+	const [, owner, rwaone, account1, account2] = accounts;
 
 	let supplySchedule, tribeetixProxy;
 
@@ -31,12 +31,12 @@ contract('SupplySchedule', async accounts => {
 
 		tribeetixProxy = await setupContract({
 			accounts,
-			contract: 'ProxyTribeone',
+			contract: 'ProxyRwaone',
 			source: 'ProxyERC20',
 		});
 
-		await supplySchedule.setTribeoneProxy(tribeetixProxy.address, { from: owner });
-		await tribeetixProxy.setTarget(tribeone, { from: owner });
+		await supplySchedule.setRwaoneProxy(tribeetixProxy.address, { from: owner });
+		await tribeetixProxy.setTarget(rwaone, { from: owner });
 	});
 
 	it('only expected functions should be mutative', () => {
@@ -46,7 +46,7 @@ contract('SupplySchedule', async accounts => {
 			expected: [
 				'recordMintEvent',
 				'setMinterReward',
-				'setTribeoneProxy',
+				'setRwaoneProxy',
 				'setInflationAmount',
 				'setMaxInflationAmount',
 			],
@@ -69,26 +69,26 @@ contract('SupplySchedule', async accounts => {
 		assert.bnEqual(await instance.inflationAmount(), 0);
 	});
 
-	describe('linking tribeone', async () => {
-		it('should have set tribeone proxy', async () => {
+	describe('linking rwaone', async () => {
+		it('should have set rwaone proxy', async () => {
 			const tribeetixProxy = await supplySchedule.tribeetixProxy();
 			assert.equal(tribeetixProxy, tribeetixProxy);
 		});
-		it('should revert when setting tribeone proxy to ZERO_ADDRESS', async () => {
-			await assert.revert(supplySchedule.setTribeoneProxy(ZERO_ADDRESS, { from: owner }));
+		it('should revert when setting rwaone proxy to ZERO_ADDRESS', async () => {
+			await assert.revert(supplySchedule.setRwaoneProxy(ZERO_ADDRESS, { from: owner }));
 		});
 
-		it('should emit an event when setting tribeone proxy', async () => {
-			const txn = await supplySchedule.setTribeoneProxy(account2, { from: owner });
+		it('should emit an event when setting rwaone proxy', async () => {
+			const txn = await supplySchedule.setRwaoneProxy(account2, { from: owner });
 
-			assert.eventEqual(txn, 'TribeoneProxyUpdated', {
+			assert.eventEqual(txn, 'RwaoneProxyUpdated', {
 				newAddress: account2,
 			});
 		});
 
-		it('should disallow a non-owner from setting the tribeone proxy', async () => {
+		it('should disallow a non-owner from setting the rwaone proxy', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: supplySchedule.setTribeoneProxy,
+				fnc: supplySchedule.setRwaoneProxy,
 				args: [account2],
 				address: owner,
 				accounts,
@@ -176,9 +176,9 @@ contract('SupplySchedule', async accounts => {
 				instance = supplySchedule
 			) {
 				const weekCounterBefore = await instance.weekCounter();
-				// call updateMintValues to mimic tribeone issuing tokens
+				// call updateMintValues to mimic rwaone issuing tokens
 				const transaction = await instance.recordMintEvent(mintedSupply, {
-					from: tribeone,
+					from: rwaone,
 				});
 
 				const weekCounterAfter = weekCounterBefore.add(new BN(weeksIssued));
@@ -377,8 +377,8 @@ contract('SupplySchedule', async accounts => {
 					});
 
 					// setup new instance
-					await instance.setTribeoneProxy(tribeetixProxy.address, { from: owner });
-					await tribeetixProxy.setTarget(tribeone, { from: owner });
+					await instance.setRwaoneProxy(tribeetixProxy.address, { from: owner });
+					await tribeetixProxy.setTarget(rwaone, { from: owner });
 					await instance.setInflationAmount(initialWeeklySupply, { from: owner });
 				});
 

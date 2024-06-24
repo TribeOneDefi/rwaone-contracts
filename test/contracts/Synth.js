@@ -31,7 +31,7 @@ contract('Tribe', async accounts => {
 
 	let feePool,
 		FEE_ADDRESS,
-		tribeone,
+		rwaone,
 		exchangeRates,
 		hUSDProxy,
 		hUSDImpl,
@@ -45,7 +45,7 @@ contract('Tribe', async accounts => {
 	before(async () => {
 		({
 			AddressResolver: addressResolver,
-			Tribeone: tribeone,
+			Rwaone: rwaone,
 			ExchangeRates: exchangeRates,
 			FeePool: feePool,
 			SystemStatus: systemStatus,
@@ -62,11 +62,11 @@ contract('Tribe', async accounts => {
 				'ExchangeRates',
 				'FeePool',
 				'FeePoolEternalStorage', // required for Exchanger/FeePool to access the tribe exchange fee rates
-				'Tribeone',
+				'Rwaone',
 				'SystemStatus',
 				'AddressResolver',
 				'DebtCache',
-				'Issuer', // required to issue via Tribeone
+				'Issuer', // required to issue via Rwaone
 				'LiquidatorRewards',
 				'Exchanger', // required to exchange into hUSD when transferring to the FeePool
 				'SystemSettings',
@@ -175,7 +175,7 @@ contract('Tribe', async accounts => {
 			const revertMsg = 'Only the proxy';
 			beforeEach(async () => {
 				// ensure owner has funds
-				await tribeone.issueTribes(amount, { from: owner });
+				await rwaone.issueTribes(amount, { from: owner });
 
 				// approve for transferFrom to work
 				await hUSDProxy.approve(account1, amount, { from: owner });
@@ -219,7 +219,7 @@ contract('Tribe', async accounts => {
 		const amount = toUnit('10000');
 		beforeEach(async () => {
 			// ensure owner has funds
-			await tribeone.issueTribes(amount, { from: owner });
+			await rwaone.issueTribes(amount, { from: owner });
 
 			// approve for transferFrom to work
 			await hUSDProxy.approve(account1, amount, { from: owner });
@@ -301,7 +301,7 @@ contract('Tribe', async accounts => {
 	it('should transfer (ERC20) without error @gasprofile', async () => {
 		// Issue 10,000 hUSD.
 		const amount = toUnit('10000');
-		await tribeone.issueTribes(amount, { from: owner });
+		await rwaone.issueTribes(amount, { from: owner });
 
 		// Do a single transfer of all our hUSD.
 		const transaction = await hUSDProxy.transfer(account1, amount, {
@@ -326,7 +326,7 @@ contract('Tribe', async accounts => {
 	it('should revert when transferring (ERC20) with insufficient balance', async () => {
 		// Issue 10,000 hUSD.
 		const amount = toUnit('10000');
-		await tribeone.issueTribes(amount, { from: owner });
+		await rwaone.issueTribes(amount, { from: owner });
 
 		// Try to transfer 10,000 + 1 wei, which we don't have the balance for.
 		await assert.revert(
@@ -337,7 +337,7 @@ contract('Tribe', async accounts => {
 	it('should transferFrom (ERC20) without error @gasprofile', async () => {
 		// Issue 10,000 hUSD.
 		const amount = toUnit('10000');
-		await tribeone.issueTribes(amount, { from: owner });
+		await rwaone.issueTribes(amount, { from: owner });
 
 		// Give account1 permission to act on our behalf
 		await hUSDProxy.approve(account1, amount, { from: owner });
@@ -368,7 +368,7 @@ contract('Tribe', async accounts => {
 	it('should revert when calling transferFrom (ERC20) with insufficient allowance', async () => {
 		// Issue 10,000 hUSD.
 		const amount = toUnit('10000');
-		await tribeone.issueTribes(amount, { from: owner });
+		await rwaone.issueTribes(amount, { from: owner });
 
 		// Approve for 1 wei less than amount
 		await hUSDProxy.approve(account1, amount.sub(web3.utils.toBN('1')), {
@@ -386,7 +386,7 @@ contract('Tribe', async accounts => {
 	it('should revert when calling transferFrom (ERC20) with insufficient balance', async () => {
 		// Issue 10,000 - 1 wei hUSD.
 		const amount = toUnit('10000');
-		await tribeone.issueTribes(amount.sub(web3.utils.toBN('1')), { from: owner });
+		await rwaone.issueTribes(amount.sub(web3.utils.toBN('1')), { from: owner });
 
 		// Approve for full amount
 		await hUSDProxy.approve(account1, amount, { from: owner });
@@ -401,7 +401,7 @@ contract('Tribe', async accounts => {
 
 	describe('invoking issue/burn directly as Issuer', () => {
 		beforeEach(async () => {
-			// Overwrite Tribeone address to the owner to allow us to invoke issue on the Tribe
+			// Overwrite Rwaone address to the owner to allow us to invoke issue on the Tribe
 			await addressResolver.importAddresses(['Issuer'].map(toBytes32), [owner], { from: owner });
 			// now have the tribe resync its cache
 			await hUSDProxy.rebuildCache();
@@ -431,7 +431,7 @@ contract('Tribe', async accounts => {
 			await hUSDImpl.issue(owner, toUnit('10000'), {
 				from: owner,
 			});
-			// await tribeone.issueTribes(toUnit('10000'), { from: owner });
+			// await rwaone.issueTribes(toUnit('10000'), { from: owner });
 
 			const transaction = await hUSDImpl.burn(owner, toUnit('10000'), { from: owner });
 
@@ -449,7 +449,7 @@ contract('Tribe', async accounts => {
 		// Issue 10,000 hUSD.
 		const amount = toUnit('10000');
 
-		await tribeone.issueTribes(amount, { from: owner });
+		await rwaone.issueTribes(amount, { from: owner });
 
 		// Do a single transfer of all our hUSD.
 		const transaction = await hUSDProxy.transfer(account1, amount, {
@@ -481,7 +481,7 @@ contract('Tribe', async accounts => {
 			// Issue 1,000 hUSD.
 			amount = toUnit('1000');
 
-			await tribeone.issueTribes(amount, { from: owner });
+			await rwaone.issueTribes(amount, { from: owner });
 		});
 
 		describe('suspension conditions', () => {
@@ -554,13 +554,13 @@ contract('Tribe', async accounts => {
 				// this could use GenericMock if we added the ability for generic functions
 				// to emit events and listened to those instead (so here, for Exchanger.settle() we'd
 				// need to be sure it was invoked during transferAndSettle())
-				exchanger = await MockExchanger.new(tribeone.address);
+				exchanger = await MockExchanger.new(rwaone.address);
 
 				await addressResolver.importAddresses(['Exchanger'].map(toBytes32), [exchanger.address], {
 					from: owner,
 				});
-				// now have tribeone resync its cache
-				await tribeone.rebuildCache();
+				// now have rwaone resync its cache
+				await rwaone.rebuildCache();
 				await hUSDImpl.rebuildCache();
 			});
 			it('then transferableTribes should be the total amount', async () => {
@@ -747,7 +747,7 @@ contract('Tribe', async accounts => {
 			// Issue 10,000 hUSD.
 			amount = toUnit('10000');
 
-			await tribeone.issueTribes(amount, { from: owner });
+			await rwaone.issueTribes(amount, { from: owner });
 		});
 		it('should transfer to FEE_ADDRESS and recorded as fee', async () => {
 			const feeBalanceBefore = await hUSDProxy.balanceOf(FEE_ADDRESS);
@@ -791,7 +791,7 @@ contract('Tribe', async accounts => {
 						DebtCache: debtCache,
 						Exchanger: exchanger,
 						FeePool: feePool,
-						Tribeone: tribeone,
+						Rwaone: rwaone,
 					},
 					contracts: [{ contract: 'Tribe', properties: { currencyKey: sEUR } }],
 				}));
@@ -846,7 +846,7 @@ contract('Tribe', async accounts => {
 			// Issue 10,000 hUSD.
 			amount = toUnit('1000');
 
-			await tribeone.issueTribes(amount, { from: owner });
+			await rwaone.issueTribes(amount, { from: owner });
 		});
 		it('should burn the tribes and reduce totalSupply', async () => {
 			const balanceBefore = await hUSDProxy.balanceOf(owner);

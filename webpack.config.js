@@ -5,7 +5,7 @@ module.exports = {
 	output: {
 		filename: 'browser.js',
 		path: path.resolve(__dirname),
-		library: 'tribeone',
+		library: 'rwaone',
 		libraryTarget: 'umd',
 	},
 	resolve: {

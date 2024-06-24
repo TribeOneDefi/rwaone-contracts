@@ -1,35 +1,35 @@
-# Tribeone
+# Rwaone
 
-[![CircleCI](https://circleci.com/gh/Tribeoneio/tribeone.svg?style=svg)](https://circleci.com/gh/Tribeoneio/tribeone)
-[![codecov](https://codecov.io/gh/Tribeoneio/tribeone/branch/develop/graph/badge.svg)](https://codecov.io/gh/Tribeoneio/tribeone)
-[![npm version](https://badge.fury.io/js/tribeone.svg)](https://badge.fury.io/js/tribeone)
-[![Discord](https://img.shields.io/discord/413890591840272394.svg?color=768AD4&label=discord&logo=https%3A%2F%2Fdiscordapp.com%2Fassets%2F8c9701b98ad4372b58f13fd9f65f966e.svg)](https://discord.com/invite/Tribeone)
+[![CircleCI](https://circleci.com/gh/Rwaoneio/rwaone.svg?style=svg)](https://circleci.com/gh/Rwaoneio/rwaone)
+[![codecov](https://codecov.io/gh/Rwaoneio/rwaone/branch/develop/graph/badge.svg)](https://codecov.io/gh/Rwaoneio/rwaone)
+[![npm version](https://badge.fury.io/js/rwaone.svg)](https://badge.fury.io/js/rwaone)
+[![Discord](https://img.shields.io/discord/413890591840272394.svg?color=768AD4&label=discord&logo=https%3A%2F%2Fdiscordapp.com%2Fassets%2F8c9701b98ad4372b58f13fd9f65f966e.svg)](https://discord.com/invite/Rwaone)
 [![Twitter Follow](https://img.shields.io/twitter/follow/tribeetix_io.svg?label=tribeetix_io&style=social)](https://twitter.com/tribeetix_io)
 
-Tribeone is a crypto-backed tribeetic asset platform.
+Rwaone is a crypto-backed tribeetic asset platform.
 
-It is a multi-token system, powered by wHAKA, the Tribeone Network Token. wHAKA holders can stake wHAKA to issue Tribes, on-chain tribeetic assets via the [Staking dApp](https://staking.tribeone.io) The network currently supports an ever-growing [list of tribeetic assets](https://www.tribeone.io/tribes/). Please see the [list of the deployed contracts on MAIN and TESTNETS](https://docs.tribeone.io/addresses/)
+It is a multi-token system, powered by wHAKA, the Rwaone Network Token. wHAKA holders can stake wHAKA to issue Tribes, on-chain tribeetic assets via the [Staking dApp](https://staking.rwaone.io) The network currently supports an ever-growing [list of tribeetic assets](https://www.rwaone.io/tribes/). Please see the [list of the deployed contracts on MAIN and TESTNETS](https://docs.rwaone.io/addresses/)
 Tribes can be traded using [Kwenta](https://kwenta.io)
 
-Tribeone uses a proxy system so that upgrades will not be disruptive to the functionality of the contract. This smooths user interaction, since new functionality will become available without any interruption in their experience. It is also transparent to the community at large, since each upgrade is accompanied by events announcing those upgrades. New releases are managed via the [Tribeone Improvement Proposal (SIP)](https://sips.tribeone.io/all-sip) system similar to the [EIPs](https://eips.ethereum.org/all)
+Rwaone uses a proxy system so that upgrades will not be disruptive to the functionality of the contract. This smooths user interaction, since new functionality will become available without any interruption in their experience. It is also transparent to the community at large, since each upgrade is accompanied by events announcing those upgrades. New releases are managed via the [Rwaone Improvement Proposal (SIP)](https://sips.rwaone.io/all-sip) system similar to the [EIPs](https://eips.ethereum.org/all)
 
 Prices are committed on-chain by a trusted oracle provided by [Chainlink](https://feeds.chain.link/).
 
 Please note that this repository is under development.
 
-For the latest system documentation see [docs.tribeone.io](https://docs.tribeone.io)
+For the latest system documentation see [docs.rwaone.io](https://docs.rwaone.io)
 
 ## DApps
 
-- [staking.tribeone.io](https://staking.tribeone.io)
+- [staking.rwaone.io](https://staking.rwaone.io)
 - [kwenta.io](https://kwenta.io)
-- [stats.tribeone.io](https://stats.tribeone.io)
+- [stats.rwaone.io](https://stats.rwaone.io)
 
 ### Community
 
 [![Discord](https://img.shields.io/discord/413890591840272394.svg?color=768AD4&label=discord&logo=https%3A%2F%2Fdiscordapp.com%2Fassets%2F8c9701b98ad4372b58f13fd9f65f966e.svg)](https://discordapp.com/channels/413890591840272394/) [![Twitter Follow](https://img.shields.io/twitter/follow/tribeetix_io.svg?label=tribeetix_io&style=social)](https://twitter.com/tribeetix_io)
 
-For a guide from the community, see [tribeone.community](https://tribeone.community)
+For a guide from the community, see [rwaone.community](https://rwaone.community)
 
 ---
 
@@ -45,43 +45,43 @@ When a new version of the contracts makes its way through all testnets, it event
 
 ### Testing
 
-[![CircleCI](https://circleci.com/gh/Tribeoneio/tribeone.svg?style=svg)](https://circleci.com/gh/Tribeoneio/tribeone)
-[![codecov](https://codecov.io/gh/Tribeoneio/tribeone/branch/develop/graph/badge.svg)](https://codecov.io/gh/Tribeoneio/tribeone)
+[![CircleCI](https://circleci.com/gh/Rwaoneio/rwaone.svg?style=svg)](https://circleci.com/gh/Rwaoneio/rwaone)
+[![codecov](https://codecov.io/gh/Rwaoneio/rwaone/branch/develop/graph/badge.svg)](https://codecov.io/gh/Rwaoneio/rwaone)
 
-Please see [docs.tribeone.io/contracts/testing](https://docs.tribeone.io/contracts/testing) for an overview of the automated testing methodologies.
+Please see [docs.rwaone.io/contracts/testing](https://docs.rwaone.io/contracts/testing) for an overview of the automated testing methodologies.
 
 ## Module Usage
 
-[![npm version](https://badge.fury.io/js/tribeone.svg)](https://badge.fury.io/js/tribeone)
+[![npm version](https://badge.fury.io/js/rwaone.svg)](https://badge.fury.io/js/rwaone)
 
 This repo may be installed via `npm install` to support both node.js scripting applications and Solidity contract development.
 
 ### Examples
 
-:100: Please see our walkthroughs for code examples in both JavaScript and Solidity: [docs.tribeone.io/integrations](https://docs.tribeone.io/integrations/)
+:100: Please see our walkthroughs for code examples in both JavaScript and Solidity: [docs.rwaone.io/integrations](https://docs.rwaone.io/integrations/)
 
 ### Solidity API
 
-All interfaces are available via the path [`tribeone/contracts/interfaces`](./contracts/interfaces/).
+All interfaces are available via the path [`rwaone/contracts/interfaces`](./contracts/interfaces/).
 
-:zap: In your code, the key is to use `IAddressResolver` which can be tied to the immutable proxy: [`ReadProxyAddressResolver`](https://contracts.tribeone.io/ReadProxyAddressResolver) ([introduced in SIP-57](https://sips.tribeone.io/sips/sip-57)). You can then fetch `Tribeone`, `FeePool`, `Depot`, et al via `IAddressResolver.getAddress(bytes32 name)` where `name` is the `bytes32` version of the contract name (case-sensitive). Or you can fetch any tribe using `IAddressResolver.getTribe(bytes32 tribe)` where `tribe` is the `bytes32` name of the tribe (e.g. `iETH`, `hUSD`, `sDEFI`).
+:zap: In your code, the key is to use `IAddressResolver` which can be tied to the immutable proxy: [`ReadProxyAddressResolver`](https://contracts.rwaone.io/ReadProxyAddressResolver) ([introduced in SIP-57](https://sips.rwaone.io/sips/sip-57)). You can then fetch `Rwaone`, `FeePool`, `Depot`, et al via `IAddressResolver.getAddress(bytes32 name)` where `name` is the `bytes32` version of the contract name (case-sensitive). Or you can fetch any tribe using `IAddressResolver.getTribe(bytes32 tribe)` where `tribe` is the `bytes32` name of the tribe (e.g. `iETH`, `hUSD`, `sDEFI`).
 
 E.g.
 
-`npm install tribeone`
+`npm install rwaone`
 
 then you can write Solidity as below (using a compiler that links named imports via `node_modules`):
 
 ```solidity
 pragma solidity ^0.5.16;
 
-import 'tribeone/contracts/interfaces/IAddressResolver.sol';
-import 'tribeone/contracts/interfaces/ITribeone.sol';
+import 'rwaone/contracts/interfaces/IAddressResolver.sol';
+import 'rwaone/contracts/interfaces/IRwaone.sol';
 
 contract MyContract {
   // This should be instantiated with our ReadProxyAddressResolver
   // it's a ReadProxy that won't change, so safe to code it here without a setter
-  // see https://docs.tribeone.io/addresses for addresses in mainnet and testnets
+  // see https://docs.rwaone.io/addresses for addresses in mainnet and testnets
   IAddressResolver public tribeetixResolver;
 
   constructor(IAddressResolver _snxResolver) public {
@@ -89,20 +89,20 @@ contract MyContract {
   }
 
   function tribeetixIssue() external {
-    ITribeone tribeone = tribeetixResolver.getAddress('Tribeone');
-    require(tribeone != address(0), 'Tribeone is missing from Tribeone resolver');
+    IRwaone rwaone = tribeetixResolver.getAddress('Rwaone');
+    require(rwaone != address(0), 'Rwaone is missing from Rwaone resolver');
 
     // Issue for msg.sender = address(MyContract)
-    tribeone.issueMaxTribes();
+    rwaone.issueMaxTribes();
   }
 
   function tribeetixIssueOnBehalf(address user) external {
-    ITribeone tribeone = tribeetixResolver.getAddress('Tribeone');
-    require(tribeone != address(0), 'Tribeone is missing from Tribeone resolver');
+    IRwaone rwaone = tribeetixResolver.getAddress('Rwaone');
+    require(rwaone != address(0), 'Rwaone is missing from Rwaone resolver');
 
     // Note: this will fail if `DelegateApprovals.approveIssueOnBehalf(address(MyContract))` has
     // not yet been invoked by the `user`
-    tribeone.issueMaxTribesOnBehalf(user);
+    rwaone.issueMaxTribesOnBehalf(user);
   }
 }
 ```
@@ -115,9 +115,9 @@ contract MyContract {
 - `getSuspensionReasons({ code })` Return mapping of `SystemStatus` suspension codes to string reasons
 - `getStakingRewards({ network })` Return the list of staking reward contracts available.
 - `getTribes({ network })` Return the list of tribes for a network
-- `getTarget({ network })` Return the information about a contract's `address` and `source` file. The contract names are those specified in [docs.tribeone.io/addresses](https://docs.tribeone.io/addresses)
+- `getTarget({ network })` Return the information about a contract's `address` and `source` file. The contract names are those specified in [docs.rwaone.io/addresses](https://docs.rwaone.io/addresses)
 - `getTokens({ network })` Return the list of tokens (tribes and `wHAKA`) used in the system, along with their addresses.
-- `getUsers({ network })` Return the list of user accounts within the Tribeone protocol (e.g. `owner`, `fee`, etc)
+- `getUsers({ network })` Return the list of user accounts within the Rwaone protocol (e.g. `owner`, `fee`, etc)
 - `getVersions({ network, byContract = false })` Return the list of deployed versions to the network keyed by tagged version. If `byContract` is `true`, it keys by `contract` name.
 - `networks` Return the list of supported networks
 - `toBytes32` Convert any string to a `bytes32` value
@@ -125,7 +125,7 @@ contract MyContract {
 #### Via code
 
 ```javascript
-const snx = require('tribeone');
+const snx = require('rwaone');
 
 snx.getAST();
 /*
@@ -133,7 +133,7 @@ snx.getAST();
    { imports:
       [ 'contracts/Owned.sol',
         'contracts/interfaces/IAddressResolver.sol',
-        'contracts/interfaces/ITribeone.sol' ],
+        'contracts/interfaces/IRwaone.sol' ],
      contracts: { AddressResolver: [Object] },
      interfaces: {},
      libraries: {} },
@@ -144,26 +144,26 @@ snx.getAST();
      libraries: {} },
 */
 
-snx.getAST({ source: 'Tribeone.sol' });
+snx.getAST({ source: 'Rwaone.sol' });
 /*
 { imports:
    [ 'contracts/ExternStateToken.sol',
      'contracts/MixinResolver.sol',
-     'contracts/interfaces/ITribeone.sol',
+     'contracts/interfaces/IRwaone.sol',
      'contracts/TokenState.sol',
      'contracts/interfaces/ITribe.sol',
      'contracts/interfaces/IERC20.sol',
      'contracts/interfaces/ISystemStatus.sol',
      'contracts/interfaces/IExchanger.sol',
      'contracts/interfaces/IIssuer.sol',
-     'contracts/interfaces/ITribeoneState.sol',
+     'contracts/interfaces/IRwaoneState.sol',
      'contracts/interfaces/IExchangeRates.sol',
      'contracts/SupplySchedule.sol',
      'contracts/interfaces/IRewardEscrow.sol',
      'contracts/interfaces/IHasBalance.sol',
      'contracts/interfaces/IRewardsDistribution.sol' ],
   contracts:
-   { Tribeone:
+   { Rwaone:
       { functions: [Array],
         events: [Array],
         variables: [Array],
@@ -176,7 +176,7 @@ snx.getAST({ source: 'Tribeone.sol' });
 
 // Get the path to the network
 snx.getPathToNetwork({ network: 'mainnet' });
-//'.../Tribeoneio/tribeone/publish/deployed/mainnet'
+//'.../Rwaoneio/rwaone/publish/deployed/mainnet'
 
 // retrieve an object detailing the contract ABI and bytecode
 snx.getSource({ network: 'goerli', contract: 'Proxy' });
@@ -202,10 +202,10 @@ snx.getTribes({ network: 'goerli' }).map(({ name }) => name);
 // ['hUSD', 'sEUR', ...]
 
 // retrieve an object detailing the contract deployed to the given network.
-snx.getTarget({ network: 'goerli', contract: 'ProxyTribeone' });
+snx.getTarget({ network: 'goerli', contract: 'ProxyRwaone' });
 /*
 {
-	name: 'ProxyTribeone',
+	name: 'ProxyRwaone',
   address: '0x322A3346bf24363f451164d96A5b5cd5A7F4c337',
   source: 'Proxy',
   link: 'https://goerli.etherscan.io/address/0x322A3346bf24363f451164d96A5b5cd5A7F4c337',
@@ -258,7 +258,7 @@ snx.toBytes32('hUSD');
 Same as above but as a CLI tool that outputs JSON, using names without the `get` prefixes:
 
 ```bash
-$ npx tribeone ast contracts/Tribe.sol
+$ npx rwaone ast contracts/Tribe.sol
 {
   "imports": [
     "contracts/Owned.sol",
@@ -268,34 +268,34 @@ $ npx tribeone ast contracts/Tribe.sol
     "contracts/interfaces/IERC20.sol",
     "contracts/interfaces/ISystemStatus.sol",
     "contracts/interfaces/IFeePool.sol",
-    "contracts/interfaces/ITribeone.sol",
+    "contracts/interfaces/IRwaone.sol",
     "contracts/interfaces/IExchanger.sol",
     "contracts/interfaces/IIssue"
     # ...
   ]
 }
 
-$ npx tribeone bytes32 hUSD
+$ npx rwaone bytes32 hUSD
 0x7355534400000000000000000000000000000000000000000000000000000000
 
-$ npx tribeone networks
+$ npx rwaone networks
 [ 'local', 'goerli', 'mainnet' ]
 
-$ npx tribeone source --network goerli --contract Proxy
+$ npx rwaone source --network goerli --contract Proxy
 {
   "bytecode": "0..0",
   "abi": [ ... ]
 }
 
-$ npx tribeone suspension-reason --code 2
+$ npx rwaone suspension-reason --code 2
 Market Closure
 
-$ npx tribeone tribes --network goerli --key name
+$ npx rwaone tribes --network goerli --key name
 ["hUSD", "sEUR", ... ]
 
-$ npx tribeone target --network goerli --contract ProxyTribeone
+$ npx rwaone target --network goerli --contract ProxyRwaone
 {
-  "name": "ProxyTribeone",
+  "name": "ProxyRwaone",
   "address": "0x322A3346bf24363f451164d96A5b5cd5A7F4c337",
   "source": "Proxy",
   "link": "https://goerli.etherscan.io/address/0x322A3346bf24363f451164d96A5b5cd5A7F4c337",
@@ -303,13 +303,13 @@ $ npx tribeone target --network goerli --contract ProxyTribeone
   "network": "goerli"
 }
 
-$ npx tribeone users --network mainnet --user oracle
+$ npx rwaone users --network mainnet --user oracle
 {
   "name": "oracle",
   "address": "0xaC1ED4Fabbd5204E02950D68b6FC8c446AC95362"
 }
 
-$ npx tribeone versions
+$ npx rwaone versions
 {
   "v2.0-19": {
     "tag": "v2.0-19",
@@ -336,7 +336,7 @@ $ npx tribeone versions
   }
 }
 
-$ npx tribeone versions --by-contract
+$ npx rwaone versions --by-contract
 {
   "Depot": [
     {

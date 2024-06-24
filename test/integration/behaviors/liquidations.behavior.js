@@ -17,8 +17,8 @@ function itCanLiquidate({ ctx }) {
 		let Liquidator,
 			LiquidatorRewards,
 			RewardEscrowV2,
-			Tribeone,
-			TribeoneDebtShare,
+			Rwaone,
+			RwaoneDebtShare,
 			SystemSettings;
 
 		before('target contracts and users', () => {
@@ -26,8 +26,8 @@ function itCanLiquidate({ ctx }) {
 				Liquidator,
 				LiquidatorRewards,
 				RewardEscrowV2,
-				Tribeone,
-				TribeoneDebtShare,
+				Rwaone,
+				RwaoneDebtShare,
 				SystemSettings,
 			} = ctx.contracts);
 
@@ -92,11 +92,11 @@ function itCanLiquidate({ ctx }) {
 		});
 
 		before('liquidatedUser stakes their wHAKA', async () => {
-			await Tribeone.connect(liquidatedUser).issueMaxTribes();
+			await Rwaone.connect(liquidatedUser).issueMaxTribes();
 		});
 
 		before('someUser stakes their wHAKA', async () => {
-			await Tribeone.connect(someUser).issueMaxTribes();
+			await Rwaone.connect(someUser).issueMaxTribes();
 		});
 
 		it('cannot be liquidated at this point', async () => {
@@ -146,17 +146,17 @@ function itCanLiquidate({ ctx }) {
 						beforeRemainingRewardCredittedSnx;
 
 					before('liquidatorUser calls liquidateDelinquentAccount', async () => {
-						beforeDebtShares = await TribeoneDebtShare.balanceOf(liquidatedUser.address);
-						beforeSharesSupply = await TribeoneDebtShare.totalSupply();
-						beforeFlagRewardCredittedSnx = await Tribeone.balanceOf(flaggerUser.address);
-						beforeLiquidateRewardCredittedSnx = await Tribeone.balanceOf(liquidatorUser.address);
-						beforeRemainingRewardCredittedSnx = await Tribeone.balanceOf(
+						beforeDebtShares = await RwaoneDebtShare.balanceOf(liquidatedUser.address);
+						beforeSharesSupply = await RwaoneDebtShare.totalSupply();
+						beforeFlagRewardCredittedSnx = await Rwaone.balanceOf(flaggerUser.address);
+						beforeLiquidateRewardCredittedSnx = await Rwaone.balanceOf(liquidatorUser.address);
+						beforeRemainingRewardCredittedSnx = await Rwaone.balanceOf(
 							LiquidatorRewards.address
 						);
 
-						beforeCRatio = await Tribeone.collateralisationRatio(liquidatedUser.address);
+						beforeCRatio = await Rwaone.collateralisationRatio(liquidatedUser.address);
 
-						tx = await Tribeone.connect(liquidatorUser).liquidateDelinquentAccount(
+						tx = await Rwaone.connect(liquidatorUser).liquidateDelinquentAccount(
 							liquidatedUser.address
 						);
 
@@ -169,17 +169,17 @@ function itCanLiquidate({ ctx }) {
 					});
 
 					it('fixes the c-ratio of the partially liquidatedUser', async () => {
-						const cratio = await Tribeone.collateralisationRatio(liquidatedUser.address);
+						const cratio = await Rwaone.collateralisationRatio(liquidatedUser.address);
 						// Check that the ratio is repaired
 						assert.bnLt(cratio, beforeCRatio);
 					});
 
 					it('reduces the total supply of debt shares by the amount of liquidated debt shares', async () => {
-						const afterDebtShares = await TribeoneDebtShare.balanceOf(liquidatedUser.address);
+						const afterDebtShares = await RwaoneDebtShare.balanceOf(liquidatedUser.address);
 						const liquidatedDebtShares = beforeDebtShares.sub(afterDebtShares);
 						const afterSupply = beforeSharesSupply.sub(liquidatedDebtShares);
 
-						assert.bnEqual(await TribeoneDebtShare.totalSupply(), afterSupply);
+						assert.bnEqual(await RwaoneDebtShare.totalSupply(), afterSupply);
 					});
 
 					it('should remove the liquidation entry for the liquidatedUser', async () => {
@@ -193,7 +193,7 @@ function itCanLiquidate({ ctx }) {
 					it('transfers the flag reward to flaggerUser', async () => {
 						const flagReward = await Liquidator.flagReward();
 						assert.bnEqual(
-							await Tribeone.balanceOf(flaggerUser.address),
+							await Rwaone.balanceOf(flaggerUser.address),
 							beforeFlagRewardCredittedSnx.add(flagReward)
 						);
 					});
@@ -201,7 +201,7 @@ function itCanLiquidate({ ctx }) {
 					it('transfers the liquidate reward to liquidatorUser', async () => {
 						const liquidateReward = await Liquidator.liquidateReward();
 						assert.bnEqual(
-							await Tribeone.balanceOf(liquidatorUser.address),
+							await Rwaone.balanceOf(liquidatorUser.address),
 							beforeLiquidateRewardCredittedSnx.add(liquidateReward)
 						);
 					});
@@ -211,7 +211,7 @@ function itCanLiquidate({ ctx }) {
 						const liqEvent = events.find(l => l.event === 'AccountLiquidated');
 						const snxRedeemed = liqEvent.args.snxRedeemed;
 						assert.bnEqual(
-							await Tribeone.balanceOf(LiquidatorRewards.address),
+							await Rwaone.balanceOf(LiquidatorRewards.address),
 							beforeRemainingRewardCredittedSnx.add(snxRedeemed)
 						);
 					});
@@ -248,7 +248,7 @@ function itCanLiquidate({ ctx }) {
 			});
 
 			before('user7 stakes their wHAKA', async () => {
-				await Tribeone.connect(user7).issueMaxTribes();
+				await Rwaone.connect(user7).issueMaxTribes();
 			});
 
 			before('exchange rate changes to allow liquidation', async () => {
@@ -297,18 +297,18 @@ function itCanLiquidate({ ctx }) {
 						flagReward = await Liquidator.flagReward();
 						liquidateReward = await Liquidator.liquidateReward();
 
-						collateralBefore = await Tribeone.collateral(user7.address);
-						beforeDebtShares = await TribeoneDebtShare.balanceOf(user7.address);
-						beforeSharesSupply = await TribeoneDebtShare.totalSupply();
-						beforeFlagRewardCredittedSnx = await Tribeone.balanceOf(flaggerUser.address);
-						beforeLiquidateRewardCredittedSnx = await Tribeone.balanceOf(liquidatorUser.address);
-						beforeRemainingRewardCredittedSnx = await Tribeone.balanceOf(
+						collateralBefore = await Rwaone.collateral(user7.address);
+						beforeDebtShares = await RwaoneDebtShare.balanceOf(user7.address);
+						beforeSharesSupply = await RwaoneDebtShare.totalSupply();
+						beforeFlagRewardCredittedSnx = await Rwaone.balanceOf(flaggerUser.address);
+						beforeLiquidateRewardCredittedSnx = await Rwaone.balanceOf(liquidatorUser.address);
+						beforeRemainingRewardCredittedSnx = await Rwaone.balanceOf(
 							LiquidatorRewards.address
 						);
-						beforeDebtBalance = await Tribeone.debtBalanceOf(user7.address, toBytes32('hUSD'));
+						beforeDebtBalance = await Rwaone.debtBalanceOf(user7.address, toBytes32('hUSD'));
 
 						viewResults = await Liquidator.liquidationAmounts(user7.address, false);
-						tx = await Tribeone.connect(liquidatorUser).liquidateDelinquentAccount(user7.address);
+						tx = await Rwaone.connect(liquidatorUser).liquidateDelinquentAccount(user7.address);
 					});
 
 					it('results correspond to view before liquidation', async () => {
@@ -323,9 +323,9 @@ function itCanLiquidate({ ctx }) {
 					});
 
 					it('removes all transferable collateral from the liquidated user', async () => {
-						const collateralAfter = await Tribeone.collateral(user7.address);
+						const collateralAfter = await Rwaone.collateral(user7.address);
 						assert.bnLt(collateralAfter, collateralBefore);
-						assert.bnEqual(await Tribeone.balanceOf(user7.address), '0');
+						assert.bnEqual(await Rwaone.balanceOf(user7.address), '0');
 						assert.bnEqual(
 							viewResults.totalRedeemed,
 							collateralBefore.sub(flagReward.add(liquidateReward))
@@ -333,11 +333,11 @@ function itCanLiquidate({ ctx }) {
 					});
 
 					it('reduces the total supply of debt shares by the amount of liquidated debt shares', async () => {
-						const afterDebtShares = await TribeoneDebtShare.balanceOf(user7.address);
+						const afterDebtShares = await RwaoneDebtShare.balanceOf(user7.address);
 						const liquidatedDebtShares = beforeDebtShares.sub(afterDebtShares);
 						const afterSupply = beforeSharesSupply.sub(liquidatedDebtShares);
 
-						assert.bnEqual(await TribeoneDebtShare.totalSupply(), afterSupply);
+						assert.bnEqual(await RwaoneDebtShare.totalSupply(), afterSupply);
 					});
 
 					it('should remove the liquidation entry for the user7', async () => {
@@ -348,7 +348,7 @@ function itCanLiquidate({ ctx }) {
 					it('transfers the flag reward to flaggerUser', async () => {
 						const flagReward = await Liquidator.flagReward();
 						assert.bnEqual(
-							await Tribeone.balanceOf(flaggerUser.address),
+							await Rwaone.balanceOf(flaggerUser.address),
 							beforeFlagRewardCredittedSnx.add(flagReward)
 						);
 					});
@@ -356,7 +356,7 @@ function itCanLiquidate({ ctx }) {
 					it('transfers the liquidate reward to liquidatorUser', async () => {
 						const liquidateReward = await Liquidator.liquidateReward();
 						assert.bnEqual(
-							await Tribeone.balanceOf(liquidatorUser.address),
+							await Rwaone.balanceOf(liquidatorUser.address),
 							beforeLiquidateRewardCredittedSnx.add(liquidateReward)
 						);
 					});
@@ -366,7 +366,7 @@ function itCanLiquidate({ ctx }) {
 						const liqEvent = events.find(l => l.event === 'AccountLiquidated');
 						const snxRedeemed = liqEvent.args.snxRedeemed;
 						assert.bnEqual(
-							await Tribeone.balanceOf(LiquidatorRewards.address),
+							await Rwaone.balanceOf(LiquidatorRewards.address),
 							beforeRemainingRewardCredittedSnx.add(snxRedeemed)
 						);
 					});
@@ -412,7 +412,7 @@ function itCanLiquidate({ ctx }) {
 				flagReward = await Liquidator.flagReward();
 				liquidateReward = await Liquidator.liquidateReward();
 
-				await Tribeone.connect(owner).approve(RewardEscrowV2.address, ethers.constants.MaxUint256);
+				await Rwaone.connect(owner).approve(RewardEscrowV2.address, ethers.constants.MaxUint256);
 
 				// 100 entries is a somewhat realistic estimate for an account which as been escrowing for a while and
 				// hasnt claimed
@@ -426,7 +426,7 @@ function itCanLiquidate({ ctx }) {
 			});
 
 			before('user8 stakes their wHAKA', async () => {
-				await Tribeone.connect(user8).issueMaxTribes();
+				await Rwaone.connect(user8).issueMaxTribes();
 			});
 
 			before('exchange rate changes to allow liquidation', async () => {
@@ -451,21 +451,21 @@ function itCanLiquidate({ ctx }) {
 			it('user8 cannot self liquidate', async () => {
 				// because collateral is in escrow
 				await assert.revert(
-					Tribeone.connect(user8.address).liquidateSelf(),
+					Rwaone.connect(user8.address).liquidateSelf(),
 					'Not open for liquidation'
 				);
 			});
 
 			before('liquidatorUser calls liquidateDelinquentAccount', async () => {
-				beforeSnxBalance = await Tribeone.balanceOf(user8.address);
+				beforeSnxBalance = await Rwaone.balanceOf(user8.address);
 				beforeEscrowBalance = await RewardEscrowV2.totalEscrowedAccountBalance(user8.address);
-				beforeDebtShares = await TribeoneDebtShare.balanceOf(user8.address);
-				beforeSharesSupply = await TribeoneDebtShare.totalSupply();
-				beforeDebtBalance = await Tribeone.debtBalanceOf(user8.address, toBytes32('hUSD'));
-				beforeRewardsCredittedSnx = await Tribeone.balanceOf(LiquidatorRewards.address);
+				beforeDebtShares = await RwaoneDebtShare.balanceOf(user8.address);
+				beforeSharesSupply = await RwaoneDebtShare.totalSupply();
+				beforeDebtBalance = await Rwaone.debtBalanceOf(user8.address, toBytes32('hUSD'));
+				beforeRewardsCredittedSnx = await Rwaone.balanceOf(LiquidatorRewards.address);
 
 				viewResults = await Liquidator.liquidationAmounts(user8.address, false);
-				tx = await Tribeone.connect(liquidatorUser).liquidateDelinquentAccount(user8.address);
+				tx = await Rwaone.connect(liquidatorUser).liquidateDelinquentAccount(user8.address);
 
 				const { gasUsed } = await tx.wait();
 				console.log(
@@ -484,7 +484,7 @@ function itCanLiquidate({ ctx }) {
 			});
 
 			it('should remove all transferable collateral', async () => {
-				const afterSnxBalance = await Tribeone.balanceOf(user8.address);
+				const afterSnxBalance = await Rwaone.balanceOf(user8.address);
 				assert.bnEqual(afterSnxBalance, '0');
 			});
 
@@ -494,7 +494,7 @@ function itCanLiquidate({ ctx }) {
 			});
 
 			it('should remove all debt', async () => {
-				const afterDebtBalance = await Tribeone.debtBalanceOf(user8.address, toBytes32('hUSD'));
+				const afterDebtBalance = await Rwaone.debtBalanceOf(user8.address, toBytes32('hUSD'));
 				assert.bnEqual(afterDebtBalance, '0');
 			});
 
@@ -524,11 +524,11 @@ function itCanLiquidate({ ctx }) {
 			});
 
 			it('reduces the total supply of debt shares by the amount of liquidated debt shares', async () => {
-				const afterDebtShares = await TribeoneDebtShare.balanceOf(user8.address);
+				const afterDebtShares = await RwaoneDebtShare.balanceOf(user8.address);
 				const liquidatedDebtShares = beforeDebtShares.sub(afterDebtShares);
 				const afterSupply = beforeSharesSupply.sub(liquidatedDebtShares);
 
-				assert.bnEqual(await TribeoneDebtShare.totalSupply(), afterSupply);
+				assert.bnEqual(await RwaoneDebtShare.totalSupply(), afterSupply);
 			});
 
 			it('should not be open for liquidation anymore', async () => {
@@ -541,7 +541,7 @@ function itCanLiquidate({ ctx }) {
 				const liqEvent = events.find(l => l.event === 'AccountLiquidated');
 				const snxRedeemed = liqEvent.args.snxRedeemed;
 				assert.bnEqual(
-					await Tribeone.balanceOf(LiquidatorRewards.address),
+					await Rwaone.balanceOf(LiquidatorRewards.address),
 					beforeRewardsCredittedSnx.add(snxRedeemed)
 				);
 			});

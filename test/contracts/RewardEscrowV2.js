@@ -17,28 +17,28 @@ const BN = require('bn.js');
 contract('RewardEscrowV2', async accounts => {
 	const entry1Amount = toUnit(1);
 	const [, owner, user1, bridge] = accounts;
-	let rewardEscrowV2, tribeone, resolver;
+	let rewardEscrowV2, rwaone, resolver;
 
 	// Run once at beginning - snapshots will take care of resetting this before each test
 	before(async () => {
 		({
 			RewardEscrowV2: rewardEscrowV2,
 			AddressResolver: resolver,
-			Tribeone: tribeone,
+			Rwaone: rwaone,
 		} = await setupAllContracts({
 			accounts,
-			contracts: ['RewardEscrowV2', 'MintableTribeone'],
+			contracts: ['RewardEscrowV2', 'MintableRwaone'],
 		}));
 		// allow owner to write to create entries
 		await resolver.importAddresses(
-			['FeePool', 'TribeoneBridgeToBase', 'TribeoneBridgeToOptimism'].map(toBytes32),
+			['FeePool', 'RwaoneBridgeToBase', 'RwaoneBridgeToOptimism'].map(toBytes32),
 			[owner, owner, bridge],
 			{ from: owner }
 		);
 		await rewardEscrowV2.rebuildCache();
-		await tribeone.rebuildCache();
+		await rwaone.rebuildCache();
 		// mint some snx into the contract (the holder of the wHAKA)
-		await tribeone.mintSecondary(rewardEscrowV2.address, toUnit(100), {
+		await rwaone.mintSecondary(rewardEscrowV2.address, toUnit(100), {
 			from: owner,
 		});
 		// create two entries
@@ -73,7 +73,7 @@ contract('RewardEscrowV2', async accounts => {
 		it('reverts if called not by bridge', async () => {
 			await assert.revert(
 				rewardEscrowV2.burnForMigration(user1, [1, 2], { from: user1 }),
-				'TribeoneBridgeToOptimism'
+				'RwaoneBridgeToOptimism'
 			);
 		});
 

@@ -15,7 +15,7 @@ import "./../interfaces/IFuturesMarket.sol";
  * continually tallied against this margin. If a user's margin runs out, then their position is closed
  * by a liquidation keeper, which is rewarded with a flat fee extracted from the margin.
  *
- * The Tribeone debt pool is effectively the counterparty to each trade, so if a particular position
+ * The Rwaone debt pool is effectively the counterparty to each trade, so if a particular position
  * is in profit, then the debt pool pays by issuing hUSD into their margin account,
  * while if the position makes a loss then the debt pool burns hUSD from the margin, reducing the
  * debt load in the system.
@@ -54,7 +54,7 @@ import "./../interfaces/IFuturesMarket.sol";
  *     - the account being managed was not liquidated in the same transaction;
  */
 
-// https://docs.tribeone.io/contracts/source/contracts/FuturesMarket
+// https://docs.rwaone.io/contracts/source/contracts/FuturesMarket
 contract FuturesMarket is IFuturesMarket, FuturesMarketBase, MixinFuturesNextPriceOrders, MixinFuturesViews {
     constructor(
         address _resolver,

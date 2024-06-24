@@ -3,7 +3,7 @@ pragma solidity ^0.5.16;
 // Internal references
 import "./AddressResolver.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/mixinresolver
+// https://docs.rwaone.io/contracts/source/contracts/mixinresolver
 contract MixinResolver {
     AddressResolver public resolver;
 
@@ -15,11 +15,10 @@ contract MixinResolver {
 
     /* ========== INTERNAL FUNCTIONS ========== */
 
-    function combineArrays(bytes32[] memory first, bytes32[] memory second)
-        internal
-        pure
-        returns (bytes32[] memory combination)
-    {
+    function combineArrays(
+        bytes32[] memory first,
+        bytes32[] memory second
+    ) internal pure returns (bytes32[] memory combination) {
         combination = new bytes32[](first.length + second.length);
 
         for (uint i = 0; i < first.length; i++) {
@@ -42,8 +41,10 @@ contract MixinResolver {
         for (uint i = 0; i < requiredAddresses.length; i++) {
             bytes32 name = requiredAddresses[i];
             // Note: can only be invoked once the resolver has all the targets needed added
-            address destination =
-                resolver.requireAndGetAddress(name, string(abi.encodePacked("Resolver missing target: ", name)));
+            address destination = resolver.requireAndGetAddress(
+                name,
+                string(abi.encodePacked("Resolver missing target: ", name))
+            );
             addressCache[name] = destination;
             emit CacheUpdated(name, destination);
         }

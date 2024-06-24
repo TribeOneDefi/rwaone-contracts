@@ -11,7 +11,7 @@ import "./SafeDecimalMath.sol";
 
 // Internal references
 import "./interfaces/IERC20.sol";
-import "./interfaces/ITribeone.sol";
+import "./interfaces/IRwaone.sol";
 import "./interfaces/IExchangeRates.sol";
 import "./interfaces/IIssuer.sol";
 import "./interfaces/ISystemStatus.sol";
@@ -31,10 +31,10 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
     bytes32 private constant CONTRACT_SYSTEMSTATUS = "SystemStatus";
-    bytes32 private constant CONTRACT_TRIBEONEETIX = "Tribeone";
+    bytes32 private constant CONTRACT_RWAONEETIX = "Rwaone";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
-    bytes32 private constant CONTRACT_TRIBEONEETIXESCROW = "TribeoneEscrow";
+    bytes32 private constant CONTRACT_RWAONEETIXESCROW = "RwaoneEscrow";
     bytes32 private constant CONTRACT_V3_LEGACYMARKET = "LegacyMarket";
 
     /* ========== CONSTANTS ========== */
@@ -52,14 +52,14 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](4);
         newAddresses[0] = CONTRACT_SYSTEMSTATUS;
-        newAddresses[1] = CONTRACT_TRIBEONEETIX;
+        newAddresses[1] = CONTRACT_RWAONEETIX;
         newAddresses[2] = CONTRACT_ISSUER;
         newAddresses[3] = CONTRACT_EXRATES;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
-    function tribeone() internal view returns (ITribeone) {
-        return ITribeone(requireAndGetAddress(CONTRACT_TRIBEONEETIX));
+    function rwaone() internal view returns (IRwaone) {
+        return IRwaone(requireAndGetAddress(CONTRACT_RWAONEETIX));
     }
 
     function systemStatus() internal view returns (ISystemStatus) {
@@ -127,7 +127,7 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
     /// @dev An account is eligible to self liquidate if its c-ratio is below the target c-ratio
     /// @dev An account with no wHAKA collateral will not be open for liquidation since the ratio is 0
     function isLiquidationOpen(address account, bool isSelfLiquidation) external view returns (bool) {
-        uint accountCollateralisationRatio = tribeone().collateralisationRatio(account);
+        uint accountCollateralisationRatio = rwaone().collateralisationRatio(account);
 
         // Not open for liquidation if collateral ratio is less than or equal to target issuance ratio
         if (accountCollateralisationRatio <= getIssuanceRatio()) {
@@ -160,16 +160,10 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
     /// @return debtToRemove the amount of debt (hUSD) to burn in order to fix the account's c-ratio
     /// @return escrowToLiquidate the amount of escrow wHAKA that will be revoked during liquidation
     /// @return initialDebtBalance the amount of initial (hUSD) debt the account has
-    function liquidationAmounts(address account, bool isSelfLiquidation)
-        external
-        view
-        returns (
-            uint totalRedeemed,
-            uint debtToRemove,
-            uint escrowToLiquidate,
-            uint initialDebtBalance
-        )
-    {
+    function liquidationAmounts(
+        address account,
+        bool isSelfLiquidation
+    ) external view returns (uint totalRedeemed, uint debtToRemove, uint escrowToLiquidate, uint initialDebtBalance) {
         // return zeroes otherwise calculateAmountToFixCollateral reverts with unhelpful underflow error
         if (!this.isLiquidationOpen(account, isSelfLiquidation)) {
             return (0, 0, 0, issuer().debtBalanceOf(account, "hUSD"));
@@ -211,11 +205,7 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
      * Note: this only returns the amount of debt to remove "assuming the penalty", the penalty still needs to be
      * correctly applied when removing collateral.
      */
-    function calculateAmountToFixCollateral(
-        uint debtBalance,
-        uint collateral,
-        uint penalty
-    ) external view returns (uint) {
+    function calculateAmountToFixCollateral(uint debtBalance, uint collateral, uint penalty) external view returns (uint) {
         uint ratio = getIssuanceRatio();
         uint unit = SafeDecimalMath.unit();
 
@@ -253,7 +243,7 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
         LiquidationEntry memory liquidation = _getLiquidationEntryForAccount(account);
         require(liquidation.deadline == 0, "Account already flagged for liquidation");
 
-        uint accountsCollateralisationRatio = tribeone().collateralisationRatio(account);
+        uint accountsCollateralisationRatio = rwaone().collateralisationRatio(account);
 
         // if accounts issuance ratio is greater than or equal to liquidation ratio set liquidation entry
         require(
@@ -290,7 +280,7 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
 
         require(liquidation.deadline > 0, "Account has no liquidation set");
 
-        uint accountsCollateralisationRatio = tribeone().collateralisationRatio(account);
+        uint accountsCollateralisationRatio = rwaone().collateralisationRatio(account);
 
         // Remove from liquidator if accountsCollateralisationRatio is fixed (less than equal target issuance ratio)
         if (accountsCollateralisationRatio <= getIssuanceRatio()) {
@@ -298,11 +288,7 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
         }
     }
 
-    function _storeLiquidationEntry(
-        address _account,
-        uint _deadline,
-        address _caller
-    ) internal {
+    function _storeLiquidationEntry(address _account, uint _deadline, address _caller) internal {
         // record liquidation deadline and caller
         flexibleStorage().setUIntValue(CONTRACT_NAME, _getKey(LIQUIDATION_DEADLINE, _account), _deadline);
 

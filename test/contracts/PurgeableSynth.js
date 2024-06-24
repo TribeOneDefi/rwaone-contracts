@@ -65,7 +65,7 @@ contract('PurgeableTribe', accounts => {
 				'Issuer',
 				'FeePool',
 				'FeePoolEternalStorage',
-				'Tribeone',
+				'Rwaone',
 				'SystemStatus',
 				'SystemSettings',
 				'CollateralManager',
@@ -114,7 +114,7 @@ contract('PurgeableTribe', accounts => {
 		return { tribe, tokenState, proxy };
 	};
 
-	describe('when a Purgeable tribe is added and connected to Tribeone', () => {
+	describe('when a Purgeable tribe is added and connected to Rwaone', () => {
 		beforeEach(async () => {
 			// Create iETH as a PurgeableTribe as we do not create any PurgeableTribe
 			// in the migration script
@@ -356,7 +356,7 @@ contract('PurgeableTribe', accounts => {
 						this.oldProxy = await Proxy.at(await this.oldTribe.proxy());
 						await this.oldTribe.setTotalSupply(toUnit('0'), { from: owner });
 					});
-					describe('and the old sAUD tribe is removed from Tribeone', () => {
+					describe('and the old sAUD tribe is removed from Rwaone', () => {
 						beforeEach(async () => {
 							await issuer.removeTribe(sAUD, { from: owner });
 						});
@@ -369,7 +369,7 @@ contract('PurgeableTribe', accounts => {
 								});
 								this.replacement = tribe;
 							});
-							describe('and it is added to Tribeone', () => {
+							describe('and it is added to Rwaone', () => {
 								beforeEach(async () => {
 									await issuer.addTribe(this.replacement.address, { from: owner });
 									await this.replacement.rebuildCache();

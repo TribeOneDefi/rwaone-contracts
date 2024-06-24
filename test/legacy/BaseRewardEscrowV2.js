@@ -33,7 +33,7 @@ contract('BaseRewardEscrowV2', async accounts => {
 		rewardEscrowV2Storage,
 		mocks,
 		feePoolAccount,
-		mockedTribeone,
+		mockedRwaone,
 		resolver;
 
 	addSnapshotBeforeRestoreAfterEach();
@@ -70,12 +70,12 @@ contract('BaseRewardEscrowV2', async accounts => {
 			// update the resolver for baseRewardEscrowV2
 			await newRewardEscrowV2.rebuildCache({ from: owner });
 
-			const balance = await mockedTribeone.balanceOf(baseRewardEscrowV2.address);
+			const balance = await mockedRwaone.balanceOf(baseRewardEscrowV2.address);
 			// in hypothetical migration snx balance would be transferred over to new escrow contract
 			// TODO: the `mockToken` implementation does not make it easy to do unchecked transfers,
 			// so we don't have an easy way to check if the old contract somehow got funds or not other than
 			// revert
-			await mockedTribeone.transfer(newRewardEscrowV2.address, balance, {
+			await mockedRwaone.transfer(newRewardEscrowV2.address, balance, {
 				from: owner,
 			});
 
@@ -86,14 +86,14 @@ contract('BaseRewardEscrowV2', async accounts => {
 	// Run once at beginning - snapshots will take care of resetting this before each test
 	beforeEach(async () => {
 		({ mocks, resolver } = await prepareSmocks({
-			contracts: ['FeePool', 'Issuer', 'Tribeone'],
+			contracts: ['FeePool', 'Issuer', 'Rwaone'],
 			accounts: accounts.slice(10), // mock using accounts after the first few
 		}));
 
 		// create our own mock for wHAKA ERC20
-		({ token: mockedTribeone } = await mockToken({
+		({ token: mockedRwaone } = await mockToken({
 			accounts,
-			name: 'Tribeone',
+			name: 'Rwaone',
 			symbol: 'wHAKA',
 		}));
 
@@ -182,7 +182,7 @@ contract('BaseRewardEscrowV2', async accounts => {
 			let duration = YEAR;
 			it('should revert appending a vesting entry from account1', async () => {
 				// Transfer of wHAKA to the escrow must occur before creating an entry
-				mocks['Tribeone'].balanceOf.returns(parseEther('10'));
+				mocks['Rwaone'].balanceOf.returns(parseEther('10'));
 
 				await assert.revert(
 					baseRewardEscrowV2.appendVestingEntry(account1, toUnit('1'), duration, {
@@ -193,7 +193,7 @@ contract('BaseRewardEscrowV2', async accounts => {
 			});
 			it('should revert appending a vesting entry with a zero amount', async () => {
 				// Transfer of wHAKA to the escrow must occur before creating an entry
-				mocks['Tribeone'].balanceOf.returns(parseEther('1'));
+				mocks['Rwaone'].balanceOf.returns(parseEther('1'));
 
 				await assert.revert(
 					baseRewardEscrowV2.appendVestingEntry(account1, toUnit('0'), duration, {
@@ -204,7 +204,7 @@ contract('BaseRewardEscrowV2', async accounts => {
 			});
 			it('should revert appending a vesting entry if there is not enough wHAKA in the contracts balance', async () => {
 				// Transfer of wHAKA to the escrow must occur before creating an entry
-				mocks['Tribeone'].balanceOf.returns(parseEther('1'));
+				mocks['Rwaone'].balanceOf.returns(parseEther('1'));
 
 				await assert.revert(
 					baseRewardEscrowV2.appendVestingEntry(account1, toUnit('10'), duration, {
@@ -217,7 +217,7 @@ contract('BaseRewardEscrowV2', async accounts => {
 				duration = 0;
 
 				// Transfer of wHAKA to the escrow must occur before creating an entry
-				mocks['Tribeone'].balanceOf.returns(parseEther('10'));
+				mocks['Rwaone'].balanceOf.returns(parseEther('10'));
 
 				await assert.revert(
 					baseRewardEscrowV2.appendVestingEntry(account1, toUnit('10'), duration, {
@@ -230,7 +230,7 @@ contract('BaseRewardEscrowV2', async accounts => {
 				duration = (await baseRewardEscrowV2.max_duration()).add(toUnit(1));
 
 				// Transfer of wHAKA to the escrow must occur before creating an entry
-				mocks['Tribeone'].balanceOf.returns(parseEther('10'));
+				mocks['Rwaone'].balanceOf.returns(parseEther('10'));
 
 				await assert.revert(
 					baseRewardEscrowV2.appendVestingEntry(account1, toUnit('10'), duration, {
@@ -251,7 +251,7 @@ contract('BaseRewardEscrowV2', async accounts => {
 					escrowAmount = toUnit('10');
 
 					// Transfer of wHAKA to the escrow must occur before creating an entry
-					mocks['Tribeone'].balanceOf.returns(parseEther('10'));
+					mocks['Rwaone'].balanceOf.returns(parseEther('10'));
 
 					// Append vesting entry
 					await baseRewardEscrowV2.appendVestingEntry(account1, escrowAmount, duration, {
@@ -313,13 +313,13 @@ contract('BaseRewardEscrowV2', async accounts => {
 		let duration, entryID;
 		beforeEach(async () => {
 			// approve rewardEscrow to spend wHAKA
-			mocks['Tribeone'].allowance.returns(parseEther('10'));
+			mocks['Rwaone'].allowance.returns(parseEther('10'));
 
 			// stub transferFrom
-			mocks['Tribeone'].transferFrom.returns(true);
+			mocks['Rwaone'].transferFrom.returns(true);
 
 			// stub balanceOf
-			mocks['Tribeone'].balanceOf.returns(parseEther('10'));
+			mocks['Rwaone'].balanceOf.returns(parseEther('10'));
 
 			duration = 1 * YEAR;
 		});
@@ -399,14 +399,14 @@ contract('BaseRewardEscrowV2', async accounts => {
 
 	describe('Vesting', () => {
 		beforeEach(async () => {
-			// replace tribeone on resolver (see prepareSmocks() for why this works)
-			mocks['Tribeone'] = mockedTribeone;
+			// replace rwaone on resolver (see prepareSmocks() for why this works)
+			mocks['Rwaone'] = mockedRwaone;
 
 			// rebuild cache
 			await baseRewardEscrowV2.rebuildCache({ from: owner });
 
 			// Transfer of wHAKA to the escrow must occur before creating a vestinng entry
-			await mockedTribeone.transfer(baseRewardEscrowV2.address, toUnit('1000'), {
+			await mockedRwaone.transfer(baseRewardEscrowV2.address, toUnit('1000'), {
 				from: owner,
 			});
 		});
@@ -436,10 +436,10 @@ contract('BaseRewardEscrowV2', async accounts => {
 					await e.vest([randomID], { from: account1 });
 
 					// Check user has no vested wHAKA
-					assert.bnEqual(await mockedTribeone.balanceOf(account1), toUnit('0'));
+					assert.bnEqual(await mockedRwaone.balanceOf(account1), toUnit('0'));
 
 					// Check rewardEscrow does not have any wHAKA
-					assert.bnEqual(await mockedTribeone.balanceOf(e.address), escrowAmount);
+					assert.bnEqual(await mockedRwaone.balanceOf(e.address), escrowAmount);
 
 					// Check total escrowedAccountBalance is unchanged
 					const escrowedAccountBalance = await e.totalEscrowedAccountBalance(account1);
@@ -461,7 +461,7 @@ contract('BaseRewardEscrowV2', async accounts => {
 				async (e, s) => {
 					claimableHAKA = await baseRewardEscrowV2.getVestingEntryClaimable(account1, entryID);
 
-					const escrowBalanceBefore = await mockedTribeone.balanceOf(e.address);
+					const escrowBalanceBefore = await mockedRwaone.balanceOf(e.address);
 					const totalEscrowedBalanceBefore = await e.totalEscrowedBalance();
 					const accountEscrowedBalanceBefore = await e.totalEscrowedAccountBalance(account1);
 					const accountTotalVestedBefore = await e.totalVestedAccountBalance(account1);
@@ -470,10 +470,10 @@ contract('BaseRewardEscrowV2', async accounts => {
 					await e.vest([entryID], { from: account1 });
 
 					// Check user has the 0 vested wHAKA
-					assert.bnEqual(await mockedTribeone.balanceOf(account1), 0);
+					assert.bnEqual(await mockedRwaone.balanceOf(account1), 0);
 
 					// Check rewardEscrow contract has same amount of wHAKA
-					assert.bnEqual(await mockedTribeone.balanceOf(e.address), escrowBalanceBefore);
+					assert.bnEqual(await mockedRwaone.balanceOf(e.address), escrowBalanceBefore);
 
 					const vestingEntryAfter = await e.getVestingEntry(account1, entryID);
 
@@ -518,10 +518,10 @@ contract('BaseRewardEscrowV2', async accounts => {
 				await e.vest([entryID], { from: account1 });
 
 				// Check user has all their vested wHAKA
-				assert.bnEqual(await mockedTribeone.balanceOf(account1), escrowAmount);
+				assert.bnEqual(await mockedRwaone.balanceOf(account1), escrowAmount);
 
 				// Check rewardEscrow does not have any wHAKA
-				assert.bnEqual(await mockedTribeone.balanceOf(e.address), toUnit('0'));
+				assert.bnEqual(await mockedRwaone.balanceOf(e.address), toUnit('0'));
 			});
 
 			assertWithFallback('should vest and emit a Vest event', async e => {
@@ -629,13 +629,13 @@ contract('BaseRewardEscrowV2', async accounts => {
 					});
 
 					// Check account1 has no wHAKA in their balance
-					assert.bnEqual(await mockedTribeone.balanceOf(account1), toUnit('0'));
+					assert.bnEqual(await mockedRwaone.balanceOf(account1), toUnit('0'));
 
 					// Check account2 has no wHAKA in their balance
-					assert.bnEqual(await mockedTribeone.balanceOf(account2), toUnit('0'));
+					assert.bnEqual(await mockedRwaone.balanceOf(account2), toUnit('0'));
 
 					// Check rewardEscrow has all the wHAKA
-					assert.bnEqual(await mockedTribeone.balanceOf(e.address), toUnit('1000'));
+					assert.bnEqual(await mockedRwaone.balanceOf(e.address), toUnit('1000'));
 				});
 			});
 
@@ -647,10 +647,10 @@ contract('BaseRewardEscrowV2', async accounts => {
 					});
 
 					// Check user has all their vested wHAKA
-					assert.bnEqual(await mockedTribeone.balanceOf(account1), toUnit('1000'));
+					assert.bnEqual(await mockedRwaone.balanceOf(account1), toUnit('1000'));
 
 					// Check rewardEscrow does not have any wHAKA
-					assert.bnEqual(await mockedTribeone.balanceOf(e.address), toUnit('0'));
+					assert.bnEqual(await mockedRwaone.balanceOf(e.address), toUnit('0'));
 				}
 			);
 
@@ -714,10 +714,10 @@ contract('BaseRewardEscrowV2', async accounts => {
 					});
 
 					// Check user has all their vested wHAKA
-					assert.bnEqual(await mockedTribeone.balanceOf(account1), toUnit('1000'));
+					assert.bnEqual(await mockedRwaone.balanceOf(account1), toUnit('1000'));
 
 					// Check rewardEscrow does not have any wHAKA
-					assert.bnEqual(await mockedTribeone.balanceOf(e.address), toUnit('0'));
+					assert.bnEqual(await mockedRwaone.balanceOf(e.address), toUnit('0'));
 
 					// Vest attempt 2
 					await e.vest([entryID1, entryID2, entryID3], {
@@ -725,10 +725,10 @@ contract('BaseRewardEscrowV2', async accounts => {
 					});
 
 					// Check user has same amount of wHAKA
-					assert.bnEqual(await mockedTribeone.balanceOf(account1), toUnit('1000'));
+					assert.bnEqual(await mockedRwaone.balanceOf(account1), toUnit('1000'));
 
 					// Check rewardEscrow does not have any wHAKA
-					assert.bnEqual(await mockedTribeone.balanceOf(e.address), toUnit('0'));
+					assert.bnEqual(await mockedRwaone.balanceOf(e.address), toUnit('0'));
 				}
 			);
 		});
@@ -775,13 +775,13 @@ contract('BaseRewardEscrowV2', async accounts => {
 					});
 
 					// Check account1 has no wHAKA in their balance
-					assert.bnEqual(await mockedTribeone.balanceOf(account1), toUnit('0'));
+					assert.bnEqual(await mockedRwaone.balanceOf(account1), toUnit('0'));
 
 					// Check account2 has no wHAKA in their balance
-					assert.bnEqual(await mockedTribeone.balanceOf(account2), toUnit('0'));
+					assert.bnEqual(await mockedRwaone.balanceOf(account2), toUnit('0'));
 
 					// Check rewardEscrow has all the wHAKA
-					assert.bnEqual(await mockedTribeone.balanceOf(e.address), toUnit('1000'));
+					assert.bnEqual(await mockedRwaone.balanceOf(e.address), toUnit('1000'));
 				});
 			});
 
@@ -800,12 +800,12 @@ contract('BaseRewardEscrowV2', async accounts => {
 
 						// Check user has entry1 + entry2 amount
 						assert.bnEqual(
-							await mockedTribeone.balanceOf(account1),
+							await mockedRwaone.balanceOf(account1),
 							escrowAmount1.add(escrowAmount2)
 						);
 
 						// Check rewardEscrow has remaining entry3 amount
-						assert.bnEqual(await mockedTribeone.balanceOf(e.address), escrowAmount3);
+						assert.bnEqual(await mockedRwaone.balanceOf(e.address), escrowAmount3);
 					}
 				);
 
@@ -870,12 +870,12 @@ contract('BaseRewardEscrowV2', async accounts => {
 
 						// Check user have vested escrowAmount1 and escrowAmount2 wHAKA
 						assert.bnEqual(
-							await mockedTribeone.balanceOf(account1),
+							await mockedRwaone.balanceOf(account1),
 							escrowAmount1.add(escrowAmount2)
 						);
 
 						// Check rewardEscrow does has escrowAmount3 wHAKA
-						assert.bnEqual(await mockedTribeone.balanceOf(e.address), escrowAmount3);
+						assert.bnEqual(await mockedRwaone.balanceOf(e.address), escrowAmount3);
 
 						// Vest attempt 2
 						await e.vest([entryID1, entryID2, entryID3], {
@@ -884,12 +884,12 @@ contract('BaseRewardEscrowV2', async accounts => {
 
 						// Check user has same amount of wHAKA
 						assert.bnEqual(
-							await mockedTribeone.balanceOf(account1),
+							await mockedRwaone.balanceOf(account1),
 							escrowAmount1.add(escrowAmount2)
 						);
 
 						// Check rewardEscrow has same escrowAmount3 wHAKA
-						assert.bnEqual(await mockedTribeone.balanceOf(e.address), escrowAmount3);
+						assert.bnEqual(await mockedRwaone.balanceOf(e.address), escrowAmount3);
 					}
 				);
 			});
@@ -901,14 +901,14 @@ contract('BaseRewardEscrowV2', async accounts => {
 		let escrowAmount, timeElapsed, firstEntryId;
 
 		beforeEach(async () => {
-			// replace tribeone on resolver (see prepareSmocks() for why this works)
-			mocks['Tribeone'] = mockedTribeone;
+			// replace rwaone on resolver (see prepareSmocks() for why this works)
+			mocks['Rwaone'] = mockedRwaone;
 
 			// rebuild cache
 			await baseRewardEscrowV2.rebuildCache({ from: owner });
 
 			// Transfer of wHAKA to the escrow must occur before creating a vestinng entry
-			await mockedTribeone.transfer(baseRewardEscrowV2.address, toUnit('2000'), {
+			await mockedRwaone.transfer(baseRewardEscrowV2.address, toUnit('2000'), {
 				from: owner,
 			});
 		});
@@ -930,36 +930,36 @@ contract('BaseRewardEscrowV2', async accounts => {
 			await fastForward(timeElapsed);
 		});
 
-		assertWithFallback('should revert when calling from non Tribeone address', async (e, s) => {
+		assertWithFallback('should revert when calling from non Rwaone address', async (e, s) => {
 			await assert.revert(
 				e.revokeFrom(account1, account3, toUnit(1000), 0, { from: account1 }),
-				'Only Tribeone'
+				'Only Rwaone'
 			);
 			await assert.revert(
 				e.revokeFrom(account1, account3, toUnit(1000), 0, { from: account2 }),
-				'Only Tribeone'
+				'Only Rwaone'
 			);
 		});
 
 		assertWithFallback('should revert on invalid inputs', async (e, s) => {
 			await assert.revert(
-				mockedTribeone.revokeFrom(e.address, ZERO_ADDRESS, account3, toUnit(2000), 0),
+				mockedRwaone.revokeFrom(e.address, ZERO_ADDRESS, account3, toUnit(2000), 0),
 				'account not set'
 			);
 			await assert.revert(
-				mockedTribeone.revokeFrom(e.address, account1, ZERO_ADDRESS, toUnit(2000), 0),
+				mockedRwaone.revokeFrom(e.address, account1, ZERO_ADDRESS, toUnit(2000), 0),
 				'recipient not set'
 			);
 			await assert.revert(
-				mockedTribeone.revokeFrom(e.address, account1, account3, toUnit(3000), 0),
+				mockedRwaone.revokeFrom(e.address, account1, account3, toUnit(3000), 0),
 				'less than target'
 			);
 			await assert.revert(
-				mockedTribeone.revokeFrom(e.address, account1, account3, toUnit(2000), 10),
+				mockedRwaone.revokeFrom(e.address, account1, account3, toUnit(2000), 10),
 				'startIndex'
 			);
 			await assert.revert(
-				mockedTribeone.revokeFrom(e.address, account1, account3, toUnit(0), 10),
+				mockedRwaone.revokeFrom(e.address, account1, account3, toUnit(0), 10),
 				'targetAmount'
 			);
 		});
@@ -972,13 +972,13 @@ contract('BaseRewardEscrowV2', async accounts => {
 				const targetAmount = toUnit(2000);
 				// revoke
 				// method in PublicEST.sol
-				const tx = await mockedTribeone.revokeFrom(e.address, account1, account3, targetAmount, 0);
+				const tx = await mockedRwaone.revokeFrom(e.address, account1, account3, targetAmount, 0);
 
 				// Check user has the 0 vested wHAKA
-				assert.bnEqual(await mockedTribeone.balanceOf(account1), 0);
+				assert.bnEqual(await mockedRwaone.balanceOf(account1), 0);
 
 				// Check recipient contract has same amount of wHAKA
-				assert.bnEqual(await mockedTribeone.balanceOf(account3), accountEscrowedBalanceBefore);
+				assert.bnEqual(await mockedRwaone.balanceOf(account3), accountEscrowedBalanceBefore);
 
 				const vestingEntryAfter = await e.getVestingEntry(account1, firstEntryId);
 
@@ -1012,20 +1012,20 @@ contract('BaseRewardEscrowV2', async accounts => {
 		assertWithFallback(
 			'should revoke and transfer wHAKA to recipient for partial amount',
 			async (e, s) => {
-				const escrowBalanceBefore = await mockedTribeone.balanceOf(e.address);
+				const escrowBalanceBefore = await mockedRwaone.balanceOf(e.address);
 				const accountEscrowedBalanceBefore = await e.totalEscrowedAccountBalance(account1);
 
 				const targetAmount = toUnit(1);
 
 				// revoke
 				// method in PublicEST.sol
-				const tx = await mockedTribeone.revokeFrom(e.address, account1, account3, targetAmount, 0);
+				const tx = await mockedRwaone.revokeFrom(e.address, account1, account3, targetAmount, 0);
 
 				// Check user has the 0 vested wHAKA
-				assert.bnEqual(await mockedTribeone.balanceOf(account1), 0);
+				assert.bnEqual(await mockedRwaone.balanceOf(account1), 0);
 
 				// Check recipient contract has correct amount of wHAKA
-				assert.bnEqual(await mockedTribeone.balanceOf(account3), targetAmount);
+				assert.bnEqual(await mockedRwaone.balanceOf(account3), targetAmount);
 
 				// total escrowed balance
 				assert.bnEqual(await e.totalEscrowedBalance(), escrowBalanceBefore.sub(targetAmount));
@@ -1083,20 +1083,20 @@ contract('BaseRewardEscrowV2', async accounts => {
 		);
 
 		assertWithFallback('should use startIndex', async (e, s) => {
-			const escrowBalanceBefore = await mockedTribeone.balanceOf(e.address);
+			const escrowBalanceBefore = await mockedRwaone.balanceOf(e.address);
 			const accountEscrowedBalanceBefore = await e.totalEscrowedAccountBalance(account1);
 
 			const targetAmount = toUnit(1);
 
 			// revoke
 			// method in PublicEST.sol
-			const tx = await mockedTribeone.revokeFrom(e.address, account1, account3, targetAmount, 1);
+			const tx = await mockedRwaone.revokeFrom(e.address, account1, account3, targetAmount, 1);
 
 			// Check user has the 0 vested wHAKA
-			assert.bnEqual(await mockedTribeone.balanceOf(account1), 0);
+			assert.bnEqual(await mockedRwaone.balanceOf(account1), 0);
 
 			// Check recipient contract has correct amount of wHAKA
-			assert.bnEqual(await mockedTribeone.balanceOf(account3), targetAmount);
+			assert.bnEqual(await mockedRwaone.balanceOf(account3), targetAmount);
 
 			// total escrowed balance
 			assert.bnEqual(await e.totalEscrowedBalance(), escrowBalanceBefore.sub(targetAmount));
@@ -1139,7 +1139,7 @@ contract('BaseRewardEscrowV2', async accounts => {
 		let entryID1, entryID2, entryID3;
 		beforeEach(async () => {
 			// Transfer of wHAKA to the escrow must occur before creating a vestinng entry
-			mocks['Tribeone'].balanceOf.returns(parseEther('1000'));
+			mocks['Rwaone'].balanceOf.returns(parseEther('1000'));
 
 			// Add a few vesting entries as the feepool address
 			entryID1 = await baseRewardEscrowV2.nextEntryId();
@@ -1189,7 +1189,7 @@ contract('BaseRewardEscrowV2', async accounts => {
 		const numberOfEntries = 260; // 5 years of entries
 		beforeEach(async () => {
 			// Transfer of wHAKA to the escrow must occur before creating a vestinng entry
-			mocks['Tribeone'].balanceOf.returns(parseEther('1000'));
+			mocks['Rwaone'].balanceOf.returns(parseEther('1000'));
 
 			// add a 260 escrow entries
 			for (var i = 0; i < numberOfEntries; i++) {
@@ -1234,7 +1234,7 @@ contract('BaseRewardEscrowV2', async accounts => {
 
 		beforeEach(async () => {
 			// Transfer of wHAKA to the escrow must occur before creating a vestinng entry
-			mocks['Tribeone'].balanceOf.returns(parseEther('1000'));
+			mocks['Rwaone'].balanceOf.returns(parseEther('1000'));
 
 			escrowAmount1 = toUnit('200');
 			escrowAmount2 = toUnit('300');

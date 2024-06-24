@@ -12,7 +12,7 @@ import "./interfaces/IERC20.sol";
 import "./interfaces/IFeePool.sol";
 import "./interfaces/IRewardsDistribution.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/rewardsdistribution
+// https://docs.rwaone.io/contracts/source/contracts/rewardsdistribution
 contract RewardsDistribution is Owned, IRewardsDistribution {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -23,7 +23,7 @@ contract RewardsDistribution is Owned, IRewardsDistribution {
     address public authority;
 
     /**
-     * @notice Address of the Tribeone ProxyERC20
+     * @notice Address of the Rwaone ProxyERC20
      */
     address public tribeetixProxy;
 
@@ -43,8 +43,8 @@ contract RewardsDistribution is Owned, IRewardsDistribution {
     DistributionData[] public distributions;
 
     /**
-     * @dev _authority maybe the underlying tribeone contract.
-     * Remember to set the authority on a tribeone upgrade
+     * @dev _authority maybe the underlying rwaone contract.
+     * Remember to set the authority on a rwaone upgrade
      */
     constructor(
         address _owner,
@@ -61,7 +61,7 @@ contract RewardsDistribution is Owned, IRewardsDistribution {
 
     // ========== EXTERNAL SETTERS ==========
 
-    function setTribeoneProxy(address _tribeetixProxy) external onlyOwner {
+    function setRwaoneProxy(address _tribeetixProxy) external onlyOwner {
         tribeetixProxy = _tribeetixProxy;
     }
 
@@ -128,11 +128,7 @@ contract RewardsDistribution is Owned, IRewardsDistribution {
      * @param destination The destination address. Send the same address to keep or different address to change it.
      * @param amount The amount of tokens to edit. Send the same number to keep or change the amount of tokens to send.
      */
-    function editRewardDistribution(
-        uint index,
-        address destination,
-        uint amount
-    ) external onlyOwner returns (bool) {
+    function editRewardDistribution(uint index, address destination, uint amount) external onlyOwner returns (bool) {
         require(index <= distributions.length - 1, "index out of bounds");
 
         distributions[index].destination = destination;
@@ -145,7 +141,7 @@ contract RewardsDistribution is Owned, IRewardsDistribution {
         require(amount > 0, "Nothing to distribute");
         require(msg.sender == authority, "Caller is not authorised");
         require(rewardEscrow != address(0), "RewardEscrow is not set");
-        require(tribeetixProxy != address(0), "TribeoneProxy is not set");
+        require(tribeetixProxy != address(0), "RwaoneProxy is not set");
         require(feePoolProxy != address(0), "FeePoolProxy is not set");
         require(
             IERC20(tribeetixProxy).balanceOf(address(this)) >= amount,

@@ -14,11 +14,11 @@ const path = require('path');
 const { wrap } = require('..');
 
 program
-	.description('Inspect historical state of Tribeone at some given block')
+	.description('Inspect historical state of Rwaone at some given block')
 	.arguments('[args...]')
 	.option('-b, --block-number <value>', 'Block')
-	.option('-c, --contract <value>', 'The contract label or address', 'ProxyTribeone')
-	.option('-s, --source <value>', 'The label of the source contract', 'Tribeone')
+	.option('-c, --contract <value>', 'The contract label or address', 'ProxyRwaone')
+	.option('-s, --source <value>', 'The label of the source contract', 'Rwaone')
 	.option('-m, --method <value>', 'The method name', 'name')
 	.option('-n, --network <value>', 'The network to run off.', x => x.toLowerCase(), 'mainnet')
 	.option('-i, --infura-project-id <value>', 'An infura project ID with access to archive state')

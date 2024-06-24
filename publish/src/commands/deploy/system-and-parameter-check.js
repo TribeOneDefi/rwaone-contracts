@@ -41,7 +41,7 @@ module.exports = async ({
 	yes,
 	buildPath,
 }) => {
-	let currentTribeoneSupply;
+	let currentRwaoneSupply;
 	let oldExrates;
 	let currentLastMintEvent = 0;
 	let currentWeekOfInflation = 0;
@@ -50,8 +50,8 @@ module.exports = async ({
 	let systemSuspendedReason;
 
 	try {
-		const oldTribeone = deployer.getExistingContract({ contract: 'Tribeone' });
-		currentTribeoneSupply = await oldTribeone.totalSupply();
+		const oldRwaone = deployer.getExistingContract({ contract: 'Rwaone' });
+		currentRwaoneSupply = await oldRwaone.totalSupply();
 
 		if (config['SupplySchedule']) {
 			const oldSupplySchedule = deployer.getExistingContract({ contract: 'SupplySchedule' });
@@ -60,16 +60,16 @@ module.exports = async ({
 		}
 
 		// inflationSupplyToDate = total supply - 100m
-		inflationSupplyToDate = parseUnits(currentTribeoneSupply.toString(), 'wei').sub(
+		inflationSupplyToDate = parseUnits(currentRwaoneSupply.toString(), 'wei').sub(
 			parseUnits((100e6).toString(), 'wei')
 		);
 	} catch (err) {
 		if (freshDeploy) {
-			currentTribeoneSupply = await getDeployParameter('INITIAL_ISSUANCE');
+			currentRwaoneSupply = await getDeployParameter('INITIAL_ISSUANCE');
 		} else {
 			console.error(
 				red(
-					'Cannot connect to existing Tribeone contract. Please double check the deploymentPath is correct for the network allocated'
+					'Cannot connect to existing Rwaone contract. Please double check the deploymentPath is correct for the network allocated'
 				)
 			);
 			throw err;
@@ -185,7 +185,7 @@ module.exports = async ({
 			? green('✅ YES\n\t\t\t\t') + newTribesToAdd.join(', ')
 			: yellow('⚠ NO'),
 		'Deployer account:': account,
-		'Tribeone totalSupply': `${Math.round(formatUnits(currentTribeoneSupply) / 1e6)}m`,
+		'Rwaone totalSupply': `${Math.round(formatUnits(currentRwaoneSupply) / 1e6)}m`,
 		'Inflation Supply to date': inflationSupplyToDate
 			? `${Math.round(formatUnits(inflationSupplyToDate) / 1e6)}m`
 			: 'N/A',
@@ -204,7 +204,7 @@ module.exports = async ({
 			)
 				.filter(([, { deploy }]) => deploy)
 				.map(([contract]) => contract)
-				.join(', ')}` + `\nIt will also set proxy targets and add tribes to Tribeone.\n`
+				.join(', ')}` + `\nIt will also set proxy targets and add tribes to Rwaone.\n`
 		) + gray('-'.repeat(50))
 	);
 
@@ -218,7 +218,7 @@ module.exports = async ({
 	}
 
 	return {
-		currentTribeoneSupply,
+		currentRwaoneSupply,
 		currentLastMintEvent,
 		currentWeekOfInflation,
 		oldExrates,

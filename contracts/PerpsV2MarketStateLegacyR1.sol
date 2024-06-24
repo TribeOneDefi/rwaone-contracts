@@ -19,7 +19,7 @@ import "./AddressSetLib.sol";
  PerpsV2MarketState ---(consumes)--> PerpsV2MarketStateLegacyR1 
  */
 
-// https://docs.tribeone.io/contracts/source/contracts/PerpsV2MarketStateLegacyR1
+// https://docs.rwaone.io/contracts/source/contracts/PerpsV2MarketStateLegacyR1
 contract PerpsV2MarketStateLegacyR1 is Owned, StateShared, IPerpsV2MarketBaseTypesLegacyR1 {
     using AddressSetLib for AddressSetLib.AddressSet;
 
@@ -109,21 +109,17 @@ contract PerpsV2MarketStateLegacyR1 is Owned, StateShared, IPerpsV2MarketBaseTyp
         return fundingSequence.length;
     }
 
-    function getPositionAddressesPage(uint index, uint pageSize)
-        external
-        view
-        onlyAssociatedContracts
-        returns (address[] memory)
-    {
+    function getPositionAddressesPage(
+        uint index,
+        uint pageSize
+    ) external view onlyAssociatedContracts returns (address[] memory) {
         return _positionAddresses.getPage(index, pageSize);
     }
 
-    function getDelayedOrderAddressesPage(uint index, uint pageSize)
-        external
-        view
-        onlyAssociatedContracts
-        returns (address[] memory)
-    {
+    function getDelayedOrderAddressesPage(
+        uint index,
+        uint pageSize
+    ) external view onlyAssociatedContracts returns (address[] memory) {
         return _delayedOrderAddresses.getPage(index, pageSize);
     }
 

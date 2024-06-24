@@ -65,7 +65,7 @@ contract('FuturesMarketData', accounts => {
 				'CircuitBreaker',
 				'SystemStatus',
 				'SystemSettings',
-				'Tribeone',
+				'Rwaone',
 				'CollateralManager',
 			],
 		}));

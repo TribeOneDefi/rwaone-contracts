@@ -14,7 +14,7 @@ const { toBytes32 } = require('../..');
 
 /*
  * This tests the TradingRewards contract's integration
- * with the rest of the Tribeone system.
+ * with the rest of the Rwaone system.
  *
  * Inner workings of the contract are tested in TradingRewards.unit.js.
  **/
@@ -25,7 +25,7 @@ contract('TradingRewards', accounts => {
 	const tribeKeys = tribes.map(toBytes32);
 	const [hUSD, hETH, hBTC, wHAKA] = tribeKeys;
 
-	let tribeone, exchanger, exchangeRates, rewards, resolver, systemSettings;
+	let rwaone, exchanger, exchangeRates, rewards, resolver, systemSettings;
 	let hUSDContract, hETHContract, hBTCContract;
 
 	let exchangeLogs;
@@ -45,14 +45,14 @@ contract('TradingRewards', accounts => {
 	async function getExchangeLogs({ exchangeTx }) {
 		const logs = await getDecodedLogs({
 			hash: exchangeTx.tx,
-			contracts: [tribeone, rewards],
+			contracts: [rwaone, rewards],
 		});
 
 		return logs.filter(log => log !== undefined);
 	}
 
 	async function executeTrade({ account, fromCurrencyKey, fromCurrencyAmount, toCurrencyKey }) {
-		const exchangeTx = await tribeone.exchange(
+		const exchangeTx = await rwaone.exchange(
 			fromCurrencyKey,
 			fromCurrencyAmount,
 			toCurrencyKey,
@@ -76,7 +76,7 @@ contract('TradingRewards', accounts => {
 	describe('when deploying the system', () => {
 		before('deploy all contracts', async () => {
 			({
-				Tribeone: tribeone,
+				Rwaone: rwaone,
 				TradingRewards: rewards,
 				AddressResolver: resolver,
 				Exchanger: exchanger,
@@ -89,7 +89,7 @@ contract('TradingRewards', accounts => {
 				accounts,
 				tribes,
 				contracts: [
-					'Tribeone',
+					'Rwaone',
 					'TradingRewards',
 					'Exchanger',
 					'AddressResolver',
@@ -128,7 +128,7 @@ contract('TradingRewards', accounts => {
 		it('has expected parameters', async () => {
 			assert.equal(owner, await rewards.getPeriodController());
 			assert.equal(owner, await rewards.owner());
-			assert.equal(tribeone.address, await rewards.getRewardsToken());
+			assert.equal(rwaone.address, await rewards.getRewardsToken());
 			assert.equal(resolver.address, await rewards.resolver());
 		});
 
@@ -284,7 +284,7 @@ contract('TradingRewards', accounts => {
 
 				describe('when a valid reward address is passed', () => {
 					before('execute exchange with tracking', async () => {
-						const exchangeTx = await tribeone.exchangeWithTracking(
+						const exchangeTx = await rwaone.exchangeWithTracking(
 							hUSD,
 							toUnit('100'),
 							hETH,
@@ -309,7 +309,7 @@ contract('TradingRewards', accounts => {
 
 				describe('when no valid reward address is passed', () => {
 					before('execute exchange with tracking', async () => {
-						const exchangeTx = await tribeone.exchangeWithTracking(
+						const exchangeTx = await rwaone.exchangeWithTracking(
 							hUSD,
 							toUnit('100'),
 							hETH,

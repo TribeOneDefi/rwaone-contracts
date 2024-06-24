@@ -9,7 +9,7 @@ const { wrap, toBytes32 } = require('../../..');
 
 const { ensureNetwork, loadConnections, stringify, assignGasOptions } = require('../util');
 
-// The block where Tribeone first had SIP-37 added (when ExchangeState was added)
+// The block where Rwaone first had SIP-37 added (when ExchangeState was added)
 const fromBlockMap = {
 	// these were from when ExchangeState was first deployed (SIP-37)
 	// kovan: 16814289,
@@ -26,7 +26,7 @@ const fromBlockMap = {
 	// blocks from the Pollux deploy
 	// kovan: 20528323,
 	// rinkeby: 7100439,
-	// Note: ropsten was not settled. Needs to be done after https://github.com/Tribeoneio/tribeone/pull/699
+	// Note: ropsten was not settled. Needs to be done after https://github.com/Rwaoneio/rwaone/pull/699
 	mainnet: 11590207, // system exchanged after SCCP-68 implemented
 };
 
@@ -136,9 +136,9 @@ const settle = async ({
 		return new ethers.Contract(address, getSource({ contract: source }).abi, user);
 	};
 
-	const Tribeone = getContract({
-		label: 'ProxyTribeone',
-		source: 'Tribeone',
+	const Rwaone = getContract({
+		label: 'ProxyRwaone',
+		source: 'Rwaone',
 	});
 
 	const fetchAllEvents = ({ pageSize = 10e3, startingBlock = fromBlock, target }) => {
@@ -166,7 +166,7 @@ const settle = async ({
 		}
 		exchanges = loadExchangesFromFile({ network, fromBlock });
 	} catch (err) {
-		exchanges = await fetchAllEvents({ target: Tribeone });
+		exchanges = await fetchAllEvents({ target: Rwaone });
 		saveExchangesToFile({
 			network,
 			fromBlock,
@@ -224,10 +224,10 @@ const settle = async ({
 				earliestTimestamp = Math.min(timestamp, earliestTimestamp);
 			}
 			const isTribeTheDest = new RegExp(tribe).test(ethers.utils.toUtf8String(toCurrencyKey));
-			const isTribeOneSrcEntry = !!fromTribes.find(src => ethers.utils.toUtf8String(src) === tribe);
+			const isRwaOneSrcEntry = !!fromTribes.find(src => ethers.utils.toUtf8String(src) === tribe);
 
 			// skip when filtered by tribe if not the destination and not any of the sources
-			if (tribe && !isTribeTheDest && !isTribeOneSrcEntry) {
+			if (tribe && !isTribeTheDest && !isRwaOneSrcEntry) {
 				continue;
 			}
 
@@ -255,13 +255,13 @@ const settle = async ({
 			if (showDebt) {
 				const valueInUSD = wasReclaimOrRebate
 					? ethers.utils.formatEther(
-							await ExchangeRates.effectiveValue(
-								toCurrencyKey,
-								reclaimAmount > rebateAmount ? reclaimAmount.toString() : rebateAmount.toString(),
-								toBytes32('hUSD'),
-								{ blockTag: blockNumber }
-							)
-					  )
+						await ExchangeRates.effectiveValue(
+							toCurrencyKey,
+							reclaimAmount > rebateAmount ? reclaimAmount.toString() : rebateAmount.toString(),
+							toBytes32('hUSD'),
+							{ blockTag: blockNumber }
+						)
+					)
 					: 0;
 
 				debtTally += Math.round(reclaimAmount > rebateAmount ? -valueInUSD : +valueInUSD);
@@ -280,7 +280,7 @@ const settle = async ({
 				);
 				// see if user has enough funds to settle
 				if (reclaimAmount > 0) {
-					const tribe = await Tribeone.tribes(toCurrencyKey);
+					const tribe = await Rwaone.tribes(toCurrencyKey);
 
 					const Tribe = new ethers.Contract(tribe, getSource({ contract: 'Tribe' }).abi, provider);
 
@@ -304,10 +304,10 @@ const settle = async ({
 						'entries.',
 						wasReclaimOrRebate
 							? (reclaimAmount > rebateAmount ? green : red)(
-									ethers.utils.formatEther(
-										reclaimAmount > rebateAmount ? reclaimAmount : rebateAmount
-									)
-							  )
+								ethers.utils.formatEther(
+									reclaimAmount > rebateAmount ? reclaimAmount : rebateAmount
+								)
+							)
 							: '($0)',
 						'Settling...'
 					)

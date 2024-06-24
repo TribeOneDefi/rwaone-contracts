@@ -1,16 +1,16 @@
 pragma solidity ^0.5.16;
 
-interface ITribeoneEscrow {
+interface IRwaoneEscrow {
     function numVestingEntries(address account) external view returns (uint);
 
     function getVestingScheduleEntry(address account, uint index) external view returns (uint[2] memory);
 }
 
-// https://docs.tribeone.io/contracts/source/contracts/escrowchecker
+// https://docs.rwaone.io/contracts/source/contracts/escrowchecker
 contract EscrowChecker {
-    ITribeoneEscrow public tribeetix_escrow;
+    IRwaoneEscrow public tribeetix_escrow;
 
-    constructor(ITribeoneEscrow _esc) public {
+    constructor(IRwaoneEscrow _esc) public {
         tribeetix_escrow = _esc;
     }
 

@@ -3,7 +3,7 @@ pragma solidity ^0.5.16;
 // Inheritance
 import "./Owned.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/rewardsdistributionrecipient
+// https://docs.rwaone.io/contracts/source/contracts/rewardsdistributionrecipient
 contract RewardsDistributionRecipient is Owned {
     address public rewardsDistribution;
 

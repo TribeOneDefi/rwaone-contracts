@@ -1,9 +1,9 @@
 {
-	"name": "tribeone",
+	"name": "rwaone",
 	"version": "2.88.1",
 	"license": "MIT",
-	"author": "Tribeone",
-	"description": "The smart contracts which make up the Tribeone system. (tribeone.io)",
+	"author": "Rwaone",
+	"description": "The smart contracts which make up the Rwaone system. (rwaone.io)",
 	"scripts": {
 		"setup": "npm install && allow-scripts",
 		"clean-install": "rm -rf build && rm ./package-lock.json && rm -rf node_modules/* && npm install",
@@ -36,10 +36,10 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/Tribeoneio/tribeone.git"
+		"url": "https://github.com/Rwaoneio/rwaone.git"
 	},
 	"keywords": [
-		"Tribeone",
+		"Rwaone",
 		"wHAKA",
 		"hUSD",
 		"Solidity",
@@ -67,9 +67,9 @@
 	"main": "index.js",
 	"browser": "browser.js",
 	"bugs": {
-		"url": "https://github.com/Tribeoneio/tribeone/issues"
+		"url": "https://github.com/Rwaoneio/rwaone/issues"
 	},
-	"homepage": "https://tribeone.io",
+	"homepage": "https://rwaone.io",
 	"directories": {
 		"test": "test"
 	},

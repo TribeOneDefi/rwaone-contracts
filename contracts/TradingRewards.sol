@@ -16,7 +16,7 @@ import "./SafeDecimalMath.sol";
 import "./interfaces/ITradingRewards.sol";
 import "./interfaces/IExchanger.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/tradingrewards
+// https://docs.rwaone.io/contracts/source/contracts/tradingrewards
 contract TradingRewards is ITradingRewards, ReentrancyGuard, Owned, Pausable, MixinResolver {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -41,15 +41,11 @@ contract TradingRewards is ITradingRewards, ReentrancyGuard, Owned, Pausable, Mi
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
     bytes32 private constant CONTRACT_EXCHANGER = "Exchanger";
-    bytes32 private constant CONTRACT_TRIBEONEETIX = "Tribeone";
+    bytes32 private constant CONTRACT_RWAONEETIX = "Rwaone";
 
     /* ========== CONSTRUCTOR ========== */
 
-    constructor(
-        address owner,
-        address periodController,
-        address resolver
-    ) public Owned(owner) MixinResolver(resolver) {
+    constructor(address owner, address periodController, address resolver) public Owned(owner) MixinResolver(resolver) {
         require(periodController != address(0), "Invalid period controller");
 
         _periodController = periodController;
@@ -60,11 +56,11 @@ contract TradingRewards is ITradingRewards, ReentrancyGuard, Owned, Pausable, Mi
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         addresses = new bytes32[](2);
         addresses[0] = CONTRACT_EXCHANGER;
-        addresses[1] = CONTRACT_TRIBEONEETIX;
+        addresses[1] = CONTRACT_RWAONEETIX;
     }
 
-    function tribeone() internal view returns (IERC20) {
-        return IERC20(requireAndGetAddress(CONTRACT_TRIBEONEETIX));
+    function rwaone() internal view returns (IERC20) {
+        return IERC20(requireAndGetAddress(CONTRACT_RWAONEETIX));
     }
 
     function exchanger() internal view returns (IExchanger) {
@@ -76,11 +72,11 @@ contract TradingRewards is ITradingRewards, ReentrancyGuard, Owned, Pausable, Mi
     }
 
     function getUnassignedRewards() external view returns (uint) {
-        return tribeone().balanceOf(address(this)).sub(_balanceAssignedToRewards);
+        return rwaone().balanceOf(address(this)).sub(_balanceAssignedToRewards);
     }
 
     function getRewardsToken() external view returns (address) {
-        return address(tribeone());
+        return address(rwaone());
     }
 
     function getPeriodController() external view returns (address) {
@@ -119,11 +115,10 @@ contract TradingRewards is ITradingRewards, ReentrancyGuard, Owned, Pausable, Mi
         return _calculateRewards(account, periodID);
     }
 
-    function getAvailableRewardsForAccountForPeriods(address account, uint[] calldata periodIDs)
-        external
-        view
-        returns (uint totalRewards)
-    {
+    function getAvailableRewardsForAccountForPeriods(
+        address account,
+        uint[] calldata periodIDs
+    ) external view returns (uint totalRewards) {
         for (uint i = 0; i < periodIDs.length; i++) {
             uint periodID = periodIDs[i];
 
@@ -173,7 +168,7 @@ contract TradingRewards is ITradingRewards, ReentrancyGuard, Owned, Pausable, Mi
 
         _balanceAssignedToRewards = _balanceAssignedToRewards.sub(amountToClaim);
 
-        tribeone().safeTransfer(account, amountToClaim);
+        rwaone().safeTransfer(account, amountToClaim);
 
         emit RewardsClaimed(account, amountToClaim, periodID);
     }
@@ -192,7 +187,7 @@ contract TradingRewards is ITradingRewards, ReentrancyGuard, Owned, Pausable, Mi
     }
 
     function closeCurrentPeriodWithRewards(uint rewards) external onlyPeriodController {
-        uint currentBalance = tribeone().balanceOf(address(this));
+        uint currentBalance = rwaone().balanceOf(address(this));
         uint availableForNewRewards = currentBalance.sub(_balanceAssignedToRewards);
         require(rewards <= availableForNewRewards, "Insufficient free rewards");
 
@@ -213,7 +208,7 @@ contract TradingRewards is ITradingRewards, ReentrancyGuard, Owned, Pausable, Mi
 
     function recoverTokens(address tokenAddress, address recoverAddress) external onlyOwner {
         _validateRecoverAddress(recoverAddress);
-        require(tokenAddress != address(tribeone()), "Must use another function");
+        require(tokenAddress != address(rwaone()), "Must use another function");
 
         IERC20 token = IERC20(tokenAddress);
 
@@ -228,13 +223,13 @@ contract TradingRewards is ITradingRewards, ReentrancyGuard, Owned, Pausable, Mi
     function recoverUnassignedRewardTokens(address recoverAddress) external onlyOwner {
         _validateRecoverAddress(recoverAddress);
 
-        uint tokenBalance = tribeone().balanceOf(address(this));
+        uint tokenBalance = rwaone().balanceOf(address(this));
         require(tokenBalance > 0, "No tokens to recover");
 
         uint unassignedBalance = tokenBalance.sub(_balanceAssignedToRewards);
         require(unassignedBalance > 0, "No tokens to recover");
 
-        tribeone().safeTransfer(recoverAddress, unassignedBalance);
+        rwaone().safeTransfer(recoverAddress, unassignedBalance);
 
         emit UnassignedRewardTokensRecovered(recoverAddress, unassignedBalance);
     }
@@ -247,7 +242,7 @@ contract TradingRewards is ITradingRewards, ReentrancyGuard, Owned, Pausable, Mi
         require(period.availableRewards > 0, "No rewards available to recover");
 
         uint amount = period.availableRewards;
-        tribeone().safeTransfer(recoverAddress, amount);
+        rwaone().safeTransfer(recoverAddress, amount);
 
         _balanceAssignedToRewards = _balanceAssignedToRewards.sub(amount);
 

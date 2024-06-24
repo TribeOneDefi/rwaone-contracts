@@ -1,6 +1,6 @@
 pragma solidity >=0.4.24;
 
-// https://docs.tribeone.io/contracts/source/interfaces/isystemsettings
+// https://docs.rwaone.io/contracts/source/interfaces/isystemsettings
 interface ISystemSettings {
     // Views
     function waitingPeriodSecs() external view returns (uint);

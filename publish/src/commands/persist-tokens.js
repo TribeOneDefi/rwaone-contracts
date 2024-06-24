@@ -47,19 +47,19 @@ const persistTokens = async ({ network, yes, privateKey, assetsVersion }) => {
 
 	const [major, minor, patch] = version.split(/\.|-/);
 
-	const baseURI = `https://raw.githubusercontent.com/Tribeoneio/tribeone-assets/v${assetsVersion}`;
+	const baseURI = `https://raw.githubusercontent.com/Rwaoneio/rwaone-assets/v${assetsVersion}`;
 
 	const output = {
-		name: 'Tribeone',
+		name: 'Rwaone',
 		logoURI: `${baseURI}/snx/wHAKA.svg`,
-		keywords: ['tribeone', 'defi', 'derivatives', 'tribes', 'tribeetics'],
+		keywords: ['rwaone', 'defi', 'derivatives', 'tribes', 'tribeetics'],
 		timestamp: new Date().toISOString(),
 		tags: {
 			tribe: {
 				name: 'Tribe',
 				description:
-					'A tribeetic asset within the Tribeone protocol which can at any time ' +
-					'be exchanged in its entirety into any other tribe within Tribeone.',
+					'A tribeetic asset within the Rwaone protocol which can at any time ' +
+					'be exchanged in its entirety into any other tribe within Rwaone.',
 			},
 			index: {
 				name: 'Index Tribe',
@@ -78,7 +78,7 @@ const persistTokens = async ({ network, yes, privateKey, assetsVersion }) => {
 			chainId,
 			address,
 			symbol,
-			name: symbol === 'wHAKA' ? 'Tribeone Network Token' : `Tribe ${name}`,
+			name: symbol === 'wHAKA' ? 'Rwaone Network Token' : `Tribe ${name}`,
 			decimals,
 			logoURI: baseURI + (symbol === 'wHAKA' ? '/snx/wHAKA.svg' : `/tribes/${symbol}.svg`),
 			tags: [].concat(index ? 'index' : []).concat(symbol !== 'wHAKA' ? 'tribe' : []),
@@ -146,7 +146,7 @@ module.exports = {
 		program
 			.command('persist-tokens')
 			.description(
-				'Generate a JSON representation of all ERC20 tokens within Tribeone and upload to IPFS'
+				'Generate a JSON representation of all ERC20 tokens within Rwaone and upload to IPFS'
 			)
 			.option(
 				'-n, --network <value>',
@@ -159,7 +159,7 @@ module.exports = {
 				'-p, --private-key [value]',
 				'The private key to deploy with (only works in local mode, otherwise set in .env).'
 			)
-			.option('-v, --assets-version <value>', 'Version of the tribeone-assets to use')
+			.option('-v, --assets-version <value>', 'Version of the rwaone-assets to use')
 			.option('-y, --yes', 'Dont prompt, just reply yes.')
 			.action(persistTokens),
 };

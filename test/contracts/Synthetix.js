@@ -22,12 +22,12 @@ const {
 	constants: { inflationStartTimestampInSecs },
 } = require('../..');
 
-contract('Tribeone', async accounts => {
+contract('Rwaone', async accounts => {
 	const [sAUD, sEUR, hUSD, hETH] = ['sAUD', 'sEUR', 'hUSD', 'hETH'].map(toBytes32);
 
 	const [, owner, account1, account2, account3] = accounts;
 
-	let tribeone,
+	let rwaone,
 		tribeetixProxy,
 		exchangeRates,
 		debtCache,
@@ -41,8 +41,8 @@ contract('Tribeone', async accounts => {
 
 	before(async () => {
 		({
-			Tribeone: tribeone,
-			ProxyERC20Tribeone: tribeetixProxy,
+			Rwaone: rwaone,
+			ProxyERC20Rwaone: tribeetixProxy,
 			AddressResolver: addressResolver,
 			ExchangeRates: exchangeRates,
 			DebtCache: debtCache,
@@ -56,7 +56,7 @@ contract('Tribeone', async accounts => {
 			accounts,
 			tribes: ['hUSD', 'hETH', 'sEUR', 'sAUD'],
 			contracts: [
-				'Tribeone',
+				'Rwaone',
 				'SupplySchedule',
 				'AddressResolver',
 				'ExchangeRates',
@@ -73,7 +73,7 @@ contract('Tribeone', async accounts => {
 		}));
 
 		// use implementation ABI on the proxy address to simplify calling
-		tribeetixProxy = await artifacts.require('Tribeone').at(tribeetixProxy.address);
+		tribeetixProxy = await artifacts.require('Rwaone').at(tribeetixProxy.address);
 
 		await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, hETH]);
 	});
@@ -82,26 +82,26 @@ contract('Tribeone', async accounts => {
 
 	it('ensure only expected functions are mutative', async () => {
 		ensureOnlyExpectedMutativeFunctions({
-			abi: tribeone.abi,
-			ignoreParents: ['BaseTribeone'],
+			abi: rwaone.abi,
+			ignoreParents: ['BaseRwaone'],
 			expected: ['emitAtomicTribeExchange', 'migrateEscrowBalanceToRewardEscrowV2'],
 		});
 	});
 
 	describe('constructor', () => {
 		it('should set constructor params on deployment', async () => {
-			const TRIBEONEETIX_TOTAL_SUPPLY = web3.utils.toWei('100000000');
+			const RWAONEETIX_TOTAL_SUPPLY = web3.utils.toWei('100000000');
 			const instance = await setupContract({
-				contract: 'Tribeone',
+				contract: 'Rwaone',
 				accounts,
 				skipPostDeploy: true,
-				args: [account1, account2, owner, TRIBEONEETIX_TOTAL_SUPPLY, addressResolver.address],
+				args: [account1, account2, owner, RWAONEETIX_TOTAL_SUPPLY, addressResolver.address],
 			});
 
 			assert.equal(await instance.proxy(), account1);
 			assert.equal(await instance.tokenState(), account2);
 			assert.equal(await instance.owner(), owner);
-			assert.equal(await instance.totalSupply(), TRIBEONEETIX_TOTAL_SUPPLY);
+			assert.equal(await instance.totalSupply(), RWAONEETIX_TOTAL_SUPPLY);
 			assert.equal(await instance.resolver(), addressResolver.address);
 		});
 	});
@@ -131,34 +131,34 @@ contract('Tribeone', async accounts => {
 						await setStatus({ owner, systemStatus, section, suspend: true });
 					});
 					it('then calling mint() reverts', async () => {
-						await assert.revert(tribeone.mint(), 'Operation prohibited');
+						await assert.revert(rwaone.mint(), 'Operation prohibited');
 					});
 					describe(`when ${section} is resumed`, () => {
 						beforeEach(async () => {
 							await setStatus({ owner, systemStatus, section, suspend: false });
 						});
 						it('then calling mint() succeeds', async () => {
-							await tribeone.mint();
+							await rwaone.mint();
 						});
 					});
 				});
 			});
 		});
-		it('should allow tribeone contract to mint for 234 weeks', async () => {
+		it('should allow rwaone contract to mint for 234 weeks', async () => {
 			// fast forward EVM - inflation supply at week 234
 			const week234 = INFLATION_START_DATE + WEEK * 234 + DAY;
 			await fastForwardTo(new Date(week234 * 1000));
 			await updateRatesWithDefaults({ exchangeRates, owner, debtCache });
 
-			const existingSupply = await tribeone.totalSupply();
+			const existingSupply = await rwaone.totalSupply();
 			const mintableSupply = await supplySchedule.mintableSupply();
 
-			const currentRewardEscrowBalance = await tribeone.balanceOf(rewardEscrow.address);
+			const currentRewardEscrowBalance = await rwaone.balanceOf(rewardEscrow.address);
 
-			// Call mint on Tribeone
-			await tribeone.mint();
+			// Call mint on Rwaone
+			await rwaone.mint();
 
-			const newTotalSupply = await tribeone.totalSupply();
+			const newTotalSupply = await rwaone.totalSupply();
 			const minterReward = await supplySchedule.minterReward();
 
 			const expectedEscrowBalance = currentRewardEscrowBalance
@@ -172,10 +172,10 @@ contract('Tribeone', async accounts => {
 			assert.bnEqual(newTotalSupply, expectedNewTotalSupply);
 
 			assert.bnEqual(newTotalSupply, existingSupply.add(mintableSupply));
-			assert.bnEqual(await tribeone.balanceOf(rewardEscrowV2.address), expectedEscrowBalance);
+			assert.bnEqual(await rwaone.balanceOf(rewardEscrowV2.address), expectedEscrowBalance);
 		});
 
-		it('should allow tribeone contract to mint 2 weeks of supply and minus minterReward', async () => {
+		it('should allow rwaone contract to mint 2 weeks of supply and minus minterReward', async () => {
 			// Issue
 			const expectedSupplyToMint = toUnit(INITIAL_WEEKLY_SUPPLY * 2);
 
@@ -184,14 +184,14 @@ contract('Tribeone', async accounts => {
 			await fastForwardTo(new Date(weekThree * 1000));
 			await updateRatesWithDefaults({ exchangeRates, owner, debtCache });
 
-			const existingSupply = await tribeone.totalSupply();
+			const existingSupply = await rwaone.totalSupply();
 			const mintableSupply = await supplySchedule.mintableSupply();
-			const currentRewardEscrowBalance = await tribeone.balanceOf(rewardEscrow.address);
+			const currentRewardEscrowBalance = await rwaone.balanceOf(rewardEscrow.address);
 
-			// call mint on Tribeone
-			await tribeone.mint();
+			// call mint on Rwaone
+			await rwaone.mint();
 
-			const newTotalSupply = await tribeone.totalSupply();
+			const newTotalSupply = await rwaone.totalSupply();
 
 			const minterReward = await supplySchedule.minterReward();
 			const expectedEscrowBalance = currentRewardEscrowBalance
@@ -203,7 +203,7 @@ contract('Tribeone', async accounts => {
 			assert.bnEqual(newTotalSupply, expectedNewTotalSupply);
 
 			assert.bnEqual(newTotalSupply, existingSupply.add(mintableSupply));
-			assert.bnEqual(await tribeone.balanceOf(rewardEscrowV2.address), expectedEscrowBalance);
+			assert.bnEqual(await rwaone.balanceOf(rewardEscrowV2.address), expectedEscrowBalance);
 		});
 
 		it('should be able to mint again after another 7 days period', async () => {
@@ -212,13 +212,13 @@ contract('Tribeone', async accounts => {
 			await fastForwardTo(new Date(weekThree * 1000));
 			await updateRatesWithDefaults({ exchangeRates, owner, debtCache });
 
-			let existingTotalSupply = await tribeone.totalSupply();
+			let existingTotalSupply = await rwaone.totalSupply();
 			let mintableSupply = await supplySchedule.mintableSupply();
 
-			// call mint on Tribeone
-			await tribeone.mint();
+			// call mint on Rwaone
+			await rwaone.mint();
 
-			let newTotalSupply = await tribeone.totalSupply();
+			let newTotalSupply = await rwaone.totalSupply();
 			assert.bnEqual(newTotalSupply, existingTotalSupply.add(mintableSupply));
 
 			// fast forward EVM to Week 4
@@ -226,13 +226,13 @@ contract('Tribeone', async accounts => {
 			await fastForwardTo(new Date(weekFour * 1000));
 			await updateRatesWithDefaults({ exchangeRates, owner, debtCache });
 
-			existingTotalSupply = await tribeone.totalSupply();
+			existingTotalSupply = await rwaone.totalSupply();
 			mintableSupply = await supplySchedule.mintableSupply();
 
-			// call mint on Tribeone
-			await tribeone.mint();
+			// call mint on Rwaone
+			await rwaone.mint();
 
-			newTotalSupply = await tribeone.totalSupply();
+			newTotalSupply = await rwaone.totalSupply();
 			assert.bnEqual(newTotalSupply, existingTotalSupply.add(mintableSupply));
 		});
 
@@ -242,20 +242,20 @@ contract('Tribeone', async accounts => {
 			await fastForwardTo(new Date(weekThree * 1000));
 			await updateRatesWithDefaults({ exchangeRates, owner, debtCache });
 
-			const existingTotalSupply = await tribeone.totalSupply();
+			const existingTotalSupply = await rwaone.totalSupply();
 			const mintableSupply = await supplySchedule.mintableSupply();
 
-			// call mint on Tribeone
-			await tribeone.mint();
+			// call mint on Rwaone
+			await rwaone.mint();
 
-			const newTotalSupply = await tribeone.totalSupply();
+			const newTotalSupply = await rwaone.totalSupply();
 			assert.bnEqual(newTotalSupply, existingTotalSupply.add(mintableSupply));
 
 			const weekFour = weekThree + DAY * 1;
 			await fastForwardTo(new Date(weekFour * 1000));
 
 			// should revert if try to mint again within 7 day period / mintable supply is 0
-			await assert.revert(tribeone.mint(), 'No supply is mintable');
+			await assert.revert(rwaone.mint(), 'No supply is mintable');
 		});
 	});
 
@@ -265,23 +265,23 @@ contract('Tribeone', async accounts => {
 			// transfer wHAKA to rewardEscrow
 			await tribeetixProxy.transfer(rewardEscrow.address, toUnit('100'), { from: owner });
 
-			rewardEscrowBalanceBefore = await tribeone.balanceOf(rewardEscrow.address);
+			rewardEscrowBalanceBefore = await rwaone.balanceOf(rewardEscrow.address);
 		});
 		it('should revert if called by non-owner account', async () => {
 			await assert.revert(
-				tribeone.migrateEscrowBalanceToRewardEscrowV2({ from: account1 }),
+				rwaone.migrateEscrowBalanceToRewardEscrowV2({ from: account1 }),
 				'Only the contract owner may perform this action'
 			);
 		});
 		it('should have transferred reward escrow balance to reward escrow v2', async () => {
 			// call the migrate function
-			await tribeone.migrateEscrowBalanceToRewardEscrowV2({ from: owner });
+			await rwaone.migrateEscrowBalanceToRewardEscrowV2({ from: owner });
 
 			// should have transferred balance to rewardEscrowV2
-			assert.bnEqual(await tribeone.balanceOf(rewardEscrowV2.address), rewardEscrowBalanceBefore);
+			assert.bnEqual(await rwaone.balanceOf(rewardEscrowV2.address), rewardEscrowBalanceBefore);
 
 			// rewardEscrow should have 0 balance
-			assert.bnEqual(await tribeone.balanceOf(rewardEscrow.address), 0);
+			assert.bnEqual(await rwaone.balanceOf(rewardEscrow.address), 0);
 		});
 	});
 
@@ -301,7 +301,7 @@ contract('Tribeone', async accounts => {
 				await updateRatesWithDefaults({ exchangeRates, owner, debtCache });
 
 				// issue hUSD from the owner
-				await tribeone.issueTribes(amountOfhUSD, { from: owner });
+				await rwaone.issueTribes(amountOfhUSD, { from: owner });
 
 				// transfer the hUSD to the contract
 				await hUSDContract.transfer(contractExample.address, toUnit('100'), { from: owner });
@@ -322,7 +322,7 @@ contract('Tribeone', async accounts => {
 					assert.equal(await hETHContract.balanceOf(contractExample.address), '0');
 				});
 				it('and the event emitted indicates that Barrie was the destinationAddress', async () => {
-					const logs = artifacts.require('Tribeone').decodeLogs(txn.receipt.rawLogs);
+					const logs = artifacts.require('Rwaone').decodeLogs(txn.receipt.rawLogs);
 					assert.eventEqual(
 						logs.find(log => log.event === 'TribeExchange'),
 						'TribeExchange',

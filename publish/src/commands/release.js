@@ -16,8 +16,8 @@ const release = async ({ branch, release, version, layer, yes }) => {
 				`\nWARNING: This will initiate a ${yellow(layer)} release of ${yellow(
 					version
 				)} from branch ${yellow(branch)} named ${yellow(release)}\n` +
-					gray('-'.repeat(50)) +
-					'\nDo you want to continue? (y/n) '
+				gray('-'.repeat(50)) +
+				'\nDo you want to continue? (y/n) '
 			);
 		} catch (err) {
 			console.log(gray('Operation cancelled'));
@@ -29,7 +29,7 @@ const release = async ({ branch, release, version, layer, yes }) => {
 
 	await axios({
 		method: 'post',
-		url: 'https://circleci.com/api/v2/project/github/Tribeoneio/releases/pipeline',
+		url: 'https://circleci.com/api/v2/project/github/Rwaoneio/releases/pipeline',
 		headers: {
 			'Content-Type': 'application/json',
 			'Circle-Token': process.env.CIRCLECI_TOKEN,
@@ -53,7 +53,7 @@ module.exports = {
 			.description('Initiate a new release')
 			.requiredOption(
 				'-b, --branch <value>',
-				'The branch of tribeone to release from (e.g. master, staging or develop)'
+				'The branch of rwaone to release from (e.g. master, staging or develop)'
 			)
 			.addOption(
 				new program.Option('-l, --layer <value>', `The layer to release`)

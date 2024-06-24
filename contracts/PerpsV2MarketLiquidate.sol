@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import "./PerpsV2MarketProxyable.sol";
 import "./interfaces/IPerpsV2MarketLiquidate.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/PerpsV2MarketLiquidate
+// https://docs.rwaone.io/contracts/source/contracts/PerpsV2MarketLiquidate
 contract PerpsV2MarketLiquidate is IPerpsV2MarketLiquidate, PerpsV2MarketProxyable {
     /* ========== CONSTRUCTOR ========== */
 
@@ -69,11 +69,7 @@ contract PerpsV2MarketLiquidate is IPerpsV2MarketLiquidate, PerpsV2MarketProxyab
         _liquidatePosition(position, account, messageSender, price, 0);
     }
 
-    function _flagPosition(
-        address account,
-        address flagger,
-        uint price
-    ) internal {
+    function _flagPosition(address account, address flagger, uint price) internal {
         Position memory position = marketState.positions(account);
 
         // Flag position
@@ -191,13 +187,7 @@ contract PerpsV2MarketLiquidate is IPerpsV2MarketLiquidate, PerpsV2MarketProxyab
     event PositionFlagged(uint id, address account, address flagger, uint price, uint timestamp);
     bytes32 internal constant POSITIONFLAGGED_SIG = keccak256("PositionFlagged(uint256,address,address,uint256,uint256)");
 
-    function emitPositionFlagged(
-        uint id,
-        address account,
-        address flagger,
-        uint price,
-        uint timestamp
-    ) internal {
+    function emitPositionFlagged(uint id, address account, address flagger, uint price, uint timestamp) internal {
         proxy._emit(abi.encode(id, account, flagger, price, timestamp), 1, POSITIONFLAGGED_SIG, 0, 0, 0);
     }
 

@@ -1,6 +1,6 @@
 pragma solidity >=0.4.24;
 
-// https://docs.tribeone.io/contracts/source/interfaces/idelegateapprovals
+// https://docs.rwaone.io/contracts/source/interfaces/idelegateapprovals
 interface IDelegateApprovals {
     // Views
     function canBurnFor(address authoriser, address delegate) external view returns (bool);

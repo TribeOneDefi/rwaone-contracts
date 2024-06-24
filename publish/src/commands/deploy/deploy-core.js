@@ -11,7 +11,7 @@ module.exports = async ({
 	account,
 	addressOf,
 	currentLastMintEvent,
-	currentTribeoneSupply,
+	currentRwaoneSupply,
 	currentWeekOfInflation,
 	deployer,
 	useOvm,
@@ -92,27 +92,27 @@ module.exports = async ({
 		args: [account, addressOf(readProxyForResolver)],
 	});
 
-	const tokenStateTribeone = await deployer.deployContract({
-		name: 'TokenStateTribeone',
+	const tokenStateRwaone = await deployer.deployContract({
+		name: 'TokenStateRwaone',
 		source: 'LegacyTokenState',
 		args: [account, account],
 	});
 
-	const proxyTribeone = await deployer.deployContract({
-		name: 'ProxyTribeone',
+	const proxyRwaone = await deployer.deployContract({
+		name: 'ProxyRwaone',
 		source: 'ProxyERC20',
 		args: [account],
 	});
 
 	await deployer.deployContract({
-		name: 'Tribeone',
-		source: useOvm ? 'MintableTribeone' : 'Tribeone',
-		deps: ['ProxyTribeone', 'TokenStateTribeone', 'AddressResolver'],
+		name: 'Rwaone',
+		source: useOvm ? 'MintableRwaone' : 'Rwaone',
+		deps: ['ProxyRwaone', 'TokenStateRwaone', 'AddressResolver'],
 		args: [
-			addressOf(proxyTribeone),
-			addressOf(tokenStateTribeone),
+			addressOf(proxyRwaone),
+			addressOf(tokenStateRwaone),
 			account,
-			currentTribeoneSupply,
+			currentRwaoneSupply,
 			addressOf(readProxyForResolver),
 		],
 	});
@@ -147,18 +147,18 @@ module.exports = async ({
 	});
 
 	const tribeetixEscrow = await deployer.deployContract({
-		name: 'TribeoneEscrow',
+		name: 'RwaoneEscrow',
 		args: [account, ZERO_ADDRESS],
 	});
 
 	await deployer.deployContract({
-		name: 'TribeoneState',
-		source: useOvm ? 'TribeoneStateWithLimitedSetup' : 'TribeoneState',
+		name: 'RwaoneState',
+		source: useOvm ? 'RwaoneStateWithLimitedSetup' : 'RwaoneState',
 		args: [account, account],
 	});
 
 	await deployer.deployContract({
-		name: 'TribeoneDebtShare',
+		name: 'RwaoneDebtShare',
 		deps: ['AddressResolver'],
 		args: [account, addressOf(readProxyForResolver)],
 	});
@@ -213,8 +213,8 @@ module.exports = async ({
 		deps: useOvm ? ['RewardEscrowV2', 'ProxyFeePool'] : ['RewardEscrowV2', 'ProxyFeePool'],
 		args: [
 			account, // owner
-			ZERO_ADDRESS, // authority (tribeone)
-			ZERO_ADDRESS, // Tribeone Proxy
+			ZERO_ADDRESS, // authority (rwaone)
+			ZERO_ADDRESS, // Rwaone Proxy
 			addressOf(rewardEscrowV2),
 			addressOf(proxyFeePool),
 		],
@@ -277,25 +277,25 @@ module.exports = async ({
 	if (tribeetixEscrow) {
 		await deployer.deployContract({
 			name: 'EscrowChecker',
-			deps: ['TribeoneEscrow'],
+			deps: ['RwaoneEscrow'],
 			args: [addressOf(tribeetixEscrow)],
 		});
 	}
 
 	await deployer.deployContract({
-		name: 'TribeoneBridgeToBase',
+		name: 'RwaoneBridgeToBase',
 		deps: ['AddressResolver'],
 		args: [account, addressOf(readProxyForResolver)],
 	});
 
 	await deployer.deployContract({
-		name: 'TribeoneBridgeToOptimism',
+		name: 'RwaoneBridgeToOptimism',
 		deps: ['AddressResolver'],
 		args: [account, addressOf(readProxyForResolver)],
 	});
 
 	await deployer.deployContract({
-		name: 'TribeoneBridgeEscrow',
+		name: 'RwaoneBridgeEscrow',
 		deps: ['AddressResolver'],
 		args: [account],
 	});

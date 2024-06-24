@@ -12,12 +12,12 @@ import "./interfaces/IFeePool.sol";
 import "./interfaces/IFlexibleStorage.sol";
 import "./interfaces/IWrapperFactory.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/wrapperfactory
+// https://docs.rwaone.io/contracts/source/contracts/wrapperfactory
 contract WrapperFactory is Owned, MixinResolver, IWrapperFactory {
     bytes32 public constant CONTRACT_NAME = "WrapperFactory";
 
     bytes32 internal constant CONTRACT_FLEXIBLESTORAGE = "FlexibleStorage";
-    bytes32 internal constant CONTRACT_TRIBEONE_HUSD = "TribehUSD";
+    bytes32 internal constant CONTRACT_RWAONE_HUSD = "TribehUSD";
     bytes32 internal constant CONTRACT_FEEPOOL = "FeePool";
 
     uint internal constant WRAPPER_VERSION = 1;
@@ -27,14 +27,14 @@ contract WrapperFactory is Owned, MixinResolver, IWrapperFactory {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         addresses = new bytes32[](3);
-        addresses[0] = CONTRACT_TRIBEONE_HUSD;
+        addresses[0] = CONTRACT_RWAONE_HUSD;
         addresses[1] = CONTRACT_FLEXIBLESTORAGE;
         addresses[2] = CONTRACT_FEEPOOL;
     }
 
     /* ========== INTERNAL VIEWS ========== */
     function tribehUSD() internal view returns (IERC20) {
-        return IERC20(requireAndGetAddress(CONTRACT_TRIBEONE_HUSD));
+        return IERC20(requireAndGetAddress(CONTRACT_RWAONE_HUSD));
     }
 
     function flexibleStorage() internal view returns (IFlexibleStorage) {

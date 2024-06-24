@@ -39,7 +39,7 @@ interface IMarketViews {
     function getAllTargets() external view returns (address[] memory);
 }
 
-// https://docs.tribeone.io/contracts/source/contracts/FuturesMarketManager
+// https://docs.rwaone.io/contracts/source/contracts/FuturesMarketManager
 contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
     using SafeMath for uint;
     using AddressSetLib for AddressSetLib.AddressSet;
@@ -63,7 +63,7 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
     bytes32 public constant CONTRACT_NAME = "FuturesMarketManager";
 
     bytes32 internal constant HUSD = "hUSD";
-    bytes32 internal constant CONTRACT_TRIBEONEHUSD = "TribehUSD";
+    bytes32 internal constant CONTRACT_RWAONEHUSD = "TribehUSD";
     bytes32 internal constant CONTRACT_FEEPOOL = "FeePool";
     bytes32 internal constant CONTRACT_EXCHANGER = "Exchanger";
 
@@ -75,13 +75,13 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         addresses = new bytes32[](3);
-        addresses[0] = CONTRACT_TRIBEONEHUSD;
+        addresses[0] = CONTRACT_RWAONEHUSD;
         addresses[1] = CONTRACT_FEEPOOL;
         addresses[2] = CONTRACT_EXCHANGER;
     }
 
     function _hUSD() internal view returns (ITribe) {
-        return ITribe(requireAndGetAddress(CONTRACT_TRIBEONEHUSD));
+        return ITribe(requireAndGetAddress(CONTRACT_RWAONEHUSD));
     }
 
     function _feePool() internal view returns (IFeePool) {
@@ -102,11 +102,7 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
     /*
      * Returns slices of the list of all v1 or v2 (proxied) markets.
      */
-    function markets(
-        uint index,
-        uint pageSize,
-        bool proxiedMarkets
-    ) external view returns (address[] memory) {
+    function markets(uint index, uint pageSize, bool proxiedMarkets) external view returns (address[] memory) {
         if (proxiedMarkets) {
             return _proxiedMarkets.getPage(index, pageSize);
         } else {
@@ -280,8 +276,8 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
      */
     function addProxiedMarkets(address[] calldata marketsToAdd) external onlyOwner {
         uint numOfMarkets = marketsToAdd.length;
-        for (uint i; i < numOfMarkets; i++) {            
-            _addMarket(marketsToAdd[i], true);                       
+        for (uint i; i < numOfMarkets; i++) {
+            _addMarket(marketsToAdd[i], true);
         }
     }
 
@@ -289,13 +285,17 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
      * Add a set of new markets. Reverts if some market key already has a market.
      */
     function _addMarket(address market, bool isProxied) internal onlyOwner {
-        if ( market != address(0xe26C391598D6FBfd512BBCa7BEFD5Dfb72465377) && market != address(0x62d95eC870aF9f31023c87FE106dEe6761B99861) && market != address(0x915d64Eb061F93908BE94ec4c22ABD14b882B014) ) {
+        if (
+            market != address(0xe26C391598D6FBfd512BBCa7BEFD5Dfb72465377) &&
+            market != address(0x62d95eC870aF9f31023c87FE106dEe6761B99861) &&
+            market != address(0x915d64Eb061F93908BE94ec4c22ABD14b882B014)
+        ) {
             require(!_allMarkets.contains(market), "Market already exists");
 
             bytes32 key = IMarketViews(market).marketKey();
             bytes32 baseAsset = IMarketViews(market).baseAsset();
 
-            require(marketForKey[key] == address(0), "Market already exists for key");        
+            require(marketForKey[key] == address(0), "Market already exists for key");
             marketForKey[key] = market;
             _allMarkets.add(market);
 

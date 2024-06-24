@@ -1,4 +1,4 @@
-name = "tribeone"
+name = "rwaone"
 description = "Infinite liquidity is here."
 version = "<%= package.version %>"
 
@@ -7,7 +7,7 @@ version = "<%= package.version %>"
 [setting.network]
 defaultValue = "goerli"
 
-[run.tribeone]
+[run.rwaone]
 exec = "./publish/cannon.js"
 func = "deploy"
 args = ["<%= settings.network %>"]

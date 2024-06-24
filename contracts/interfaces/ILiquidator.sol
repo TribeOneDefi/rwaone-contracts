@@ -28,26 +28,17 @@ interface ILiquidator {
 
     function isLiquidationDeadlinePassed(address account) external view returns (bool);
 
-    function calculateAmountToFixCollateral(
-        uint debtBalance,
-        uint collateral,
-        uint penalty
-    ) external view returns (uint);
+    function calculateAmountToFixCollateral(uint debtBalance, uint collateral, uint penalty) external view returns (uint);
 
-    function liquidationAmounts(address account, bool isSelfLiquidation)
-        external
-        view
-        returns (
-            uint totalRedeemed,
-            uint debtToRemove,
-            uint escrowToLiquidate,
-            uint initialDebtBalance
-        );
+    function liquidationAmounts(
+        address account,
+        bool isSelfLiquidation
+    ) external view returns (uint totalRedeemed, uint debtToRemove, uint escrowToLiquidate, uint initialDebtBalance);
 
     // Mutative Functions
     function flagAccountForLiquidation(address account) external;
 
-    // Restricted: used internally to Tribeone contracts
+    // Restricted: used internally to Rwaone contracts
     function removeAccountInLiquidation(address account) external;
 
     function checkAndRemoveAccountInLiquidation(address account) external;

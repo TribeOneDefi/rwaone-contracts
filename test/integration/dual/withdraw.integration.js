@@ -12,7 +12,7 @@ describe('withdraw() integration tests (L1, L2)', () => {
 	const amountToWithdraw = ethers.utils.parseEther('10');
 
 	let owner;
-	let Tribeone, TribeoneL1, TribeoneBridgeToBase;
+	let Rwaone, RwaoneL1, RwaoneBridgeToBase;
 
 	let ownerBalance, ownerL1Balance;
 
@@ -20,33 +20,33 @@ describe('withdraw() integration tests (L1, L2)', () => {
 
 	describe('when the owner withdraws wHAKA', () => {
 		before('target contracts and users', () => {
-			({ Tribeone, TribeoneBridgeToBase } = ctx.l2.contracts);
-			({ Tribeone: TribeoneL1 } = ctx.l1.contracts);
+			({ Rwaone, RwaoneBridgeToBase } = ctx.l2.contracts);
+			({ Rwaone: RwaoneL1 } = ctx.l1.contracts);
 
 			owner = ctx.l2.users.owner;
 		});
 
 		before('record balances', async () => {
-			ownerBalance = await Tribeone.balanceOf(owner.address);
-			ownerL1Balance = await TribeoneL1.balanceOf(owner.address);
+			ownerBalance = await Rwaone.balanceOf(owner.address);
+			ownerL1Balance = await RwaoneL1.balanceOf(owner.address);
 		});
 
 		before('make the withdrawal', async () => {
-			TribeoneBridgeToBase = TribeoneBridgeToBase.connect(owner);
+			RwaoneBridgeToBase = RwaoneBridgeToBase.connect(owner);
 
-			const tx = await TribeoneBridgeToBase.withdraw(amountToWithdraw);
+			const tx = await RwaoneBridgeToBase.withdraw(amountToWithdraw);
 
 			withdrawalReceipt = await tx.wait();
 		});
 
 		it('decreases the owner balance', async () => {
-			const newOwnerBalance = await Tribeone.balanceOf(owner.address);
+			const newOwnerBalance = await Rwaone.balanceOf(owner.address);
 
 			assert.bnEqual(newOwnerBalance, ownerBalance.sub(amountToWithdraw));
 		});
 
 		describe('when the withdrawal gets picked up in L1', () => {
-			before(function() {
+			before(function () {
 				if (!hre.config.debugOptimism) {
 					console.log(
 						chalk.yellow.bold(
@@ -63,7 +63,7 @@ describe('withdraw() integration tests (L1, L2)', () => {
 
 			it('increases the owner balance', async () => {
 				assert.bnEqual(
-					await TribeoneL1.balanceOf(owner.address),
+					await RwaoneL1.balanceOf(owner.address),
 					ownerL1Balance.add(amountToWithdraw)
 				);
 			});

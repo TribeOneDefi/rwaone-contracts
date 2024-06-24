@@ -30,7 +30,7 @@ const connectBridge = async ({
 }) => {
 	const logger = console.log;
 	if (quiet) {
-		console.log = () => {};
+		console.log = () => { };
 	}
 
 	// ---------------------------------
@@ -41,9 +41,9 @@ const connectBridge = async ({
 	const {
 		wallet: walletL1,
 		AddressResolver: AddressResolverL1,
-		TribeoneBridge: TribeoneBridgeToOptimism,
-		Tribeone,
-		BridgeEscrow: TribeoneBridgeEscrow,
+		RwaoneBridge: RwaoneBridgeToOptimism,
+		Rwaone,
+		BridgeEscrow: RwaoneBridgeEscrow,
 		OwnerRelay: OwnerRelayOnEthereum,
 		DebtMigrator: DebtMigratorOnEthereum,
 	} = await setupInstance({
@@ -64,7 +64,7 @@ const connectBridge = async ({
 	const {
 		wallet: walletL2,
 		AddressResolver: AddressResolverL2,
-		TribeoneBridge: TribeoneBridgeToBase,
+		RwaoneBridge: RwaoneBridgeToBase,
 		OwnerRelay: OwnerRelayOnOptimism,
 		DebtMigrator: DebtMigratorOnOptimism,
 	} = await setupInstance({
@@ -87,18 +87,18 @@ const connectBridge = async ({
 		gasLimit: l1GasLimit,
 		names: [
 			'ext:Messenger',
-			'ovm:TribeoneBridgeToBase',
+			'ovm:RwaoneBridgeToBase',
 			'ovm:OwnerRelayOnOptimism',
 			'ovm:DebtMigratorOnOptimism',
 		],
 		addresses: [
 			l1Messenger,
-			TribeoneBridgeToBase.address,
+			RwaoneBridgeToBase.address,
 			OwnerRelayOnOptimism.address,
 			DebtMigratorOnOptimism.address,
 		],
 		AddressResolver: AddressResolverL1,
-		cachables: [TribeoneBridgeToOptimism, OwnerRelayOnEthereum, DebtMigratorOnEthereum],
+		cachables: [RwaoneBridgeToOptimism, OwnerRelayOnEthereum, DebtMigratorOnEthereum],
 		dryRun,
 	});
 
@@ -112,25 +112,25 @@ const connectBridge = async ({
 		gasLimit: undefined,
 		names: [
 			'ext:Messenger',
-			'base:TribeoneBridgeToOptimism',
+			'base:RwaoneBridgeToOptimism',
 			'base:OwnerRelayOnEthereum',
 			'base:DebtMigratorOnEthereum',
 		],
 		addresses: [
 			l2Messenger,
-			TribeoneBridgeToOptimism.address,
+			RwaoneBridgeToOptimism.address,
 			OwnerRelayOnEthereum.address,
 			DebtMigratorOnEthereum.address,
 		],
 		AddressResolver: AddressResolverL2,
-		cachables: [TribeoneBridgeToBase, OwnerRelayOnOptimism, DebtMigratorOnOptimism],
+		cachables: [RwaoneBridgeToBase, OwnerRelayOnOptimism, DebtMigratorOnOptimism],
 		dryRun,
 	});
 
 	// check approval (bridge needs ERC20 approval to spend bridge escrow's wHAKA for withdrawals)
-	const currentAllowance = await Tribeone.allowance(
-		TribeoneBridgeEscrow.address,
-		TribeoneBridgeToOptimism.address
+	const currentAllowance = await Rwaone.allowance(
+		RwaoneBridgeEscrow.address,
+		RwaoneBridgeToOptimism.address
 	);
 
 	console.log(
@@ -148,14 +148,14 @@ const connectBridge = async ({
 		if (!dryRun) {
 			console.log(
 				yellow.inverse(
-					`  * CALLING TribeoneBridgeEscrow.approveBridge(wHAKA, 'TribeoneBridgeToOptimism', UInt256.MAX))`
+					`  * CALLING RwaoneBridgeEscrow.approveBridge(wHAKA, 'RwaoneBridgeToOptimism', UInt256.MAX))`
 				)
 			);
-			const owner = await TribeoneBridgeEscrow.owner();
+			const owner = await RwaoneBridgeEscrow.owner();
 			if (walletL1.address.toLowerCase() !== owner.toLowerCase()) {
-				const calldata = await TribeoneBridgeEscrow.interface.encodeFunctionData('approveBridge', [
-					Tribeone.address,
-					TribeoneBridgeToOptimism.address,
+				const calldata = await RwaoneBridgeEscrow.interface.encodeFunctionData('approveBridge', [
+					Rwaone.address,
+					RwaoneBridgeToOptimism.address,
 					ethers.constants.MaxUint256,
 				]);
 				console.log('Calldata is', calldata);
@@ -169,9 +169,9 @@ const connectBridge = async ({
 				const params = {
 					gasLimit: l1GasLimit,
 				};
-				const tx = await TribeoneBridgeEscrow.approveBridge(
-					Tribeone.address,
-					TribeoneBridgeToOptimism.address,
+				const tx = await RwaoneBridgeEscrow.approveBridge(
+					Rwaone.address,
+					RwaoneBridgeToOptimism.address,
 					ethers.constants.MaxUint256,
 					params
 				);
@@ -322,15 +322,15 @@ const setupInstance = async ({
 	});
 	console.log(gray('  > AddressResolver:', AddressResolver.address));
 
-	const bridgeName = useOvm ? 'TribeoneBridgeToBase' : 'TribeoneBridgeToOptimism';
-	const TribeoneBridge = getContract({
+	const bridgeName = useOvm ? 'RwaoneBridgeToBase' : 'RwaoneBridgeToOptimism';
+	const RwaoneBridge = getContract({
 		contract: bridgeName,
 		getTarget,
 		getSource,
 		deploymentPath,
 		wallet,
 	});
-	console.log(gray(`  > ${bridgeName}:`, TribeoneBridge.address));
+	console.log(gray(`  > ${bridgeName}:`, RwaoneBridge.address));
 
 	const relayName = useOvm ? 'OwnerRelayOnOptimism' : 'OwnerRelayOnEthereum';
 	const OwnerRelay = getContract({
@@ -352,21 +352,21 @@ const setupInstance = async ({
 	});
 	console.log(gray(`  > ${migratorName}:`, DebtMigrator.address));
 
-	let Tribeone;
+	let Rwaone;
 	let BridgeEscrow;
 
 	if (!useOvm) {
-		Tribeone = getContract({
-			contract: 'ProxyTribeone',
+		Rwaone = getContract({
+			contract: 'ProxyRwaone',
 			getTarget,
 			getSource,
-			sourceName: 'Tribeone',
+			sourceName: 'Rwaone',
 			deploymentPath,
 			wallet,
 		});
 
 		BridgeEscrow = getContract({
-			contract: 'TribeoneBridgeEscrow',
+			contract: 'RwaoneBridgeEscrow',
 			getTarget,
 			getSource,
 			deploymentPath,
@@ -379,8 +379,8 @@ const setupInstance = async ({
 		BridgeEscrow,
 		DebtMigrator,
 		OwnerRelay,
-		Tribeone,
-		TribeoneBridge,
+		Rwaone,
+		RwaoneBridge,
 		wallet,
 	};
 };

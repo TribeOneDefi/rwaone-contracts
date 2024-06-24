@@ -19,7 +19,7 @@ interface IVirtualTribeInternal {
     ) external;
 }
 
-// https://docs.tribeone.io/contracts/source/contracts/exchangerwithfeereclamationalternatives
+// https://docs.rwaone.io/contracts/source/contracts/exchangerwithfeereclamationalternatives
 contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
     bytes32 public constant CONTRACT_NAME = "ExchangerWithFeeRecAlternatives";
 
@@ -36,12 +36,12 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
-    bytes32 private constant CONTRACT_VIRTUALTRIBEONE_MASTERCOPY = "VirtualTribeMastercopy";
+    bytes32 private constant CONTRACT_VIRTUALRWAONE_MASTERCOPY = "VirtualTribeMastercopy";
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = Exchanger.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](1);
-        newAddresses[0] = CONTRACT_VIRTUALTRIBEONE_MASTERCOPY;
+        newAddresses[0] = CONTRACT_VIRTUALRWAONE_MASTERCOPY;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -51,15 +51,18 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
         return getAtomicMaxVolumePerBlock();
     }
 
-    function feeRateForAtomicExchange(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey)
-        external
-        view
-        returns (uint exchangeFeeRate)
-    {
-        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings =
-            _exchangeSettings(msg.sender, sourceCurrencyKey);
-        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings =
-            _exchangeSettings(msg.sender, destinationCurrencyKey);
+    function feeRateForAtomicExchange(
+        bytes32 sourceCurrencyKey,
+        bytes32 destinationCurrencyKey
+    ) external view returns (uint exchangeFeeRate) {
+        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings = _exchangeSettings(
+            msg.sender,
+            sourceCurrencyKey
+        );
+        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings = _exchangeSettings(
+            msg.sender,
+            destinationCurrencyKey
+        );
         exchangeFeeRate = _feeRateForAtomicExchange(sourceSettings, destinationSettings);
     }
 
@@ -67,19 +70,15 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
         uint sourceAmount,
         bytes32 sourceCurrencyKey,
         bytes32 destinationCurrencyKey
-    )
-        external
-        view
-        returns (
-            uint amountReceived,
-            uint fee,
-            uint exchangeFeeRate
-        )
-    {
-        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings =
-            _exchangeSettings(msg.sender, sourceCurrencyKey);
-        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings =
-            _exchangeSettings(msg.sender, destinationCurrencyKey);
+    ) external view returns (uint amountReceived, uint fee, uint exchangeFeeRate) {
+        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings = _exchangeSettings(
+            msg.sender,
+            sourceCurrencyKey
+        );
+        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings = _exchangeSettings(
+            msg.sender,
+            destinationCurrencyKey
+        );
         IDirectIntegrationManager.ParameterIntegrationSettings memory usdSettings = _exchangeSettings(msg.sender, hUSD);
 
         (amountReceived, fee, exchangeFeeRate, , , ) = _getAmountsForAtomicExchangeMinusFees(
@@ -100,7 +99,7 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
         address destinationAddress,
         bytes32 trackingCode,
         uint minAmount
-    ) external onlyTribeoneorTribe returns (uint amountReceived) {
+    ) external onlyRwaoneorTribe returns (uint amountReceived) {
         uint fee;
         (amountReceived, fee) = _exchangeAtomically(
             from,
@@ -122,7 +121,7 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
     /* ========== INTERNAL FUNCTIONS ========== */
 
     function _virtualTribeMastercopy() internal view returns (address) {
-        return requireAndGetAddress(CONTRACT_VIRTUALTRIBEONE_MASTERCOPY);
+        return requireAndGetAddress(CONTRACT_VIRTUALRWAONE_MASTERCOPY);
     }
 
     function _createVirtualTribe(
@@ -134,8 +133,9 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
         // prevent inverse tribes from being allowed due to purgeability
         require(currencyKey[0] != 0x69, "Cannot virtualize this tribe");
 
-        IVirtualTribeInternal vTribe =
-            IVirtualTribeInternal(_cloneAsMinimalProxy(_virtualTribeMastercopy(), "Could not create new vTribe"));
+        IVirtualTribeInternal vTribe = IVirtualTribeInternal(
+            _cloneAsMinimalProxy(_virtualTribeMastercopy(), "Could not create new vTribe")
+        );
         vTribe.initialize(tribe, resolver, recipient, amount, currencyKey);
         emit VirtualTribeCreated(address(tribe), recipient, address(vTribe), currencyKey, amount);
 
@@ -155,10 +155,14 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
         uint systemDestinationRate;
 
         {
-            IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings =
-                _exchangeSettings(from, sourceCurrencyKey);
-            IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings =
-                _exchangeSettings(from, destinationCurrencyKey);
+            IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings = _exchangeSettings(
+                from,
+                sourceCurrencyKey
+            );
+            IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings = _exchangeSettings(
+                from,
+                destinationCurrencyKey
+            );
 
             if (!_ensureCanExchange(sourceCurrencyKey, destinationCurrencyKey, sourceAmount)) {
                 return (0, 0);
@@ -210,13 +214,12 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
                 sourceSusdValue = systemConvertedAmount;
             } else {
                 // Otherwise, convert source to hUSD value
-                (uint amountReceivedInUSD, uint sUsdFee, , , , ) =
-                    _getAmountsForAtomicExchangeMinusFees(
-                        sourceAmountAfterSettlement,
-                        sourceSettings,
-                        usdSettings,
-                        usdSettings
-                    );
+                (uint amountReceivedInUSD, uint sUsdFee, , , , ) = _getAmountsForAtomicExchangeMinusFees(
+                    sourceAmountAfterSettlement,
+                    sourceSettings,
+                    usdSettings,
+                    usdSettings
+                );
                 sourceSusdValue = amountReceivedInUSD.add(sUsdFee);
             }
 
@@ -264,7 +267,7 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
         );
 
         // Let the DApps know there was a Tribe exchange
-        ITribeoneInternal(address(tribeone())).emitTribeExchange(
+        IRwaoneInternal(address(rwaone())).emitTribeExchange(
             from,
             sourceCurrencyKey,
             sourceAmountAfterSettlement,
@@ -274,7 +277,7 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
         );
 
         // Emit separate event to track atomic exchanges
-        ITribeoneInternal(address(tribeone())).emitAtomicTribeExchange(
+        IRwaoneInternal(address(rwaone())).emitAtomicTribeExchange(
             from,
             sourceCurrencyKey,
             sourceAmountAfterSettlement,
@@ -290,10 +293,9 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
         IDirectIntegrationManager.ParameterIntegrationSettings memory settings,
         uint sourceSusdValue
     ) internal {
-        uint currentVolume =
-            uint(lastAtomicVolume.time) == block.timestamp
-                ? uint(lastAtomicVolume.volume).add(sourceSusdValue)
-                : sourceSusdValue;
+        uint currentVolume = uint(lastAtomicVolume.time) == block.timestamp
+            ? uint(lastAtomicVolume.volume).add(sourceSusdValue)
+            : sourceSusdValue;
         require(currentVolume <= settings.atomicMaxVolumePerBlock, "Surpassed volume limit");
         lastAtomicVolume.time = uint64(block.timestamp);
         lastAtomicVolume.volume = uint192(currentVolume); // Protected by volume limit check above

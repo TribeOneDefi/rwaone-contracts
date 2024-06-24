@@ -2,16 +2,16 @@ pragma solidity ^0.5.16;
 pragma experimental ABIEncoderV2;
 
 // Inheritance
-import "./BaseTribeone.sol";
+import "./BaseRwaone.sol";
 
 // Internal references
 import "./interfaces/IRewardEscrow.sol";
 import "./interfaces/IRewardEscrowV2.sol";
 import "./interfaces/ISupplySchedule.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/tribeone
-contract Tribeone is BaseTribeone {
-    bytes32 public constant CONTRACT_NAME = "Tribeone";
+// https://docs.rwaone.io/contracts/source/contracts/rwaone
+contract Rwaone is BaseRwaone {
+    bytes32 public constant CONTRACT_NAME = "Rwaone";
 
     // ========== ADDRESS RESOLVER CONFIGURATION ==========
     bytes32 private constant CONTRACT_REWARD_ESCROW = "RewardEscrow";
@@ -26,11 +26,10 @@ contract Tribeone is BaseTribeone {
         address _owner,
         uint _totalSupply,
         address _resolver
-    ) public BaseTribeone(_proxy, _tokenState, _owner, _totalSupply, _resolver) {
-    }
+    ) public BaseRwaone(_proxy, _tokenState, _owner, _totalSupply, _resolver) {}
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
-        bytes32[] memory existingAddresses = BaseTribeone.resolverAddressesRequired();
+        bytes32[] memory existingAddresses = BaseRwaone.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](2);
         newAddresses[0] = CONTRACT_REWARD_ESCROW;
         newAddresses[1] = CONTRACT_SUPPLYSCHEDULE;
@@ -117,15 +116,9 @@ contract Tribeone is BaseTribeone {
             );
     }
 
-    function settle(bytes32 currencyKey)
-        external
-        optionalProxy
-        returns (
-            uint reclaimed,
-            uint refunded,
-            uint numEntriesSettled
-        )
-    {
+    function settle(
+        bytes32 currencyKey
+    ) external optionalProxy returns (uint reclaimed, uint refunded, uint numEntriesSettled) {
         return exchanger().settle(messageSender, currencyKey);
     }
 
@@ -189,7 +182,7 @@ contract Tribeone is BaseTribeone {
         uint256 toAmount,
         address toAddress
     );
-    bytes32 internal constant ATOMIC_TRIBEONE_EXCHANGE_SIG =
+    bytes32 internal constant ATOMIC_RWAONE_EXCHANGE_SIG =
         keccak256("AtomicTribeExchange(address,bytes32,uint256,bytes32,uint256,address)");
 
     function emitAtomicTribeExchange(
@@ -203,14 +196,14 @@ contract Tribeone is BaseTribeone {
         proxy._emit(
             abi.encode(fromCurrencyKey, fromAmount, toCurrencyKey, toAmount, toAddress),
             2,
-            ATOMIC_TRIBEONE_EXCHANGE_SIG,
+            ATOMIC_RWAONE_EXCHANGE_SIG,
             addressToBytes32(account),
             0,
             0
         );
     }
 
-    function setHakaAddress(address _hakaToken) public onlyOwner() {
+    function setHakaAddress(address _hakaToken) public onlyOwner {
         hakaToken = _hakaToken;
     }
 

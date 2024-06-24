@@ -65,10 +65,10 @@ const liquidatorRewardsRestitution = async ({
 
 	console.log(gray(`Using account with public key ${signer.address}`));
 
-	// Instantiate Tribeone contract
-	const { address: tribeetixAddress } = deployment.targets['Tribeone'];
-	const { abi: tribeetixABI } = deployment.sources[deployment.targets['Tribeone'].source];
-	const Tribeone = new ethers.Contract(tribeetixAddress, tribeetixABI, signer);
+	// Instantiate Rwaone contract
+	const { address: tribeetixAddress } = deployment.targets['Rwaone'];
+	const { abi: tribeetixABI } = deployment.sources[deployment.targets['Rwaone'].source];
+	const Rwaone = new ethers.Contract(tribeetixAddress, tribeetixABI, signer);
 
 	// Instantiate RewardEscrowV2 contract
 	const { address: rewardEscrowV2Address } = deployment.targets['RewardEscrowV2'];
@@ -267,16 +267,16 @@ const liquidatorRewardsRestitution = async ({
 		console.log('approving...');
 
 		const txns = [
-			Tribeone.populateTransaction.approve(
+			Rwaone.populateTransaction.approve(
 				'', // deployer address (should be owner of the PrivateMulticall)
 				ethers.constants.MaxUint256
 			),
-			Tribeone.populateTransaction.approve(rewardEscrowV2Address, ethers.constants.MaxUint256),
+			Rwaone.populateTransaction.approve(rewardEscrowV2Address, ethers.constants.MaxUint256),
 		];
 		await readMulticall(
 			txns,
 			v => v,
-			() => {},
+			() => { },
 			0,
 			1
 		);

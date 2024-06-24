@@ -51,17 +51,9 @@ interface IRewardEscrowV2Frozen {
     // Mutative functions
     function vest(uint256[] calldata entryIDs) external;
 
-    function createEscrowEntry(
-        address beneficiary,
-        uint256 deposit,
-        uint256 duration
-    ) external;
+    function createEscrowEntry(address beneficiary, uint256 deposit, uint256 duration) external;
 
-    function appendVestingEntry(
-        address account,
-        uint256 quantity,
-        uint256 duration
-    ) external;
+    function appendVestingEntry(address account, uint256 quantity, uint256 duration) external;
 
     function migrateVestingSchedule(address _addressToMigrate) external;
 
@@ -87,10 +79,11 @@ interface IRewardEscrowV2Frozen {
         VestingEntries.VestingEntry[] calldata vestingEntries
     ) external;
 
-    // Return amount of wHAKA transfered to TribeoneBridgeToOptimism deposit contract
-    function burnForMigration(address account, uint256[] calldata entryIDs)
-        external
-        returns (uint256 escrowedAccountBalance, VestingEntries.VestingEntry[] memory vestingEntries);
+    // Return amount of wHAKA transfered to RwaoneBridgeToOptimism deposit contract
+    function burnForMigration(
+        address account,
+        uint256[] calldata entryIDs
+    ) external returns (uint256 escrowedAccountBalance, VestingEntries.VestingEntry[] memory vestingEntries);
 
     function nextEntryId() external view returns (uint);
 

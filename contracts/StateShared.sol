@@ -13,7 +13,7 @@ import "./AddressSetLib.sol";
  * Note: it changed the interface to manage the associated contracts from `setAssociatedContract`
  * to `addAssociatedContracts` or `removeAssociatedContracts` and the modifier is now plural
  */
-// https://docs.tribeone.io/contracts/source/contracts/StateShared
+// https://docs.rwaone.io/contracts/source/contracts/StateShared
 contract StateShared is Owned {
     using AddressSetLib for AddressSetLib.AddressSet;
 
@@ -60,7 +60,7 @@ contract StateShared is Owned {
 
     /* ========== MODIFIERS ========== */
 
-    modifier onlyAssociatedContracts {
+    modifier onlyAssociatedContracts() {
         require(_associatedContracts.contains(msg.sender), "Only an associated contract can perform this action");
         _;
     }

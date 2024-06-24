@@ -82,15 +82,15 @@ async function _getWETH({ ctx, user, amount }) {
 }
 
 async function _getHAKA({ ctx, user, amount }) {
-	let { Tribeone } = ctx.contracts;
+	let { Rwaone } = ctx.contracts;
 
-	const ownerTransferable = await Tribeone.transferableTribeone(ctx.users.owner.address);
+	const ownerTransferable = await Rwaone.transferableRwaone(ctx.users.owner.address);
 	if (ownerTransferable.lt(amount)) {
 		await _getHAKAForOwner({ ctx, amount: amount.sub(ownerTransferable) });
 	}
 
-	Tribeone = Tribeone.connect(ctx.users.owner);
-	const tx = await Tribeone.transfer(user.address, amount);
+	Rwaone = Rwaone.connect(ctx.users.owner);
+	const tx = await Rwaone.transfer(user.address, amount);
 	await tx.wait();
 }
 
@@ -105,9 +105,9 @@ async function _getHAKAForOwner({ ctx, amount }) {
 async function _getHAKAForOwnerOnL2ByHackMinting({ ctx, amount }) {
 	const owner = ctx.users.owner;
 
-	let { Tribeone, AddressResolver } = ctx.contracts;
+	let { Rwaone, AddressResolver } = ctx.contracts;
 
-	const bridgeName = toBytes32('TribeoneBridgeToBase');
+	const bridgeName = toBytes32('RwaoneBridgeToBase');
 	const bridgeAddress = await AddressResolver.getAddress(bridgeName);
 
 	let tx;
@@ -115,21 +115,21 @@ async function _getHAKAForOwnerOnL2ByHackMinting({ ctx, amount }) {
 	AddressResolver = AddressResolver.connect(owner);
 	tx = await AddressResolver.importAddresses([bridgeName], [owner.address]);
 	await tx.wait();
-	tx = await AddressResolver.rebuildCaches([Tribeone.address]);
+	tx = await AddressResolver.rebuildCaches([Rwaone.address]);
 	await tx.wait();
 
-	Tribeone = Tribeone.connect(owner);
-	tx = await Tribeone.mintSecondary(owner.address, amount);
+	Rwaone = Rwaone.connect(owner);
+	tx = await Rwaone.mintSecondary(owner.address, amount);
 	await tx.wait();
 
 	tx = await AddressResolver.importAddresses([bridgeName], [bridgeAddress]);
 	await tx.wait();
-	tx = await AddressResolver.rebuildCaches([Tribeone.address]);
+	tx = await AddressResolver.rebuildCaches([Rwaone.address]);
 	await tx.wait();
 }
 
 async function _gethUSD({ ctx, user, amount }) {
-	let { Tribeone, TribehUSD } = ctx.contracts;
+	let { Rwaone, TribehUSD } = ctx.contracts;
 
 	let tx;
 
@@ -137,8 +137,8 @@ async function _gethUSD({ ctx, user, amount }) {
 	// TODO: mul(12) is a temp workaround for "Amount too large" error.
 	await ensureBalance({ ctx, symbol: 'wHAKA', user: ctx.users.owner, balance: requiredHAKA.mul(12) });
 
-	Tribeone = Tribeone.connect(ctx.users.owner);
-	tx = await Tribeone.issueTribes(amount);
+	Rwaone = Rwaone.connect(ctx.users.owner);
+	tx = await Rwaone.issueTribes(amount);
 	await tx.wait();
 
 	TribehUSD = TribehUSD.connect(ctx.users.owner);
@@ -163,7 +163,7 @@ async function _getHAKAAmountRequiredForhUSDAmount({ ctx, amount }) {
 
 function _getTokenFromSymbol({ ctx, symbol }) {
 	if (symbol === 'wHAKA') {
-		return ctx.contracts.Tribeone;
+		return ctx.contracts.Rwaone;
 	} else if (symbol === 'WETH') {
 		return ctx.contracts.WETH;
 	} else {

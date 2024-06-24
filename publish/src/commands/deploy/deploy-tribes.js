@@ -76,11 +76,11 @@ module.exports = async ({
 					yellow(
 						'⚠⚠⚠ WARNING: The system is not suspended! Adding a tribe here without using a migration contract is potentially problematic.'
 					) +
-						yellow(
-							`⚠⚠⚠ Please confirm - ${network}:\n` +
-								`Tribe${currencyKey} totalSupply is ${originalTotalSupply} \n` +
-								'NOTE: Deploying with this amount is dangerous when the system is not already suspended'
-						),
+					yellow(
+						`⚠⚠⚠ Please confirm - ${network}:\n` +
+						`Tribe${currencyKey} totalSupply is ${originalTotalSupply} \n` +
+						'NOTE: Deploying with this amount is dangerous when the system is not already suspended'
+					),
 					gray('-'.repeat(50)) + '\n'
 				);
 
@@ -99,7 +99,7 @@ module.exports = async ({
 		const tribe = await deployer.deployContract({
 			name: `Tribe${currencyKey}`,
 			source: sourceContract,
-			deps: [`TokenState${currencyKey}`, `Proxy${currencyKey}`, 'Tribeone', 'FeePool'],
+			deps: [`TokenState${currencyKey}`, `Proxy${currencyKey}`, 'Rwaone', 'FeePool'],
 			args: [
 				addressOf(proxyForTribe),
 				addressOf(tokenStateForTribe),

@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import "./IPyth.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/IPerpsV2ExchangeRate
+// https://docs.rwaone.io/contracts/source/contracts/IPerpsV2ExchangeRate
 interface IPerpsV2ExchangeRate {
     function setOffchainOracle(IPyth _offchainOracle) external;
 

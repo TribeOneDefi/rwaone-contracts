@@ -19,14 +19,14 @@ contract TribeRedeemer is ITribeRedeemer, MixinResolver {
     mapping(address => uint) public redemptions;
 
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
-    bytes32 private constant CONTRACT_TRIBEONEHUSD = "TribehUSD";
+    bytes32 private constant CONTRACT_RWAONEHUSD = "TribehUSD";
 
     constructor(address _resolver) public MixinResolver(_resolver) {}
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         addresses = new bytes32[](2);
         addresses[0] = CONTRACT_ISSUER;
-        addresses[1] = CONTRACT_TRIBEONEHUSD;
+        addresses[1] = CONTRACT_RWAONEHUSD;
     }
 
     function issuer() internal view returns (IIssuer) {
@@ -34,7 +34,7 @@ contract TribeRedeemer is ITribeRedeemer, MixinResolver {
     }
 
     function hUSD() internal view returns (IERC20) {
-        return IERC20(requireAndGetAddress(CONTRACT_TRIBEONEHUSD));
+        return IERC20(requireAndGetAddress(CONTRACT_RWAONEHUSD));
     }
 
     function totalSupply(IERC20 tribeProxy) public view returns (uint supplyInhUSD) {

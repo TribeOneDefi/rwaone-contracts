@@ -1,6 +1,6 @@
 pragma solidity >=0.4.24;
 
-// https://docs.tribeone.io/contracts/source/interfaces/ierc20
+// https://docs.rwaone.io/contracts/source/interfaces/ierc20
 interface IERC20 {
     // ERC20 Optional Views
     function name() external view returns (string memory);
@@ -21,11 +21,7 @@ interface IERC20 {
 
     function approve(address spender, uint value) external returns (bool);
 
-    function transferFrom(
-        address from,
-        address to,
-        uint value
-    ) external returns (bool);
+    function transferFrom(address from, address to, uint value) external returns (bool);
 
     // Events
     event Transfer(address indexed from, address indexed to, uint value);

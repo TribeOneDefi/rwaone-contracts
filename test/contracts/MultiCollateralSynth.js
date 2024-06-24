@@ -72,7 +72,7 @@ contract('MultiCollateralTribe', accounts => {
 			tribes,
 			contracts: [
 				'AddressResolver',
-				'Tribeone',
+				'Rwaone',
 				'Issuer',
 				'ExchangeRates',
 				'SystemStatus',
@@ -145,7 +145,7 @@ contract('MultiCollateralTribe', accounts => {
 		return { tribe, tokenState, proxy };
 	};
 
-	describe('when a MultiCollateral tribe is added and connected to Tribeone', () => {
+	describe('when a MultiCollateral tribe is added and connected to Rwaone', () => {
 		beforeEach(async () => {
 			const { tribe, tokenState, proxy } = await deployTribe({
 				currencyKey: 'sXYZ',
@@ -284,7 +284,7 @@ contract('MultiCollateralTribe', accounts => {
 				});
 			});
 
-			describe('when tribeone set to account1', () => {
+			describe('when rwaone set to account1', () => {
 				const accountToIssue = account1;
 				const issueAmount = toUnit('1');
 

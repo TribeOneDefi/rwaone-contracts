@@ -8,7 +8,7 @@ import "./interfaces/IAddressResolver.sol";
 import "./interfaces/IIssuer.sol";
 import "./MixinResolver.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/addressresolver
+// https://docs.rwaone.io/contracts/source/contracts/addressresolver
 contract AddressResolver is Owned, IAddressResolver {
     mapping(bytes32 => address) public repository;
 

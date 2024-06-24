@@ -3,7 +3,7 @@ pragma solidity ^0.5.16;
 // Inheritance
 import "./Owned.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/pausable
+// https://docs.rwaone.io/contracts/source/contracts/pausable
 contract Pausable is Owned {
     uint public lastPauseTime;
     bool public paused;
@@ -38,7 +38,7 @@ contract Pausable is Owned {
 
     event PauseChanged(bool isPaused);
 
-    modifier notPaused {
+    modifier notPaused() {
         require(!paused, "This action cannot be performed while the contract is paused");
         _;
     }

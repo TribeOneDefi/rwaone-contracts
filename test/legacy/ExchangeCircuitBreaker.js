@@ -32,7 +32,7 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 
 	const [, owner, account1, account2] = accounts;
 
-	let tribeone,
+	let rwaone,
 		exchangeRates,
 		hUSDContract,
 		exchangeFeeRate,
@@ -78,7 +78,7 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 					describe('lastValue in new CircuitBreaker is persisted during exchanges', () => {
 						describe('when a user exchanges into hETH from hUSD', () => {
 							beforeEach(async () => {
-								await tribeone.exchange(hUSD, toUnit('100'), hETH, { from: account1 });
+								await rwaone.exchange(hUSD, toUnit('100'), hETH, { from: account1 });
 							});
 							it('and the dest side has a rate persisted', async () => {
 								assert.bnEqual(
@@ -118,14 +118,14 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 		});
 	};
 
-	describe('When using Tribeone', () => {
+	describe('When using Rwaone', () => {
 		before(async () => {
 			const VirtualTribeMastercopy = artifacts.require('VirtualTribeMastercopy');
 
 			({
 				ExchangeCircuitBreaker: exchangeCircuitBreaker,
 				CircuitBreaker: circuitBreaker,
-				Tribeone: tribeone,
+				Rwaone: rwaone,
 				ExchangeRates: exchangeRates,
 				TribehUSD: hUSDContract,
 				SystemSettings: systemSettings,
@@ -139,10 +139,10 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 					'ExchangeState',
 					'ExchangeRates',
 					'DebtCache',
-					'Issuer', // necessary for tribeone transfers to succeed
+					'Issuer', // necessary for rwaone transfers to succeed
 					'FeePool',
 					'FeePoolEternalStorage',
-					'Tribeone',
+					'Rwaone',
 					'SystemStatus',
 					'SystemSettings',
 					'DelegateApprovals',

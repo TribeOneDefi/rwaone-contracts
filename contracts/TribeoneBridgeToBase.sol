@@ -2,29 +2,29 @@ pragma solidity ^0.5.16;
 pragma experimental ABIEncoderV2;
 
 // Inheritance
-import "./BaseTribeoneBridge.sol";
-import "./interfaces/ITribeoneBridgeToBase.sol";
+import "./BaseRwaoneBridge.sol";
+import "./interfaces/IRwaoneBridgeToBase.sol";
 import "@eth-optimism/contracts/iOVM/bridge/tokens/iOVM_L2DepositedToken.sol";
 
 // Internal references
 import "@eth-optimism/contracts/iOVM/bridge/tokens/iOVM_L1TokenGateway.sol";
 
-contract TribeoneBridgeToBase is BaseTribeoneBridge, ITribeoneBridgeToBase, iOVM_L2DepositedToken {
+contract RwaoneBridgeToBase is BaseRwaoneBridge, IRwaoneBridgeToBase, iOVM_L2DepositedToken {
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
-    bytes32 private constant CONTRACT_BASE_TRIBEONEETIXBRIDGETOOPTIMISM = "base:TribeoneBridgeToOptimism";
+    bytes32 private constant CONTRACT_BASE_RWAONEETIXBRIDGETOOPTIMISM = "base:RwaoneBridgeToOptimism";
 
     function CONTRACT_NAME() public pure returns (bytes32) {
-        return "TribeoneBridgeToBase";
+        return "RwaoneBridgeToBase";
     }
 
     // ========== CONSTRUCTOR ==========
 
-    constructor(address _owner, address _resolver) public BaseTribeoneBridge(_owner, _resolver) {}
+    constructor(address _owner, address _resolver) public BaseRwaoneBridge(_owner, _resolver) {}
 
     // ========== INTERNALS ============
 
     function tribeetixBridgeToOptimism() internal view returns (address) {
-        return requireAndGetAddress(CONTRACT_BASE_TRIBEONEETIXBRIDGETOOPTIMISM);
+        return requireAndGetAddress(CONTRACT_BASE_RWAONEETIXBRIDGETOOPTIMISM);
     }
 
     function counterpart() internal view returns (address) {
@@ -34,9 +34,9 @@ contract TribeoneBridgeToBase is BaseTribeoneBridge, ITribeoneBridgeToBase, iOVM
     // ========== VIEWS ==========
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
-        bytes32[] memory existingAddresses = BaseTribeoneBridge.resolverAddressesRequired();
+        bytes32[] memory existingAddresses = BaseRwaoneBridge.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](1);
-        newAddresses[0] = CONTRACT_BASE_TRIBEONEETIXBRIDGETOOPTIMISM;
+        newAddresses[0] = CONTRACT_BASE_RWAONEETIXBRIDGETOOPTIMISM;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -52,10 +52,10 @@ contract TribeoneBridgeToBase is BaseTribeoneBridge, ITribeoneBridgeToBase, iOVM
     }
 
     function _initiateWithdraw(address to, uint amount) private {
-        require(tribeone().transferableTribeone(msg.sender) >= amount, "Not enough transferable wHAKA");
+        require(rwaone().transferableRwaone(msg.sender) >= amount, "Not enough transferable wHAKA");
 
-        // instruct L2 Tribeone to burn this supply
-        tribeone().burnSecondary(msg.sender, amount);
+        // instruct L2 Rwaone to burn this supply
+        rwaone().burnSecondary(msg.sender, amount);
 
         // create message payload for L1
         iOVM_L1TokenGateway bridgeToOptimism;
@@ -80,7 +80,7 @@ contract TribeoneBridgeToBase is BaseTribeoneBridge, ITribeoneBridgeToBase, iOVM
     ) external onlyCounterpart {
         IRewardEscrowV2 rewardEscrow = rewardEscrowV2();
         // First, mint the escrowed wHAKA that are being migrated
-        tribeone().mintSecondary(address(rewardEscrow), escrowedAmount);
+        rwaone().mintSecondary(address(rewardEscrow), escrowedAmount);
         rewardEscrow.importVestingEntries(account, escrowedAmount, vestingEntries);
 
         emit ImportedVestingEntries(account, escrowedAmount, vestingEntries);
@@ -88,23 +88,23 @@ contract TribeoneBridgeToBase is BaseTribeoneBridge, ITribeoneBridgeToBase, iOVM
 
     // invoked by Messenger on L2
     function finalizeDeposit(address to, uint256 amount) external onlyCounterpart {
-        // now tell Tribeone to mint these tokens, deposited in L1, into the specified account for L2
-        tribeone().mintSecondary(to, amount);
+        // now tell Rwaone to mint these tokens, deposited in L1, into the specified account for L2
+        rwaone().mintSecondary(to, amount);
 
         emit iOVM_L2DepositedToken.DepositFinalized(to, amount);
     }
 
     // invoked by Messenger on L2
     function finalizeRewardDeposit(address from, uint256 amount) external onlyCounterpart {
-        // now tell Tribeone to mint these tokens, deposited in L1, into reward escrow on L2
-        tribeone().mintSecondaryRewards(amount);
+        // now tell Rwaone to mint these tokens, deposited in L1, into reward escrow on L2
+        rwaone().mintSecondaryRewards(amount);
 
         emit RewardDepositFinalized(from, amount);
     }
 
     // invoked by Messenger on L2
     function finalizeFeePeriodClose(uint256 snxBackedAmount, uint256 totalDebtShares) external onlyCounterpart {
-        // now tell Tribeone to mint these tokens, deposited in L1, into reward escrow on L2
+        // now tell Rwaone to mint these tokens, deposited in L1, into reward escrow on L2
         feePool().closeSecondary(snxBackedAmount, totalDebtShares);
 
         emit FeePeriodCloseFinalized(snxBackedAmount, totalDebtShares);

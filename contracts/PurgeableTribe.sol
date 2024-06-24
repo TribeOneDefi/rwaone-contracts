@@ -9,7 +9,7 @@ import "./SafeDecimalMath.sol";
 // Internal References
 import "./interfaces/IExchangeRates.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/purgeabletribe
+// https://docs.rwaone.io/contracts/source/contracts/purgeabletribe
 contract PurgeableTribe is Tribe {
     using SafeDecimalMath for uint;
 

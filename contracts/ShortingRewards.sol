@@ -15,7 +15,7 @@ import "./MixinResolver.sol";
 
 import "./interfaces/ICollateralErc20.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/stakingrewards
+// https://docs.rwaone.io/contracts/source/contracts/stakingrewards
 contract ShortingRewards is IShortingRewards, RewardsDistributionRecipient, ReentrancyGuard, Pausable, MixinResolver {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
@@ -164,7 +164,7 @@ contract ShortingRewards is IShortingRewards, RewardsDistributionRecipient, Reen
         _;
     }
 
-    modifier onlyShortContract {
+    modifier onlyShortContract() {
         bool isShort = msg.sender == address(_short());
         require(isShort, "Only Short Contract");
         _;

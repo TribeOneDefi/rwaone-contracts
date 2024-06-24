@@ -6,24 +6,24 @@ const { onlyGivenAddressCanInvoke, ensureOnlyExpectedMutativeFunctions } = requi
 const { toBytes32 } = require('../..');
 const { smock } = require('@defi-wonderland/smock');
 
-const TribeoneBridgeToOptimism = artifacts.require('TribeoneBridgeToOptimism');
+const RwaoneBridgeToOptimism = artifacts.require('RwaoneBridgeToOptimism');
 
-contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
+contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 	const [
 		owner,
 		user1,
 		smockedMessenger,
 		rewardsDistribution,
 		snxBridgeToBase,
-		TribeoneBridgeEscrow,
+		RwaoneBridgeEscrow,
 		FeePool,
 		randomAddress,
 	] = accounts;
 
 	it('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
-			abi: TribeoneBridgeToOptimism.abi,
-			ignoreParents: ['BaseTribeoneBridge'],
+			abi: RwaoneBridgeToOptimism.abi,
+			ignoreParents: ['BaseRwaoneBridge'],
 			expected: [
 				'closeFeePeriod',
 				'depositAndMigrateEscrow',
@@ -46,7 +46,7 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 
 	describe('when all the deps are mocked', () => {
 		let messenger;
-		let tribeone;
+		let rwaone;
 		let issuer;
 		let exchangeRates;
 		let systemStatus;
@@ -63,8 +63,8 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 
 			rewardEscrow = await smock.fake('contracts/interfaces/IRewardEscrowV2.sol:IRewardEscrowV2');
 
-			// can't use ITribeone as we need ERC20 functions as well
-			tribeone = await smock.fake('Tribeone');
+			// can't use IRwaone as we need ERC20 functions as well
+			rwaone = await smock.fake('Rwaone');
 			issuer = await smock.fake('IIssuer');
 			exchangeRates = await smock.fake('ExchangeRates');
 			systemStatus = await smock.fake('SystemStatus');
@@ -75,20 +75,20 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 				[
 					'FlexibleStorage',
 					'ext:Messenger',
-					'Tribeone',
+					'Rwaone',
 					'Issuer',
 					'ExchangeRates',
 					'SystemStatus',
 					'FeePool',
 					'RewardsDistribution',
-					'ovm:TribeoneBridgeToBase',
+					'ovm:RwaoneBridgeToBase',
 					'RewardEscrowV2',
-					'TribeoneBridgeEscrow',
+					'RwaoneBridgeEscrow',
 				].map(toBytes32),
 				[
 					flexibleStorage.address,
 					messenger.address,
-					tribeone.address,
+					rwaone.address,
 					issuer.address,
 					exchangeRates.address,
 					systemStatus.address,
@@ -96,7 +96,7 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 					rewardsDistribution,
 					snxBridgeToBase,
 					rewardEscrow.address,
-					TribeoneBridgeEscrow,
+					RwaoneBridgeEscrow,
 				],
 				{ from: owner }
 			);
@@ -104,10 +104,10 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 
 		beforeEach(async () => {
 			// stubs
-			tribeone.transferFrom.returns(() => true);
-			tribeone.balanceOf.returns(() => web3.utils.toWei('1'));
-			tribeone.transfer.returns(() => true);
-			messenger.sendMessage.returns(() => {});
+			rwaone.transferFrom.returns(() => true);
+			rwaone.balanceOf.returns(() => web3.utils.toWei('1'));
+			rwaone.transfer.returns(() => true);
+			messenger.sendMessage.returns(() => { });
 			messenger.xDomainMessageSender.returns(() => snxBridgeToBase);
 			issuer.debtBalanceOf.returns(() => '0');
 			rewardEscrow.burnForMigration.returns(() => [escrowAmount, emptyArray]);
@@ -118,7 +118,7 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 			let instance;
 			beforeEach(async () => {
 				instance = await artifacts
-					.require('TribeoneBridgeToOptimism')
+					.require('RwaoneBridgeToOptimism')
 					.new(owner, resolver.address);
 
 				await instance.rebuildCache();
@@ -158,7 +158,7 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 						expect(messenger.sendMessage).to.have.length(0);
 						messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
 						const expectedData = getDataOfEncodedFncCall({
-							contract: 'TribeoneBridgeToBase',
+							contract: 'RwaoneBridgeToBase',
 							fnc: 'finalizeDeposit',
 							args: [user1, amount],
 						});
@@ -201,7 +201,7 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 
 						messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
 						const expectedData = getDataOfEncodedFncCall({
-							contract: 'TribeoneBridgeToBase',
+							contract: 'RwaoneBridgeToBase',
 							fnc: 'finalizeDeposit',
 							args: [randomAddress, amount],
 						});
@@ -294,7 +294,7 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 
 							messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
 							let expectedData = getDataOfEncodedFncCall({
-								contract: 'ITribeoneBridgeToBase',
+								contract: 'IRwaoneBridgeToBase',
 								fnc: 'finalizeEscrowMigration',
 								args: [user1, escrowAmount, emptyArray],
 							});
@@ -303,7 +303,7 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 
 							messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
 							expectedData = getDataOfEncodedFncCall({
-								contract: 'ITribeoneBridgeToBase',
+								contract: 'IRwaoneBridgeToBase',
 								fnc: 'finalizeEscrowMigration',
 								args: [user1, escrowAmount, emptyArray],
 							});
@@ -312,7 +312,7 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 
 							messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
 							expectedData = getDataOfEncodedFncCall({
-								contract: 'TribeoneBridgeToBase',
+								contract: 'RwaoneBridgeToBase',
 								fnc: 'finalizeDeposit',
 								args: [user1, amount],
 							});
@@ -322,9 +322,9 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 						});
 
 						it('wHAKA is transferred from the user to the deposit contract', async () => {
-							tribeone.transferFrom.returnsAtCall(0, user1);
-							tribeone.transferFrom.returnsAtCall(1, TribeoneBridgeEscrow);
-							tribeone.transferFrom.returnsAtCall(2, amount);
+							rwaone.transferFrom.returnsAtCall(0, user1);
+							rwaone.transferFrom.returnsAtCall(1, RwaoneBridgeEscrow);
+							rwaone.transferFrom.returnsAtCall(2, amount);
 						});
 
 						it('and three events are emitted', async () => {
@@ -352,7 +352,7 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 							expect(messenger.sendMessage).to.have.length(0);
 							messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
 							const expectedData = getDataOfEncodedFncCall({
-								contract: 'TribeoneBridgeToBase',
+								contract: 'RwaoneBridgeToBase',
 								fnc: 'finalizeDeposit',
 								args: [user1, amount],
 							});
@@ -383,7 +383,7 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 							expect(messenger.sendMessage).to.have.length(0);
 							messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
 							let expectedData = getDataOfEncodedFncCall({
-								contract: 'ITribeoneBridgeToBase',
+								contract: 'IRwaoneBridgeToBase',
 								fnc: 'finalizeEscrowMigration',
 								args: [user1, escrowAmount, []],
 							});
@@ -392,7 +392,7 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 
 							messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
 							expectedData = getDataOfEncodedFncCall({
-								contract: 'ITribeoneBridgeToBase',
+								contract: 'IRwaoneBridgeToBase',
 								fnc: 'finalizeEscrowMigration',
 								args: [user1, escrowAmount, []],
 							});
@@ -434,16 +434,16 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 					});
 
 					it('then wHAKA is transferred from the account to the bridge escrow', async () => {
-						tribeone.transferFrom.returnsAtCall(0, user1);
-						tribeone.transferFrom.returnsAtCall(1, TribeoneBridgeEscrow);
-						tribeone.transferFrom.returnsAtCall(2, amount);
+						rwaone.transferFrom.returnsAtCall(0, user1);
+						rwaone.transferFrom.returnsAtCall(1, RwaoneBridgeEscrow);
+						rwaone.transferFrom.returnsAtCall(2, amount);
 					});
 
 					it('and the message is relayed', async () => {
 						expect(messenger.sendMessage).to.have.length(0);
 						messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
 						const expectedData = getDataOfEncodedFncCall({
-							contract: 'TribeoneBridgeToBase',
+							contract: 'RwaoneBridgeToBase',
 							fnc: 'finalizeRewardDeposit',
 							args: [user1, amount],
 						});
@@ -486,7 +486,7 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 						expect(messenger.sendMessage).to.have.length(0);
 						messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
 						const expectedData = getDataOfEncodedFncCall({
-							contract: 'TribeoneBridgeToBase',
+							contract: 'RwaoneBridgeToBase',
 							fnc: 'finalizeFeePeriodClose',
 							args: ['1', '2'],
 						});
@@ -525,7 +525,7 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 						messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
 
 						const expectedData = getDataOfEncodedFncCall({
-							contract: 'TribeoneBridgeToBase',
+							contract: 'RwaoneBridgeToBase',
 							fnc: 'finalizeRewardDeposit',
 							args: [rewardsDistribution, amount],
 						});
@@ -535,8 +535,8 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 					});
 
 					it('wHAKA is transferred from the bridge to the bridge escrow', async () => {
-						tribeone.transfer.returnsAtCall(0, TribeoneBridgeEscrow);
-						tribeone.transfer.returnsAtCall(1, amount);
+						rwaone.transfer.returnsAtCall(0, RwaoneBridgeEscrow);
+						rwaone.transfer.returnsAtCall(1, amount);
 					});
 
 					it('and a RewardDepositInitiated event is emitted', async () => {
@@ -589,11 +589,11 @@ contract('TribeoneBridgeToOptimism (unit tests)', accounts => {
 						});
 					});
 
-					it('then wHAKA is minted via MintableTribeone.finalizeWithdrawal', async () => {
+					it('then wHAKA is minted via MintableRwaone.finalizeWithdrawal', async () => {
 						expect(messenger.sendMessage).to.have.length(0);
-						tribeone.transferFrom.returnsAtCall(0, TribeoneBridgeEscrow);
-						tribeone.transferFrom.returnsAtCall(1, user1);
-						tribeone.transferFrom.returnsAtCall(2, finalizeWithdrawalAmount);
+						rwaone.transferFrom.returnsAtCall(0, RwaoneBridgeEscrow);
+						rwaone.transferFrom.returnsAtCall(1, user1);
+						rwaone.transferFrom.returnsAtCall(2, finalizeWithdrawalAmount);
 					});
 				});
 			});

@@ -7,7 +7,7 @@ import "./interfaces/IFlexibleStorage.sol";
 // Internal References
 import "./interfaces/IAddressResolver.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/flexiblestorage
+// https://docs.rwaone.io/contracts/source/contracts/flexiblestorage
 contract FlexibleStorage is ContractStorage, IFlexibleStorage {
     mapping(bytes32 => mapping(bytes32 => uint)) internal uintStorage;
     mapping(bytes32 => mapping(bytes32 => int)) internal intStorage;
@@ -19,47 +19,27 @@ contract FlexibleStorage is ContractStorage, IFlexibleStorage {
 
     /* ========== INTERNAL FUNCTIONS ========== */
 
-    function _setUIntValue(
-        bytes32 contractName,
-        bytes32 record,
-        uint value
-    ) internal {
+    function _setUIntValue(bytes32 contractName, bytes32 record, uint value) internal {
         uintStorage[_memoizeHash(contractName)][record] = value;
         emit ValueSetUInt(contractName, record, value);
     }
 
-    function _setIntValue(
-        bytes32 contractName,
-        bytes32 record,
-        int value
-    ) internal {
+    function _setIntValue(bytes32 contractName, bytes32 record, int value) internal {
         intStorage[_memoizeHash(contractName)][record] = value;
         emit ValueSetInt(contractName, record, value);
     }
 
-    function _setAddressValue(
-        bytes32 contractName,
-        bytes32 record,
-        address value
-    ) internal {
+    function _setAddressValue(bytes32 contractName, bytes32 record, address value) internal {
         addressStorage[_memoizeHash(contractName)][record] = value;
         emit ValueSetAddress(contractName, record, value);
     }
 
-    function _setBoolValue(
-        bytes32 contractName,
-        bytes32 record,
-        bool value
-    ) internal {
+    function _setBoolValue(bytes32 contractName, bytes32 record, bool value) internal {
         boolStorage[_memoizeHash(contractName)][record] = value;
         emit ValueSetBool(contractName, record, value);
     }
 
-    function _setBytes32Value(
-        bytes32 contractName,
-        bytes32 record,
-        bytes32 value
-    ) internal {
+    function _setBytes32Value(bytes32 contractName, bytes32 record, bytes32 value) internal {
         bytes32Storage[_memoizeHash(contractName)][record] = value;
         emit ValueSetBytes32(contractName, record, value);
     }
@@ -137,11 +117,7 @@ contract FlexibleStorage is ContractStorage, IFlexibleStorage {
     }
 
     /* ========== RESTRICTED FUNCTIONS ========== */
-    function setUIntValue(
-        bytes32 contractName,
-        bytes32 record,
-        uint value
-    ) external onlyContract(contractName) {
+    function setUIntValue(bytes32 contractName, bytes32 record, uint value) external onlyContract(contractName) {
         _setUIntValue(contractName, record, value);
     }
 
@@ -163,11 +139,7 @@ contract FlexibleStorage is ContractStorage, IFlexibleStorage {
         delete uintStorage[hashes[contractName]][record];
     }
 
-    function setIntValue(
-        bytes32 contractName,
-        bytes32 record,
-        int value
-    ) external onlyContract(contractName) {
+    function setIntValue(bytes32 contractName, bytes32 record, int value) external onlyContract(contractName) {
         _setIntValue(contractName, record, value);
     }
 
@@ -189,11 +161,7 @@ contract FlexibleStorage is ContractStorage, IFlexibleStorage {
         delete intStorage[hashes[contractName]][record];
     }
 
-    function setAddressValue(
-        bytes32 contractName,
-        bytes32 record,
-        address value
-    ) external onlyContract(contractName) {
+    function setAddressValue(bytes32 contractName, bytes32 record, address value) external onlyContract(contractName) {
         _setAddressValue(contractName, record, value);
     }
 
@@ -215,11 +183,7 @@ contract FlexibleStorage is ContractStorage, IFlexibleStorage {
         delete addressStorage[hashes[contractName]][record];
     }
 
-    function setBoolValue(
-        bytes32 contractName,
-        bytes32 record,
-        bool value
-    ) external onlyContract(contractName) {
+    function setBoolValue(bytes32 contractName, bytes32 record, bool value) external onlyContract(contractName) {
         _setBoolValue(contractName, record, value);
     }
 
@@ -241,11 +205,7 @@ contract FlexibleStorage is ContractStorage, IFlexibleStorage {
         delete boolStorage[hashes[contractName]][record];
     }
 
-    function setBytes32Value(
-        bytes32 contractName,
-        bytes32 record,
-        bytes32 value
-    ) external onlyContract(contractName) {
+    function setBytes32Value(bytes32 contractName, bytes32 record, bytes32 value) external onlyContract(contractName) {
         _setBytes32Value(contractName, record, value);
     }
 

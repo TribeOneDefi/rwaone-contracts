@@ -1,7 +1,7 @@
 pragma solidity >=0.4.24;
 pragma experimental ABIEncoderV2;
 
-// https://docs.tribeone.io/contracts/source/interfaces/IDirectIntegration
+// https://docs.rwaone.io/contracts/source/interfaces/IDirectIntegration
 interface IDirectIntegrationManager {
     struct ParameterIntegrationSettings {
         bytes32 currencyKey;
@@ -19,10 +19,10 @@ interface IDirectIntegrationManager {
         uint exchangeDynamicFeeWeightDecay;
     }
 
-    function getExchangeParameters(address integration, bytes32 key)
-        external
-        view
-        returns (ParameterIntegrationSettings memory settings);
+    function getExchangeParameters(
+        address integration,
+        bytes32 key
+    ) external view returns (ParameterIntegrationSettings memory settings);
 
     function setExchangeParameters(
         address integration,

@@ -17,7 +17,7 @@ import "./interfaces/IERC20.sol";
 import "./interfaces/IFeePool.sol";
 import "./interfaces/IIssuer.sol";
 
-// https://docs.tribeone.io/contracts/RewardEscrow
+// https://docs.rwaone.io/contracts/RewardEscrow
 contract BaseRewardEscrowV2 is Owned, IRewardEscrowV2, LimitedSetup(8 weeks), MixinResolver {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -39,7 +39,7 @@ contract BaseRewardEscrowV2 is Owned, IRewardEscrowV2, LimitedSetup(8 weeks), Mi
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
-    bytes32 private constant CONTRACT_TRIBEONEETIX = "Tribeone";
+    bytes32 private constant CONTRACT_RWAONEETIX = "Rwaone";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_FEEPOOL = "FeePool";
     bytes32 private constant CONTRACT_REWARDESCROWV2STORAGE = "RewardEscrowV2Storage";
@@ -55,7 +55,7 @@ contract BaseRewardEscrowV2 is Owned, IRewardEscrowV2, LimitedSetup(8 weeks), Mi
     }
 
     function tribeetixERC20() internal view returns (IERC20) {
-        return IERC20(requireAndGetAddress(CONTRACT_TRIBEONEETIX));
+        return IERC20(requireAndGetAddress(CONTRACT_RWAONEETIX));
     }
 
     function issuer() internal view returns (IIssuer) {
@@ -75,7 +75,7 @@ contract BaseRewardEscrowV2 is Owned, IRewardEscrowV2, LimitedSetup(8 weeks), Mi
     // Note: use public visibility so that it can be invoked in a subclass
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         addresses = new bytes32[](4);
-        addresses[0] = CONTRACT_TRIBEONEETIX;
+        addresses[0] = CONTRACT_RWAONEETIX;
         addresses[1] = CONTRACT_FEEPOOL;
         addresses[2] = CONTRACT_ISSUER;
         addresses[3] = CONTRACT_REWARDESCROWV2STORAGE;
@@ -254,23 +254,21 @@ contract BaseRewardEscrowV2 is Owned, IRewardEscrowV2, LimitedSetup(8 weeks), Mi
     }
 
     /// method for revoking vesting entries regardless of schedule to be used for liquidations
-    /// access controlled to only Tribeone contract
+    /// access controlled to only Rwaone contract
     /// @param account: account
     /// @param recipient: account to transfer the revoked tokens to
     /// @param targetAmount: amount of wHAKA to revoke, when this amount is reached, no more entries are revoked
     /// @param startIndex: index into accountVestingEntryIDs[account] to start iterating from
-    function revokeFrom(
-        address account,
-        address recipient,
-        uint targetAmount,
-        uint startIndex
-    ) external onlyTribeone {
+    function revokeFrom(address account, address recipient, uint targetAmount, uint startIndex) external onlyRwaone {
         require(account != address(0), "account not set");
         require(recipient != address(0), "recipient not set");
 
         // set stored entries to zero
-        (uint total, uint endIndex, uint lastEntryTime) =
-            state().setZeroAmountUntilTarget(account, startIndex, targetAmount);
+        (uint total, uint endIndex, uint lastEntryTime) = state().setZeroAmountUntilTarget(
+            account,
+            startIndex,
+            targetAmount
+        );
 
         // check total is indeed enough
         // the caller should have checked for the general amount of escrow
@@ -281,11 +279,10 @@ contract BaseRewardEscrowV2 is Owned, IRewardEscrowV2, LimitedSetup(8 weeks), Mi
         if (total > targetAmount) {
             // only take the precise amount needed by adding a new entry with the difference from total
             uint refund = total.sub(targetAmount);
-            uint entryID =
-                state().addVestingEntry(
-                    account,
-                    VestingEntries.VestingEntry({endTime: uint64(lastEntryTime), escrowAmount: refund})
-                );
+            uint entryID = state().addVestingEntry(
+                account,
+                VestingEntries.VestingEntry({endTime: uint64(lastEntryTime), escrowAmount: refund})
+            );
             // emit event
             uint duration = lastEntryTime > block.timestamp ? lastEntryTime.sub(block.timestamp) : 0;
             emit VestingEntryCreated(account, block.timestamp, refund, duration, entryID);
@@ -298,11 +295,7 @@ contract BaseRewardEscrowV2 is Owned, IRewardEscrowV2, LimitedSetup(8 weeks), Mi
     }
 
     /// remove tokens from vesting aggregates and transfer them to recipient
-    function _subtractAndTransfer(
-        address subtractFrom,
-        address transferTo,
-        uint256 amount
-    ) internal {
+    function _subtractAndTransfer(address subtractFrom, address transferTo, uint256 amount) internal {
         state().updateEscrowAccountBalance(subtractFrom, -SafeCast.toInt256(amount));
         tribeetixERC20().transfer(transferTo, amount);
     }
@@ -312,11 +305,7 @@ contract BaseRewardEscrowV2 is Owned, IRewardEscrowV2, LimitedSetup(8 weeks), Mi
      * @dev This call expects that the depositor (msg.sender) has already approved the Reward escrow contract
      to spend the the amount being escrowed.
      */
-    function createEscrowEntry(
-        address beneficiary,
-        uint256 deposit,
-        uint256 duration
-    ) external {
+    function createEscrowEntry(address beneficiary, uint256 deposit, uint256 duration) external {
         require(beneficiary != address(0), "Cannot create escrow with address(0)");
 
         /* Transfer wHAKA from msg.sender */
@@ -328,25 +317,17 @@ contract BaseRewardEscrowV2 is Owned, IRewardEscrowV2, LimitedSetup(8 weeks), Mi
 
     /**
      * @notice Add a new vesting entry at a given time and quantity to an account's schedule.
-     * @dev A call to this should accompany a previous successful call to tribeone.transfer(rewardEscrow, amount),
+     * @dev A call to this should accompany a previous successful call to rwaone.transfer(rewardEscrow, amount),
      * to ensure that when the funds are withdrawn, there is enough balance.
      * @param account The account to append a new vesting entry to.
      * @param quantity The quantity of wHAKA that will be escrowed.
      * @param duration The duration that wHAKA will be emitted.
      */
-    function appendVestingEntry(
-        address account,
-        uint256 quantity,
-        uint256 duration
-    ) external onlyFeePool {
+    function appendVestingEntry(address account, uint256 quantity, uint256 duration) external onlyFeePool {
         _appendVestingEntry(account, quantity, duration);
     }
 
-    function _appendVestingEntry(
-        address account,
-        uint256 quantity,
-        uint256 duration
-    ) internal {
+    function _appendVestingEntry(address account, uint256 quantity, uint256 duration) internal {
         /* No empty or already-passed vesting entries allowed. */
         require(quantity != 0, "Quantity cannot be zero");
         require(duration > 0 && duration <= max_duration, "Cannot escrow with 0 duration OR above max_duration");
@@ -364,11 +345,10 @@ contract BaseRewardEscrowV2 is Owned, IRewardEscrowV2, LimitedSetup(8 weeks), Mi
         uint endTime = block.timestamp + duration;
 
         // store vesting entry
-        uint entryID =
-            state().addVestingEntry(
-                account,
-                VestingEntries.VestingEntry({endTime: uint64(endTime), escrowAmount: quantity})
-            );
+        uint entryID = state().addVestingEntry(
+            account,
+            VestingEntries.VestingEntry({endTime: uint64(endTime), escrowAmount: quantity})
+        );
 
         emit VestingEntryCreated(account, block.timestamp, quantity, duration, entryID);
     }
@@ -448,11 +428,7 @@ contract BaseRewardEscrowV2 is Owned, IRewardEscrowV2, LimitedSetup(8 weeks), Mi
         _notImplemented();
     }
 
-    function migrateAccountEscrowBalances(
-        address[] calldata,
-        uint256[] calldata,
-        uint256[] calldata
-    ) external {
+    function migrateAccountEscrowBalances(address[] calldata, uint256[] calldata, uint256[] calldata) external {
         _notImplemented();
     }
 
@@ -462,11 +438,7 @@ contract BaseRewardEscrowV2 is Owned, IRewardEscrowV2, LimitedSetup(8 weeks), Mi
         _notImplemented();
     }
 
-    function importVestingEntries(
-        address,
-        uint256,
-        VestingEntries.VestingEntry[] calldata
-    ) external {
+    function importVestingEntries(address, uint256, VestingEntries.VestingEntry[] calldata) external {
         _notImplemented();
     }
 
@@ -476,8 +448,8 @@ contract BaseRewardEscrowV2 is Owned, IRewardEscrowV2, LimitedSetup(8 weeks), Mi
         _;
     }
 
-    modifier onlyTribeone() {
-        require(msg.sender == address(tribeetixERC20()), "Only Tribeone");
+    modifier onlyRwaone() {
+        require(msg.sender == address(tribeetixERC20()), "Only Rwaone");
         _;
     }
 

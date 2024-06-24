@@ -3,7 +3,7 @@ pragma solidity ^0.5.16;
 // Libraries
 import "./SafeDecimalMath.sol";
 
-// https://docs.tribeone.io/contracts/source/libraries/math
+// https://docs.rwaone.io/contracts/source/libraries/math
 library Math {
     using SafeMath for uint;
     using SafeDecimalMath for uint;

@@ -20,7 +20,7 @@ import "./interfaces/IEtherWrapper.sol";
 import "./interfaces/IWrapperFactory.sol";
 import "./interfaces/IFuturesMarketManager.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/debtcache
+// https://docs.rwaone.io/contracts/source/contracts/debtcache
 contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -131,11 +131,10 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         return _cacheStale(_cacheTimestamp);
     }
 
-    function _issuedTribeValues(bytes32[] memory currencyKeys, uint[] memory rates)
-        internal
-        view
-        returns (uint[] memory values)
-    {
+    function _issuedTribeValues(
+        bytes32[] memory currencyKeys,
+        uint[] memory rates
+    ) internal view returns (uint[] memory values) {
         uint numValues = currencyKeys.length;
         values = new uint[](numValues);
         ITribe[] memory tribes = issuer().getTribes(currencyKeys);
@@ -150,16 +149,9 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         return (values);
     }
 
-    function _currentTribeDebts(bytes32[] memory currencyKeys)
-        internal
-        view
-        returns (
-            uint[] memory snxIssuedDebts,
-            uint _futuresDebt,
-            uint _excludedDebt,
-            bool anyRateIsInvalid
-        )
-    {
+    function _currentTribeDebts(
+        bytes32[] memory currencyKeys
+    ) internal view returns (uint[] memory snxIssuedDebts, uint _futuresDebt, uint _excludedDebt, bool anyRateIsInvalid) {
         (uint[] memory rates, bool isInvalid) = exchangeRates().ratesAndInvalidForCurrencies(currencyKeys);
         uint[] memory values = _issuedTribeValues(currencyKeys, rates);
         (uint excludedDebt, bool isAnyNonSnxDebtRateInvalid) = _totalNonSnxBackedDebt(currencyKeys, rates, isInvalid);
@@ -168,16 +160,9 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         return (values, futuresDebt, excludedDebt, isInvalid || futuresDebtIsInvalid || isAnyNonSnxDebtRateInvalid);
     }
 
-    function currentTribeDebts(bytes32[] calldata currencyKeys)
-        external
-        view
-        returns (
-            uint[] memory debtValues,
-            uint futuresDebt,
-            uint excludedDebt,
-            bool anyRateIsInvalid
-        )
-    {
+    function currentTribeDebts(
+        bytes32[] calldata currencyKeys
+    ) external view returns (uint[] memory debtValues, uint futuresDebt, uint excludedDebt, bool anyRateIsInvalid) {
         return _currentTribeDebts(currencyKeys);
     }
 
@@ -302,16 +287,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         return _currentDebt();
     }
 
-    function cacheInfo()
-        external
-        view
-        returns (
-            uint debt,
-            uint timestamp,
-            bool isInvalid,
-            bool isStale
-        )
-    {
+    function cacheInfo() external view returns (uint debt, uint timestamp, bool isInvalid, bool isStale) {
         uint time = _cacheTimestamp;
         return (_cachedDebt, time, _cacheInvalid, _cacheStale(time));
     }

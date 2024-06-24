@@ -6,7 +6,7 @@ const uniq = require('lodash.uniq');
 const {
 	wrap,
 	toBytes32,
-	constants: { CONFIG_FILENAME, TRIBEONES_FILENAME, DEPLOYMENT_FILENAME },
+	constants: { CONFIG_FILENAME, RWAONES_FILENAME, DEPLOYMENT_FILENAME },
 } = require('../../..');
 const { red, gray, yellow } = require('chalk');
 
@@ -39,7 +39,7 @@ async function extractStakingBalances({
 		path,
 	});
 
-	const { abi: snxABI } = getSource({ contract: 'Tribeone' });
+	const { abi: snxABI } = getSource({ contract: 'Rwaone' });
 
 	/** *********** Replace Settings Here *********** **/
 
@@ -170,7 +170,7 @@ async function extractStakingBalances({
 		console.log(`    Tribe: ${iTribeAddress}`);
 		console.log(
 			`    Starting Block: ${deploymentBlock} (${currentBlock -
-				deploymentBlock} blocks ago at ${formatDate(deploymentBlockDetails.timestamp * 1000)})\n`
+			deploymentBlock} blocks ago at ${formatDate(deploymentBlockDetails.timestamp * 1000)})\n`
 		);
 
 		const transferEvents = await iTribe.queryFilter(
@@ -275,7 +275,7 @@ module.exports = {
 			)
 			.option(
 				'-d, --deployment-path <value>',
-				`Path to a folder that has your input configuration file ${CONFIG_FILENAME}, the tribe list ${TRIBEONES_FILENAME} and where your ${DEPLOYMENT_FILENAME} files will go`
+				`Path to a folder that has your input configuration file ${CONFIG_FILENAME}, the tribe list ${RWAONES_FILENAME} and where your ${DEPLOYMENT_FILENAME} files will go`
 			)
 			.option('-z, --use-ovm', 'Target deployment for the OVM (Optimism).')
 			.option('-s, --tribe <value>', 'The tribe to extract from')

@@ -130,7 +130,7 @@ contract('CollateralErc20', async accounts => {
 			accounts,
 			tribes,
 			contracts: [
-				'Tribeone',
+				'Rwaone',
 				'FeePool',
 				'AddressResolver',
 				'ExchangeRates',

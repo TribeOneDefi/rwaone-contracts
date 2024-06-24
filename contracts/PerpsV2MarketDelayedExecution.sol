@@ -22,7 +22,7 @@ import "./interfaces/IPyth.sol";
  without either introducing free (or cheap) optionality to cause cancellations, and without large
  sacrifices to the UX / risk of the traders (e.g. blocking all actions, or penalizing failures too much).
  */
-// https://docs.tribeone.io/contracts/source/contracts/PerpsV2MarketDelayedExecution
+// https://docs.rwaone.io/contracts/source/contracts/PerpsV2MarketDelayedExecution
 contract PerpsV2MarketDelayedExecution is IPerpsV2MarketDelayedExecution, PerpsV2MarketProxyable {
     /* ========== CONSTRUCTOR ========== */
 
@@ -217,10 +217,9 @@ contract PerpsV2MarketDelayedExecution is IPerpsV2MarketDelayedExecution, PerpsV
 
         require(onchainPrice > 0 && price > 0, "invalid, price is 0");
 
-        uint delta =
-            (onchainPrice > price)
-                ? onchainPrice.divideDecimal(price).sub(SafeDecimalMath.unit())
-                : price.divideDecimal(onchainPrice).sub(SafeDecimalMath.unit());
+        uint delta = (onchainPrice > price)
+            ? onchainPrice.divideDecimal(price).sub(SafeDecimalMath.unit())
+            : price.divideDecimal(onchainPrice).sub(SafeDecimalMath.unit());
         require(_offchainPriceDivergence(_marketKey()) > delta, "price divergence too high");
 
         return (price, publishTime);
@@ -349,11 +348,7 @@ contract PerpsV2MarketDelayedExecution is IPerpsV2MarketDelayedExecution, PerpsV
     bytes32 internal constant DELAYEDORDERREMOVED_SIG =
         keccak256("DelayedOrderRemoved(address,bool,uint256,int256,uint256,uint256,uint256,bytes32)");
 
-    function emitDelayedOrderRemoved(
-        address account,
-        uint currentRoundId,
-        DelayedOrder memory order
-    ) internal {
+    function emitDelayedOrderRemoved(address account, uint currentRoundId, DelayedOrder memory order) internal {
         proxy._emit(
             abi.encode(
                 order.isOffchain,

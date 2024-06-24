@@ -131,7 +131,7 @@ contract('PerpsV2Market PerpsV2MarketOffchainOrders', accounts => {
 				'CircuitBreaker',
 				'SystemStatus',
 				'SystemSettings',
-				'Tribeone',
+				'Rwaone',
 				'CollateralManager',
 				'DebtCache',
 			],

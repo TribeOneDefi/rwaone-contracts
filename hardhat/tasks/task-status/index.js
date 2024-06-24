@@ -5,9 +5,9 @@ const { ensureDeploymentPath, getDeploymentPathForNetwork } = require('../../../
 const { logHeader, logActionError, actions, ActionNames } = require('./statusActions');
 
 const defaultActions = [
-	'Tribeone',
+	'Rwaone',
 	'DebtCache',
-	'TribeoneState',
+	'RwaoneState',
 	'SupplySchedule',
 	'FeePool',
 	'FeePoolState',

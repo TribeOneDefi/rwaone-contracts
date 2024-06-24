@@ -14,7 +14,7 @@ import "./interfaces/IPerpsV2Market.sol";
  * continually tallied against this margin. If a user's margin runs out, then their position is closed
  * by a liquidation keeper, which is rewarded with a flat fee extracted from the margin.
  *
- * The Tribeone debt pool is effectively the counterparty to each trade, so if a particular position
+ * The Rwaone debt pool is effectively the counterparty to each trade, so if a particular position
  * is in profit, then the debt pool pays by issuing hUSD into their margin account,
  * while if the position makes a loss then the debt pool burns hUSD from the margin, reducing the
  * debt load in the system.
@@ -92,7 +92,7 @@ import "./interfaces/IPerpsV2Market.sol";
  *     - the account being managed was not liquidated in the same transaction;
  */
 
-// https://docs.tribeone.io/contracts/source/contracts/PerpsV2Market
+// https://docs.rwaone.io/contracts/source/contracts/PerpsV2Market
 contract PerpsV2Market is IPerpsV2Market, PerpsV2MarketProxyable {
     /* ========== CONSTRUCTOR ========== */
 
@@ -127,11 +127,7 @@ contract PerpsV2Market is IPerpsV2Market, PerpsV2MarketProxyable {
         return _recomputeFunding(price);
     }
 
-    function _transferMargin(
-        int marginDelta,
-        uint price,
-        address sender
-    ) internal notFlagged(sender) onlyIfNotPendingOrder {
+    function _transferMargin(int marginDelta, uint price, address sender) internal notFlagged(sender) onlyIfNotPendingOrder {
         // Transfer no tokens if marginDelta is 0
         uint absDelta = _abs(marginDelta);
         if (marginDelta > 0) {
@@ -208,11 +204,7 @@ contract PerpsV2Market is IPerpsV2Market, PerpsV2MarketProxyable {
      * Same as modifyPosition, but emits an event with the passed tracking code to
      * allow off-chain calculations for fee sharing with originating integrations
      */
-    function modifyPositionWithTracking(
-        int sizeDelta,
-        uint desiredFillPrice,
-        bytes32 trackingCode
-    ) external {
+    function modifyPositionWithTracking(int sizeDelta, uint desiredFillPrice, bytes32 trackingCode) external {
         _modifyPosition(sizeDelta, desiredFillPrice, trackingCode);
     }
 

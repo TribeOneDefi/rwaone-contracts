@@ -2,11 +2,11 @@ pragma solidity ^0.5.16;
 pragma experimental ABIEncoderV2;
 
 // Inheritance
-import "./BaseTribeone.sol";
+import "./BaseRwaone.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/mintabletribeetix
-contract MintableTribeone is BaseTribeone {
-    bytes32 private constant CONTRACT_TRIBEONEETIX_BRIDGE = "TribeoneBridgeToBase";
+// https://docs.rwaone.io/contracts/source/contracts/mintabletribeetix
+contract MintableRwaone is BaseRwaone {
+    bytes32 private constant CONTRACT_RWAONEETIX_BRIDGE = "RwaoneBridgeToBase";
 
     constructor(
         address payable _proxy,
@@ -14,7 +14,7 @@ contract MintableTribeone is BaseTribeone {
         address _owner,
         uint _totalSupply,
         address _resolver
-    ) public BaseTribeone(_proxy, _tokenState, _owner, _totalSupply, _resolver) {}
+    ) public BaseRwaone(_proxy, _tokenState, _owner, _totalSupply, _resolver) {}
 
     /* ========== INTERNALS =================== */
     function _mintSecondary(address account, uint amount) internal {
@@ -36,14 +36,14 @@ contract MintableTribeone is BaseTribeone {
 
     /* ========== VIEWS ======================= */
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
-        bytes32[] memory existingAddresses = BaseTribeone.resolverAddressesRequired();
+        bytes32[] memory existingAddresses = BaseRwaone.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](1);
-        newAddresses[0] = CONTRACT_TRIBEONEETIX_BRIDGE;
+        newAddresses[0] = CONTRACT_RWAONEETIX_BRIDGE;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
     function tribeetixBridge() internal view returns (address) {
-        return requireAndGetAddress(CONTRACT_TRIBEONEETIX_BRIDGE);
+        return requireAndGetAddress(CONTRACT_RWAONEETIX_BRIDGE);
     }
 
     /* ========== RESTRICTED FUNCTIONS ========== */

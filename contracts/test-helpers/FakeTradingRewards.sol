@@ -5,20 +5,20 @@ import "../TradingRewards.sol";
 import "../interfaces/IExchanger.sol";
 
 contract FakeTradingRewards is TradingRewards {
-    IERC20 public _mockTribeoneToken;
+    IERC20 public _mockRwaoneToken;
 
     constructor(
         address owner,
         address periodController,
         address resolver,
-        address mockTribeoneToken
+        address mockRwaoneToken
     ) public TradingRewards(owner, periodController, resolver) {
-        _mockTribeoneToken = IERC20(mockTribeoneToken);
+        _mockRwaoneToken = IERC20(mockRwaoneToken);
     }
 
-    // Tribeone is mocked with an ERC20 token passed via the constructor.
-    function tribeone() internal view returns (IERC20) {
-        return IERC20(_mockTribeoneToken);
+    // Rwaone is mocked with an ERC20 token passed via the constructor.
+    function rwaone() internal view returns (IERC20) {
+        return IERC20(_mockRwaoneToken);
     }
 
     // Return msg.sender so that onlyExchanger modifier can be bypassed.

@@ -4,7 +4,7 @@ pragma solidity ^0.5.16;
 
 import "./AddressResolver.sol";
 import "./interfaces/IDebtCache.sol";
-import "./interfaces/ITribeoneDebtShare.sol";
+import "./interfaces/IRwaoneDebtShare.sol";
 import "./interfaces/AggregatorV2V3Interface.sol";
 
 import "./SafeDecimalMath.sol";
@@ -28,17 +28,7 @@ contract BaseOneNetAggregator is Owned, AggregatorV2V3Interface {
         emit SetOverrideTimestamp(timestamp);
     }
 
-    function latestRoundData()
-        external
-        view
-        returns (
-            uint80,
-            int256,
-            uint256,
-            uint256,
-            uint80
-        )
-    {
+    function latestRoundData() external view returns (uint80, int256, uint256, uint256, uint80) {
         return getRoundData(uint80(latestRound()));
     }
 
@@ -58,16 +48,7 @@ contract BaseOneNetAggregator is Owned, AggregatorV2V3Interface {
         (, , timestamp, , ) = getRoundData(uint80(_roundId));
     }
 
-    function getRoundData(uint80)
-        public
-        view
-        returns (
-            uint80,
-            int256,
-            uint256,
-            uint256,
-            uint80
-        );
+    function getRoundData(uint80) public view returns (uint80, int256, uint256, uint256, uint80);
 
     event SetOverrideTimestamp(uint timestamp);
 }

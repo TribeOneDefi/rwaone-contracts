@@ -1,7 +1,7 @@
 pragma solidity ^0.5.16;
 
 import "../interfaces/IAddressResolver.sol";
-import "../interfaces/ITribeone.sol";
+import "../interfaces/IRwaone.sol";
 
 contract MockThirdPartyExchangeContract {
     IAddressResolver public resolver;
@@ -10,13 +10,9 @@ contract MockThirdPartyExchangeContract {
         resolver = _resolver;
     }
 
-    function exchange(
-        bytes32 src,
-        uint amount,
-        bytes32 dest
-    ) external {
-        ITribeone tribeone = ITribeone(resolver.getAddress("Tribeone"));
+    function exchange(bytes32 src, uint amount, bytes32 dest) external {
+        IRwaone rwaone = IRwaone(resolver.getAddress("Rwaone"));
 
-        tribeone.exchangeWithTrackingForInitiator(src, amount, dest, address(this), "TRACKING_CODE");
+        rwaone.exchangeWithTrackingForInitiator(src, amount, dest, address(this), "TRACKING_CODE");
     }
 }

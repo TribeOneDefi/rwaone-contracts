@@ -52,7 +52,7 @@
 		"asset": "wHAKA",
 		"category": "crypto",
 		"sign": "",
-		"description": "Tribeone Network Token"
+		"description": "Rwaone Network Token"
 	},
 	"ETH": {
 		"asset": "ETH",
@@ -500,7 +500,7 @@
 		"asset": "DebtRatio",
 		"category": "crypto",
 		"sign": "",
-		"description": "Tribeone Aggregator Debt Ratio"
+		"description": "Rwaone Aggregator Debt Ratio"
 	},
 	"OP": {
 		"asset": "OP",

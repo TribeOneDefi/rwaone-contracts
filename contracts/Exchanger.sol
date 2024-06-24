@@ -21,7 +21,7 @@ import "./ExchangeSettlementLib.sol";
 
 import "./Proxyable.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/exchanger
+// https://docs.rwaone.io/contracts/source/contracts/exchanger
 contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -35,7 +35,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     bytes32 private constant CONTRACT_SYSTEMSTATUS = "SystemStatus";
     bytes32 private constant CONTRACT_EXCHANGESTATE = "ExchangeState";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
-    bytes32 private constant CONTRACT_TRIBEONEETIX = "Tribeone";
+    bytes32 private constant CONTRACT_RWAONEETIX = "Rwaone";
     bytes32 private constant CONTRACT_FEEPOOL = "FeePool";
     bytes32 private constant CONTRACT_TRADING_REWARDS = "TradingRewards";
     bytes32 private constant CONTRACT_DELEGATEAPPROVALS = "DelegateApprovals";
@@ -54,7 +54,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         newAddresses[0] = CONTRACT_SYSTEMSTATUS;
         newAddresses[1] = CONTRACT_EXCHANGESTATE;
         newAddresses[2] = CONTRACT_EXRATES;
-        newAddresses[3] = CONTRACT_TRIBEONEETIX;
+        newAddresses[3] = CONTRACT_RWAONEETIX;
         newAddresses[4] = CONTRACT_FEEPOOL;
         newAddresses[5] = CONTRACT_TRADING_REWARDS;
         newAddresses[6] = CONTRACT_DELEGATEAPPROVALS;
@@ -81,8 +81,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         return ICircuitBreaker(requireAndGetAddress(CONTRACT_CIRCUIT_BREAKER));
     }
 
-    function tribeone() internal view returns (ITribeone) {
-        return ITribeone(requireAndGetAddress(CONTRACT_TRIBEONEETIX));
+    function rwaone() internal view returns (IRwaone) {
+        return IRwaone(requireAndGetAddress(CONTRACT_RWAONEETIX));
     }
 
     function feePool() internal view returns (IFeePool) {
@@ -117,7 +117,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
                 circuitBreaker(),
                 debtCache(),
                 issuer(),
-                tribeone()
+                rwaone()
             );
     }
 
@@ -137,15 +137,10 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         return circuitBreaker().lastValue(address(exchangeRates().aggregators(currencyKey)));
     }
 
-    function settlementOwing(address account, bytes32 currencyKey)
-        public
-        view
-        returns (
-            uint reclaimAmount,
-            uint rebateAmount,
-            uint numEntries
-        )
-    {
+    function settlementOwing(
+        address account,
+        bytes32 currencyKey
+    ) public view returns (uint reclaimAmount, uint rebateAmount, uint numEntries) {
         (reclaimAmount, rebateAmount, numEntries, ) = ExchangeSettlementLib.settlementOwing(
             resolvedAddresses(),
             account,
@@ -212,16 +207,20 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         bool virtualTribe,
         address rewardAddress,
         bytes32 trackingCode
-    ) external onlyTribeoneorTribe returns (uint amountReceived, IVirtualTribe vTribe) {
+    ) external onlyRwaoneorTribe returns (uint amountReceived, IVirtualTribe vTribe) {
         uint fee;
         if (from != exchangeForAddress) {
             require(delegateApprovals().canExchangeFor(exchangeForAddress, from), "Not approved to act on behalf");
         }
 
-        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings =
-            _exchangeSettings(from, sourceCurrencyKey);
-        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings =
-            _exchangeSettings(from, destinationCurrencyKey);
+        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings = _exchangeSettings(
+            from,
+            sourceCurrencyKey
+        );
+        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings = _exchangeSettings(
+            from,
+            destinationCurrencyKey
+        );
 
         (amountReceived, fee, vTribe) = _exchange(
             exchangeForAddress,
@@ -239,25 +238,12 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         }
     }
 
-    function exchangeAtomically(
-        address,
-        bytes32,
-        uint,
-        bytes32,
-        address,
-        bytes32,
-        uint
-    ) external returns (uint) {
+    function exchangeAtomically(address, bytes32, uint, bytes32, address, bytes32, uint) external returns (uint) {
         _notImplemented();
     }
 
-    function _emitTrackingEvent(
-        bytes32 trackingCode,
-        bytes32 toCurrencyKey,
-        uint256 toAmount,
-        uint256 fee
-    ) internal {
-        ITribeoneInternal(address(tribeone())).emitExchangeTracking(trackingCode, toCurrencyKey, toAmount, fee);
+    function _emitTrackingEvent(bytes32 trackingCode, bytes32 toCurrencyKey, uint256 toAmount, uint256 fee) internal {
+        IRwaoneInternal(address(rwaone())).emitExchangeTracking(trackingCode, toCurrencyKey, toAmount, fee);
     }
 
     function _processTradingRewards(uint fee, address rewardAddress) internal {
@@ -293,14 +279,13 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         address from,
         bytes32 sourceCurrencyKey
     ) internal returns (uint sourceAmountAfterSettlement) {
-        (, uint refunded, uint numEntriesSettled) =
-            ExchangeSettlementLib.internalSettle(
-                resolvedAddresses(),
-                from,
-                sourceCurrencyKey,
-                false,
-                getWaitingPeriodSecs()
-            );
+        (, uint refunded, uint numEntriesSettled) = ExchangeSettlementLib.internalSettle(
+            resolvedAddresses(),
+            from,
+            sourceCurrencyKey,
+            false,
+            getWaitingPeriodSecs()
+        );
 
         sourceAmountAfterSettlement = sourceAmount;
 
@@ -318,14 +303,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings,
         address destinationAddress,
         bool virtualTribe
-    )
-        internal
-        returns (
-            uint amountReceived,
-            uint fee,
-            IVirtualTribe vTribe
-        )
-    {
+    ) internal returns (uint amountReceived, uint fee, IVirtualTribe vTribe) {
         if (!_ensureCanExchange(sourceSettings.currencyKey, destinationSettings.currencyKey, sourceAmount)) {
             return (0, 0, IVirtualTribe(0));
         }
@@ -352,12 +330,12 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         (entry.destinationAmount, entry.sourceRate, entry.destinationRate) = addrs
             .exchangeRates
             .effectiveValueAndRatesAtRound(
-            sourceSettings.currencyKey,
-            entry.sourceAmountAfterSettlement,
-            destinationSettings.currencyKey,
-            entry.roundIdForSrc,
-            entry.roundIdForDest
-        );
+                sourceSettings.currencyKey,
+                entry.sourceAmountAfterSettlement,
+                destinationSettings.currencyKey,
+                entry.roundIdForSrc,
+                entry.roundIdForDest
+            );
 
         // rates must also be good for the round we are doing
         _ensureCanExchangeAtRound(
@@ -426,7 +404,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         );
 
         // Let the DApps know there was a Tribe exchange
-        ITribeoneInternal(address(tribeone())).emitTribeExchange(
+        IRwaoneInternal(address(rwaone())).emitTribeExchange(
             from,
             sourceSettings.currencyKey,
             entry.sourceAmountAfterSettlement,
@@ -474,24 +452,15 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         }
     }
 
-    function _createVirtualTribe(
-        IERC20,
-        address,
-        uint,
-        bytes32
-    ) internal returns (IVirtualTribe) {
+    function _createVirtualTribe(IERC20, address, uint, bytes32) internal returns (IVirtualTribe) {
         _notImplemented();
     }
 
     // Note: this function can intentionally be called by anyone on behalf of anyone else (the caller just pays the gas)
-    function settle(address from, bytes32 currencyKey)
-        external
-        returns (
-            uint reclaimed,
-            uint refunded,
-            uint numEntriesSettled
-        )
-    {
+    function settle(
+        address from,
+        bytes32 currencyKey
+    ) external returns (uint reclaimed, uint refunded, uint numEntriesSettled) {
         systemStatus().requireTribeActive(currencyKey);
         return ExchangeSettlementLib.internalSettle(resolvedAddresses(), from, currencyKey, true, getWaitingPeriodSecs());
     }
@@ -499,11 +468,10 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     /* ========== INTERNAL FUNCTIONS ========== */
 
     // gets the exchange parameters for a given direct integration (returns default params if no overrides exist)
-    function _exchangeSettings(address from, bytes32 currencyKey)
-        internal
-        view
-        returns (IDirectIntegrationManager.ParameterIntegrationSettings memory settings)
-    {
+    function _exchangeSettings(
+        address from,
+        bytes32 currencyKey
+    ) internal view returns (IDirectIntegrationManager.ParameterIntegrationSettings memory settings) {
         settings = directIntegrationManager().getExchangeParameters(from, currencyKey);
     }
 
@@ -517,12 +485,12 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         require(sourceCurrencyKey != destinationCurrencyKey, "Can't be same tribe");
         require(sourceAmount > 0, "Zero amount");
 
-        (, bool srcBroken, bool srcStaleOrInvalid) =
-            sourceCurrencyKey != hUSD ? exchangeRates().rateWithSafetyChecks(sourceCurrencyKey) : (0, false, false);
-        (, bool dstBroken, bool dstStaleOrInvalid) =
-            destinationCurrencyKey != hUSD
-                ? exchangeRates().rateWithSafetyChecks(destinationCurrencyKey)
-                : (0, false, false);
+        (, bool srcBroken, bool srcStaleOrInvalid) = sourceCurrencyKey != hUSD
+            ? exchangeRates().rateWithSafetyChecks(sourceCurrencyKey)
+            : (0, false, false);
+        (, bool dstBroken, bool dstStaleOrInvalid) = destinationCurrencyKey != hUSD
+            ? exchangeRates().rateWithSafetyChecks(destinationCurrencyKey)
+            : (0, false, false);
 
         require(!srcStaleOrInvalid, "src rate stale or flagged");
         require(!dstStaleOrInvalid, "dest rate stale or flagged");
@@ -555,10 +523,14 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     /// @param destinationCurrencyKey The destination currency key
     /// @return The exchange fee rate, and whether the rates are too volatile
     function feeRateForExchange(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey) external view returns (uint) {
-        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings =
-            _exchangeSettings(msg.sender, sourceCurrencyKey);
-        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings =
-            _exchangeSettings(msg.sender, destinationCurrencyKey);
+        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings = _exchangeSettings(
+            msg.sender,
+            sourceCurrencyKey
+        );
+        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings = _exchangeSettings(
+            msg.sender,
+            destinationCurrencyKey
+        );
 
         (uint feeRate, bool tooVolatile) = _feeRateForExchange(sourceSettings, destinationSettings);
         require(!tooVolatile, "too volatile");
@@ -569,15 +541,18 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     /// @param sourceCurrencyKey The source currency key
     /// @param destinationCurrencyKey The destination currency key
     /// @return The exchange dynamic fee rate and if rates are too volatile
-    function dynamicFeeRateForExchange(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey)
-        external
-        view
-        returns (uint feeRate, bool tooVolatile)
-    {
-        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings =
-            _exchangeSettings(msg.sender, sourceCurrencyKey);
-        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings =
-            _exchangeSettings(msg.sender, destinationCurrencyKey);
+    function dynamicFeeRateForExchange(
+        bytes32 sourceCurrencyKey,
+        bytes32 destinationCurrencyKey
+    ) external view returns (uint feeRate, bool tooVolatile) {
+        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings = _exchangeSettings(
+            msg.sender,
+            sourceCurrencyKey
+        );
+        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings = _exchangeSettings(
+            msg.sender,
+            destinationCurrencyKey
+        );
 
         return _dynamicFeeRateForExchange(sourceSettings, destinationSettings);
     }
@@ -654,11 +629,9 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     /// @notice Get dynamic dynamicFee for a given currency key (SIP-184)
     /// @param settings The given currency key
     /// @return The dynamic fee and if it exceeds max dynamic fee set in config
-    function _dynamicFeeRateForCurrency(IDirectIntegrationManager.ParameterIntegrationSettings memory settings)
-        internal
-        view
-        returns (uint dynamicFee, bool tooVolatile)
-    {
+    function _dynamicFeeRateForCurrency(
+        IDirectIntegrationManager.ParameterIntegrationSettings memory settings
+    ) internal view returns (uint dynamicFee, bool tooVolatile) {
         // no dynamic dynamicFee for hUSD or too few rounds
         if (settings.currencyKey == hUSD || settings.exchangeDynamicFeeRounds <= 1) {
             return (0, false);
@@ -701,11 +674,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     /// @param threshold A threshold to clip the price deviation ratop
     /// @param weightDecay A weight decay constant
     /// @return uint dynamic fee rate as decimal
-    function _dynamicFeeCalculation(
-        uint[] memory prices,
-        uint threshold,
-        uint weightDecay
-    ) internal pure returns (uint) {
+    function _dynamicFeeCalculation(uint[] memory prices, uint threshold, uint weightDecay) internal pure returns (uint) {
         // don't underflow
         if (prices.length == 0) {
             return 0;
@@ -727,11 +696,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     /// absolute price deviation ratio used by dynamic fee calculation
     /// deviationRatio = (abs(current - previous) / previous) - threshold
     /// if negative, zero is returned
-    function _thresholdedAbsDeviationRatio(
-        uint price,
-        uint previousPrice,
-        uint threshold
-    ) internal pure returns (uint) {
+    function _thresholdedAbsDeviationRatio(uint price, uint previousPrice, uint threshold) internal pure returns (uint) {
         if (previousPrice == 0) {
             return 0; // don't divide by zero
         }
@@ -747,19 +712,15 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         uint sourceAmount,
         bytes32 sourceCurrencyKey,
         bytes32 destinationCurrencyKey
-    )
-        external
-        view
-        returns (
-            uint amountReceived,
-            uint fee,
-            uint exchangeFeeRate
-        )
-    {
-        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings =
-            _exchangeSettings(msg.sender, sourceCurrencyKey);
-        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings =
-            _exchangeSettings(msg.sender, destinationCurrencyKey);
+    ) external view returns (uint amountReceived, uint fee, uint exchangeFeeRate) {
+        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings = _exchangeSettings(
+            msg.sender,
+            sourceCurrencyKey
+        );
+        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings = _exchangeSettings(
+            msg.sender,
+            destinationCurrencyKey
+        );
 
         require(sourceCurrencyKey == hUSD || !exchangeRates().rateIsInvalid(sourceCurrencyKey), "src tribe rate invalid");
 
@@ -782,8 +743,11 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         // check rates volatility result
         require(!tooVolatile, "exchange rates too volatile");
 
-        (uint destinationAmount, , ) =
-            exchangeRates().effectiveValueAndRates(sourceCurrencyKey, sourceAmount, destinationCurrencyKey);
+        (uint destinationAmount, , ) = exchangeRates().effectiveValueAndRates(
+            sourceCurrencyKey,
+            sourceAmount,
+            destinationCurrencyKey
+        );
 
         amountReceived = ExchangeSettlementLib._deductFeesFromAmount(destinationAmount, exchangeFeeRate);
         fee = destinationAmount.sub(amountReceived);
@@ -795,11 +759,11 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
 
     // ========== MODIFIERS ==========
 
-    modifier onlyTribeoneorTribe() {
-        ITribeone _tribeetix = tribeone();
+    modifier onlyRwaoneorTribe() {
+        IRwaone _tribeetix = rwaone();
         require(
             msg.sender == address(_tribeetix) || _tribeetix.tribesByAddress(msg.sender) != bytes32(0),
-            "Exchanger: Only tribeone or a tribe contract can perform this action"
+            "Exchanger: Only rwaone or a tribe contract can perform this action"
         );
         _;
     }

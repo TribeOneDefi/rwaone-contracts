@@ -71,7 +71,7 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
     bytes32 private constant CONTRACT_EXCHANGER = "Exchanger";
     bytes32 private constant CONTRACT_FEEPOOL = "FeePool";
-    bytes32 private constant CONTRACT_TRIBEONEHUSD = "TribehUSD";
+    bytes32 private constant CONTRACT_RWAONEHUSD = "TribehUSD";
     bytes32 private constant CONTRACT_COLLATERALUTIL = "CollateralUtil";
 
     /* ========== CONSTRUCTOR ========== */
@@ -99,7 +99,7 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         newAddresses[1] = CONTRACT_EXRATES;
         newAddresses[2] = CONTRACT_EXCHANGER;
         newAddresses[3] = CONTRACT_SYSTEMSTATUS;
-        newAddresses[4] = CONTRACT_TRIBEONEHUSD;
+        newAddresses[4] = CONTRACT_RWAONEHUSD;
         newAddresses[5] = CONTRACT_COLLATERALUTIL;
 
         bytes32[] memory combined = combineArrays(existingAddresses, newAddresses);
@@ -118,7 +118,7 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
     }
 
     function _tribehUSD() internal view returns (ITribe) {
-        return ITribe(requireAndGetAddress(CONTRACT_TRIBEONEHUSD));
+        return ITribe(requireAndGetAddress(CONTRACT_RWAONEHUSD));
     }
 
     function _exchangeRates() internal view returns (IExchangeRates) {
@@ -154,11 +154,10 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         return _collateralUtil().maxLoan(amount, currency, minCratio, collateralKey);
     }
 
-    function areTribesAndCurrenciesSet(bytes32[] calldata _tribeNamesInResolver, bytes32[] calldata _tribeKeys)
-        external
-        view
-        returns (bool)
-    {
+    function areTribesAndCurrenciesSet(
+        bytes32[] calldata _tribeNamesInResolver,
+        bytes32[] calldata _tribeKeys
+    ) external view returns (bool) {
         if (tribes.length != _tribeNamesInResolver.length) {
             return false;
         }
@@ -196,11 +195,7 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
     /* ---------- UTILITIES ---------- */
 
     // Check the account has enough of the tribe to make the payment
-    function _checkTribeBalance(
-        address payer,
-        bytes32 key,
-        uint amount
-    ) internal view {
+    function _checkTribeBalance(address payer, bytes32 key, uint amount) internal view {
         require(IERC20(address(_tribe(tribesByKey[key]))).balanceOf(payer) >= amount, "Not enough balance");
     }
 
@@ -374,11 +369,7 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         _recordLoanAsClosed(loan);
     }
 
-    function _deposit(
-        address account,
-        uint id,
-        uint amount
-    ) internal rateIsValid issuanceIsActive returns (uint, uint) {
+    function _deposit(address account, uint id, uint amount) internal rateIsValid issuanceIsActive returns (uint, uint) {
         // 0. They sent some value > 0
         require(amount > 0, "Deposit must be above 0");
 

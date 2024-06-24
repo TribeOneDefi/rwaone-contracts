@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 // Inheritance
 import "./BaseRewardEscrowV2Frozen.sol";
 
-// https://docs.tribeone.io/contracts/RewardEscrow
+// https://docs.rwaone.io/contracts/RewardEscrow
 /// SIP-252: this is the source for immutable V2 escrow on L2 (renamed with suffix Frozen).
 /// These sources need to exist here and match on-chain frozen contracts for tests and reference.
 /// The reason for the naming mess is that the immutable LiquidatorRewards expects a working
@@ -12,7 +12,7 @@ import "./BaseRewardEscrowV2Frozen.sol";
 /// needs to be found at that entry for liq-rewards to function.
 contract ImportableRewardEscrowV2Frozen is BaseRewardEscrowV2Frozen {
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
-    bytes32 private constant CONTRACT_TRIBEONEETIX_BRIDGE_BASE = "TribeoneBridgeToBase";
+    bytes32 private constant CONTRACT_RWAONEETIX_BRIDGE_BASE = "RwaoneBridgeToBase";
 
     /* ========== CONSTRUCTOR ========== */
 
@@ -23,12 +23,12 @@ contract ImportableRewardEscrowV2Frozen is BaseRewardEscrowV2Frozen {
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = BaseRewardEscrowV2Frozen.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](1);
-        newAddresses[0] = CONTRACT_TRIBEONEETIX_BRIDGE_BASE;
+        newAddresses[0] = CONTRACT_RWAONEETIX_BRIDGE_BASE;
         return combineArrays(existingAddresses, newAddresses);
     }
 
     function tribeetixBridgeToBase() internal view returns (address) {
-        return requireAndGetAddress(CONTRACT_TRIBEONEETIX_BRIDGE_BASE);
+        return requireAndGetAddress(CONTRACT_RWAONEETIX_BRIDGE_BASE);
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
@@ -37,11 +37,11 @@ contract ImportableRewardEscrowV2Frozen is BaseRewardEscrowV2Frozen {
         address account,
         uint256 escrowedAmount,
         VestingEntries.VestingEntry[] calldata vestingEntries
-    ) external onlyTribeoneBridge {
+    ) external onlyRwaoneBridge {
         // There must be enough balance in the contract to provide for the escrowed balance.
         totalEscrowedBalance = totalEscrowedBalance.add(escrowedAmount);
         require(
-            totalEscrowedBalance <= IERC20(address(tribeone())).balanceOf(address(this)),
+            totalEscrowedBalance <= IERC20(address(rwaone())).balanceOf(address(this)),
             "Insufficient balance in the contract to provide for escrowed balance"
         );
 
@@ -64,8 +64,8 @@ contract ImportableRewardEscrowV2Frozen is BaseRewardEscrowV2Frozen {
         nextEntryId = nextEntryId.add(1);
     }
 
-    modifier onlyTribeoneBridge() {
-        require(msg.sender == tribeetixBridgeToBase(), "Can only be invoked by TribeoneBridgeToBase contract");
+    modifier onlyRwaoneBridge() {
+        require(msg.sender == tribeetixBridgeToBase(), "Can only be invoked by RwaoneBridgeToBase contract");
         _;
     }
 }

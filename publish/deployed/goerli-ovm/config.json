@@ -2,7 +2,7 @@
 	"SystemSettings": {
 		"deploy": false
 	},
-	"TribeoneBridgeToBase": {
+	"RwaoneBridgeToBase": {
 		"deploy": false
 	},
 	"AddressResolver": {
@@ -50,10 +50,10 @@
 	"Issuer": {
 		"deploy": false
 	},
-	"Tribeone": {
+	"Rwaone": {
 		"deploy": false
 	},
-	"TribeoneEscrow": {
+	"RwaoneEscrow": {
 		"deploy": false
 	},
 	"RewardsDistribution": {
@@ -74,7 +74,7 @@
 	"ProxyFeePool": {
 		"deploy": false
 	},
-	"ProxyTribeone": {
+	"ProxyRwaone": {
 		"deploy": false
 	},
 	"ProxyhUSD": {
@@ -86,7 +86,7 @@
 	"Math": {
 		"deploy": false
 	},
-	"TokenStateTribeone": {
+	"TokenStateRwaone": {
 		"deploy": false
 	},
 	"TokenStatehUSD": {
@@ -143,7 +143,7 @@
 	"SystemSettingsLib": {
 		"deploy": false
 	},
-	"TribeoneDebtShare": {
+	"RwaoneDebtShare": {
 		"deploy": false
 	},
 	"ExchangeCircuitBreaker": {

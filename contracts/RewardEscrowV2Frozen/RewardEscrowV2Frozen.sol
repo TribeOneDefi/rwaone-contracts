@@ -8,7 +8,7 @@ import "./BaseRewardEscrowV2Frozen.sol";
 import "../interfaces/IRewardEscrow.sol";
 import "../interfaces/ISystemStatus.sol";
 
-// https://docs.tribeone.io/contracts/RewardEscrow
+// https://docs.rwaone.io/contracts/RewardEscrow
 /// SIP-252: this is the source for immutable V2 escrow on L1 (renamed with suffix Frozen).
 /// These sources need to exist here and match on-chain frozen contracts for tests and reference.
 /// The reason for the naming mess is that the immutable LiquidatorRewards expects a working
@@ -19,10 +19,10 @@ contract RewardEscrowV2Frozen is BaseRewardEscrowV2Frozen {
 
     // note that the actual deployed RewardEscrowV2 uses SafeDecimalMath to get this value,
     // and this is different in order to simplify deployment for testing
-    uint public migrateEntriesThresholdAmount = (10**18) * 1000; // Default 1000 wHAKA
+    uint public migrateEntriesThresholdAmount = (10 ** 18) * 1000; // Default 1000 wHAKA
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
-    bytes32 private constant CONTRACT_TRIBEONEETIX_BRIDGE_OPTIMISM = "TribeoneBridgeToOptimism";
+    bytes32 private constant CONTRACT_RWAONEETIX_BRIDGE_OPTIMISM = "RwaoneBridgeToOptimism";
     bytes32 private constant CONTRACT_REWARD_ESCROW = "RewardEscrow";
     bytes32 private constant CONTRACT_SYSTEMSTATUS = "SystemStatus";
 
@@ -35,14 +35,14 @@ contract RewardEscrowV2Frozen is BaseRewardEscrowV2Frozen {
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = BaseRewardEscrowV2Frozen.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](3);
-        newAddresses[0] = CONTRACT_TRIBEONEETIX_BRIDGE_OPTIMISM;
+        newAddresses[0] = CONTRACT_RWAONEETIX_BRIDGE_OPTIMISM;
         newAddresses[1] = CONTRACT_REWARD_ESCROW;
         newAddresses[2] = CONTRACT_SYSTEMSTATUS;
         return combineArrays(existingAddresses, newAddresses);
     }
 
     function tribeetixBridgeToOptimism() internal view returns (address) {
-        return requireAndGetAddress(CONTRACT_TRIBEONEETIX_BRIDGE_OPTIMISM);
+        return requireAndGetAddress(CONTRACT_RWAONEETIX_BRIDGE_OPTIMISM);
     }
 
     function oldRewardEscrow() internal view returns (IRewardEscrow) {
@@ -119,11 +119,10 @@ contract RewardEscrowV2Frozen is BaseRewardEscrowV2Frozen {
      * All entries imported should have past their vesting timestamp and will be ready to be vested
      * Addresses with totalEscrowedAccountBalance == 0 will not be migrated as they have all vested
      */
-    function importVestingSchedule(address[] calldata accounts, uint256[] calldata escrowAmounts)
-        external
-        onlyDuringSetup
-        onlyOwner
-    {
+    function importVestingSchedule(
+        address[] calldata accounts,
+        uint256[] calldata escrowAmounts
+    ) external onlyDuringSetup onlyOwner {
         require(accounts.length == escrowAmounts.length, "Account and escrowAmounts Length mismatch");
 
         for (uint i = 0; i < accounts.length; i++) {
@@ -169,7 +168,7 @@ contract RewardEscrowV2Frozen is BaseRewardEscrowV2Frozen {
             // ensure account doesn't have escrow migration pending / being imported more than once
             require(totalBalancePendingMigration[account] == 0, "Account migration is pending already");
 
-            /* Update totalEscrowedBalance for tracking the Tribeone balance of this contract. */
+            /* Update totalEscrowedBalance for tracking the Rwaone balance of this contract. */
             totalEscrowedBalance = totalEscrowedBalance.add(escrowedAmount);
 
             /* Update totalEscrowedAccountBalance and totalVestedAccountBalance for each account */
@@ -193,9 +192,12 @@ contract RewardEscrowV2Frozen is BaseRewardEscrowV2Frozen {
 
     /* ========== L2 MIGRATION ========== */
 
-    function burnForMigration(address account, uint[] calldata entryIDs)
+    function burnForMigration(
+        address account,
+        uint[] calldata entryIDs
+    )
         external
-        onlyTribeoneBridge
+        onlyRwaoneBridge
         returns (uint256 escrowedAccountBalance, VestingEntries.VestingEntry[] memory vestingEntries)
     {
         require(entryIDs.length > 0, "Entry IDs required");
@@ -222,7 +224,7 @@ contract RewardEscrowV2Frozen is BaseRewardEscrowV2Frozen {
          */
         if (escrowedAccountBalance > 0) {
             _reduceAccountEscrowBalances(account, escrowedAccountBalance);
-            IERC20(address(tribeone())).transfer(tribeetixBridgeToOptimism(), escrowedAccountBalance);
+            IERC20(address(rwaone())).transfer(tribeetixBridgeToOptimism(), escrowedAccountBalance);
         }
 
         emit BurnedForMigrationToL2(account, entryIDs, escrowedAccountBalance, block.timestamp);
@@ -232,8 +234,8 @@ contract RewardEscrowV2Frozen is BaseRewardEscrowV2Frozen {
 
     /* ========== MODIFIERS ========== */
 
-    modifier onlyTribeoneBridge() {
-        require(msg.sender == tribeetixBridgeToOptimism(), "Can only be invoked by TribeoneBridgeToOptimism contract");
+    modifier onlyRwaoneBridge() {
+        require(msg.sender == tribeetixBridgeToOptimism(), "Can only be invoked by RwaoneBridgeToOptimism contract");
         _;
     }
 

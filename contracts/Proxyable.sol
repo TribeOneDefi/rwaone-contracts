@@ -6,7 +6,7 @@ import "./Owned.sol";
 // Internal references
 import "./Proxy.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/proxyable
+// https://docs.rwaone.io/contracts/source/contracts/proxyable
 contract Proxyable is Owned {
     // This contract should be treated like an abstract contract
 
@@ -35,7 +35,7 @@ contract Proxyable is Owned {
         messageSender = sender;
     }
 
-    modifier onlyProxy {
+    modifier onlyProxy() {
         _onlyProxy();
         _;
     }
@@ -44,7 +44,7 @@ contract Proxyable is Owned {
         require(Proxy(msg.sender) == proxy, "Only the proxy can call");
     }
 
-    modifier optionalProxy {
+    modifier optionalProxy() {
         _optionalProxy();
         _;
     }
@@ -55,7 +55,7 @@ contract Proxyable is Owned {
         }
     }
 
-    modifier optionalProxy_onlyOwner {
+    modifier optionalProxy_onlyOwner() {
         _optionalProxy_onlyOwner();
         _;
     }

@@ -17,8 +17,8 @@ import "@chainlink/contracts-0.0.10/src/v0.5/interfaces/AggregatorV2V3Interface.
 import "./interfaces/IERC20.sol";
 import "./interfaces/ITribe.sol";
 import "./interfaces/ISystemStatus.sol";
-import "./interfaces/ITribeone.sol";
-import "./interfaces/ITribeoneDebtShare.sol";
+import "./interfaces/IRwaone.sol";
+import "./interfaces/IRwaoneDebtShare.sol";
 import "./FeePoolEternalStorage.sol";
 import "./interfaces/IExchanger.sol";
 import "./interfaces/IIssuer.sol";
@@ -29,9 +29,9 @@ import "./interfaces/ICollateralManager.sol";
 import "./interfaces/IEtherWrapper.sol";
 import "./interfaces/IFuturesMarketManager.sol";
 import "./interfaces/IWrapperFactory.sol";
-import "./interfaces/ITribeoneBridgeToOptimism.sol";
+import "./interfaces/IRwaoneBridgeToOptimism.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/feepool
+// https://docs.rwaone.io/contracts/source/contracts/feepool
 contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePool {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -69,7 +69,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
     bytes32 private constant CONTRACT_SYSTEMSTATUS = "SystemStatus";
-    bytes32 private constant CONTRACT_TRIBEONEETIXDEBTSHARE = "TribeoneDebtShare";
+    bytes32 private constant CONTRACT_RWAONEETIXDEBTSHARE = "RwaoneDebtShare";
     bytes32 private constant CONTRACT_FEEPOOLETERNALSTORAGE = "FeePoolEternalStorage";
     bytes32 private constant CONTRACT_EXCHANGER = "Exchanger";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
@@ -81,10 +81,10 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     bytes32 private constant CONTRACT_FUTURES_MARKET_MANAGER = "FuturesMarketManager";
     bytes32 private constant CONTRACT_WRAPPER_FACTORY = "WrapperFactory";
 
-    bytes32 private constant CONTRACT_TRIBEONEETIX_BRIDGE_TO_OPTIMISM = "TribeoneBridgeToOptimism";
-    bytes32 private constant CONTRACT_TRIBEONEETIX_BRIDGE_TO_BASE = "TribeoneBridgeToBase";
+    bytes32 private constant CONTRACT_RWAONEETIX_BRIDGE_TO_OPTIMISM = "RwaoneBridgeToOptimism";
+    bytes32 private constant CONTRACT_RWAONEETIX_BRIDGE_TO_BASE = "RwaoneBridgeToBase";
 
-    bytes32 private constant CONTRACT_EXT_AGGREGATOR_ISSUED_TRIBEONES = "ext:AggregatorIssuedTribes";
+    bytes32 private constant CONTRACT_EXT_AGGREGATOR_ISSUED_RWAONES = "ext:AggregatorIssuedTribes";
     bytes32 private constant CONTRACT_EXT_AGGREGATOR_DEBT_RATIO = "ext:AggregatorDebtRatio";
 
     /* ========== ETERNAL STORAGE CONSTANTS ========== */
@@ -106,7 +106,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](14);
         newAddresses[0] = CONTRACT_SYSTEMSTATUS;
-        newAddresses[1] = CONTRACT_TRIBEONEETIXDEBTSHARE;
+        newAddresses[1] = CONTRACT_RWAONEETIXDEBTSHARE;
         newAddresses[2] = CONTRACT_FEEPOOLETERNALSTORAGE;
         newAddresses[3] = CONTRACT_EXCHANGER;
         newAddresses[4] = CONTRACT_ISSUER;
@@ -116,7 +116,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         newAddresses[8] = CONTRACT_COLLATERALMANAGER;
         newAddresses[9] = CONTRACT_WRAPPER_FACTORY;
         newAddresses[10] = CONTRACT_ETHER_WRAPPER;
-        newAddresses[11] = CONTRACT_EXT_AGGREGATOR_ISSUED_TRIBEONES;
+        newAddresses[11] = CONTRACT_EXT_AGGREGATOR_ISSUED_RWAONES;
         newAddresses[12] = CONTRACT_EXT_AGGREGATOR_DEBT_RATIO;
         newAddresses[13] = CONTRACT_FUTURES_MARKET_MANAGER;
         addresses = combineArrays(existingAddresses, newAddresses);
@@ -126,8 +126,8 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         return ISystemStatus(requireAndGetAddress(CONTRACT_SYSTEMSTATUS));
     }
 
-    function tribeetixDebtShare() internal view returns (ITribeoneDebtShare) {
-        return ITribeoneDebtShare(requireAndGetAddress(CONTRACT_TRIBEONEETIXDEBTSHARE));
+    function tribeetixDebtShare() internal view returns (IRwaoneDebtShare) {
+        return IRwaoneDebtShare(requireAndGetAddress(CONTRACT_RWAONEETIXDEBTSHARE));
     }
 
     function feePoolEternalStorage() internal view returns (FeePoolEternalStorage) {
@@ -183,26 +183,31 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     }
 
     function allNetworksSnxBackedDebt() public view returns (uint256 debt, uint256 updatedAt) {
-        (, int256 rawData, , uint timestamp, ) =
-            AggregatorV2V3Interface(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_ISSUED_TRIBEONES)).latestRoundData();
+        (, int256 rawData, , uint timestamp, ) = AggregatorV2V3Interface(
+            requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_ISSUED_RWAONES)
+        ).latestRoundData();
 
         debt = uint(rawData);
         updatedAt = timestamp;
     }
 
     function allNetworksDebtSharesSupply() public view returns (uint256 sharesSupply, uint256 updatedAt) {
-        (, int256 rawIssuedTribes, , uint issuedTribesUpdatedAt, ) =
-            AggregatorV2V3Interface(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_ISSUED_TRIBEONES)).latestRoundData();
+        (, int256 rawIssuedTribes, , uint issuedTribesUpdatedAt, ) = AggregatorV2V3Interface(
+            requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_ISSUED_RWAONES)
+        ).latestRoundData();
 
-        (, int256 rawRatio, , uint ratioUpdatedAt, ) =
-            AggregatorV2V3Interface(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_DEBT_RATIO)).latestRoundData();
+        (, int256 rawRatio, , uint ratioUpdatedAt, ) = AggregatorV2V3Interface(
+            requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_DEBT_RATIO)
+        ).latestRoundData();
 
         uint debt = uint(rawIssuedTribes);
         sharesSupply = rawRatio == 0 ? 0 : debt.divideDecimalRoundPrecise(uint(rawRatio));
         updatedAt = issuedTribesUpdatedAt < ratioUpdatedAt ? issuedTribesUpdatedAt : ratioUpdatedAt;
     }
 
-    function recentFeePeriods(uint index)
+    function recentFeePeriods(
+        uint index
+    )
         external
         view
         returns (
@@ -264,13 +269,9 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         _closeSecondary(snxBackedDebt, debtSharesSupply);
 
         // inform other chain of the chosen values
-        ITribeoneBridgeToOptimism(
-            resolver.requireAndGetAddress(
-                CONTRACT_TRIBEONEETIX_BRIDGE_TO_OPTIMISM,
-                "Missing contract: TribeoneBridgeToOptimism"
-            )
-        )
-            .closeFeePeriod(snxBackedDebt, debtSharesSupply);
+        IRwaoneBridgeToOptimism(
+            resolver.requireAndGetAddress(CONTRACT_RWAONEETIX_BRIDGE_TO_OPTIMISM, "Missing contract: RwaoneBridgeToOptimism")
+        ).closeFeePeriod(snxBackedDebt, debtSharesSupply);
     }
 
     function closeSecondary(uint allNetworksSnxBackedDebt, uint allNetworksDebtSharesSupply) external onlyRelayer {
@@ -442,8 +443,9 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         // until we've exhausted the amount.
         // The condition checks for overflow because we're going to 0 with an unsigned int.
         for (uint i = FEE_PERIOD_LENGTH - 1; i < FEE_PERIOD_LENGTH; i--) {
-            uint toDistribute =
-                _recentFeePeriodsStorage(i).rewardsToDistribute.sub(_recentFeePeriodsStorage(i).rewardsClaimed);
+            uint toDistribute = _recentFeePeriodsStorage(i).rewardsToDistribute.sub(
+                _recentFeePeriodsStorage(i).rewardsClaimed
+            );
 
             if (toDistribute > 0) {
                 // Take the smaller of the amount left to claim in the period and the amount we need to allocate
@@ -548,7 +550,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
      * This also does not consider pending fees in the wrappers since they are distributed at fee period close.
      */
     function feesToBurn(address account) public view returns (uint feesFromPeriod) {
-        ITribeoneDebtShare sds = tribeetixDebtShare();
+        IRwaoneDebtShare sds = tribeetixDebtShare();
         uint userOwnershipPercentage = sds.sharePercent(account);
         (feesFromPeriod, ) = _feesAndRewardsFromPeriod(0, userOwnershipPercentage);
         return feesFromPeriod;
@@ -588,7 +590,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     function feesByPeriod(address account) public view returns (uint[FEE_PERIOD_LENGTH][2] memory results) {
         // What's the user's debt entry index and the debt they owe to the system at current feePeriod
         uint userOwnershipPercentage;
-        ITribeoneDebtShare sds = tribeetixDebtShare();
+        IRwaoneDebtShare sds = tribeetixDebtShare();
 
         userOwnershipPercentage = sds.sharePercent(account);
 
@@ -694,14 +696,14 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
             account == address(etherWrapper());
     }
 
-    modifier onlyInternalContracts {
+    modifier onlyInternalContracts() {
         require(_isInternalContract(msg.sender), "Only Internal Contracts");
         _;
     }
 
-    modifier onlyRelayer {
+    modifier onlyRelayer() {
         require(
-            msg.sender == address(this) || msg.sender == resolver.getAddress(CONTRACT_TRIBEONEETIX_BRIDGE_TO_BASE),
+            msg.sender == address(this) || msg.sender == resolver.getAddress(CONTRACT_RWAONEETIX_BRIDGE_TO_BASE),
             "Only valid relayer can call"
         );
         _;
@@ -729,11 +731,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     event FeesClaimed(address account, uint hUSDAmount, uint snxRewards);
     bytes32 private constant FEESCLAIMED_SIG = keccak256("FeesClaimed(address,uint256,uint256)");
 
-    function emitFeesClaimed(
-        address account,
-        uint hUSDAmount,
-        uint snxRewards
-    ) internal {
+    function emitFeesClaimed(address account, uint hUSDAmount, uint snxRewards) internal {
         proxy._emit(abi.encode(account, hUSDAmount, snxRewards), 1, FEESCLAIMED_SIG, 0, 0, 0);
     }
 }

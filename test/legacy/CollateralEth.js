@@ -92,7 +92,7 @@ contract('CollateralEth', async accounts => {
 			accounts,
 			tribes,
 			contracts: [
-				'Tribeone',
+				'Rwaone',
 				'FeePool',
 				'AddressResolver',
 				'ExchangeRates',

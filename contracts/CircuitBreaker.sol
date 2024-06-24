@@ -26,7 +26,7 @@ import "@chainlink/contracts-0.0.10/src/v0.5/interfaces/AggregatorV2V3Interface.
  * methods.
  * Suspend functionality is public, resume functionality is controlled by owner.
  *
- * https://docs.tribeone.io/contracts/source/contracts/CircuitBreaker
+ * https://docs.rwaone.io/contracts/source/contracts/CircuitBreaker
  */
 contract CircuitBreaker is Owned, MixinSystemSettings, ICircuitBreaker {
     using SafeMath for uint;

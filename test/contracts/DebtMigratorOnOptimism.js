@@ -17,7 +17,7 @@ contract('DebtMigratorOnOptimism', accounts => {
 		flexibleStorage,
 		messenger,
 		resolver,
-		tribeone,
+		rwaone,
 		tribeetixDebtShare,
 		rewardEscrowV2;
 
@@ -32,8 +32,8 @@ contract('DebtMigratorOnOptimism', accounts => {
 			AddressResolver: resolver,
 			DebtMigratorOnOptimism: debtMigratorOnOptimism,
 			FlexibleStorage: flexibleStorage,
-			Tribeone: tribeone,
-			TribeoneDebtShare: tribeetixDebtShare,
+			Rwaone: rwaone,
+			RwaoneDebtShare: tribeetixDebtShare,
 			RewardEscrowV2: rewardEscrowV2,
 		} = await setupAllContracts({
 			accounts,
@@ -43,7 +43,7 @@ contract('DebtMigratorOnOptimism', accounts => {
 				'FlexibleStorage',
 				'Issuer',
 				'RewardEscrowV2',
-				'Tribeone',
+				'Rwaone',
 				'SystemSettings',
 			],
 		}));
@@ -132,7 +132,7 @@ contract('DebtMigratorOnOptimism', accounts => {
 			await resolver.importAddresses(['Depot'].map(toBytes32), [owner], {
 				from: owner,
 			});
-			await tribeone.transfer(debtMigratorOnOptimism.address, escrowAmount.add(liquidHAKAAmount), {
+			await rwaone.transfer(debtMigratorOnOptimism.address, escrowAmount.add(liquidHAKAAmount), {
 				from: owner,
 			});
 		});
@@ -148,7 +148,7 @@ contract('DebtMigratorOnOptimism', accounts => {
 		});
 
 		before('record balances', async () => {
-			liquidHAKABalanceBefore = await tribeone.balanceOf(user);
+			liquidHAKABalanceBefore = await rwaone.balanceOf(user);
 			escrowedHAKABalanceBefore = await rewardEscrowV2.balanceOf(user);
 			debtShareBalanceBefore = await tribeetixDebtShare.balanceOf(user);
 		});
@@ -181,7 +181,7 @@ contract('DebtMigratorOnOptimism', accounts => {
 
 		it('updates the L2 state', async () => {
 			// updates balances
-			const liquidHAKABalanceAfter = await tribeone.balanceOf(user);
+			const liquidHAKABalanceAfter = await rwaone.balanceOf(user);
 			const escrowedHAKABalanceAfter = await rewardEscrowV2.balanceOf(user);
 			const debtShareBalanceAfter = await tribeetixDebtShare.balanceOf(user);
 			assert.bnEqual(liquidHAKABalanceAfter, liquidHAKABalanceBefore.add(liquidHAKAAmount));

@@ -42,7 +42,7 @@ contract('DebtCache', async accounts => {
 	const oneETH = toUnit('1.0');
 	const twoETH = toUnit('2.0');
 
-	let tribeone,
+	let rwaone,
 		tribeetixProxy,
 		systemStatus,
 		systemSettings,
@@ -248,8 +248,8 @@ contract('DebtCache', async accounts => {
 	before(async () => {
 		tribes = ['hUSD', 'sAUD', 'sEUR', 'hETH', 'iETH'];
 		({
-			Tribeone: tribeone,
-			ProxyERC20Tribeone: tribeetixProxy,
+			Rwaone: rwaone,
+			ProxyERC20Rwaone: tribeetixProxy,
 			SystemStatus: systemStatus,
 			SystemSettings: systemSettings,
 			ExchangeRates: exchangeRates,
@@ -272,14 +272,14 @@ contract('DebtCache', async accounts => {
 			accounts,
 			tribes,
 			contracts: [
-				'Tribeone',
+				'Rwaone',
 				'ExchangeRates',
 				'CircuitBreaker',
 				'FeePool',
 				'FeePoolEternalStorage',
 				'AddressResolver',
 				'RewardEscrow',
-				'TribeoneEscrow',
+				'RwaoneEscrow',
 				'SystemSettings',
 				'Issuer',
 				'LiquidatorRewards',
@@ -297,7 +297,7 @@ contract('DebtCache', async accounts => {
 		}));
 
 		// use implementation ABI on the proxy address to simplify calling
-		tribeone = await artifacts.require('Tribeone').at(tribeetixProxy.address);
+		rwaone = await artifacts.require('Rwaone').at(tribeetixProxy.address);
 
 		await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, hETH, ETH, iETH]);
 	});
@@ -557,7 +557,7 @@ contract('DebtCache', async accounts => {
 				await setStatus({ owner, systemStatus, section: 'System', suspend: true });
 				await assert.revert(
 					debtCache.takeDebtSnapshot({ from: account1 }),
-					'Tribeone is suspended'
+					'Rwaone is suspended'
 				);
 				await debtCache.takeDebtSnapshot({ from: owner });
 			});
@@ -749,7 +749,7 @@ contract('DebtCache', async accounts => {
 				await setStatus({ owner, systemStatus, section: 'System', suspend: true });
 				await assert.revert(
 					debtCache.updateCachedTribeDebts([sAUD, sEUR], { from: account1 }),
-					'Tribeone is suspended'
+					'Rwaone is suspended'
 				);
 				await debtCache.updateCachedTribeDebts([sAUD, sEUR], { from: owner });
 			});
@@ -925,8 +925,8 @@ contract('DebtCache', async accounts => {
 				const issued = (await debtCache.cacheInfo())[0];
 
 				const tribesToIssue = toUnit('10');
-				await tribeone.transfer(account1, toUnit('1000'), { from: owner });
-				const tx = await tribeone.issueTribes(tribesToIssue, { from: account1 });
+				await rwaone.transfer(account1, toUnit('1000'), { from: owner });
+				const tx = await rwaone.issueTribes(tribesToIssue, { from: account1 });
 				assert.bnEqual((await debtCache.cacheInfo())[0], issued.add(tribesToIssue));
 
 				const logs = await getDecodedLogs({
@@ -945,8 +945,8 @@ contract('DebtCache', async accounts => {
 			it('burning hUSD updates the debt total', async () => {
 				await debtCache.takeDebtSnapshot();
 				const tribesToIssue = toUnit('10');
-				await tribeone.transfer(account1, toUnit('1000'), { from: owner });
-				await tribeone.issueTribes(tribesToIssue, { from: account1 });
+				await rwaone.transfer(account1, toUnit('1000'), { from: owner });
+				await rwaone.issueTribes(tribesToIssue, { from: account1 });
 
 				await circuitBreaker.resetLastValue(
 					[aggregatorIssuedTribes.address, aggregatorDebtRatio.address],
@@ -961,7 +961,7 @@ contract('DebtCache', async accounts => {
 
 				const tribesToBurn = toUnit('5');
 
-				const tx = await tribeone.burnTribes(tribesToBurn, { from: account1 });
+				const tx = await rwaone.burnTribes(tribesToBurn, { from: account1 });
 				assert.bnEqual((await debtCache.cacheInfo())[0], issued.sub(tribesToBurn));
 
 				const logs = await getDecodedLogs({
@@ -984,9 +984,9 @@ contract('DebtCache', async accounts => {
 				const tribesToIssue = toUnit('1000');
 				const cachedTribes = (await debtCache.cachedTribeDebts([hUSD]))[0];
 
-				await tribeone.transfer(account1, toUnit('10000'), { from: owner });
+				await rwaone.transfer(account1, toUnit('10000'), { from: owner });
 
-				const tx = await tribeone.issueTribes(tribesToIssue, { from: account1 });
+				const tx = await rwaone.issueTribes(tribesToIssue, { from: account1 });
 
 				const logs = await getDecodedLogs({
 					hash: tx.tx,
@@ -1009,14 +1009,14 @@ contract('DebtCache', async accounts => {
 				await debtCache.takeDebtSnapshot();
 
 				const tribesToIssue = toUnit('1000');
-				await tribeone.transfer(account1, toUnit('10000'), { from: owner });
-				await tribeone.issueTribes(tribesToIssue, { from: account1 });
+				await rwaone.transfer(account1, toUnit('10000'), { from: owner });
+				await rwaone.issueTribes(tribesToIssue, { from: account1 });
 
 				const cachedTribes = (await debtCache.cachedTribeDebts([hUSD]))[0];
 				const issued = (await debtCache.cacheInfo())[0];
 				const tribesToBurn = toUnit('500');
 
-				const tx = await tribeone.burnTribes(tribesToBurn, { from: account1 });
+				const tx = await rwaone.burnTribes(tribesToBurn, { from: account1 });
 
 				const logs = await getDecodedLogs({
 					hash: tx.tx,
@@ -1042,11 +1042,11 @@ contract('DebtCache', async accounts => {
 				});
 
 				await debtCache.takeDebtSnapshot();
-				await tribeone.transfer(account1, toUnit('1000'), { from: owner });
-				await tribeone.issueTribes(toUnit('10'), { from: account1 });
+				await rwaone.transfer(account1, toUnit('1000'), { from: owner });
+				await rwaone.issueTribes(toUnit('10'), { from: account1 });
 				const issued = (await debtCache.cacheInfo())[0];
 				const debts = await debtCache.cachedTribeDebts([hUSD, sAUD]);
-				const tx = await tribeone.exchange(hUSD, toUnit('5'), sAUD, { from: account1 });
+				const tx = await rwaone.exchange(hUSD, toUnit('5'), sAUD, { from: account1 });
 				const postDebts = await debtCache.cachedTribeDebts([hUSD, sAUD]);
 				assert.bnEqual((await debtCache.cacheInfo())[0], issued);
 				assert.bnEqual(postDebts[0], debts[0].sub(toUnit(5)));
@@ -1077,7 +1077,7 @@ contract('DebtCache', async accounts => {
 
 				const debts = await debtCache.cachedTribeDebts([hUSD, sAUD, sEUR]);
 
-				await tribeone.exchange(sEUR, toUnit(10), sAUD, { from: account1 });
+				await rwaone.exchange(sEUR, toUnit(10), sAUD, { from: account1 });
 				const postDebts = await debtCache.cachedTribeDebts([hUSD, sAUD, sEUR]);
 
 				assert.bnEqual((await debtCache.cacheInfo())[0], issued);
@@ -1111,7 +1111,7 @@ contract('DebtCache', async accounts => {
 					['1', '1'].map(toUnit)
 				);
 
-				await tribeone.exchange(sEUR, toUnit(10), sAUD, { from: account1 });
+				await rwaone.exchange(sEUR, toUnit(10), sAUD, { from: account1 });
 				const postDebts = await debtCache.cachedTribeDebts([sAUD, sEUR]);
 
 				// 120 eur @ $2 = $240 and 100 aud @ $0.50 = $50 becomes:
@@ -1136,7 +1136,7 @@ contract('DebtCache', async accounts => {
 
 				const cachedDebt = await debtCache.cachedDebt();
 
-				await tribeone.exchange(sAUD, toUnit(50), sEUR, { from: account1 });
+				await rwaone.exchange(sAUD, toUnit(50), sEUR, { from: account1 });
 				// so there's now 100 - 25 hUSD left (25 of it was exchanged)
 				// and now there's 100 + (25 / 2 ) of sEUR = 112.5
 
@@ -1460,8 +1460,8 @@ contract('DebtCache', async accounts => {
 		beforeEach(async () => {
 			// Issue some debt to avoid a division-by-zero in `getBorrowRate` where
 			// we compute the utilisation.
-			await tribeone.transfer(account1, toUnit('1000'), { from: owner });
-			await tribeone.issueTribes(toUnit('10'), { from: account1 });
+			await rwaone.transfer(account1, toUnit('1000'), { from: owner });
+			await rwaone.issueTribes(toUnit('10'), { from: account1 });
 
 			totalNonSnxBackedDebt = await getTotalNonSnxBackedDebt();
 			currentDebt = await debtCache.currentDebt();
@@ -1495,7 +1495,7 @@ contract('DebtCache', async accounts => {
 				let tx;
 				beforeEach(async () => {
 					// Swap some hETH into tribeetic dollarydoos.
-					tx = await tribeone.exchange(hETH, '5', sAUD, { from: account1 });
+					tx = await rwaone.exchange(hETH, '5', sAUD, { from: account1 });
 				});
 
 				it('non-wHAKA debt is unchanged', async () => {

@@ -9,7 +9,7 @@ import "../RewardEscrow.sol";
 import "../RewardsDistribution.sol";
 import "../Issuer.sol";
 
-interface ITribeoneNamedContract {
+interface IRwaoneNamedContract {
     // solhint-disable func-name-mixedcase
     function CONTRACT_NAME() external view returns (bytes32);
 }
@@ -20,7 +20,7 @@ contract Migration_Naos is BaseMigration {
     address public constant OWNER = 0xEb3107117FEAd7de89Cd14D463D340A2E6917769;
 
     // ----------------------------
-    // EXISTING TRIBEONEETIX CONTRACTS
+    // EXISTING RWAONEETIX CONTRACTS
     // ----------------------------
 
     // https://etherscan.io/address/0x823bE81bbF96BEc0e25CA13170F5AaCb5B79ba83
@@ -44,7 +44,7 @@ contract Migration_Naos is BaseMigration {
     // ----------------------------------
 
     // https://etherscan.io/address/0xd0dA9cBeA9C3852C5d63A95F9ABCC4f6eA0F9032
-    address public constant new_Tribeone_contract = 0xd0dA9cBeA9C3852C5d63A95F9ABCC4f6eA0F9032;
+    address public constant new_Rwaone_contract = 0xd0dA9cBeA9C3852C5d63A95F9ABCC4f6eA0F9032;
     // https://etherscan.io/address/0xca68a3D663483515a9D434E854AB59A41b3A523c
     address public constant new_Issuer_contract = 0xca68a3D663483515a9D434E854AB59A41b3A523c;
 
@@ -72,16 +72,16 @@ contract Migration_Naos is BaseMigration {
         addressresolver_rebuildCaches_1();
         // Rebuild the resolver caches in all MixinResolver contracts - batch 2;
         addressresolver_rebuildCaches_2();
-        // Ensure the wHAKA proxy has the correct Tribeone target set;
-        proxytribeetix_i.setTarget(Proxyable(new_Tribeone_contract));
+        // Ensure the wHAKA proxy has the correct Rwaone target set;
+        proxytribeetix_i.setTarget(Proxyable(new_Rwaone_contract));
         // Ensure Issuer contract can suspend issuance - see SIP-165;
         systemstatus_i.updateAccessControl("Issuance", new_Issuer_contract, true, false);
-        // Ensure the Tribeone contract can write to its TokenState contract;
-        tokenstatetribeetix_i.setAssociatedContract(new_Tribeone_contract);
-        // Ensure the legacy RewardEscrow contract is connected to the Tribeone contract;
-        rewardescrow_i.setTribeone(ITribeone(new_Tribeone_contract));
-        // Ensure the RewardsDistribution has Tribeone set as its authority for distribution;
-        rewardsdistribution_i.setAuthority(new_Tribeone_contract);
+        // Ensure the Rwaone contract can write to its TokenState contract;
+        tokenstatetribeetix_i.setAssociatedContract(new_Rwaone_contract);
+        // Ensure the legacy RewardEscrow contract is connected to the Rwaone contract;
+        rewardescrow_i.setRwaone(IRwaone(new_Rwaone_contract));
+        // Ensure the RewardsDistribution has Rwaone set as its authority for distribution;
+        rewardsdistribution_i.setAuthority(new_Rwaone_contract);
         // Add tribes to the Issuer contract - batch 1;
         issuer_addTribes_10();
 
@@ -105,10 +105,10 @@ contract Migration_Naos is BaseMigration {
 
     function addressresolver_importAddresses_0() internal {
         bytes32[] memory addressresolver_importAddresses_names_0_0 = new bytes32[](2);
-        addressresolver_importAddresses_names_0_0[0] = bytes32("Tribeone");
+        addressresolver_importAddresses_names_0_0[0] = bytes32("Rwaone");
         addressresolver_importAddresses_names_0_0[1] = bytes32("Issuer");
         address[] memory addressresolver_importAddresses_destinations_0_1 = new address[](2);
-        addressresolver_importAddresses_destinations_0_1[0] = address(new_Tribeone_contract);
+        addressresolver_importAddresses_destinations_0_1[0] = address(new_Rwaone_contract);
         addressresolver_importAddresses_destinations_0_1[1] = address(new_Issuer_contract);
         addressresolver_i.importAddresses(
             addressresolver_importAddresses_names_0_0,
@@ -125,7 +125,7 @@ contract Migration_Naos is BaseMigration {
         addressresolver_rebuildCaches_destinations_1_0[4] = MixinResolver(new_Issuer_contract);
         addressresolver_rebuildCaches_destinations_1_0[5] = MixinResolver(0x62922670313bf6b41C580143d1f6C173C5C20019);
         addressresolver_rebuildCaches_destinations_1_0[6] = MixinResolver(0x39Ea01a0298C315d149a490E34B59Dbf2EC7e48F);
-        addressresolver_rebuildCaches_destinations_1_0[7] = MixinResolver(new_Tribeone_contract);
+        addressresolver_rebuildCaches_destinations_1_0[7] = MixinResolver(new_Rwaone_contract);
         addressresolver_rebuildCaches_destinations_1_0[8] = MixinResolver(0x89FCb32F29e509cc42d0C8b6f058C993013A843F);
         addressresolver_rebuildCaches_destinations_1_0[9] = MixinResolver(0x83105D7CDd2fd9b8185BFF1cb56bB1595a618618);
         addressresolver_rebuildCaches_destinations_1_0[10] = MixinResolver(0x1620Aa736939597891C1940CF0d28b82566F9390);

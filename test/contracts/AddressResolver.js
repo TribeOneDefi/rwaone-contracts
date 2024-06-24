@@ -144,7 +144,7 @@ contract('AddressResolver', accounts => {
 		describe('when a mock for Issuer is added', () => {
 			let mock;
 			beforeEach(async () => {
-				// mock a Tribeone
+				// mock a Rwaone
 				mock = await artifacts.require('GenericMock').new();
 
 				// add it to the resolver
@@ -164,7 +164,7 @@ contract('AddressResolver', accounts => {
 				assert.equal(tribe, account4);
 			});
 		});
-		describe('when a Tribeone is created with a few added tribes', () => {
+		describe('when a Rwaone is created with a few added tribes', () => {
 			let hETHContract;
 			let hUSDContract;
 			beforeEach(async () => {
@@ -174,7 +174,7 @@ contract('AddressResolver', accounts => {
 						AddressResolver: resolver,
 					},
 					tribes: ['hUSD', 'hETH', 'sEUR', 'sAUD'],
-					contracts: ['Tribeone'],
+					contracts: ['Rwaone'],
 				}));
 			});
 			it('when getTribe() is invoked with these tribe keys, they are returned correctly', async () => {

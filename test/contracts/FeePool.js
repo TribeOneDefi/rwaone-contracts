@@ -73,7 +73,7 @@ contract('FeePool', async accounts => {
 		debtCache,
 		feePoolProxy,
 		FEE_ADDRESS,
-		tribeone,
+		rwaone,
 		tribeetixProxy,
 		systemStatus,
 		systemSettings,
@@ -97,8 +97,8 @@ contract('FeePool', async accounts => {
 			DebtCache: debtCache,
 			ProxyFeePool: feePoolProxy,
 			RewardsDistribution: rewardsDistribution,
-			Tribeone: tribeone,
-			ProxyERC20Tribeone: tribeetixProxy,
+			Rwaone: rwaone,
+			ProxyERC20Rwaone: tribeetixProxy,
 			SystemSettings: systemSettings,
 			TribehUSD: hUSDContract,
 			SystemStatus: systemStatus,
@@ -115,7 +115,7 @@ contract('FeePool', async accounts => {
 				'DebtCache',
 				'LiquidatorRewards',
 				'Proxy',
-				'Tribeone',
+				'Rwaone',
 				'SystemSettings',
 				'SystemStatus',
 				'RewardEscrowV2',
@@ -129,17 +129,17 @@ contract('FeePool', async accounts => {
 		}));
 
 		// use implementation ABI on the proxy address to simplify calling
-		tribeone = await artifacts.require('Tribeone').at(tribeetixProxy.address);
+		rwaone = await artifacts.require('Rwaone').at(tribeetixProxy.address);
 
 		await setupPriceAggregators(exchangeRates, owner, [sAUD]);
 
 		FEE_ADDRESS = await feePool.FEE_ADDRESS();
 
-		tribeetixBridgeToOptimism = await smock.fake('TribeoneBridgeToOptimism');
+		tribeetixBridgeToOptimism = await smock.fake('RwaoneBridgeToOptimism');
 
 		// import special address for relayer so we can call as it
 		await addressResolver.importAddresses(
-			['TribeoneBridgeToOptimism', 'TribeoneBridgeToBase'].map(toBytes32),
+			['RwaoneBridgeToOptimism', 'RwaoneBridgeToBase'].map(toBytes32),
 			[tribeetixBridgeToOptimism.address, relayer],
 			{
 				from: owner,
@@ -255,18 +255,18 @@ contract('FeePool', async accounts => {
 			const amount = toUnit('10000');
 
 			// Issue hUSD for two different accounts.
-			await tribeone.transfer(account1, toUnit('1000000'), {
+			await rwaone.transfer(account1, toUnit('1000000'), {
 				from: owner,
 			});
 
-			await tribeone.issueTribes(amount, { from: owner });
-			await tribeone.issueTribes(amount, { from: account1 });
+			await rwaone.issueTribes(amount, { from: owner });
+			await rwaone.issueTribes(amount, { from: account1 });
 
 			await closeFeePeriod();
 
 			// Generate a fee.
 			const exchange = toUnit('10000');
-			await tribeone.exchange(hUSD, exchange, sAUD, { from: owner });
+			await rwaone.exchange(hUSD, exchange, sAUD, { from: owner });
 
 			await closeFeePeriod();
 
@@ -321,15 +321,15 @@ contract('FeePool', async accounts => {
 			const fee = amount.sub(amountReceivedFromExchange(amount));
 
 			// Issue hUSD for two different accounts.
-			await tribeone.transfer(account1, toUnit('1000000'), {
+			await rwaone.transfer(account1, toUnit('1000000'), {
 				from: owner,
 			});
 
-			await tribeone.issueTribes(amount, { from: owner });
-			await tribeone.issueTribes(amount.mul(web3.utils.toBN('2')), { from: account1 });
+			await rwaone.issueTribes(amount, { from: owner });
+			await rwaone.issueTribes(amount.mul(web3.utils.toBN('2')), { from: account1 });
 
 			// Generate a fee.
-			await tribeone.exchange(hUSD, amount, sAUD, { from: owner });
+			await rwaone.exchange(hUSD, amount, sAUD, { from: owner });
 
 			// Should be no fees available yet because the period is still pending.
 			assert.bnEqual(await feePool.totalFeesAvailable(), 0);
@@ -381,15 +381,15 @@ contract('FeePool', async accounts => {
 			let feesToBurn0, feesToBurn1;
 
 			// Issue hUSD for two different accounts.
-			await tribeone.transfer(account1, toUnit('1000000'), {
+			await rwaone.transfer(account1, toUnit('1000000'), {
 				from: owner,
 			});
 
-			await tribeone.issueTribes(amount1, { from: owner });
-			await tribeone.issueTribes(amount2, { from: account1 });
+			await rwaone.issueTribes(amount1, { from: owner });
+			await rwaone.issueTribes(amount2, { from: account1 });
 
 			// Generate a fee.
-			await tribeone.exchange(hUSD, amount1, sAUD, { from: owner });
+			await rwaone.exchange(hUSD, amount1, sAUD, { from: owner });
 
 			// Should be no fees available or burned yet because the period is still pending.
 			assert.bnEqual(await feePool.totalFeesAvailable(), 0);
@@ -414,7 +414,7 @@ contract('FeePool', async accounts => {
 			const fee2 = amount2.sub(amountReceivedFromExchange(amount2));
 
 			// Generate a fee.
-			await tribeone.exchange(hUSD, amount2, sAUD, { from: account1 });
+			await rwaone.exchange(hUSD, amount2, sAUD, { from: account1 });
 
 			// Should be only the previous fees burned because the period is still pending.
 			assert.bnEqual(await feePool.totalFeesBurned(), fee1);
@@ -437,18 +437,18 @@ contract('FeePool', async accounts => {
 			const fee = amount.sub(amountReceivedFromExchange(amount));
 
 			// Issue hUSD for two different accounts.
-			await tribeone.transfer(account1, toUnit('1000000'), {
+			await rwaone.transfer(account1, toUnit('1000000'), {
 				from: owner,
 			});
 
-			await tribeone.issueTribes(amount, { from: owner });
-			await tribeone.issueTribes(amount.mul(web3.utils.toBN('2')), { from: account1 });
+			await rwaone.issueTribes(amount, { from: owner });
+			await rwaone.issueTribes(amount.mul(web3.utils.toBN('2')), { from: account1 });
 
 			// Close out the period to allow both users to be part of the whole fee period.
 			await closeFeePeriod();
 
 			// Generate a fee.
-			await tribeone.exchange(hUSD, amount, sAUD, { from: owner });
+			await rwaone.exchange(hUSD, amount, sAUD, { from: owner });
 
 			// Should be no fees available yet because the period is still pending.
 			let feesAvailable;
@@ -489,18 +489,18 @@ contract('FeePool', async accounts => {
 			const FEE_PERIOD_LENGTH = await feePool.FEE_PERIOD_LENGTH();
 
 			// Issue hUSD for two different accounts.
-			await tribeone.transfer(account1, toUnit('1000000'), {
+			await rwaone.transfer(account1, toUnit('1000000'), {
 				from: owner,
 			});
 
-			await tribeone.issueTribes(amount, { from: owner });
-			await tribeone.issueTribes(amount.mul(web3.utils.toBN('2')), { from: account1 });
+			await rwaone.issueTribes(amount, { from: owner });
+			await rwaone.issueTribes(amount.mul(web3.utils.toBN('2')), { from: account1 });
 
 			// Close out the period to allow both users to be part of the whole fee period.
 			await closeFeePeriod();
 
 			// Generate a fee.
-			await tribeone.exchange(hUSD, amount, sAUD, { from: owner });
+			await rwaone.exchange(hUSD, amount, sAUD, { from: owner });
 
 			let feesAvailable;
 			// Should be no fees available yet because the period is still pending.
@@ -564,7 +564,7 @@ contract('FeePool', async accounts => {
 			});
 			it('should import feePeriods and close the current fee period correctly', async () => {
 				// Make sure the FeeAddress has enough tribes to burn for the imported periods.
-				await tribeone.issueTribes(toUnit('1000'), { from: owner });
+				await rwaone.issueTribes(toUnit('1000'), { from: owner });
 				await hUSDContract.transfer(FEE_ADDRESS, toUnit('1000'), {
 					from: owner,
 				});
@@ -666,7 +666,7 @@ contract('FeePool', async accounts => {
 			});
 			it('should correctly roll over unclaimed fees when closing fee periods', async () => {
 				// Issue 10,000 hUSD.
-				await tribeone.issueTribes(toUnit('10000'), { from: owner });
+				await rwaone.issueTribes(toUnit('10000'), { from: owner });
 
 				// Users are only entitled to fees when they've participated in a fee period in its
 				// entirety. Roll over the fee period so fees generated below count for owner.
@@ -687,7 +687,7 @@ contract('FeePool', async accounts => {
 				const length = await feePool.FEE_PERIOD_LENGTH();
 
 				// Issue 10,000 hUSD.
-				await tribeone.issueTribes(toUnit('10000'), { from: owner });
+				await rwaone.issueTribes(toUnit('10000'), { from: owner });
 
 				// Users have to have minted before the close of period. Close that fee period
 				// so that there won't be any fees in period. future fees are available.
@@ -733,7 +733,7 @@ contract('FeePool', async accounts => {
 				}
 
 				// Now create the first fee
-				await tribeone.issueTribes(toUnit('10000'), { from: owner });
+				await rwaone.issueTribes(toUnit('10000'), { from: owner });
 				await hUSDContract.transfer(account1, toUnit('10000'), {
 					from: owner,
 				});
@@ -772,7 +772,7 @@ contract('FeePool', async accounts => {
 
 			it('should receive fees from WrapperFactory', async () => {
 				// Make sure some debt exists otherwise updateCachedhUSDDebt will revert when closing/burning fees.
-				await tribeone.issueTribes(toUnit('1000'), { from: owner });
+				await rwaone.issueTribes(toUnit('1000'), { from: owner });
 
 				// Close the current one so we know exactly what we're dealing with
 				await closeFeePeriod();
@@ -854,7 +854,7 @@ contract('FeePool', async accounts => {
 			});
 
 			it('should trigger bridge to close period on other networks', async () => {
-				await tribeone.issueTribes(toUnit(500), { from: owner });
+				await rwaone.issueTribes(toUnit(500), { from: owner });
 
 				await fastForward(await feePool.feePeriodDuration());
 
@@ -938,7 +938,7 @@ contract('FeePool', async accounts => {
 			});
 			it('should import feePeriods and close the current fee period correctly', async () => {
 				// Make sure the FeeAddress has enough tribes to burn for the imported periods.
-				await tribeone.issueTribes(toUnit('1000'), { from: owner });
+				await rwaone.issueTribes(toUnit('1000'), { from: owner });
 				await hUSDContract.transfer(FEE_ADDRESS, toUnit('1000'), {
 					from: owner,
 				});
@@ -1028,8 +1028,8 @@ contract('FeePool', async accounts => {
 			describe('potential blocking conditions', () => {
 				beforeEach(async () => {
 					// ensure claimFees() can succeed by default (generate fees and close period)
-					await tribeone.issueTribes(toUnit('10000'), { from: owner });
-					await tribeone.exchange(hUSD, toUnit('10'), sAUD, { from: owner });
+					await rwaone.issueTribes(toUnit('10000'), { from: owner });
+					await rwaone.exchange(hUSD, toUnit('10'), sAUD, { from: owner });
 					await closeFeePeriod();
 				});
 				['System', 'Issuance'].forEach(section => {
@@ -1082,20 +1082,20 @@ contract('FeePool', async accounts => {
 				const length = (await feePool.FEE_PERIOD_LENGTH()).toNumber();
 
 				// Issue 10,000 hUSD for two different accounts.
-				await tribeone.transfer(account1, toUnit('1000000'), {
+				await rwaone.transfer(account1, toUnit('1000000'), {
 					from: owner,
 				});
 
-				await tribeone.issueTribes(toUnit('10000'), { from: owner });
-				await tribeone.issueTribes(toUnit('10000'), { from: account1 });
+				await rwaone.issueTribes(toUnit('10000'), { from: owner });
+				await rwaone.issueTribes(toUnit('10000'), { from: account1 });
 
 				// For each fee period (with one extra to test rollover), do two exchange transfers, then close it off.
 				for (let i = 0; i <= length; i++) {
 					const exchange1 = toUnit(((i + 1) * 10).toString());
 					const exchange2 = toUnit(((i + 1) * 15).toString());
 
-					await tribeone.exchange(hUSD, exchange1, sAUD, { from: owner });
-					await tribeone.exchange(hUSD, exchange2, sAUD, { from: account1 });
+					await rwaone.exchange(hUSD, exchange1, sAUD, { from: owner });
+					await rwaone.exchange(hUSD, exchange2, sAUD, { from: account1 });
 
 					await closeFeePeriod();
 				}
@@ -1120,22 +1120,22 @@ contract('FeePool', async accounts => {
 
 			it('should allow a user to claim their fees in hUSD after burning @gasprofile', async () => {
 				// Issue 10,000 hUSD for two different accounts.
-				await tribeone.transfer(account1, toUnit('1000000'), {
+				await rwaone.transfer(account1, toUnit('1000000'), {
 					from: owner,
 				});
 
-				await tribeone.issueTribes(toUnit('10000'), { from: owner });
-				await tribeone.issueTribes(toUnit('10000'), { from: account1 });
+				await rwaone.issueTribes(toUnit('10000'), { from: owner });
+				await rwaone.issueTribes(toUnit('10000'), { from: account1 });
 
-				await tribeone.exchange(hUSD, toUnit(100), sAUD, { from: account1 });
+				await rwaone.exchange(hUSD, toUnit(100), sAUD, { from: account1 });
 
 				await closeFeePeriod();
 
 				// Settle our debt
-				await tribeone.burnTribes(toUnit('999999'), { from: owner });
+				await rwaone.burnTribes(toUnit('999999'), { from: owner });
 
 				assert.bnEqual(
-					await tribeone.debtBalanceOf(owner, toBytes32('hUSD')),
+					await rwaone.debtBalanceOf(owner, toBytes32('hUSD')),
 					toUnit('0'),
 					'account has debt remaining'
 				);
@@ -1160,18 +1160,18 @@ contract('FeePool', async accounts => {
 
 			it('should allow a user to claim their fees if they minted debt during period', async () => {
 				// Issue 10,000 hUSD for two different accounts.
-				await tribeone.transfer(account1, toUnit('1000000'), {
+				await rwaone.transfer(account1, toUnit('1000000'), {
 					from: owner,
 				});
 
-				await tribeone.issueTribes(toUnit('10000'), { from: owner });
+				await rwaone.issueTribes(toUnit('10000'), { from: owner });
 
 				// For first fee period, do two transfers, then close it off.
 				let totalFees = web3.utils.toBN('0');
 
 				const exchange1 = toUnit((10).toString());
 
-				await tribeone.exchange(hUSD, exchange1, sAUD, { from: owner });
+				await rwaone.exchange(hUSD, exchange1, sAUD, { from: owner });
 
 				totalFees = totalFees.add(exchange1.sub(amountReceivedFromExchange(exchange1)));
 
@@ -1192,10 +1192,10 @@ contract('FeePool', async accounts => {
 
 				// FeePeriod 2 - account 1 joins and mints 50% of the debt
 				totalFees = web3.utils.toBN('0');
-				await tribeone.issueTribes(toUnit('10000'), { from: account1 });
+				await rwaone.issueTribes(toUnit('10000'), { from: account1 });
 
 				// Generate fees
-				await tribeone.exchange(hUSD, exchange1, sAUD, { from: owner });
+				await rwaone.exchange(hUSD, exchange1, sAUD, { from: owner });
 				totalFees = totalFees.add(exchange1.sub(amountReceivedFromExchange(exchange1)));
 
 				await closeFeePeriod();
@@ -1221,12 +1221,12 @@ contract('FeePool', async accounts => {
 				const length = (await feePool.FEE_PERIOD_LENGTH()).toNumber();
 
 				// Issue 10,000 hUSD for two different accounts.
-				await tribeone.transfer(account1, toUnit('1000000'), {
+				await rwaone.transfer(account1, toUnit('1000000'), {
 					from: owner,
 				});
 
-				await tribeone.issueTribes(toUnit('10000'), { from: owner });
-				await tribeone.issueTribes(toUnit('10000'), { from: account1 });
+				await rwaone.issueTribes(toUnit('10000'), { from: owner });
+				await rwaone.issueTribes(toUnit('10000'), { from: account1 });
 
 				// For each fee period (with one extra to test rollover), do two transfers, then close it off.
 				let totalFees = web3.utils.toBN('0');
@@ -1235,8 +1235,8 @@ contract('FeePool', async accounts => {
 					const exchange1 = toUnit(((i + 1) * 10).toString());
 					const exchange2 = toUnit(((i + 1) * 15).toString());
 
-					await tribeone.exchange(hUSD, exchange1, sAUD, { from: owner });
-					await tribeone.exchange(hUSD, exchange2, sAUD, { from: account1 });
+					await rwaone.exchange(hUSD, exchange1, sAUD, { from: owner });
+					await rwaone.exchange(hUSD, exchange2, sAUD, { from: account1 });
 
 					totalFees = totalFees.add(exchange1.sub(amountReceivedFromExchange(exchange1)));
 					totalFees = totalFees.add(exchange2.sub(amountReceivedFromExchange(exchange2)));
@@ -1275,7 +1275,7 @@ contract('FeePool', async accounts => {
 
 			it('should revert when a user tries to double claim their fees', async () => {
 				// Issue 10,000 hUSD.
-				await tribeone.issueTribes(toUnit('10000'), { from: owner });
+				await rwaone.issueTribes(toUnit('10000'), { from: owner });
 
 				// Users are only allowed to claim fees in periods they had an issued balance
 				// for the entire period.
@@ -1283,7 +1283,7 @@ contract('FeePool', async accounts => {
 
 				// Do a single exchange of all our tribes to generate a fee.
 				const exchange1 = toUnit(100);
-				await tribeone.exchange(hUSD, exchange1, sAUD, { from: owner });
+				await rwaone.exchange(hUSD, exchange1, sAUD, { from: owner });
 
 				// Assert that the correct fee is in the fee pool.
 				const fee = await hUSDContract.balanceOf(FEE_ADDRESS);
@@ -1360,7 +1360,7 @@ contract('FeePool', async accounts => {
 			});
 
 			it('should be no penalty if issuance ratio is less than target ratio', async () => {
-				await tribeone.issueMaxTribes({ from: owner });
+				await rwaone.issueMaxTribes({ from: owner });
 
 				// Increase the price so we start well and truly within our 20% ratio.
 				const newRate = (await exchangeRates.rateForCurrency(wHAKA)).add(web3.utils.toBN('1'));
@@ -1372,7 +1372,7 @@ contract('FeePool', async accounts => {
 
 			it('should correctly calculate the 10% buffer for penalties at specific issuance ratios', async () => {
 				const step = toUnit('0.01');
-				await tribeone.issueMaxTribes({ from: owner });
+				await rwaone.issueMaxTribes({ from: owner });
 
 				// Increase the price so we start well and truly within our 20% ratio.
 				const newRate = (await exchangeRates.rateForCurrency(wHAKA)).add(
@@ -1385,10 +1385,10 @@ contract('FeePool', async accounts => {
 				const penaltyThreshold = fromUnit(await feePool.targetThreshold());
 
 				const threshold = Number(issuanceRatio) * (1 + Number(penaltyThreshold));
-				// Start from the current price of tribeone and slowly decrease the price until
+				// Start from the current price of rwaone and slowly decrease the price until
 				// we hit almost zero. Assert the correct penalty at each point.
 				while ((await exchangeRates.rateForCurrency(wHAKA)).gt(step.mul(web3.utils.toBN('2')))) {
-					const ratio = await tribeone.collateralisationRatio(owner);
+					const ratio = await rwaone.collateralisationRatio(owner);
 
 					if (ratio.lte(toUnit(threshold))) {
 						// Should be claimable
@@ -1407,17 +1407,17 @@ contract('FeePool', async accounts => {
 
 			it('should revert when users try to claim fees with > 10% of threshold', async () => {
 				// Issue 10,000 hUSD for two different accounts.
-				await tribeone.transfer(account1, toUnit('1000000'), {
+				await rwaone.transfer(account1, toUnit('1000000'), {
 					from: owner,
 				});
 
-				await tribeone.issueMaxTribes({ from: account1 });
+				await rwaone.issueMaxTribes({ from: account1 });
 				const amount = await hUSDContract.balanceOf(account1);
-				await tribeone.issueTribes(amount, { from: owner });
+				await rwaone.issueTribes(amount, { from: owner });
 				await closeFeePeriod();
 
 				// Do a transfer to generate fees
-				await tribeone.exchange(hUSD, amount, sAUD, { from: owner });
+				await rwaone.exchange(hUSD, amount, sAUD, { from: owner });
 				const fee = amount.sub(amountReceivedFromExchange(amount));
 
 				// We should have zero fees available because the period is still open.
@@ -1447,17 +1447,17 @@ contract('FeePool', async accounts => {
 
 			it('should be able to set the Target threshold to 15% and claim fees', async () => {
 				// Issue 10,000 hUSD for two different accounts.
-				await tribeone.transfer(account1, toUnit('1000000'), {
+				await rwaone.transfer(account1, toUnit('1000000'), {
 					from: owner,
 				});
 
-				await tribeone.issueMaxTribes({ from: account1 });
+				await rwaone.issueMaxTribes({ from: account1 });
 				const amount = await hUSDContract.balanceOf(account1);
-				await tribeone.issueTribes(amount, { from: owner });
+				await rwaone.issueTribes(amount, { from: owner });
 				await closeFeePeriod();
 
 				// Do a transfer to generate fees
-				await tribeone.exchange(hUSD, amount, sAUD, { from: owner });
+				await rwaone.exchange(hUSD, amount, sAUD, { from: owner });
 				const fee = amount.sub(amountReceivedFromExchange(amount));
 
 				// We should have zero fees available because the period is still open.
@@ -1510,17 +1510,17 @@ contract('FeePool', async accounts => {
 		describe('claimOnBehalf', async () => {
 			async function generateFees() {
 				// Issue 10,000 hUSD.
-				await tribeone.transfer(account1, toUnit('1000000'), {
+				await rwaone.transfer(account1, toUnit('1000000'), {
 					from: owner,
 				});
 
-				await tribeone.issueTribes(toUnit('10000'), { from: account1 });
+				await rwaone.issueTribes(toUnit('10000'), { from: account1 });
 
 				// For first fee period, do one exchange.
 				const exchange1 = toUnit((10).toString());
 
 				// generate fee
-				await tribeone.exchange(hUSD, exchange1, sAUD, { from: account1 });
+				await rwaone.exchange(hUSD, exchange1, sAUD, { from: account1 });
 
 				await closeFeePeriod();
 			}
@@ -1636,7 +1636,7 @@ contract('FeePool', async accounts => {
 			it('should be able to get fees available when feePoolState issuanceData is 6 blocks', async () => {
 				const length = (await feePool.FEE_PERIOD_LENGTH()).toNumber();
 
-				await tribeone.transfer(account1, toUnit('1000000'), {
+				await rwaone.transfer(account1, toUnit('1000000'), {
 					from: owner,
 				});
 
@@ -1650,10 +1650,10 @@ contract('FeePool', async accounts => {
 					const exchange1 = toUnit(((i + 1) * 10).toString());
 
 					// Mint debt each period to fill up feelPoolState issuanceData to [6]
-					await tribeone.issueTribes(toUnit('1000'), { from: owner });
-					await tribeone.issueTribes(toUnit('1000'), { from: account1 });
+					await rwaone.issueTribes(toUnit('1000'), { from: owner });
+					await rwaone.issueTribes(toUnit('1000'), { from: account1 });
 
-					await tribeone.exchange(hUSD, exchange1, sAUD, { from: owner });
+					await rwaone.exchange(hUSD, exchange1, sAUD, { from: owner });
 
 					totalFees = totalFees.add(exchange1.sub(amountReceivedFromExchange(exchange1)));
 

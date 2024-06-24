@@ -67,11 +67,11 @@ const initiateLiquidatorRewards = async ({
 	console.log(gray(`Using account with public key ${signer.address}`));
 
 	// Instantiate Debt Share contract
-	const { address: debtSharesAddress } = deployment.targets['TribeoneDebtShare'];
+	const { address: debtSharesAddress } = deployment.targets['RwaoneDebtShare'];
 	const { abi: debtSharesABI } = deployment.sources[
-		deployment.targets['TribeoneDebtShare'].source
+		deployment.targets['RwaoneDebtShare'].source
 	];
-	const TribeoneDebtShare = new ethers.Contract(debtSharesAddress, debtSharesABI, signer);
+	const RwaoneDebtShare = new ethers.Contract(debtSharesAddress, debtSharesABI, signer);
 
 	// Instantiate Liquidator Rewards contract
 	const { address: liquidatorRewardsAddress } = deployment.targets['LiquidatorRewards'];
@@ -339,7 +339,7 @@ const initiateLiquidatorRewards = async ({
 	// Check for accounts with debt shares and add them to the `filteredAddresses` list.
 	await readMulticall(
 		unFilteredAddresses,
-		a => TribeoneDebtShare.populateTransaction.balanceOf(a),
+		a => RwaoneDebtShare.populateTransaction.balanceOf(a),
 		(a, r) => {
 			const output = ethers.utils.defaultAbiCoder.decode(['uint256'], r.returnData);
 			if (output[0].gt(0)) {
@@ -356,7 +356,7 @@ const initiateLiquidatorRewards = async ({
 	await readMulticall(
 		filteredAddresses,
 		a => LiquidatorRewards.populateTransaction.updateEntry(a),
-		(a, r) => {},
+		(a, r) => { },
 		0, // 0 = READ; 1 = WRITE;
 		150 // L1 max size = ~200; L2 max size = ~150;
 	);

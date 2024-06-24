@@ -21,9 +21,9 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 	const [hUSD, hETH] = [toBytes32('hUSD'), toBytes32('hETH')];
 
 	let owner, ownerL2, user, userL2;
-	let TribehUSD, TribehETH, TribeoneBridgeToOptimism, SystemSettings;
+	let TribehUSD, TribehETH, RwaoneBridgeToOptimism, SystemSettings;
 
-	let TribehUSDL2, TribehETHL2, TribeoneBridgeToBase, SystemSettingsL2, SystemStatusL2;
+	let TribehUSDL2, TribehETHL2, RwaoneBridgeToBase, SystemSettingsL2, SystemStatusL2;
 
 	let userBalance, userL2Balance;
 
@@ -31,11 +31,11 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 
 	describe('when the owner sends hUSD and hETH', () => {
 		before('target contracts and users', () => {
-			({ TribehUSD, TribehETH, TribeoneBridgeToOptimism, SystemSettings } = ctx.l1.contracts);
+			({ TribehUSD, TribehETH, RwaoneBridgeToOptimism, SystemSettings } = ctx.l1.contracts);
 			({
 				TribehUSD: TribehUSDL2,
 				TribehETH: TribehETHL2,
-				TribeoneBridgeToBase,
+				RwaoneBridgeToBase,
 				SystemSettings: SystemSettingsL2,
 				SystemStatus: SystemStatusL2,
 			} = ctx.l2.contracts);
@@ -112,14 +112,14 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 			await approveIfNeeded({
 				token: TribehETH,
 				owner: user,
-				beneficiary: TribeoneBridgeToOptimism,
+				beneficiary: RwaoneBridgeToOptimism,
 				amount: amountToDeposit,
 			});
 
 			await approveIfNeeded({
 				token: TribehUSD,
 				owner: user,
-				beneficiary: TribeoneBridgeToOptimism,
+				beneficiary: RwaoneBridgeToOptimism,
 				amount: amountToDeposit,
 			});
 		});
@@ -129,16 +129,16 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 		});
 
 		before('make 2 deposits', async () => {
-			TribeoneBridgeToOptimism = TribeoneBridgeToOptimism.connect(user);
+			RwaoneBridgeToOptimism = RwaoneBridgeToOptimism.connect(user);
 
-			const tx = await TribeoneBridgeToOptimism.initiateTribeTransfer(
+			const tx = await RwaoneBridgeToOptimism.initiateTribeTransfer(
 				hUSD,
 				user.address,
 				amountToDeposit
 			);
 			await tx.wait();
 
-			const tx2 = await TribeoneBridgeToOptimism.initiateTribeTransfer(
+			const tx2 = await RwaoneBridgeToOptimism.initiateTribeTransfer(
 				hETH,
 				user.address,
 				amountToDeposit
@@ -155,7 +155,7 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 		it('records amount sent', async () => {
 			// 1 ETH = 1000 USD and we sent equal amount of each. so `amountToDeposit * 1001`
 			assert.bnEqual(
-				await TribeoneBridgeToOptimism.tribeTransferSent(),
+				await RwaoneBridgeToOptimism.tribeTransferSent(),
 				amountToDeposit.add(amountToDeposit.div(2))
 			);
 		});
@@ -183,7 +183,7 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 
 			it('records amount received', async () => {
 				assert.bnEqual(
-					await TribeoneBridgeToBase.tribeTransferReceived(),
+					await RwaoneBridgeToBase.tribeTransferReceived(),
 					amountToDeposit.add(amountToDeposit.div(2))
 				);
 			});
@@ -197,9 +197,9 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 				});
 
 				before('transfer tribes', async () => {
-					TribeoneBridgeToBase = TribeoneBridgeToBase.connect(userL2);
+					RwaoneBridgeToBase = RwaoneBridgeToBase.connect(userL2);
 
-					const tx = await TribeoneBridgeToBase.initiateTribeTransfer(
+					const tx = await RwaoneBridgeToBase.initiateTribeTransfer(
 						hUSD,
 						user.address,
 						amountToDeposit
@@ -214,7 +214,7 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 				});
 
 				describe('picked up on L1', () => {
-					before('wait for deposit finalization', async function() {
+					before('wait for deposit finalization', async function () {
 						if (!hre.config.debugOptimism) {
 							console.log(
 								chalk.yellow.bold(

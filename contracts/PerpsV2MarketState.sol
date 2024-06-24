@@ -10,7 +10,7 @@ import "./StateShared.sol";
 // Libraries
 import "./AddressSetLib.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/PerpsV2MarketState
+// https://docs.rwaone.io/contracts/source/contracts/PerpsV2MarketState
 // solhint-disable-next-line max-states-count
 contract PerpsV2MarketState is Owned, StateShared, IPerpsV2MarketBaseTypes {
     using AddressSetLib for AddressSetLib.AddressSet;
@@ -172,8 +172,9 @@ contract PerpsV2MarketState is Owned, StateShared, IPerpsV2MarketBaseTypes {
     function positions(address account) external view returns (Position memory) {
         // If it doesn't exist here check legacy
         if (_legacyContractExists && !_positionMigrated[account] && _positions[account].id == 0) {
-            (uint64 id, uint64 lastFundingIndex, uint128 margin, uint128 lastPrice, int128 size) =
-                legacyState.positions(account);
+            (uint64 id, uint64 lastFundingIndex, uint128 margin, uint128 lastPrice, int128 size) = legacyState.positions(
+                account
+            );
 
             return Position(id, lastFundingIndex, margin, lastPrice, size);
         }
@@ -215,12 +216,10 @@ contract PerpsV2MarketState is Owned, StateShared, IPerpsV2MarketBaseTypes {
     /*
      * helper function for migration and analytics. Not linked to legacy state
      */
-    function getPositionAddressesPage(uint index, uint pageSize)
-        external
-        view
-        onlyAssociatedContracts
-        returns (address[] memory)
-    {
+    function getPositionAddressesPage(
+        uint index,
+        uint pageSize
+    ) external view onlyAssociatedContracts returns (address[] memory) {
         return _positionAddresses.getPage(index, pageSize);
     }
 
@@ -294,11 +293,9 @@ contract PerpsV2MarketState is Owned, StateShared, IPerpsV2MarketBaseTypes {
     }
 
     // TODO: Perform this update when maxFundingVelocity and skewScale are modified.
-    function setFundingRateLastRecomputed(int128 _fundingRateLastRecomputed)
-        external
-        onlyIfInitialized
-        onlyAssociatedContracts
-    {
+    function setFundingRateLastRecomputed(
+        int128 _fundingRateLastRecomputed
+    ) external onlyIfInitialized onlyAssociatedContracts {
         fundingRateLastRecomputed = _fundingRateLastRecomputed;
     }
 

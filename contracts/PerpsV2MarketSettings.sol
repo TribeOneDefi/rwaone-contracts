@@ -11,7 +11,7 @@ import "./interfaces/IFuturesMarketManager.sol";
 import "./interfaces/IPerpsV2MarketViews.sol";
 import "./interfaces/IPerpsV2Market.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/PerpsV2MarketSettings
+// https://docs.rwaone.io/contracts/source/contracts/PerpsV2MarketSettings
 contract PerpsV2MarketSettings is Owned, MixinPerpsV2MarketSettings, IPerpsV2MarketSettings {
     /* ========== CONSTANTS ========== */
 
@@ -263,11 +263,7 @@ contract PerpsV2MarketSettings is Owned, MixinPerpsV2MarketSettings, IPerpsV2Mar
 
     /* ---------- Setters --------- */
 
-    function _setParameter(
-        bytes32 _marketKey,
-        bytes32 key,
-        uint value
-    ) internal {
+    function _setParameter(bytes32 _marketKey, bytes32 key, uint value) internal {
         _flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, keccak256(abi.encodePacked(_marketKey, key)), value);
         emit ParameterUpdated(_marketKey, key, value);
     }

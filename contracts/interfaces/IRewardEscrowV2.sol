@@ -26,13 +26,7 @@ interface IRewardEscrowV2Storage {
         address account,
         uint startIndex,
         uint targetAmount
-    )
-        external
-        returns (
-            uint total,
-            uint endIndex,
-            uint lastEntryTime
-        );
+    ) external returns (uint total, uint endIndex, uint lastEntryTime);
 
     function updateEscrowAccountBalance(address account, int delta) external;
 
@@ -81,17 +75,9 @@ interface IRewardEscrowV2 {
     // Mutative functions
     function vest(uint256[] calldata entryIDs) external;
 
-    function createEscrowEntry(
-        address beneficiary,
-        uint256 deposit,
-        uint256 duration
-    ) external;
+    function createEscrowEntry(address beneficiary, uint256 deposit, uint256 duration) external;
 
-    function appendVestingEntry(
-        address account,
-        uint256 quantity,
-        uint256 duration
-    ) external;
+    function appendVestingEntry(address account, uint256 quantity, uint256 duration) external;
 
     function migrateVestingSchedule(address _addressToMigrate) external;
 
@@ -117,10 +103,11 @@ interface IRewardEscrowV2 {
         VestingEntries.VestingEntry[] calldata vestingEntries
     ) external;
 
-    // Return amount of wHAKA transfered to TribeoneBridgeToOptimism deposit contract
-    function burnForMigration(address account, uint256[] calldata entryIDs)
-        external
-        returns (uint256 escrowedAccountBalance, VestingEntries.VestingEntry[] memory vestingEntries);
+    // Return amount of wHAKA transfered to RwaoneBridgeToOptimism deposit contract
+    function burnForMigration(
+        address account,
+        uint256[] calldata entryIDs
+    ) external returns (uint256 escrowedAccountBalance, VestingEntries.VestingEntry[] memory vestingEntries);
 
     function nextEntryId() external view returns (uint);
 
@@ -130,11 +117,6 @@ interface IRewardEscrowV2 {
 
     /// below are methods not available in IRewardEscrowV2Frozen
 
-    // revoke entries for liquidations (access controlled to Tribeone)
-    function revokeFrom(
-        address account,
-        address recipient,
-        uint targetAmount,
-        uint startIndex
-    ) external;
+    // revoke entries for liquidations (access controlled to Rwaone)
+    function revokeFrom(address account, address recipient, uint targetAmount, uint startIndex) external;
 }

@@ -1,6 +1,6 @@
 pragma solidity >=0.4.24;
 
-// https://docs.tribeone.io/contracts/source/interfaces/idepot
+// https://docs.rwaone.io/contracts/source/interfaces/idepot
 interface IDepot {
     // Views
     function fundsWallet() external view returns (address payable);
@@ -25,7 +25,7 @@ interface IDepot {
     // Note: On mainnet no wHAKA has been deposited. The following functions are kept alive for testnet wHAKA faucets.
     function exchangeEtherForHAKA() external payable returns (uint);
 
-    function exchangeEtherForHAKAAtRate(uint guaranteedRate, uint guaranteedTribeoneRate) external payable returns (uint);
+    function exchangeEtherForHAKAAtRate(uint guaranteedRate, uint guaranteedRwaoneRate) external payable returns (uint);
 
     function exchangeTribesForHAKA(uint tribeAmount) external returns (uint);
 
@@ -33,5 +33,5 @@ interface IDepot {
 
     function tribeetixReceivedForTribes(uint amount) external view returns (uint);
 
-    function withdrawTribeone(uint amount) external;
+    function withdrawRwaone(uint amount) external;
 }

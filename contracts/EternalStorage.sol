@@ -4,7 +4,7 @@ pragma solidity ^0.5.16;
 import "./Owned.sol";
 import "./State.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/eternalstorage
+// https://docs.rwaone.io/contracts/source/contracts/eternalstorage
 /**
  * @notice  This contract is based on the code available from this blog
  * https://blog.colony.io/writing-upgradeable-contracts-in-solidity-6743f0eecc88/

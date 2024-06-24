@@ -10,10 +10,10 @@ import "./Math.sol";
 
 // Internal references
 import "./Proxy.sol";
-import "./interfaces/ITribeone.sol";
+import "./interfaces/IRwaone.sol";
 import "./interfaces/IERC20.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/supplyschedule
+// https://docs.rwaone.io/contracts/source/contracts/supplyschedule
 contract SupplySchedule is Owned, ISupplySchedule {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -29,7 +29,7 @@ contract SupplySchedule is Owned, ISupplySchedule {
 
     uint public constant INFLATION_START_DATE = 1551830400; // 2019-03-06T00:00:00+00:00
 
-    // The number of wHAKA rewarded to the caller of Tribeone.mint()
+    // The number of wHAKA rewarded to the caller of Rwaone.mint()
     uint public minterReward = 100 * 1e18;
 
     // The number of wHAKA minted per week
@@ -37,7 +37,7 @@ contract SupplySchedule is Owned, ISupplySchedule {
 
     uint public maxInflationAmount = 3e6 * 1e18; // max inflation amount 3,000,000
 
-    // Address of the TribeoneProxy for the onlyTribeone modifier
+    // Address of the RwaoneProxy for the onlyRwaone modifier
     address payable public tribeetixProxy;
 
     // Max wHAKA rewards for minter
@@ -48,11 +48,7 @@ contract SupplySchedule is Owned, ISupplySchedule {
 
     uint public constant MINT_BUFFER = 1 days;
 
-    constructor(
-        address _owner,
-        uint _lastMintEvent,
-        uint _currentWeek
-    ) public Owned(_owner) {
+    constructor(address _owner, uint _lastMintEvent, uint _currentWeek) public Owned(_owner) {
         lastMintEvent = _lastMintEvent;
         weekCounter = _currentWeek;
     }
@@ -100,13 +96,13 @@ contract SupplySchedule is Owned, ISupplySchedule {
     // ========== MUTATIVE FUNCTIONS ==========
 
     /**
-     * @notice Record the mint event from Tribeone by incrementing the inflation
+     * @notice Record the mint event from Rwaone by incrementing the inflation
      * week counter for the number of weeks minted (probabaly always 1)
      * and store the time of the event.
      * @param supplyMinted the amount of wHAKA the total supply was inflated by.
      * @return minterReward the amount of wHAKA reward for caller
      * */
-    function recordMintEvent(uint supplyMinted) external onlyTribeone returns (uint) {
+    function recordMintEvent(uint supplyMinted) external onlyRwaone returns (uint) {
         uint numberOfWeeksIssued = weeksSinceLastIssuance();
 
         // add number of weeks minted to weekCounter
@@ -124,7 +120,7 @@ contract SupplySchedule is Owned, ISupplySchedule {
 
     /**
      * @notice Sets the reward amount of wHAKA for the caller of the public
-     * function Tribeone.mint().
+     * function Rwaone.mint().
      * This incentivises anyone to mint the inflationary supply and the mintr
      * Reward will be deducted from the inflationary supply and sent to the caller.
      * @param amount the amount of wHAKA to reward the minter.
@@ -136,14 +132,14 @@ contract SupplySchedule is Owned, ISupplySchedule {
     }
 
     /**
-     * @notice Set the TribeoneProxy should it ever change.
-     * SupplySchedule requires Tribeone address as it has the authority
+     * @notice Set the RwaoneProxy should it ever change.
+     * SupplySchedule requires Rwaone address as it has the authority
      * to record mint event.
      * */
-    function setTribeoneProxy(ITribeone _tribeetixProxy) external onlyOwner {
+    function setRwaoneProxy(IRwaone _tribeetixProxy) external onlyOwner {
         require(address(_tribeetixProxy) != address(0), "Address cannot be 0");
         tribeetixProxy = address(uint160(address(_tribeetixProxy)));
-        emit TribeoneProxyUpdated(tribeetixProxy);
+        emit RwaoneProxyUpdated(tribeetixProxy);
     }
 
     /**
@@ -165,12 +161,12 @@ contract SupplySchedule is Owned, ISupplySchedule {
     // ========== MODIFIERS ==========
 
     /**
-     * @notice Only the Tribeone contract is authorised to call this function
+     * @notice Only the Rwaone contract is authorised to call this function
      * */
-    modifier onlyTribeone() {
+    modifier onlyRwaone() {
         require(
             msg.sender == address(Proxy(address(tribeetixProxy)).target()),
-            "Only the tribeone contract can perform this action"
+            "Only the rwaone contract can perform this action"
         );
         _;
     }
@@ -197,7 +193,7 @@ contract SupplySchedule is Owned, ISupplySchedule {
     event MaxInflationAmountUpdated(uint newInflationAmount);
 
     /**
-     * @notice Emitted when setTribeoneProxy is called changing the Tribeone Proxy address
+     * @notice Emitted when setRwaoneProxy is called changing the Rwaone Proxy address
      * */
-    event TribeoneProxyUpdated(address newAddress);
+    event RwaoneProxyUpdated(address newAddress);
 }

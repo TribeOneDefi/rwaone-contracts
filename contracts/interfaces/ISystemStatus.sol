@@ -1,6 +1,6 @@
 pragma solidity >=0.4.24;
 
-// https://docs.tribeone.io/contracts/source/interfaces/isystemstatus
+// https://docs.rwaone.io/contracts/source/interfaces/isystemstatus
 interface ISystemStatus {
     struct Status {
         bool canSuspend;
@@ -51,20 +51,17 @@ interface ISystemStatus {
 
     function futuresMarketSuspension(bytes32 marketKey) external view returns (bool suspended, uint248 reason);
 
-    function getTribeExchangeSuspensions(bytes32[] calldata tribes)
-        external
-        view
-        returns (bool[] memory exchangeSuspensions, uint256[] memory reasons);
+    function getTribeExchangeSuspensions(
+        bytes32[] calldata tribes
+    ) external view returns (bool[] memory exchangeSuspensions, uint256[] memory reasons);
 
-    function getTribeSuspensions(bytes32[] calldata tribes)
-        external
-        view
-        returns (bool[] memory suspensions, uint256[] memory reasons);
+    function getTribeSuspensions(
+        bytes32[] calldata tribes
+    ) external view returns (bool[] memory suspensions, uint256[] memory reasons);
 
-    function getFuturesMarketSuspensions(bytes32[] calldata marketKeys)
-        external
-        view
-        returns (bool[] memory suspensions, uint256[] memory reasons);
+    function getFuturesMarketSuspensions(
+        bytes32[] calldata marketKeys
+    ) external view returns (bool[] memory suspensions, uint256[] memory reasons);
 
     // Restricted functions
     function suspendIssuance(uint256 reason) external;
@@ -73,10 +70,5 @@ interface ISystemStatus {
 
     function suspendFuturesMarket(bytes32 marketKey, uint256 reason) external;
 
-    function updateAccessControl(
-        bytes32 section,
-        address account,
-        bool canSuspend,
-        bool canResume
-    ) external;
+    function updateAccessControl(bytes32 section, address account, bool canSuspend, bool canResume) external;
 }

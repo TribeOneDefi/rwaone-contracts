@@ -18,7 +18,7 @@ let FakeTradingRewards;
 
 /*
  * This tests the TradingRewards contract in a standalone manner,
- * i.e. not integrating with the rest of the Tribeone system.
+ * i.e. not integrating with the rest of the Rwaone system.
  *
  * Dependencies with the system are bypassed via FakeTradingRewards.
  *

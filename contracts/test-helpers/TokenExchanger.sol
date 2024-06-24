@@ -1,27 +1,27 @@
 /* TokenExchanger.sol: Used for testing contract to contract calls on chain
- * with Tribeone for testing ERC20 compatability
+ * with Rwaone for testing ERC20 compatability
  */
 pragma solidity ^0.5.16;
 
 import "../Owned.sol";
-import "../interfaces/ITribeone.sol";
+import "../interfaces/IRwaone.sol";
 import "../interfaces/IFeePool.sol";
 import "../interfaces/IERC20.sol";
 
 contract TokenExchanger is Owned {
     address public integrationProxy;
-    address public tribeone;
+    address public rwaone;
 
     constructor(address _owner, address _integrationProxy) public Owned(_owner) {
         integrationProxy = _integrationProxy;
     }
 
-    function setTribeoneProxy(address _integrationProxy) external onlyOwner {
+    function setRwaoneProxy(address _integrationProxy) external onlyOwner {
         integrationProxy = _integrationProxy;
     }
 
-    function setTribeone(address _tribeetix) external onlyOwner {
-        tribeone = _tribeetix;
+    function setRwaone(address _tribeetix) external onlyOwner {
+        rwaone = _tribeetix;
     }
 
     function checkBalance(address account) public view tribeetixProxyIsSet returns (uint) {
@@ -33,18 +33,14 @@ contract TokenExchanger is Owned {
     }
 
     function checkBalanceHAKADirect(address account) public view tribeetixProxyIsSet returns (uint) {
-        return IERC20(tribeone).balanceOf(account);
+        return IERC20(rwaone).balanceOf(account);
     }
 
     function getDecimals(address tokenAddress) public view returns (uint) {
         return IERC20(tokenAddress).decimals();
     }
 
-    function doTokenSpend(
-        address fromAccount,
-        address toAccount,
-        uint amount
-    ) public tribeetixProxyIsSet returns (bool) {
+    function doTokenSpend(address fromAccount, address toAccount, uint amount) public tribeetixProxyIsSet returns (bool) {
         // Call Immutable static call #1
         require(checkBalance(fromAccount) >= amount, "fromAccount does not have the required balance to spend");
 
@@ -58,8 +54,8 @@ contract TokenExchanger is Owned {
         return IERC20(integrationProxy).transferFrom(fromAccount, toAccount, amount);
     }
 
-    modifier tribeetixProxyIsSet {
-        require(integrationProxy != address(0), "Tribeone Integration proxy address not set");
+    modifier tribeetixProxyIsSet() {
+        require(integrationProxy != address(0), "Rwaone Integration proxy address not set");
         _;
     }
 

@@ -4,7 +4,7 @@ import "./Owned.sol";
 
 // solhint-disable payable-fallback
 
-// https://docs.tribeone.io/contracts/source/contracts/readproxy
+// https://docs.rwaone.io/contracts/source/contracts/readproxy
 contract ReadProxy is Owned {
     address public target;
 

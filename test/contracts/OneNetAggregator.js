@@ -21,7 +21,7 @@ contract('OneNetAggregators', async accounts => {
 
 	let addressResolver, aggregatorDebtRatio, aggregatorIssuedTribes;
 
-	let mockTribeoneDebtShare, mockIssuer;
+	let mockRwaoneDebtShare, mockIssuer;
 
 	before(async () => {
 		addressResolver = await setupContract({
@@ -43,14 +43,14 @@ contract('OneNetAggregators', async accounts => {
 		});
 
 		mockIssuer = await smock.fake('Issuer');
-		mockTribeoneDebtShare = await smock.fake('TribeoneDebtShare');
+		mockRwaoneDebtShare = await smock.fake('RwaoneDebtShare');
 
 		mockIssuer.totalIssuedTribes.returns(ethers.utils.parseEther('500'));
-		mockTribeoneDebtShare.totalSupply.returns(ethers.utils.parseEther('1000'));
+		mockRwaoneDebtShare.totalSupply.returns(ethers.utils.parseEther('1000'));
 
 		await addressResolver.importAddresses(
-			[toBytes32('Issuer'), toBytes32('TribeoneDebtShare')],
-			[mockIssuer.address, mockTribeoneDebtShare.address]
+			[toBytes32('Issuer'), toBytes32('RwaoneDebtShare')],
+			[mockIssuer.address, mockRwaoneDebtShare.address]
 		);
 	});
 
@@ -66,7 +66,7 @@ contract('OneNetAggregators', async accounts => {
 	it('should set constructor params on deployment', async () => {
 		const instance = await setupContract({
 			accounts,
-			contract: 'TribeoneDebtShare',
+			contract: 'RwaoneDebtShare',
 			args: [owner, addressResolver.address],
 		});
 

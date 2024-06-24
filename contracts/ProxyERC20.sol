@@ -4,7 +4,7 @@ pragma solidity ^0.5.16;
 import "./Proxy.sol";
 import "./interfaces/IERC20.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/proxyerc20
+// https://docs.rwaone.io/contracts/source/contracts/proxyerc20
 contract ProxyERC20 is Proxy, IERC20 {
     constructor(address _owner) public Proxy(_owner) {}
 
@@ -68,7 +68,7 @@ contract ProxyERC20 is Proxy, IERC20 {
         // Forward the ERC20 call to the target contract
         IERC20(address(target)).transfer(to, value);
 
-        // Event emitting will occur via Tribeone.Proxy._emit()
+        // Event emitting will occur via Rwaone.Proxy._emit()
         return true;
     }
 
@@ -88,7 +88,7 @@ contract ProxyERC20 is Proxy, IERC20 {
         // Forward the ERC20 call to the target contract
         IERC20(address(target)).approve(spender, value);
 
-        // Event emitting will occur via Tribeone.Proxy._emit()
+        // Event emitting will occur via Rwaone.Proxy._emit()
         return true;
     }
 
@@ -98,18 +98,14 @@ contract ProxyERC20 is Proxy, IERC20 {
      * @param to address The address which you want to transfer to
      * @param value uint256 the amount of tokens to be transferred
      */
-    function transferFrom(
-        address from,
-        address to,
-        uint256 value
-    ) public returns (bool) {
+    function transferFrom(address from, address to, uint256 value) public returns (bool) {
         // Mutable state call requires the proxy to tell the target who the msg.sender is.
         target.setMessageSender(msg.sender);
 
         // Forward the ERC20 call to the target contract
         IERC20(address(target)).transferFrom(from, to, value);
 
-        // Event emitting will occur via Tribeone.Proxy._emit()
+        // Event emitting will occur via Rwaone.Proxy._emit()
         return true;
     }
 }

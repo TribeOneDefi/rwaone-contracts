@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import "./ExchangeRates.sol";
 import "./interfaces/IDexPriceAggregator.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/exchangerateswithdexpricing
+// https://docs.rwaone.io/contracts/source/contracts/exchangerateswithdexpricing
 contract ExchangeRatesWithDexPricing is ExchangeRates {
     bytes32 public constant CONTRACT_NAME = "ExchangeRatesWithDexPricing";
 
@@ -53,22 +53,13 @@ contract ExchangeRatesWithDexPricing is ExchangeRates {
         bytes32 sourceCurrencyKey,
         uint amount,
         bytes32 destinationCurrencyKey
-    )
-        public
-        view
-        returns (
-            uint value,
-            uint systemValue,
-            uint systemSourceRate,
-            uint systemDestinationRate
-        )
-    {
-        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings =
-            directIntegrationManager().getExchangeParameters(msg.sender, sourceCurrencyKey);
-        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings =
-            directIntegrationManager().getExchangeParameters(msg.sender, destinationCurrencyKey);
-        IDirectIntegrationManager.ParameterIntegrationSettings memory usdSettings =
-            directIntegrationManager().getExchangeParameters(msg.sender, hUSD);
+    ) public view returns (uint value, uint systemValue, uint systemSourceRate, uint systemDestinationRate) {
+        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings = directIntegrationManager()
+            .getExchangeParameters(msg.sender, sourceCurrencyKey);
+        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings = directIntegrationManager()
+            .getExchangeParameters(msg.sender, destinationCurrencyKey);
+        IDirectIntegrationManager.ParameterIntegrationSettings memory usdSettings = directIntegrationManager()
+            .getExchangeParameters(msg.sender, hUSD);
 
         return effectiveAtomicValueAndRates(sourceSettings, amount, destinationSettings, usdSettings);
     }
@@ -81,16 +72,7 @@ contract ExchangeRatesWithDexPricing is ExchangeRates {
         uint sourceAmount,
         IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings,
         IDirectIntegrationManager.ParameterIntegrationSettings memory usdSettings
-    )
-        public
-        view
-        returns (
-            uint value,
-            uint systemValue,
-            uint systemSourceRate,
-            uint systemDestinationRate
-        )
-    {
+    ) public view returns (uint value, uint systemValue, uint systemSourceRate, uint systemDestinationRate) {
         (systemValue, systemSourceRate, systemDestinationRate) = _effectiveValueAndRates(
             sourceSettings.currencyKey,
             sourceAmount,
@@ -103,7 +85,7 @@ contract ExchangeRatesWithDexPricing is ExchangeRates {
         uint destRate;
 
         // Handle the different scenarios that may arise when trading currencies with or without the PureChainlinkPrice set.
-        // outlined here: https://sips.tribeone.io/sips/sip-198/#computation-methodology-in-atomic-pricing
+        // outlined here: https://sips.rwaone.io/sips/sip-198/#computation-methodology-in-atomic-pricing
         if (usePureChainlinkPriceForSource) {
             sourceRate = systemSourceRate;
         } else {
@@ -158,17 +140,13 @@ contract ExchangeRatesWithDexPricing is ExchangeRates {
         IERC20 destEquivalent = IERC20(destinationSettings.atomicEquivalentForDexPricing);
         require(address(destEquivalent) != address(0), "No atomic equivalent for dest");
 
-        uint result =
-            _dexPriceDestinationValue(
-                IDexPriceAggregator(sourceSettings.dexPriceAggregator),
-                sourceEquivalent,
-                destEquivalent,
-                amount,
-                sourceSettings
-                    .atomicTwapWindow
-            )
-                .mul(SafeDecimalMath.unit())
-                .div(amount);
+        uint result = _dexPriceDestinationValue(
+            IDexPriceAggregator(sourceSettings.dexPriceAggregator),
+            sourceEquivalent,
+            destEquivalent,
+            amount,
+            sourceSettings.atomicTwapWindow
+        ).mul(SafeDecimalMath.unit()).div(amount);
 
         require(result != 0, "Result must be greater than 0");
 
@@ -183,39 +161,37 @@ contract ExchangeRatesWithDexPricing is ExchangeRates {
         uint twapWindow
     ) internal view returns (uint) {
         // Normalize decimals in case equivalent asset uses different decimals from internal unit
-        uint sourceAmountInEquivalent =
-            (sourceAmount.mul(10**uint(sourceEquivalent.decimals()))).div(SafeDecimalMath.unit());
+        uint sourceAmountInEquivalent = (sourceAmount.mul(10 ** uint(sourceEquivalent.decimals()))).div(
+            SafeDecimalMath.unit()
+        );
 
         require(address(dexAggregator) != address(0), "dex aggregator address is 0");
 
         require(twapWindow != 0, "Uninitialized atomic twap window");
 
-        uint twapValueInEquivalent =
-            dexAggregator.assetToAsset(
-                address(sourceEquivalent),
-                sourceAmountInEquivalent,
-                address(destEquivalent),
-                twapWindow
-            );
+        uint twapValueInEquivalent = dexAggregator.assetToAsset(
+            address(sourceEquivalent),
+            sourceAmountInEquivalent,
+            address(destEquivalent),
+            twapWindow
+        );
 
         require(twapValueInEquivalent > 0, "dex price returned 0");
 
         // Similar to source amount, normalize decimals back to internal unit for output amount
-        return (twapValueInEquivalent.mul(SafeDecimalMath.unit())).div(10**uint(destEquivalent.decimals()));
+        return (twapValueInEquivalent.mul(SafeDecimalMath.unit())).div(10 ** uint(destEquivalent.decimals()));
     }
 
     function tribeTooVolatileForAtomicExchange(bytes32 currencyKey) public view returns (bool) {
-        IDirectIntegrationManager.ParameterIntegrationSettings memory settings =
-            directIntegrationManager().getExchangeParameters(msg.sender, currencyKey);
+        IDirectIntegrationManager.ParameterIntegrationSettings memory settings = directIntegrationManager()
+            .getExchangeParameters(msg.sender, currencyKey);
 
         return tribeTooVolatileForAtomicExchange(settings);
     }
 
-    function tribeTooVolatileForAtomicExchange(IDirectIntegrationManager.ParameterIntegrationSettings memory settings)
-        public
-        view
-        returns (bool)
-    {
+    function tribeTooVolatileForAtomicExchange(
+        IDirectIntegrationManager.ParameterIntegrationSettings memory settings
+    ) public view returns (bool) {
         // hUSD is a special case and is never volatile
         if (settings.currencyKey == "hUSD") return false;
 

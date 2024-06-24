@@ -50,7 +50,7 @@ contract('WrapperFactory', async accounts => {
 			accounts,
 			tribes,
 			contracts: [
-				'Tribeone',
+				'Rwaone',
 				'AddressResolver',
 				'SystemStatus',
 				'Issuer',
@@ -156,7 +156,7 @@ contract('WrapperFactory', async accounts => {
 		});
 	});
 
-	describe('totalIssuedTribes', async () => {});
+	describe('totalIssuedTribes', async () => { });
 
 	describe('distributeFees', async () => {
 		let tx;

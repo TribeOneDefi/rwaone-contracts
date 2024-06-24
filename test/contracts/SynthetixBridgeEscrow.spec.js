@@ -4,24 +4,24 @@ const { assert } = require('./common');
 const { artifacts } = require('hardhat');
 const { toBN } = web3.utils;
 
-contract('TribeoneBridgeEscrow (spec tests) @ovm-skip', accounts => {
+contract('RwaoneBridgeEscrow (spec tests) @ovm-skip', accounts => {
 	const [, owner, snxBridgeToOptimism, user] = accounts;
 
-	let tribeone, tribeetixProxy, tribeetixBridgeEscrow;
+	let rwaone, tribeetixProxy, tribeetixBridgeEscrow;
 
 	describe('when deploying the system', () => {
 		before('deploy all contracts', async () => {
 			({
-				Tribeone: tribeone,
-				ProxyERC20Tribeone: tribeetixProxy,
-				TribeoneBridgeEscrow: tribeetixBridgeEscrow,
+				Rwaone: rwaone,
+				ProxyERC20Rwaone: tribeetixProxy,
+				RwaoneBridgeEscrow: tribeetixBridgeEscrow,
 			} = await setupAllContracts({
 				accounts,
-				contracts: ['Tribeone', 'TribeoneBridgeEscrow'],
+				contracts: ['Rwaone', 'RwaoneBridgeEscrow'],
 			}));
 
 			// use implementation ABI on the proxy address to simplify calling
-			tribeone = await artifacts.require('Tribeone').at(tribeetixProxy.address);
+			rwaone = await artifacts.require('Rwaone').at(tribeetixProxy.address);
 		});
 
 		describe('approveBridge', () => {
@@ -29,7 +29,7 @@ contract('TribeoneBridgeEscrow (spec tests) @ovm-skip', accounts => {
 				const amount = toBN('1000');
 
 				beforeEach(async () => {
-					await tribeone.transfer(tribeetixBridgeEscrow.address, amount, {
+					await rwaone.transfer(tribeetixBridgeEscrow.address, amount, {
 						from: owner,
 					});
 				});
@@ -37,7 +37,7 @@ contract('TribeoneBridgeEscrow (spec tests) @ovm-skip', accounts => {
 				describe('when there is no approval', () => {
 					it(' should fail', async () => {
 						await assert.revert(
-							tribeone.transferFrom(tribeetixBridgeEscrow.address, user, amount, {
+							rwaone.transferFrom(tribeetixBridgeEscrow.address, user, amount, {
 								from: snxBridgeToOptimism,
 							}),
 							'SafeMath: subtraction overflow'
@@ -48,7 +48,7 @@ contract('TribeoneBridgeEscrow (spec tests) @ovm-skip', accounts => {
 				describe('when there is approval', () => {
 					beforeEach(async () => {
 						await tribeetixBridgeEscrow.approveBridge(
-							tribeone.address,
+							rwaone.address,
 							snxBridgeToOptimism,
 							amount,
 							{
@@ -59,13 +59,13 @@ contract('TribeoneBridgeEscrow (spec tests) @ovm-skip', accounts => {
 
 					describe('when the bridge invokes transferFrom()', () => {
 						beforeEach(async () => {
-							await tribeone.transferFrom(tribeetixBridgeEscrow.address, user, amount, {
+							await rwaone.transferFrom(tribeetixBridgeEscrow.address, user, amount, {
 								from: snxBridgeToOptimism,
 							});
 						});
 
 						it("increases the users's balance", async () => {
-							assert.bnEqual(await tribeone.balanceOf(user), amount);
+							assert.bnEqual(await rwaone.balanceOf(user), amount);
 						});
 					});
 				});

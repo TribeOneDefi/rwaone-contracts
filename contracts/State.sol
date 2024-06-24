@@ -3,7 +3,7 @@ pragma solidity ^0.5.16;
 // Inheritance
 import "./Owned.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/state
+// https://docs.rwaone.io/contracts/source/contracts/state
 contract State is Owned {
     // the address of the contract that can modify variables
     // this can only be changed by the owner of this contract
@@ -27,7 +27,7 @@ contract State is Owned {
 
     /* ========== MODIFIERS ========== */
 
-    modifier onlyAssociatedContract {
+    modifier onlyAssociatedContract() {
         require(msg.sender == associatedContract, "Only the associated contract can perform this action");
         _;
     }

@@ -48,7 +48,7 @@ contract('FuturesMarketSettings', accounts => {
 				'ExchangeRates',
 				'SystemStatus',
 				'SystemSettings',
-				'Tribeone',
+				'Rwaone',
 				'DebtCache',
 				'CollateralManager',
 			],

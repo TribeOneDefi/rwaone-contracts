@@ -4,17 +4,16 @@ pragma solidity ^0.5.16;
 import "./EternalStorage.sol";
 import "./LimitedSetup.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/feepooleternalstorage
+// https://docs.rwaone.io/contracts/source/contracts/feepooleternalstorage
 contract FeePoolEternalStorage is EternalStorage, LimitedSetup {
     bytes32 internal constant LAST_FEE_WITHDRAWAL = "last_fee_withdrawal";
 
     constructor(address _owner, address _feePool) public EternalStorage(_owner, _feePool) LimitedSetup(6 weeks) {}
 
-    function importFeeWithdrawalData(address[] calldata accounts, uint[] calldata feePeriodIDs)
-        external
-        onlyOwner
-        onlyDuringSetup
-    {
+    function importFeeWithdrawalData(
+        address[] calldata accounts,
+        uint[] calldata feePeriodIDs
+    ) external onlyOwner onlyDuringSetup {
         require(accounts.length == feePeriodIDs.length, "Length mismatch");
 
         for (uint8 i = 0; i < accounts.length; i++) {

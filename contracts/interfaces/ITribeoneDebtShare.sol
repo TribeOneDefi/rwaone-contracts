@@ -1,7 +1,7 @@
 pragma solidity >=0.4.24;
 
-// https://docs.tribeone.io/contracts/source/interfaces/itribeetixdebtshare
-interface ITribeoneDebtShare {
+// https://docs.rwaone.io/contracts/source/interfaces/itribeetixdebtshare
+interface IRwaoneDebtShare {
     // Views
 
     function currentPeriodId() external view returns (uint128);
@@ -30,11 +30,7 @@ interface ITribeoneDebtShare {
 
     function transfer(address to, uint256 amount) external pure returns (bool);
 
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) external returns (bool);
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
 
     function addAuthorizedBroker(address target) external;
 

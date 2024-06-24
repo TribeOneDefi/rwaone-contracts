@@ -94,7 +94,7 @@ contract('CollateralShort', async accounts => {
 			accounts,
 			tribes,
 			contracts: [
-				'Tribeone',
+				'Rwaone',
 				'FeePool',
 				'AddressResolver',
 				'Exchanger',

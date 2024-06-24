@@ -12,7 +12,7 @@ import "./interfaces/PythStructs.sol";
 // Libraries
 import "./AddressSetLib.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/PerpsV2ExchangeRate
+// https://docs.rwaone.io/contracts/source/contracts/PerpsV2ExchangeRate
 contract PerpsV2ExchangeRate is Owned, ReentrancyGuard, MixinSystemSettings {
     using AddressSetLib for AddressSetLib.AddressSet;
 
@@ -84,12 +84,10 @@ contract PerpsV2ExchangeRate is Owned, ReentrancyGuard, MixinSystemSettings {
 
     /* ---------- priceFeeds mutation ---------- */
 
-    function updatePythPrice(address sender, bytes[] calldata priceUpdateData)
-        external
-        payable
-        nonReentrant
-        onlyAssociatedContracts
-    {
+    function updatePythPrice(
+        address sender,
+        bytes[] calldata priceUpdateData
+    ) external payable nonReentrant onlyAssociatedContracts {
         // Get fee amount to pay to Pyth
         uint fee = offchainOracle().getUpdateFee(priceUpdateData);
         require(msg.value >= fee, "Not enough eth for paying the fee");
@@ -134,7 +132,7 @@ contract PerpsV2ExchangeRate is Owned, ReentrancyGuard, MixinSystemSettings {
         */
 
         // Adjust exponent (using base as 18 decimals)
-        uint baseConvertion = 10**uint(int(18) + retrievedPrice.expo);
+        uint baseConvertion = 10 ** uint(int(18) + retrievedPrice.expo);
 
         price = uint(retrievedPrice.price * int(baseConvertion));
     }

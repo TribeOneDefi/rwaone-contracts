@@ -16,7 +16,7 @@ const [hUSD, hETH] = ['hUSD', 'hETH'].map(toBytes32);
 let ExchangerWithFeeRecAlternatives;
 let DirectIntegrationManager;
 
-module.exports = function({ accounts }) {
+module.exports = function ({ accounts }) {
 	before(async () => {
 		ExchangerWithFeeRecAlternatives = artifacts.require('ExchangerWithFeeRecAlternatives');
 		DirectIntegrationManager = artifacts.require('DirectIntegrationManager');
@@ -45,7 +45,7 @@ module.exports = function({ accounts }) {
 				'FeePool',
 				'FlexibleStorage',
 				'Issuer',
-				'Tribeone',
+				'Rwaone',
 				'SystemStatus',
 				'TradingRewards',
 			],
@@ -119,7 +119,7 @@ module.exports = function({ accounts }) {
 		whenMockedToAllowExchangeInvocationChecks: cb => {
 			describe(`when mocked to allow invocation checks`, () => {
 				beforeEach(async () => {
-					this.mocks.Tribeone.tribesByAddress.returns(toBytes32());
+					this.mocks.Rwaone.tribesByAddress.returns(toBytes32());
 				});
 				cb();
 			});
@@ -236,15 +236,14 @@ module.exports = function({ accounts }) {
 			});
 		},
 		whenMockedWithVolatileTribe: ({ tribe, volatile }, cb) => {
-			describe(`when mocked with ${fromBytes32(tribe)} deemed ${
-				volatile ? 'volatile' : 'not volatile'
-			}`, () => {
-				beforeEach(async () => {
-					this.mocks.ExchangeRates[
-						'tribeTooVolatileForAtomicExchange((bytes32,address,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256))'
-					].returns(tribeToCheck => (tribeToCheck === tribe ? volatile : false));
+			describe(`when mocked with ${fromBytes32(tribe)} deemed ${volatile ? 'volatile' : 'not volatile'
+				}`, () => {
+					beforeEach(async () => {
+						this.mocks.ExchangeRates[
+							'tribeTooVolatileForAtomicExchange((bytes32,address,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256))'
+						].returns(tribeToCheck => (tribeToCheck === tribe ? volatile : false));
+					});
 				});
-			});
 		},
 		whenMockedEntireExchangeRateConfiguration: (
 			{ sourceCurrency, atomicRate, systemSourceRate, systemDestinationRate },

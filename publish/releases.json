@@ -8,7 +8,7 @@
 				"FeePool",
 				"Issuer",
 				"RewardEscrowV2",
-				"Tribeone",
+				"Rwaone",
 				"SystemSettings"
 			]
 		},
@@ -16,7 +16,7 @@
 			"sip": 63,
 			"layer": "base",
 			"released": "base",
-			"sources": ["Exchanger", "Tribeone", "SystemSettings", "TradingRewards"]
+			"sources": ["Exchanger", "Rwaone", "SystemSettings", "TradingRewards"]
 		},
 		{
 			"sip": 64,
@@ -49,7 +49,7 @@
 				"FeePool",
 				"Issuer",
 				"Liquidations",
-				"Tribeone",
+				"Rwaone",
 				"SystemSettings"
 			]
 		},
@@ -121,7 +121,7 @@
 			"sip": 89,
 			"layer": "base",
 			"released": "base",
-			"sources": ["Exchanger", "Tribeone"]
+			"sources": ["Exchanger", "Rwaone"]
 		},
 		{
 			"sip": 91,
@@ -139,7 +139,7 @@
 			"sip": 94,
 			"layer": "base",
 			"released": "base",
-			"sources": ["Exchanger", "Tribeone"]
+			"sources": ["Exchanger", "Rwaone"]
 		},
 		{
 			"sip": 97,
@@ -182,7 +182,7 @@
 				"Liquidations",
 				"RewardEscrowV2",
 				"SystemSettings",
-				"Tribeone",
+				"Rwaone",
 				"TradingRewards",
 				"Tribe(s|i).+"
 			]
@@ -192,7 +192,7 @@
 			"layer": "both",
 			"released": "both",
 			"sources": {
-				"base": ["TribeoneBridgeToOptimism"],
+				"base": ["RwaoneBridgeToOptimism"],
 				"ovm": [
 					"AddressResolver",
 					"CollateralManager",
@@ -213,22 +213,22 @@
 					"ProxyERC20hUSD",
 					"ProxyFeePool",
 					"ProxyhUSD",
-					"ProxyTribeone",
+					"ProxyRwaone",
 					"ReadProxyAddressResolver",
 					"RewardEscrow",
 					"RewardEscrowV2",
 					"RewardsDistribution",
 					"SafeDecimalMath",
-					"Tribeone",
-					"TribeoneBridgeToBase",
-					"TribeoneEscrow",
-					"TribeoneState",
+					"Rwaone",
+					"RwaoneBridgeToBase",
+					"RwaoneEscrow",
+					"RwaoneState",
 					"TribehUSD",
 					"TribeUtil",
 					"SystemSettings",
 					"SystemStatus",
 					"TokenStatehUSD",
-					"TokenStateTribeone",
+					"TokenStateRwaone",
 					"TradingRewards"
 				]
 			}
@@ -256,13 +256,13 @@
 			"sip": 106,
 			"layer": "ovm",
 			"released": "ovm",
-			"sources": ["FeePool", "FeePoolState", "TribeoneState"]
+			"sources": ["FeePool", "FeePoolState", "RwaoneState"]
 		},
 		{
 			"sip": 109,
 			"layer": "both",
 			"released": "both",
-			"sources": ["Tribeone", "SystemStatus"]
+			"sources": ["Rwaone", "SystemStatus"]
 		},
 		{
 			"sip": 112,
@@ -288,12 +288,12 @@
 			"layer": "both",
 			"released": "both",
 			"sources": {
-				"base": ["TribeoneBridgeToOptimism", "TribeoneBridgeEscrow"],
+				"base": ["RwaoneBridgeToOptimism", "RwaoneBridgeEscrow"],
 				"ovm": [
 					"DebtCache",
 					"Exchanger",
-					"Tribeone",
-					"TribeoneBridgeToBase",
+					"Rwaone",
+					"RwaoneBridgeToBase",
 					"SystemStatus"
 				]
 			}
@@ -302,7 +302,7 @@
 			"sip": 117,
 			"layer": "ovm",
 			"released": "ovm",
-			"sources": ["DebtCache", "Exchanger", "Tribeone"]
+			"sources": ["DebtCache", "Exchanger", "Rwaone"]
 		},
 		{
 			"sip": 118,
@@ -313,14 +313,14 @@
 		{
 			"sip": 120,
 			"layer": "base",
-			"sources": ["Exchanger", "ExchangeRates", "Tribeone", "SystemSettings"],
+			"sources": ["Exchanger", "ExchangeRates", "Rwaone", "SystemSettings"],
 			"released": "base"
 		},
 		{
 			"sip": 121,
 			"layer": "ovm",
 			"released": "ovm",
-			"sources": ["EtherWrapper", "Exchanger", "Tribeone", "SystemSettings"]
+			"sources": ["EtherWrapper", "Exchanger", "Rwaone", "SystemSettings"]
 		},
 		{
 			"sip": 127,
@@ -359,7 +359,7 @@
 			"sip": 138,
 			"layer": "both",
 			"released": "both",
-			"sources": ["Exchanger", "Tribeone"]
+			"sources": ["Exchanger", "Rwaone"]
 		},
 		{
 			"sip": 139,
@@ -371,7 +371,7 @@
 			"sip": 140,
 			"layer": "both",
 			"released": "both",
-			"sources": ["Tribeone"]
+			"sources": ["Rwaone"]
 		},
 		{
 			"sip": 142,
@@ -381,7 +381,7 @@
 				"DebtCache",
 				"FeePool",
 				"Issuer",
-				"Tribeone",
+				"Rwaone",
 				"TribehETH",
 				"TribehUSD",
 				"TribehBTC"
@@ -400,7 +400,7 @@
 				"Issuer",
 				"Liquidator",
 				"LiquidatorRewards",
-				"Tribeone",
+				"Rwaone",
 				"SystemSettings",
 				"SystemSettingsLib"
 			],
@@ -429,7 +429,7 @@
 					"Issuer",
 					"OneNetAggregatorIssuedTribes",
 					"OneNetAggregatorDebtRatio",
-					"TribeoneBridgeToOptimism",
+					"RwaoneBridgeToOptimism",
 					"SystemSettings"
 				],
 				"ovm": [
@@ -437,7 +437,7 @@
 					"Issuer",
 					"OneNetAggregatorIssuedTribes",
 					"OneNetAggregatorDebtRatio",
-					"TribeoneBridgeToBase",
+					"RwaoneBridgeToBase",
 					"SystemSettings"
 				]
 			},
@@ -481,7 +481,7 @@
 		{
 			"sip": 185,
 			"layer": "both",
-			"sources": ["Tribeone", "FeePool", "Issuer", "TribeoneDebtShare"],
+			"sources": ["Rwaone", "FeePool", "Issuer", "RwaoneDebtShare"],
 			"released": "both"
 		},
 		{
@@ -511,7 +511,7 @@
 		{
 			"sip": 194,
 			"layer": "ovm",
-			"sources": ["Tribeone"],
+			"sources": ["Rwaone"],
 			"released": "ovm"
 		},
 		{
@@ -530,7 +530,7 @@
 			"sip": 198,
 			"layer": "both",
 			"sources": [
-				"Tribeone",
+				"Rwaone",
 				"Exchanger",
 				"ExchangeRates",
 				"SystemSettings",
@@ -553,7 +553,7 @@
 		{
 			"sip": 202,
 			"layer": "base",
-			"sources": ["SupplySchedule", "Tribeone"],
+			"sources": ["SupplySchedule", "Rwaone"],
 			"released": "base"
 		},
 		{
@@ -620,13 +620,13 @@
 			"layer": "both",
 			"sources": {
 				"base": [
-					"TribeoneBridgeToOptimism",
+					"RwaoneBridgeToOptimism",
 					"Issuer",
 					"SystemSettings",
 					"SystemSettingsLib"
 				],
 				"ovm": [
-					"TribeoneBridgeToBase",
+					"RwaoneBridgeToBase",
 					"Issuer",
 					"SystemSettings",
 					"SystemSettingsLib"
@@ -656,21 +656,21 @@
 			"sip": 237,
 			"layer": "both",
 			"sources": {
-				"base": ["Issuer", "Tribeone", "DebtMigratorOnEthereum"],
-				"ovm": ["Issuer", "Tribeone", "DebtMigratorOnOptimism"]
+				"base": ["Issuer", "Rwaone", "DebtMigratorOnEthereum"],
+				"ovm": ["Issuer", "Rwaone", "DebtMigratorOnOptimism"]
 			},
 			"released": "both"
 		},
 		{
 			"sip": 238,
 			"layer": "both",
-			"sources": ["Tribeone", "Tribes.*", "Issuer"],
+			"sources": ["Rwaone", "Tribes.*", "Issuer"],
 			"released": "both"
 		},
 		{
 			"sip": 239,
 			"layer": "both",
-			"sources": ["Tribeone"],
+			"sources": ["Rwaone"],
 			"released": "both"
 		},
 		{
@@ -709,7 +709,7 @@
 			"sources": [
 				"Issuer",
 				"RewardEscrowV2",
-				"Tribeone",
+				"Rwaone",
 				"Liquidator",
 				"RewardEscrowV2Storage"
 			],
@@ -845,7 +845,7 @@
 		{
 			"sip": 299,
 			"layer": "both",
-			"sources": ["Tribeone", "Liquidator"],
+			"sources": ["Rwaone", "Liquidator"],
 			"released": "both"
 		},
 		{

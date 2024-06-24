@@ -3,13 +3,13 @@ pragma solidity ^0.5.16;
 // Inheritance
 import "../Owned.sol";
 import "../State.sol";
-import "../interfaces/ITribeoneState.sol";
+import "../interfaces/IRwaoneState.sol";
 
 // Libraries
 import "../SafeDecimalMath.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/tribeetixstate
-contract TribeoneState is Owned, State, ITribeoneState {
+// https://docs.rwaone.io/contracts/source/contracts/tribeetixstate
+contract RwaoneState is Owned, State, IRwaoneState {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
 

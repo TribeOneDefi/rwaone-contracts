@@ -1,6 +1,6 @@
 pragma solidity >=0.4.24;
 
-// https://docs.tribeone.io/contracts/source/interfaces/ifeepool
+// https://docs.rwaone.io/contracts/source/interfaces/ifeepool
 interface IFeePool {
     // Views
 

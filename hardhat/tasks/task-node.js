@@ -13,7 +13,7 @@ task('node', 'Run a node')
 		if (taskArguments.fork) {
 			throw new Error(
 				red(
-					'Forking is automatically managed in Tribeone. Please use `--target-network mainnet` instead.'
+					'Forking is automatically managed in Rwaone. Please use `--target-network mainnet` instead.'
 				)
 			);
 		}
@@ -37,7 +37,7 @@ task('node', 'Run a node')
 			await runSuper();
 
 			console.log(
-				yellow(`Targeting Tribeone in ${network}${taskArguments.fork ? ' (forked)' : ''}`)
+				yellow(`Targeting Rwaone in ${network}${taskArguments.fork ? ' (forked)' : ''}`)
 			);
 
 			// Unlock any specified accounts, plus those

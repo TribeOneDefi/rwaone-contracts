@@ -5,22 +5,22 @@ const { updateCache } = require('../utils/rates');
 const { skipWaitingPeriod } = require('../utils/skip');
 
 async function exchangeSomething({ ctx }) {
-	let { Tribeone } = ctx.contracts;
-	Tribeone = Tribeone.connect(ctx.users.owner);
+	let { Rwaone } = ctx.contracts;
+	Rwaone = Rwaone.connect(ctx.users.owner);
 
 	const hUSDAmount = ethers.utils.parseEther('10');
 	await ensureBalance({ ctx, symbol: 'hUSD', user: ctx.users.owner, balance: hUSDAmount });
 
 	await updateCache({ ctx });
 
-	const tx = await Tribeone.exchange(toBytes32('hUSD'), hUSDAmount, toBytes32('hETH'));
+	const tx = await Rwaone.exchange(toBytes32('hUSD'), hUSDAmount, toBytes32('hETH'));
 	await tx.wait();
 }
 
 async function exchangeTribes({ ctx, src, dest, amount, user }) {
-	let { Tribeone, CircuitBreaker } = ctx.contracts;
+	let { Rwaone, CircuitBreaker } = ctx.contracts;
 	const { ExchangeRates } = ctx.contracts;
-	Tribeone = Tribeone.connect(user);
+	Rwaone = Rwaone.connect(user);
 	CircuitBreaker = CircuitBreaker.connect(ctx.users.owner);
 
 	await ensureBalance({ ctx, symbol: src, user, balance: amount });
@@ -35,12 +35,12 @@ async function exchangeTribes({ ctx, src, dest, amount, user }) {
 		oracles.map(() => 0)
 	);
 
-	tx = await Tribeone.exchange(toBytes32(src), amount, toBytes32(dest));
+	tx = await Rwaone.exchange(toBytes32(src), amount, toBytes32(dest));
 	await tx.wait();
 
 	await skipWaitingPeriod({ ctx });
 
-	tx = await Tribeone.settle(toBytes32(dest));
+	tx = await Rwaone.settle(toBytes32(dest));
 	await tx.wait();
 }
 

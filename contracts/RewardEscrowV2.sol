@@ -7,11 +7,11 @@ import "./BaseRewardEscrowV2.sol";
 // Internal references
 import "./interfaces/IRewardEscrow.sol";
 
-// https://docs.tribeone.io/contracts/RewardEscrow
+// https://docs.rwaone.io/contracts/RewardEscrow
 contract RewardEscrowV2 is BaseRewardEscrowV2 {
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
-    bytes32 private constant CONTRACT_TRIBEONEETIX_BRIDGE_OPTIMISM = "TribeoneBridgeToOptimism";
+    bytes32 private constant CONTRACT_RWAONEETIX_BRIDGE_OPTIMISM = "RwaoneBridgeToOptimism";
 
     /* ========== CONSTRUCTOR ========== */
 
@@ -22,19 +22,22 @@ contract RewardEscrowV2 is BaseRewardEscrowV2 {
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = BaseRewardEscrowV2.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](1);
-        newAddresses[0] = CONTRACT_TRIBEONEETIX_BRIDGE_OPTIMISM;
+        newAddresses[0] = CONTRACT_RWAONEETIX_BRIDGE_OPTIMISM;
         return combineArrays(existingAddresses, newAddresses);
     }
 
     function tribeetixBridgeToOptimism() internal view returns (address) {
-        return requireAndGetAddress(CONTRACT_TRIBEONEETIX_BRIDGE_OPTIMISM);
+        return requireAndGetAddress(CONTRACT_RWAONEETIX_BRIDGE_OPTIMISM);
     }
 
     /* ========== L2 MIGRATION ========== */
 
-    function burnForMigration(address account, uint[] calldata entryIDs)
+    function burnForMigration(
+        address account,
+        uint[] calldata entryIDs
+    )
         external
-        onlyTribeoneBridge
+        onlyRwaoneBridge
         returns (uint256 escrowedAccountBalance, VestingEntries.VestingEntry[] memory vestingEntries)
     {
         require(entryIDs.length > 0, "Entry IDs required");
@@ -72,8 +75,8 @@ contract RewardEscrowV2 is BaseRewardEscrowV2 {
 
     /* ========== MODIFIERS ========== */
 
-    modifier onlyTribeoneBridge() {
-        require(msg.sender == tribeetixBridgeToOptimism(), "Can only be invoked by TribeoneBridgeToOptimism contract");
+    modifier onlyRwaoneBridge() {
+        require(msg.sender == tribeetixBridgeToOptimism(), "Can only be invoked by RwaoneBridgeToOptimism contract");
         _;
     }
 

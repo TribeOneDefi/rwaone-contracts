@@ -1,6 +1,6 @@
 pragma solidity ^0.5.16;
 
-import "../interfaces/ITribeone.sol";
+import "../interfaces/IRwaone.sol";
 
 contract MockExchanger {
     uint256 private _mockReclaimAmount;
@@ -8,27 +8,23 @@ contract MockExchanger {
     uint256 private _mockNumEntries;
     uint256 private _mockMaxSecsLeft;
 
-    ITribeone public tribeone;
+    IRwaone public rwaone;
 
-    constructor(ITribeone _tribeetix) public {
-        tribeone = _tribeetix;
+    constructor(IRwaone _tribeetix) public {
+        rwaone = _tribeetix;
     }
 
     // Mock settle function
-    function settle(address from, bytes32 currencyKey)
-        external
-        returns (
-            uint256 reclaimed,
-            uint256 refunded,
-            uint numEntriesSettled
-        )
-    {
+    function settle(
+        address from,
+        bytes32 currencyKey
+    ) external returns (uint256 reclaimed, uint256 refunded, uint numEntriesSettled) {
         if (_mockReclaimAmount > 0) {
-            tribeone.tribes(currencyKey).burn(from, _mockReclaimAmount);
+            rwaone.tribes(currencyKey).burn(from, _mockReclaimAmount);
         }
 
         if (_mockRefundAmount > 0) {
-            tribeone.tribes(currencyKey).issue(from, _mockRefundAmount);
+            rwaone.tribes(currencyKey).issue(from, _mockRefundAmount);
         }
 
         _mockMaxSecsLeft = 0;
@@ -37,32 +33,18 @@ contract MockExchanger {
     }
 
     // silence compiler warnings for args
-    function maxSecsLeftInWaitingPeriod(
-        address, /* account */
-        bytes32 /* currencyKey */
-    ) public view returns (uint) {
+    function maxSecsLeftInWaitingPeriod(address /* account */, bytes32 /* currencyKey */) public view returns (uint) {
         return _mockMaxSecsLeft;
     }
 
     // silence compiler warnings for args
-    function settlementOwing(
-        address, /* account */
-        bytes32 /* currencyKey */
-    )
-        public
-        view
-        returns (
-            uint,
-            uint,
-            uint
-        )
-    {
+    function settlementOwing(address /* account */, bytes32 /* currencyKey */) public view returns (uint, uint, uint) {
         return (_mockReclaimAmount, _mockRefundAmount, _mockNumEntries);
     }
 
     // silence compiler warnings for args
     function hasWaitingPeriodOrSettlementOwing(
-        address, /* account */
+        address /* account */,
         bytes32 /* currencyKey */
     ) external view returns (bool) {
         if (_mockMaxSecsLeft > 0) {

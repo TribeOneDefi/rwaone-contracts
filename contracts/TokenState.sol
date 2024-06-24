@@ -4,7 +4,7 @@ pragma solidity ^0.5.16;
 import "./Owned.sol";
 import "./State.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/tokenstate
+// https://docs.rwaone.io/contracts/source/contracts/tokenstate
 contract TokenState is Owned, State {
     /* ERC20 fields. */
     mapping(address => uint) public balanceOf;
@@ -22,11 +22,7 @@ contract TokenState is Owned, State {
      * @param value The total value the authorised party may spend on the
      * authorising party's behalf.
      */
-    function setAllowance(
-        address tokenOwner,
-        address spender,
-        uint value
-    ) external onlyAssociatedContract {
+    function setAllowance(address tokenOwner, address spender, uint value) external onlyAssociatedContract {
         allowance[tokenOwner][spender] = value;
     }
 

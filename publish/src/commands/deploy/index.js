@@ -18,7 +18,7 @@ const {
 const { performTransactionalStep } = require('../../command-utils/transact');
 
 const {
-	constants: { BUILD_FOLDER, CONFIG_FILENAME, TRIBEONES_FILENAME, DEPLOYMENT_FILENAME },
+	constants: { BUILD_FOLDER, CONFIG_FILENAME, RWAONES_FILENAME, DEPLOYMENT_FILENAME },
 } = require('../../../..');
 
 const addTribesToProtocol = require('./add-tribes-to-protocol');
@@ -56,7 +56,7 @@ const DEFAULTS = {
 	debtSnapshotMaxDeviation: 0.01, // a 1 percent deviation will trigger a snapshot
 	network: 'sepolia-arbitrum',
 	buildPath: path.join(__dirname, '..', '..', '..', '..', BUILD_FOLDER),
-	providerUrl:'https://arb-sepolia.g.alchemy.com/v2/9ENHYjUcOJ7YRs_N1SULaQUTewK_nwkt'
+	providerUrl: 'https://arb-sepolia.g.alchemy.com/v2/9ENHYjUcOJ7YRs_N1SULaQUTewK_nwkt'
 };
 
 const deploy = async ({
@@ -75,7 +75,7 @@ const deploy = async ({
 	network = DEFAULTS.network,
 	privateKey,
 	signer,
-	providerUrl=DEFAULTS.providerUrl,
+	providerUrl = DEFAULTS.providerUrl,
 	provider,
 	skipFeedChecks = false,
 	specifyContracts,
@@ -221,7 +221,7 @@ const deploy = async ({
 	nonceManager.account = account;
 
 	const {
-		currentTribeoneSupply,
+		currentRwaoneSupply,
 		currentLastMintEvent,
 		currentWeekOfInflation,
 		systemSuspended,
@@ -284,7 +284,7 @@ const deploy = async ({
 		account,
 		addressOf,
 		currentLastMintEvent,
-		currentTribeoneSupply,
+		currentRwaoneSupply,
 		currentWeekOfInflation,
 		deployer,
 		useOvm,
@@ -569,7 +569,7 @@ module.exports = {
 			.description('Deploy compiled solidity files')
 			.option(
 				'-a, --add-new-tribes',
-				`Whether or not any new tribes in the ${TRIBEONES_FILENAME} file should be deployed if there is no entry in the config file`,
+				`Whether or not any new tribes in the ${RWAONES_FILENAME} file should be deployed if there is no entry in the config file`,
 				true
 			)
 			.option(
@@ -579,7 +579,7 @@ module.exports = {
 			)
 			.option(
 				'-d, --deployment-path <value>',
-				`Path to a folder that has your input configuration file ${CONFIG_FILENAME}, the tribe list ${TRIBEONES_FILENAME} and where your ${DEPLOYMENT_FILENAME} files will go`
+				`Path to a folder that has your input configuration file ${CONFIG_FILENAME}, the tribe list ${RWAONES_FILENAME} and where your ${DEPLOYMENT_FILENAME} files will go`
 			)
 			.option(
 				'-e, --concurrency <value>',

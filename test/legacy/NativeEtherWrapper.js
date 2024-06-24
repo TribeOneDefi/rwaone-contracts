@@ -47,7 +47,7 @@ contract('NativeEtherWrapper', async accounts => {
 			accounts,
 			tribes,
 			contracts: [
-				'Tribeone',
+				'Rwaone',
 				'AddressResolver',
 				'SystemStatus',
 				'Issuer',

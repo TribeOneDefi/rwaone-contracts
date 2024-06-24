@@ -2,18 +2,11 @@ pragma solidity >=0.4.24;
 
 import "../interfaces/ITribe.sol";
 
-// https://docs.tribeone.io/contracts/source/interfaces/iissuer
+// https://docs.rwaone.io/contracts/source/interfaces/iissuer
 interface IIssuer {
     // Views
 
-    function allNetworksDebtInfo()
-        external
-        view
-        returns (
-            uint256 debt,
-            uint256 sharesSupply,
-            bool isStale
-        );
+    function allNetworksDebtInfo() external view returns (uint256 debt, uint256 sharesSupply, bool isStale);
 
     function anyTribeOrHAKARateIsInvalid() external view returns (bool anyRateInvalid);
 
@@ -29,10 +22,9 @@ interface IIssuer {
 
     function collateralisationRatio(address issuer) external view returns (uint);
 
-    function collateralisationRatioAndAnyRatesInvalid(address _issuer)
-        external
-        view
-        returns (uint cratio, bool anyRateIsInvalid);
+    function collateralisationRatioAndAnyRatesInvalid(
+        address _issuer
+    ) external view returns (uint cratio, bool anyRateIsInvalid);
 
     function debtBalanceOf(address issuer, bytes32 currencyKey) external view returns (uint debtBalance);
 
@@ -44,14 +36,9 @@ interface IIssuer {
 
     function minimumStakeTime() external view returns (uint);
 
-    function remainingIssuableTribes(address issuer)
-        external
-        view
-        returns (
-            uint maxIssuable,
-            uint alreadyIssued,
-            uint totalSystemDebt
-        );
+    function remainingIssuableTribes(
+        address issuer
+    ) external view returns (uint maxIssuable, uint alreadyIssued, uint totalSystemDebt);
 
     function tribes(bytes32 currencyKey) external view returns (ITribe);
 
@@ -61,31 +48,22 @@ interface IIssuer {
 
     function totalIssuedTribes(bytes32 currencyKey, bool excludeOtherCollateral) external view returns (uint);
 
-    function transferableTribeoneAndAnyRateIsInvalid(address account, uint balance)
-        external
-        view
-        returns (uint transferable, bool anyRateIsInvalid);
+    function transferableRwaoneAndAnyRateIsInvalid(
+        address account,
+        uint balance
+    ) external view returns (uint transferable, bool anyRateIsInvalid);
 
-    function liquidationAmounts(address account, bool isSelfLiquidation)
-        external
-        view
-        returns (
-            uint totalRedeemed,
-            uint debtToRemove,
-            uint escrowToLiquidate,
-            uint initialDebtBalance
-        );
+    function liquidationAmounts(
+        address account,
+        bool isSelfLiquidation
+    ) external view returns (uint totalRedeemed, uint debtToRemove, uint escrowToLiquidate, uint initialDebtBalance);
 
-    // Restricted: used internally to Tribeone
+    // Restricted: used internally to Rwaone
     function addTribes(ITribe[] calldata tribesToAdd) external;
 
     function issueTribes(address from, uint amount) external;
 
-    function issueTribesOnBehalf(
-        address issueFor,
-        address from,
-        uint amount
-    ) external;
+    function issueTribesOnBehalf(address issueFor, address from, uint amount) external;
 
     function issueMaxTribes(address from) external;
 
@@ -93,43 +71,24 @@ interface IIssuer {
 
     function burnTribes(address from, uint amount) external;
 
-    function burnTribesOnBehalf(
-        address burnForAddress,
-        address from,
-        uint amount
-    ) external;
+    function burnTribesOnBehalf(address burnForAddress, address from, uint amount) external;
 
     function burnTribesToTarget(address from) external;
 
     function burnTribesToTargetOnBehalf(address burnForAddress, address from) external;
 
-    function burnForRedemption(
-        address deprecatedTribeProxy,
-        address account,
-        uint balance
-    ) external;
+    function burnForRedemption(address deprecatedTribeProxy, address account, uint balance) external;
 
     function setCurrentPeriodId(uint128 periodId) external;
 
-    function liquidateAccount(address account, bool isSelfLiquidation)
-        external
-        returns (
-            uint totalRedeemed,
-            uint debtRemoved,
-            uint escrowToLiquidate
-        );
+    function liquidateAccount(
+        address account,
+        bool isSelfLiquidation
+    ) external returns (uint totalRedeemed, uint debtRemoved, uint escrowToLiquidate);
 
-    function issueTribesWithoutDebt(
-        bytes32 currencyKey,
-        address to,
-        uint amount
-    ) external returns (bool rateInvalid);
+    function issueTribesWithoutDebt(bytes32 currencyKey, address to, uint amount) external returns (bool rateInvalid);
 
-    function burnTribesWithoutDebt(
-        bytes32 currencyKey,
-        address to,
-        uint amount
-    ) external returns (bool rateInvalid);
+    function burnTribesWithoutDebt(bytes32 currencyKey, address to, uint amount) external returns (bool rateInvalid);
 
     function modifyDebtSharesForMigration(address account, uint amount) external;
 }

@@ -2,14 +2,14 @@ pragma solidity ^0.5.16;
 
 // Inheritance
 import "./Owned.sol";
-import "./interfaces/ITribeoneDebtShare.sol";
+import "./interfaces/IRwaoneDebtShare.sol";
 import "./MixinResolver.sol";
 
 // Libraries
 import "./SafeDecimalMath.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/tribeetixdebtshare
-contract TribeoneDebtShare is Owned, MixinResolver, ITribeoneDebtShare {
+// https://docs.rwaone.io/contracts/source/contracts/tribeetixdebtshare
+contract RwaoneDebtShare is Owned, MixinResolver, IRwaoneDebtShare {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
 
@@ -18,7 +18,7 @@ contract TribeoneDebtShare is Owned, MixinResolver, ITribeoneDebtShare {
         uint128 periodId;
     }
 
-    bytes32 public constant CONTRACT_NAME = "TribeoneDebtShare";
+    bytes32 public constant CONTRACT_NAME = "RwaoneDebtShare";
 
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
 
@@ -70,7 +70,7 @@ contract TribeoneDebtShare is Owned, MixinResolver, ITribeoneDebtShare {
     bool public isInitialized = false;
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinResolver(_resolver) {
-        name = "Tribeone Debt Shares";
+        name = "Rwaone Debt Shares";
         symbol = "SDS";
         decimals = 18;
 
@@ -98,8 +98,9 @@ contract TribeoneDebtShare is Owned, MixinResolver, ITribeoneDebtShare {
     function balanceOfOnPeriod(address account, uint periodId) public view returns (uint) {
         uint accountPeriodHistoryCount = balances[account].length;
 
-        int oldestHistoryIterate =
-            int(MAX_PERIOD_ITERATE < accountPeriodHistoryCount ? accountPeriodHistoryCount - MAX_PERIOD_ITERATE : 0);
+        int oldestHistoryIterate = int(
+            MAX_PERIOD_ITERATE < accountPeriodHistoryCount ? accountPeriodHistoryCount - MAX_PERIOD_ITERATE : 0
+        );
         int i;
         for (i = int(accountPeriodHistoryCount) - 1; i >= oldestHistoryIterate; i--) {
             if (balances[account][uint(i)].periodId <= periodId) {
@@ -107,7 +108,7 @@ contract TribeoneDebtShare is Owned, MixinResolver, ITribeoneDebtShare {
             }
         }
 
-        require(i < 0, "TribeoneDebtShare: not found in recent history");
+        require(i < 0, "RwaoneDebtShare: not found in recent history");
         return 0;
     }
 
@@ -194,11 +195,7 @@ contract TribeoneDebtShare is Owned, MixinResolver, ITribeoneDebtShare {
         revert("debt shares are not transferrable");
     }
 
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) external onlyAuthorizedBrokers returns (bool) {
+    function transferFrom(address from, address to, uint256 amount) external onlyAuthorizedBrokers returns (bool) {
         require(to != address(0), "ERC20: send to the zero address");
 
         _deductBalance(from, amount);
@@ -256,7 +253,7 @@ contract TribeoneDebtShare is Owned, MixinResolver, ITribeoneDebtShare {
     function _deductBalance(address account, uint amount) internal {
         uint accountBalanceCount = balances[account].length;
 
-        require(accountBalanceCount != 0, "TribeoneDebtShare: account has no share to deduct");
+        require(accountBalanceCount != 0, "RwaoneDebtShare: account has no share to deduct");
 
         uint128 newAmount = uint128(uint(balances[account][accountBalanceCount - 1].amount).sub(amount));
 
@@ -270,25 +267,25 @@ contract TribeoneDebtShare is Owned, MixinResolver, ITribeoneDebtShare {
     /* ========== MODIFIERS ========== */
 
     modifier onlyIssuer() {
-        require(msg.sender == requireAndGetAddress(CONTRACT_ISSUER), "TribeoneDebtShare: only issuer can mint/burn");
+        require(msg.sender == requireAndGetAddress(CONTRACT_ISSUER), "RwaoneDebtShare: only issuer can mint/burn");
         _;
     }
 
     modifier onlyAuthorizedToSnapshot() {
         require(
             authorizedToSnapshot[msg.sender] || msg.sender == requireAndGetAddress(CONTRACT_ISSUER),
-            "TribeoneDebtShare: not authorized to snapshot"
+            "RwaoneDebtShare: not authorized to snapshot"
         );
         _;
     }
 
     modifier onlyAuthorizedBrokers() {
-        require(authorizedBrokers[msg.sender], "TribeoneDebtShare: only brokers can transferFrom");
+        require(authorizedBrokers[msg.sender], "RwaoneDebtShare: only brokers can transferFrom");
         _;
     }
 
     modifier onlySetup() {
-        require(!isInitialized, "TribeoneDebt: only callable while still initializing");
+        require(!isInitialized, "RwaoneDebt: only callable while still initializing");
         _;
     }
 

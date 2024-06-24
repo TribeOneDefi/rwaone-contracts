@@ -3,7 +3,7 @@ const hre = require('hardhat');
 
 const path = require('path');
 
-const tribeone = require('..');
+const rwaone = require('..');
 
 const commands = {
 	build: require('./src/commands/build').build,
@@ -61,13 +61,13 @@ async function deploy(runtime, networkVariant) {
 		useOvm = true;
 		network = networkVariant.slice(0, networkVariant.length - 4);
 	}
-	const buildPath = path.join(__dirname, '..', tribeone.constants.BUILD_FOLDER);
+	const buildPath = path.join(__dirname, '..', rwaone.constants.BUILD_FOLDER);
 
 	// get the signer that we want to have for the deployer
 	let signer = await runtime.getDefaultSigner({});
 	try {
 		// if cannon can give us the signer for the owner address, we should use that
-		const ownerAddress = tribeone.getUsers({ network, useOvm, user: 'owner' }).address;
+		const ownerAddress = rwaone.getUsers({ network, useOvm, user: 'owner' }).address;
 		signer = await runtime.getSigner(ownerAddress);
 	} catch (err) {
 		// otherwise we want to use the cannon default signer, which is set above
@@ -86,7 +86,7 @@ async function deploy(runtime, networkVariant) {
 
 	// pull deployed contract information
 
-	const allTargets = tribeone.getTarget({ fs, path, network, useOvm });
+	const allTargets = rwaone.getTarget({ fs, path, network, useOvm });
 
 	const contracts = {};
 	for (const [name, target] of Object.entries(allTargets)) {
@@ -96,7 +96,7 @@ async function deploy(runtime, networkVariant) {
 				address: target.address,
 				sourceName: artifactData.sourceName,
 				contractName: artifactData.contractName,
-				abi: tribeone.getSource({ fs, path, network, useOvm, contract: target.source }).abi,
+				abi: rwaone.getSource({ fs, path, network, useOvm, contract: target.source }).abi,
 				deployTxn: target.txn,
 			};
 		} catch (e) {

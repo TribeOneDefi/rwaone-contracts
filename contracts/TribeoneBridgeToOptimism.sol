@@ -2,39 +2,39 @@ pragma solidity ^0.5.16;
 pragma experimental ABIEncoderV2;
 
 // Inheritance
-import "./BaseTribeoneBridge.sol";
-import "./interfaces/ITribeoneBridgeToOptimism.sol";
+import "./BaseRwaoneBridge.sol";
+import "./interfaces/IRwaoneBridgeToOptimism.sol";
 import "@eth-optimism/contracts/iOVM/bridge/tokens/iOVM_L1TokenGateway.sol";
 
 // Internal references
 import "openzeppelin-solidity-2.3.0/contracts/token/ERC20/SafeERC20.sol";
 import "./interfaces/IIssuer.sol";
-import "./interfaces/ITribeoneBridgeToBase.sol";
+import "./interfaces/IRwaoneBridgeToBase.sol";
 import "@eth-optimism/contracts/iOVM/bridge/tokens/iOVM_L2DepositedToken.sol";
 
-contract TribeoneBridgeToOptimism is BaseTribeoneBridge, ITribeoneBridgeToOptimism, iOVM_L1TokenGateway {
+contract RwaoneBridgeToOptimism is BaseRwaoneBridge, IRwaoneBridgeToOptimism, iOVM_L1TokenGateway {
     using SafeERC20 for IERC20;
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_REWARDSDISTRIBUTION = "RewardsDistribution";
-    bytes32 private constant CONTRACT_OVM_TRIBEONEETIXBRIDGETOBASE = "ovm:TribeoneBridgeToBase";
-    bytes32 private constant CONTRACT_TRIBEONEETIXBRIDGEESCROW = "TribeoneBridgeEscrow";
+    bytes32 private constant CONTRACT_OVM_RWAONEETIXBRIDGETOBASE = "ovm:RwaoneBridgeToBase";
+    bytes32 private constant CONTRACT_RWAONEETIXBRIDGEESCROW = "RwaoneBridgeEscrow";
 
     uint8 private constant MAX_ENTRIES_MIGRATED_PER_MESSAGE = 26;
 
     function CONTRACT_NAME() public pure returns (bytes32) {
-        return "TribeoneBridgeToOptimism";
+        return "RwaoneBridgeToOptimism";
     }
 
     // ========== CONSTRUCTOR ==========
 
-    constructor(address _owner, address _resolver) public BaseTribeoneBridge(_owner, _resolver) {}
+    constructor(address _owner, address _resolver) public BaseRwaoneBridge(_owner, _resolver) {}
 
     // ========== INTERNALS ============
 
     function tribeetixERC20() internal view returns (IERC20) {
-        return IERC20(requireAndGetAddress(CONTRACT_TRIBEONEETIX));
+        return IERC20(requireAndGetAddress(CONTRACT_RWAONEETIX));
     }
 
     function issuer() internal view returns (IIssuer) {
@@ -46,11 +46,11 @@ contract TribeoneBridgeToOptimism is BaseTribeoneBridge, ITribeoneBridgeToOptimi
     }
 
     function tribeetixBridgeToBase() internal view returns (address) {
-        return requireAndGetAddress(CONTRACT_OVM_TRIBEONEETIXBRIDGETOBASE);
+        return requireAndGetAddress(CONTRACT_OVM_RWAONEETIXBRIDGETOBASE);
     }
 
     function tribeetixBridgeEscrow() internal view returns (address) {
-        return requireAndGetAddress(CONTRACT_TRIBEONEETIXBRIDGEESCROW);
+        return requireAndGetAddress(CONTRACT_RWAONEETIXBRIDGEESCROW);
     }
 
     function hasZeroDebt() internal view {
@@ -64,12 +64,12 @@ contract TribeoneBridgeToOptimism is BaseTribeoneBridge, ITribeoneBridgeToOptimi
     /* ========== VIEWS ========== */
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
-        bytes32[] memory existingAddresses = BaseTribeoneBridge.resolverAddressesRequired();
+        bytes32[] memory existingAddresses = BaseRwaoneBridge.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](4);
         newAddresses[0] = CONTRACT_ISSUER;
         newAddresses[1] = CONTRACT_REWARDSDISTRIBUTION;
-        newAddresses[2] = CONTRACT_OVM_TRIBEONEETIXBRIDGETOBASE;
-        newAddresses[3] = CONTRACT_TRIBEONEETIXBRIDGEESCROW;
+        newAddresses[2] = CONTRACT_OVM_RWAONEETIXBRIDGETOBASE;
+        newAddresses[3] = CONTRACT_RWAONEETIXBRIDGEESCROW;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -113,9 +113,12 @@ contract TribeoneBridgeToOptimism is BaseTribeoneBridge, ITribeoneBridgeToOptimi
     function closeFeePeriod(uint snxBackedAmount, uint totalDebtShares) external requireInitiationActive {
         require(msg.sender == address(feePool()), "Only the fee pool can call this");
 
-        ITribeoneBridgeToBase bridgeToBase;
-        bytes memory messageData =
-            abi.encodeWithSelector(bridgeToBase.finalizeFeePeriodClose.selector, snxBackedAmount, totalDebtShares);
+        IRwaoneBridgeToBase bridgeToBase;
+        bytes memory messageData = abi.encodeWithSelector(
+            bridgeToBase.finalizeFeePeriodClose.selector,
+            snxBackedAmount,
+            totalDebtShares
+        );
 
         // relay the message to this contract on L2 via L1 Messenger
         messenger().sendMessage(
@@ -147,11 +150,10 @@ contract TribeoneBridgeToOptimism is BaseTribeoneBridge, ITribeoneBridgeToOptimi
         _depositReward(msg.sender, amount);
     }
 
-    function depositAndMigrateEscrow(uint256 depositAmount, uint256[][] memory entryIDs)
-        public
-        requireInitiationActive
-        requireZeroDebt
-    {
+    function depositAndMigrateEscrow(
+        uint256 depositAmount,
+        uint256[][] memory entryIDs
+    ) public requireInitiationActive requireZeroDebt {
         if (entryIDs.length > 0) {
             _migrateEscrow(entryIDs);
         }
@@ -165,7 +167,7 @@ contract TribeoneBridgeToOptimism is BaseTribeoneBridge, ITribeoneBridgeToOptimi
 
     function _depositReward(address _from, uint256 _amount) internal {
         // create message payload for L2
-        ITribeoneBridgeToBase bridgeToBase;
+        IRwaoneBridgeToBase bridgeToBase;
         bytes memory messageData = abi.encodeWithSelector(bridgeToBase.finalizeRewardDeposit.selector, _from, _amount);
 
         // relay the message to this contract on L2 via L1 Messenger
@@ -212,14 +214,13 @@ contract TribeoneBridgeToOptimism is BaseTribeoneBridge, ITribeoneBridgeToOptimi
                 // NOTE: transfer wHAKA to tribeetixBridgeEscrow because burnForMigration() transfers them to this contract.
                 tribeetixERC20().transfer(tribeetixBridgeEscrow(), escrowedAccountBalance);
                 // create message payload for L2
-                ITribeoneBridgeToBase bridgeToBase;
-                bytes memory messageData =
-                    abi.encodeWithSelector(
-                        bridgeToBase.finalizeEscrowMigration.selector,
-                        msg.sender,
-                        escrowedAccountBalance,
-                        vestingEntries
-                    );
+                IRwaoneBridgeToBase bridgeToBase;
+                bytes memory messageData = abi.encodeWithSelector(
+                    bridgeToBase.finalizeEscrowMigration.selector,
+                    msg.sender,
+                    escrowedAccountBalance,
+                    vestingEntries
+                );
                 // relay the message to this contract on L2 via L1 Messenger
                 messenger().sendMessage(
                     tribeetixBridgeToBase(),

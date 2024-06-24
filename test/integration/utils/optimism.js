@@ -5,41 +5,41 @@ const axios = require('axios');
 const { watchOptimismMessengers, Watcher } = require('./optimism-temp');
 
 async function deposit({ ctx, from, to, amount }) {
-	let { Tribeone, TribeoneBridgeToOptimism } = ctx.contracts;
-	Tribeone = Tribeone.connect(from);
-	TribeoneBridgeToOptimism = TribeoneBridgeToOptimism.connect(from);
+	let { Rwaone, RwaoneBridgeToOptimism } = ctx.contracts;
+	Rwaone = Rwaone.connect(from);
+	RwaoneBridgeToOptimism = RwaoneBridgeToOptimism.connect(from);
 
 	let tx;
 
-	const allowance = await Tribeone.allowance(from.address, TribeoneBridgeToOptimism.address);
+	const allowance = await Rwaone.allowance(from.address, RwaoneBridgeToOptimism.address);
 	if (allowance.lt(amount)) {
-		tx = await Tribeone.approve(TribeoneBridgeToOptimism.address, amount);
+		tx = await Rwaone.approve(RwaoneBridgeToOptimism.address, amount);
 		await tx.wait();
 	}
 
-	tx = await TribeoneBridgeToOptimism.depositTo(to.address, amount);
+	tx = await RwaoneBridgeToOptimism.depositTo(to.address, amount);
 	const receipt = await tx.wait();
 
 	await finalizationOnL2({ ctx, transactionHash: receipt.transactionHash });
 }
 
 async function approveBridge({ ctx, amount }) {
-	const { Tribeone, TribeoneBridgeToOptimism } = ctx.contracts;
-	let { TribeoneBridgeEscrow } = ctx.contracts;
-	TribeoneBridgeEscrow = TribeoneBridgeEscrow.connect(ctx.users.owner);
+	const { Rwaone, RwaoneBridgeToOptimism } = ctx.contracts;
+	let { RwaoneBridgeEscrow } = ctx.contracts;
+	RwaoneBridgeEscrow = RwaoneBridgeEscrow.connect(ctx.users.owner);
 
 	let tx;
 
-	tx = await TribeoneBridgeEscrow.approveBridge(
-		Tribeone.address,
-		TribeoneBridgeToOptimism.address,
+	tx = await RwaoneBridgeEscrow.approveBridge(
+		Rwaone.address,
+		RwaoneBridgeToOptimism.address,
 		ethers.constants.Zero
 	);
 	await tx.wait();
 
-	tx = await TribeoneBridgeEscrow.approveBridge(
-		Tribeone.address,
-		TribeoneBridgeToOptimism.address,
+	tx = await RwaoneBridgeEscrow.approveBridge(
+		Rwaone.address,
+		RwaoneBridgeToOptimism.address,
 		amount
 	);
 	await tx.wait();

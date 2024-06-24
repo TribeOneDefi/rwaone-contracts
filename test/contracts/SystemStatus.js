@@ -11,7 +11,7 @@ const { onlyGivenAddressCanInvoke, ensureOnlyExpectedMutativeFunctions } = requi
 const { toBytes32 } = require('../..');
 
 contract('SystemStatus', async accounts => {
-	const [SYSTEM, ISSUANCE, EXCHANGE, TRIBEONE_EXCHANGE, TRIBE, FUTURES] = [
+	const [SYSTEM, ISSUANCE, EXCHANGE, RWAONE_EXCHANGE, TRIBE, FUTURES] = [
 		'System',
 		'Issuance',
 		'Exchange',
@@ -99,7 +99,7 @@ contract('SystemStatus', async accounts => {
 	describe('when the owner is given access to suspend and resume everything', () => {
 		beforeEach(async () => {
 			await systemStatus.updateAccessControls(
-				[SYSTEM, ISSUANCE, EXCHANGE, TRIBEONE_EXCHANGE, TRIBE, FUTURES],
+				[SYSTEM, ISSUANCE, EXCHANGE, RWAONE_EXCHANGE, TRIBE, FUTURES],
 				[owner, owner, owner, owner, owner, owner],
 				[true, true, true, true, true, true],
 				[true, true, true, true, true, true],
@@ -164,7 +164,7 @@ contract('SystemStatus', async accounts => {
 					assert.eventEqual(txn, 'SystemSuspended', [givenReason]);
 				});
 				it('and the require checks all revert as expected', async () => {
-					const reason = 'Tribeone is suspended. Operation prohibited';
+					const reason = 'Rwaone is suspended. Operation prohibited';
 					await assert.revert(systemStatus.requireSystemActive(), reason);
 					await assert.revert(systemStatus.requireIssuanceActive(), reason);
 					await assert.revert(systemStatus.requireFuturesActive(), reason);
@@ -212,7 +212,7 @@ contract('SystemStatus', async accounts => {
 						assert.equal(isSystemUpgrading, true);
 					});
 					it('and the require checks all revert with system upgrading, as expected', async () => {
-						const reason = 'Tribeone is suspended, upgrade in progress... please stand by';
+						const reason = 'Rwaone is suspended, upgrade in progress... please stand by';
 						await assert.revert(systemStatus.requireSystemActive(), reason);
 						await assert.revert(systemStatus.requireIssuanceActive(), reason);
 						await assert.revert(systemStatus.requireFuturesActive(), reason);
@@ -791,7 +791,7 @@ contract('SystemStatus', async accounts => {
 
 			describe('when the owner adds an address to suspend only', () => {
 				beforeEach(async () => {
-					await systemStatus.updateAccessControl(TRIBEONE_EXCHANGE, account3, true, false, {
+					await systemStatus.updateAccessControl(RWAONE_EXCHANGE, account3, true, false, {
 						from: owner,
 					});
 				});
@@ -888,7 +888,7 @@ contract('SystemStatus', async accounts => {
 
 				describe('when the owner adds an address to resume only', () => {
 					beforeEach(async () => {
-						await systemStatus.updateAccessControl(TRIBEONE_EXCHANGE, account3, false, true, {
+						await systemStatus.updateAccessControl(RWAONE_EXCHANGE, account3, false, true, {
 							from: owner,
 						});
 					});
@@ -1011,7 +1011,7 @@ contract('SystemStatus', async accounts => {
 
 				describe('when the owner adds an address to resume only', () => {
 					beforeEach(async () => {
-						await systemStatus.updateAccessControl(TRIBEONE_EXCHANGE, account3, false, true, {
+						await systemStatus.updateAccessControl(RWAONE_EXCHANGE, account3, false, true, {
 							from: owner,
 						});
 					});
@@ -1964,7 +1964,7 @@ contract('SystemStatus', async accounts => {
 				const tribe = toBytes32('hETH');
 				beforeEach(async () => {
 					txn = await systemStatus.updateAccessControls(
-						[SYSTEM, TRIBEONE_EXCHANGE, TRIBE],
+						[SYSTEM, RWAONE_EXCHANGE, TRIBE],
 						[account1, account2, account3],
 						[true, false, true],
 						[false, true, true],
@@ -1975,7 +1975,7 @@ contract('SystemStatus', async accounts => {
 				it('then it emits the expected events', () => {
 					assert.eventEqual(txn.logs[0], 'AccessControlUpdated', [SYSTEM, account1, true, false]);
 					assert.eventEqual(txn.logs[1], 'AccessControlUpdated', [
-						TRIBEONE_EXCHANGE,
+						RWAONE_EXCHANGE,
 						account2,
 						false,
 						true,

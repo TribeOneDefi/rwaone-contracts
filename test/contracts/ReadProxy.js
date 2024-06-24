@@ -57,14 +57,14 @@ contract('ReadProxy', async accounts => {
 		});
 
 		it('Then a call to the forwarder must pass through to target via fallback function', async () => {
-			const expected = await resolver.getAddress(toBytes32('Tribeone'));
+			const expected = await resolver.getAddress(toBytes32('Rwaone'));
 			assert.equal(expected, ZERO_ADDRESS);
 
 			const response = await proxyThruTo({
 				proxy: forwarder,
 				target: resolver,
 				fncName: 'getAddress',
-				args: [toBytes32('Tribeone')],
+				args: [toBytes32('Rwaone')],
 				from: account3,
 				call: true,
 			});
@@ -104,17 +104,17 @@ contract('ReadProxy', async accounts => {
 
 		describe('when the target has been updated', () => {
 			beforeEach(async () => {
-				await resolver.importAddresses([toBytes32('Tribeone')], [account1], { from: owner });
+				await resolver.importAddresses([toBytes32('Rwaone')], [account1], { from: owner });
 			});
 			it('Then a call to the forwarder must pass through to target via fallback function', async () => {
-				const expected = await resolver.getAddress(toBytes32('Tribeone'));
+				const expected = await resolver.getAddress(toBytes32('Rwaone'));
 				assert.equal(expected, account1);
 
 				const response = await proxyThruTo({
 					proxy: forwarder,
 					target: resolver,
 					fncName: 'getAddress',
-					args: [toBytes32('Tribeone')],
+					args: [toBytes32('Rwaone')],
 					from: account3,
 					call: true,
 				});

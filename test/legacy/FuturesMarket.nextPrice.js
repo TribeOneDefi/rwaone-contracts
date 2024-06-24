@@ -67,7 +67,7 @@ contract('FuturesMarket MixinFuturesNextPriceOrders', accounts => {
 				'CircuitBreaker',
 				'SystemStatus',
 				'SystemSettings',
-				'Tribeone',
+				'Rwaone',
 				'CollateralManager',
 				'DebtCache',
 			],

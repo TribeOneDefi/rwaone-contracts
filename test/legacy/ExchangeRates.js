@@ -410,11 +410,11 @@ contract('Exchange Rates', async accounts => {
 					// Update all rates except hUSD.
 					await updateRates([sEUR, wHAKA], ['1.25', '0.1'].map(toUnit));
 
-					const amountOfTribeones = toUnit('10');
+					const amountOfRwaones = toUnit('10');
 					const amountOfEur = toUnit('0.8');
 
 					// Should now be able to convert from wHAKA to sEUR since they are both not stale.
-					assert.bnEqual(await instance.effectiveValue(wHAKA, amountOfTribeones, sEUR), amountOfEur);
+					assert.bnEqual(await instance.effectiveValue(wHAKA, amountOfRwaones, sEUR), amountOfEur);
 				});
 
 				it('should return 0 when relying on a non-existant dest exchange rate in effectiveValue()', async () => {
@@ -1339,13 +1339,12 @@ contract('Exchange Rates', async accounts => {
 						rates = await instance.effectiveAtomicValueAndRates(srcToken, amountIn, destToken);
 					});
 
-					it(`selects ${
-						expectedRateTypes.length ? expectedRateTypes : expectedRateTypes[0]
-					}`, () => {
-						for (const type of expectedRateTypes) {
-							assert.bnEqual(rates.value, potentialOutputs[type]);
-						}
-					});
+					it(`selects ${expectedRateTypes.length ? expectedRateTypes : expectedRateTypes[0]
+						}`, () => {
+							for (const type of expectedRateTypes) {
+								assert.bnEqual(rates.value, potentialOutputs[type]);
+							}
+						});
 
 					it('provides the correct output', () => {
 						assert.bnEqual(rates.value, expectedAmountOut);

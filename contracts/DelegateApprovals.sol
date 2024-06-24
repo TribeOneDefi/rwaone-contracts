@@ -7,7 +7,7 @@ import "./interfaces/IDelegateApprovals.sol";
 // Internal references
 import "./EternalStorage.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/delegateapprovals
+// https://docs.rwaone.io/contracts/source/contracts/delegateapprovals
 contract DelegateApprovals is Owned, IDelegateApprovals {
     bytes32 public constant BURN_FOR_ADDRESS = "BurnForAddress";
     bytes32 public constant ISSUE_FOR_ADDRESS = "IssueForAddress";
@@ -35,11 +35,7 @@ contract DelegateApprovals is Owned, IDelegateApprovals {
     // Move it to setter and associatedState
 
     // util to get key based on action name + address of authoriser + address for delegate
-    function _getKey(
-        bytes32 _action,
-        address _authoriser,
-        address _delegate
-    ) internal pure returns (bytes32) {
+    function _getKey(bytes32 _action, address _authoriser, address _delegate) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(_action, _authoriser, _delegate));
     }
 
@@ -67,11 +63,7 @@ contract DelegateApprovals is Owned, IDelegateApprovals {
     // internal function to check approval based on action
     // if approved for all actions then will return true
     // before checking specific approvals
-    function _checkApproval(
-        bytes32 action,
-        address authoriser,
-        address delegate
-    ) internal view returns (bool) {
+    function _checkApproval(bytes32 action, address authoriser, address delegate) internal view returns (bool) {
         if (approvedAll(authoriser, delegate)) return true;
 
         return eternalStorage.getBooleanValue(_getKey(action, authoriser, delegate));
@@ -127,21 +119,13 @@ contract DelegateApprovals is Owned, IDelegateApprovals {
         _withdrawApproval(EXCHANGE_FOR_ADDRESS, msg.sender, delegate);
     }
 
-    function _setApproval(
-        bytes32 action,
-        address authoriser,
-        address delegate
-    ) internal {
+    function _setApproval(bytes32 action, address authoriser, address delegate) internal {
         require(delegate != address(0), "Can't delegate to address(0)");
         eternalStorage.setBooleanValue(_getKey(action, authoriser, delegate), true);
         emit Approval(authoriser, delegate, action);
     }
 
-    function _withdrawApproval(
-        bytes32 action,
-        address authoriser,
-        address delegate
-    ) internal {
+    function _withdrawApproval(bytes32 action, address authoriser, address delegate) internal {
         // Check approval is set otherwise skip deleting approval
         if (eternalStorage.getBooleanValue(_getKey(action, authoriser, delegate))) {
             eternalStorage.deleteBooleanValue(_getKey(action, authoriser, delegate));

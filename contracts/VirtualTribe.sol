@@ -12,7 +12,7 @@ import "./interfaces/IAddressResolver.sol";
 import "./interfaces/IVirtualTribe.sol";
 import "./interfaces/IExchanger.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/virtualtribe
+// https://docs.rwaone.io/contracts/source/contracts/virtualtribe
 // Note: this contract should be treated as an abstract contract and should not be directly deployed.
 //       On higher versions of solidity, it would be marked with the `abstract` keyword.
 //       This contracts implements logic that is only intended to be accessed behind a proxy.

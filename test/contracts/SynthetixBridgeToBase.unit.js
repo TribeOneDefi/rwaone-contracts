@@ -6,15 +6,15 @@ const { toBytes32 } = require('../..');
 const { smock } = require('@defi-wonderland/smock');
 const { expect } = require('chai');
 
-const TribeoneBridgeToBase = artifacts.require('TribeoneBridgeToBase');
+const RwaoneBridgeToBase = artifacts.require('RwaoneBridgeToBase');
 
-contract('TribeoneBridgeToBase (unit tests)', accounts => {
+contract('RwaoneBridgeToBase (unit tests)', accounts => {
 	const [owner, user1, snxBridgeToOptimism, smockedMessenger, randomAddress] = accounts;
 
 	it('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
-			abi: TribeoneBridgeToBase.abi,
-			ignoreParents: ['BaseTribeoneBridge'],
+			abi: RwaoneBridgeToBase.abi,
+			ignoreParents: ['BaseRwaoneBridge'],
 			expected: [
 				'finalizeDeposit',
 				'finalizeFeePeriodClose',
@@ -28,13 +28,13 @@ contract('TribeoneBridgeToBase (unit tests)', accounts => {
 
 	const getDataOfEncodedFncCall = ({ fnc, args = [] }) =>
 		web3.eth.abi.encodeFunctionCall(
-			artifacts.require('TribeoneBridgeToOptimism').abi.find(({ name }) => name === fnc),
+			artifacts.require('RwaoneBridgeToOptimism').abi.find(({ name }) => name === fnc),
 			args
 		);
 
 	describe('when all the deps are (s)mocked', () => {
 		let messenger;
-		let mintableTribeone;
+		let mintableRwaone;
 		let resolver;
 		let rewardEscrow;
 		let flexibleStorage;
@@ -49,7 +49,7 @@ contract('TribeoneBridgeToBase (unit tests)', accounts => {
 
 			rewardEscrow = await smock.fake('contracts/interfaces/IRewardEscrowV2.sol:IRewardEscrowV2');
 
-			mintableTribeone = await smock.fake('MintableTribeone');
+			mintableRwaone = await smock.fake('MintableRwaone');
 			flexibleStorage = await smock.fake('FlexibleStorage');
 			feePool = await smock.fake('FeePool');
 			issuer = await smock.fake('Issuer');
@@ -61,8 +61,8 @@ contract('TribeoneBridgeToBase (unit tests)', accounts => {
 				[
 					'FlexibleStorage',
 					'ext:Messenger',
-					'Tribeone',
-					'base:TribeoneBridgeToOptimism',
+					'Rwaone',
+					'base:RwaoneBridgeToOptimism',
 					'RewardEscrowV2',
 					'FeePool',
 					'Issuer',
@@ -72,7 +72,7 @@ contract('TribeoneBridgeToBase (unit tests)', accounts => {
 				[
 					flexibleStorage.address,
 					messenger.address,
-					mintableTribeone.address,
+					mintableRwaone.address,
 					snxBridgeToOptimism,
 					rewardEscrow.address,
 					feePool.address,
@@ -86,13 +86,13 @@ contract('TribeoneBridgeToBase (unit tests)', accounts => {
 
 		beforeEach(async () => {
 			// stubs
-			mintableTribeone.burnSecondary.returns(() => {});
-			mintableTribeone.mintSecondary.returns(() => {});
-			mintableTribeone.balanceOf.returns(() => web3.utils.toWei('1'));
-			mintableTribeone.transferableTribeone.returns(() => web3.utils.toWei('1'));
-			messenger.sendMessage.returns(() => {});
+			mintableRwaone.burnSecondary.returns(() => { });
+			mintableRwaone.mintSecondary.returns(() => { });
+			mintableRwaone.balanceOf.returns(() => web3.utils.toWei('1'));
+			mintableRwaone.transferableRwaone.returns(() => web3.utils.toWei('1'));
+			messenger.sendMessage.returns(() => { });
 			messenger.xDomainMessageSender.returns(() => snxBridgeToOptimism);
-			rewardEscrow.importVestingEntries.returns(() => {});
+			rewardEscrow.importVestingEntries.returns(() => { });
 			flexibleStorage.getUIntValue.returns(() => '3000000');
 		});
 
@@ -100,7 +100,7 @@ contract('TribeoneBridgeToBase (unit tests)', accounts => {
 			let instance;
 			const escrowedAmount = 100;
 			beforeEach(async () => {
-				instance = await artifacts.require('TribeoneBridgeToBase').new(owner, resolver.address);
+				instance = await artifacts.require('RwaoneBridgeToBase').new(owner, resolver.address);
 				await instance.rebuildCache();
 			});
 
@@ -167,7 +167,7 @@ contract('TribeoneBridgeToBase (unit tests)', accounts => {
 			describe('withdraw', () => {
 				describe('failure modes', () => {
 					it('does not work when the user has less trasferable snx than the withdrawal amount', async () => {
-						mintableTribeone.transferableTribeone.returns(() => '0');
+						mintableRwaone.transferableRwaone.returns(() => '0');
 						await assert.revert(instance.withdraw('1'), 'Not enough transferable wHAKA');
 					});
 					it('does not work when initiation has been suspended', async () => {
@@ -186,9 +186,9 @@ contract('TribeoneBridgeToBase (unit tests)', accounts => {
 					});
 
 					it('then wHAKA is burned via mintableSyntetix.burnSecondary', async () => {
-						expect(mintableTribeone.burnSecondary).to.have.length(0);
-						mintableTribeone.burnSecondary.returnsAtCall(0, user1);
-						mintableTribeone.burnSecondary.returnsAtCall(1, amount);
+						expect(mintableRwaone.burnSecondary).to.have.length(0);
+						mintableRwaone.burnSecondary.returnsAtCall(0, user1);
+						mintableRwaone.burnSecondary.returnsAtCall(1, amount);
 					});
 
 					it('the message is relayed', async () => {
@@ -216,7 +216,7 @@ contract('TribeoneBridgeToBase (unit tests)', accounts => {
 			describe('withdrawTo', () => {
 				describe('failure modes', () => {
 					it('does not work when the user has less trasferable snx than the withdrawal amount', async () => {
-						mintableTribeone.transferableTribeone.returns(() => '0');
+						mintableRwaone.transferableRwaone.returns(() => '0');
 						await assert.revert(
 							instance.withdrawTo(randomAddress, '1'),
 							'Not enough transferable wHAKA'
@@ -238,9 +238,9 @@ contract('TribeoneBridgeToBase (unit tests)', accounts => {
 					});
 
 					it('then wHAKA is burned via mintableSyntetix.burnSecondary to the specified address', async () => {
-						expect(mintableTribeone.burnSecondary).to.have.length(0);
-						mintableTribeone.burnSecondary.returnsAtCall(0, user1);
-						mintableTribeone.burnSecondary.returnsAtCall(1, amount);
+						expect(mintableRwaone.burnSecondary).to.have.length(0);
+						mintableRwaone.burnSecondary.returnsAtCall(0, user1);
+						mintableRwaone.burnSecondary.returnsAtCall(1, amount);
 					});
 
 					it('the message is relayed', async () => {
@@ -305,10 +305,10 @@ contract('TribeoneBridgeToBase (unit tests)', accounts => {
 						});
 					});
 
-					it('then wHAKA is minted via MintableTribeone.mintSecondary', async () => {
-						expect(mintableTribeone.mintSecondary).to.have.length(0);
-						mintableTribeone.mintSecondary.returnsAtCall(0, user1);
-						mintableTribeone.mintSecondary.returnsAtCall(1, finalizeDepositAmount);
+					it('then wHAKA is minted via MintableRwaone.mintSecondary', async () => {
+						expect(mintableRwaone.mintSecondary).to.have.length(0);
+						mintableRwaone.mintSecondary.returnsAtCall(0, user1);
+						mintableRwaone.mintSecondary.returnsAtCall(1, finalizeDepositAmount);
 					});
 				});
 			});
@@ -356,9 +356,9 @@ contract('TribeoneBridgeToBase (unit tests)', accounts => {
 						});
 					});
 
-					it('then wHAKA is minted via MintbaleTribeone.mintSecondary', async () => {
-						expect(mintableTribeone.mintSecondaryRewards).to.have.length(0);
-						mintableTribeone.mintSecondaryRewards.returnsAtCall(0, finalizeRewardDepositAmount);
+					it('then wHAKA is minted via MintbaleRwaone.mintSecondary', async () => {
+						expect(mintableRwaone.mintSecondaryRewards).to.have.length(0);
+						mintableRwaone.mintSecondaryRewards.returnsAtCall(0, finalizeRewardDepositAmount);
 					});
 				});
 			});
@@ -399,7 +399,7 @@ contract('TribeoneBridgeToBase (unit tests)', accounts => {
 						assert.eventEqual(finalizeTx, 'FeePeriodCloseFinalized', ['1', '2']);
 					});
 
-					it('then wHAKA is minted via MintableTribeone.mintSecondary', async () => {
+					it('then wHAKA is minted via MintableRwaone.mintSecondary', async () => {
 						expect(feePool.closeSecondary).to.have.length(0);
 						feePool.closeSecondary.returnsAtCall(0, '1');
 						feePool.closeSecondary.returnsAtCall(1, '2');

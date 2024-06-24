@@ -17,11 +17,11 @@ describe('inflationDiversion() integration tests (L1, L2)', () => {
 		RewardsDistributionL1,
 		RewardsDistributionL2,
 		RewardEscrowV2L2,
-		Tribeone,
+		Rwaone,
 		SupplySchedule,
-		TribeoneL2,
-		TribeoneBridgeToOptimism,
-		TribeoneBridgeEscrow,
+		RwaoneL2,
+		RwaoneBridgeToOptimism,
+		RwaoneBridgeEscrow,
 		TradingRewards;
 
 	let depositReceipt;
@@ -34,10 +34,10 @@ describe('inflationDiversion() integration tests (L1, L2)', () => {
 		before('target contracts and users', () => {
 			({
 				RewardsDistribution: RewardsDistributionL1,
-				Tribeone,
+				Rwaone,
 				SupplySchedule,
-				TribeoneBridgeEscrow,
-				TribeoneBridgeToOptimism,
+				RwaoneBridgeEscrow,
+				RwaoneBridgeToOptimism,
 			} = ctx.l1.contracts);
 
 			({
@@ -45,7 +45,7 @@ describe('inflationDiversion() integration tests (L1, L2)', () => {
 				TradingRewards,
 				FeePool: FeePoolL2,
 				RewardEscrowV2: RewardEscrowV2L2,
-				Tribeone: TribeoneL2,
+				Rwaone: RwaoneL2,
 			} = ctx.l2.contracts);
 
 			ownerL1 = ctx.l1.users.owner;
@@ -56,20 +56,20 @@ describe('inflationDiversion() integration tests (L1, L2)', () => {
 			let escrowBalance;
 
 			before('record values', async () => {
-				escrowBalance = await Tribeone.balanceOf(TribeoneBridgeEscrow.address);
+				escrowBalance = await Rwaone.balanceOf(RwaoneBridgeEscrow.address);
 
-				rewardEscrowBalanceL2 = await TribeoneL2.balanceOf(RewardEscrowV2L2.address);
-				tradingRewardsBalanceL2 = await TribeoneL2.balanceOf(TradingRewards.address);
+				rewardEscrowBalanceL2 = await RwaoneL2.balanceOf(RewardEscrowV2L2.address);
+				tradingRewardsBalanceL2 = await RwaoneL2.balanceOf(TradingRewards.address);
 				currentFeePeriodRewards = (await FeePoolL2.recentFeePeriods(0)).rewardsToDistribute;
 			});
 
 			before('add new distributions', async () => {
-				Tribeone = Tribeone.connect(ownerL1);
+				Rwaone = Rwaone.connect(ownerL1);
 				RewardsDistributionL1 = RewardsDistributionL1.connect(ownerL1);
 				RewardsDistributionL2 = RewardsDistributionL2.connect(ownerL2);
 
 				let tx = await RewardsDistributionL1.addRewardDistribution(
-					TribeoneBridgeToOptimism.address,
+					RwaoneBridgeToOptimism.address,
 					rewardsToDeposit
 				);
 				await tx.wait();
@@ -83,7 +83,7 @@ describe('inflationDiversion() integration tests (L1, L2)', () => {
 
 			it('populates the distributions array accordingly on both L1 and L2', async () => {
 				let distribution = await RewardsDistributionL1.distributions(0);
-				assert.equal(distribution.destination, TribeoneBridgeToOptimism.address);
+				assert.equal(distribution.destination, RwaoneBridgeToOptimism.address);
 				assert.bnEqual(distribution.amount, rewardsToDeposit);
 
 				distribution = await RewardsDistributionL2.distributions(0);
@@ -93,15 +93,15 @@ describe('inflationDiversion() integration tests (L1, L2)', () => {
 
 			describe('when mint is invoked', () => {
 				before('mint', async () => {
-					Tribeone = Tribeone.connect(ownerL1);
+					Rwaone = Rwaone.connect(ownerL1);
 					SupplySchedule = SupplySchedule.connect(ownerL1);
 					await SupplySchedule.setInflationAmount(inflationAmount);
-					const tx = await Tribeone.mint();
+					const tx = await Rwaone.mint();
 					depositReceipt = await tx.wait();
 				});
 
 				it('increases the escrow balance', async () => {
-					const newEscrowBalance = await Tribeone.balanceOf(TribeoneBridgeEscrow.address);
+					const newEscrowBalance = await Rwaone.balanceOf(RwaoneBridgeEscrow.address);
 
 					assert.bnEqual(newEscrowBalance, escrowBalance.add(rewardsToDeposit));
 				});
@@ -120,14 +120,14 @@ describe('inflationDiversion() integration tests (L1, L2)', () => {
 
 					it('increases the TradingRewards balance on L2', async () => {
 						assert.bnEqual(
-							await TribeoneL2.balanceOf(TradingRewards.address),
+							await RwaoneL2.balanceOf(TradingRewards.address),
 							tradingRewardsBalanceL2.add(tradingRewards)
 						);
 					});
 
 					it('increases the RewardEscrowV2 balance on L2', async () => {
 						assert.bnEqual(
-							await TribeoneL2.balanceOf(RewardEscrowV2L2.address),
+							await RwaoneL2.balanceOf(RewardEscrowV2L2.address),
 							rewardEscrowBalanceL2.add(rewardsToDistribute)
 						);
 					});

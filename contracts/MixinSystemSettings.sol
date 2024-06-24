@@ -5,7 +5,7 @@ import "./MixinResolver.sol";
 // Internal references
 import "./interfaces/IFlexibleStorage.sol";
 
-// https://docs.tribeone.io/contracts/source/contracts/mixinsystemsettings
+// https://docs.rwaone.io/contracts/source/contracts/mixinsystemsettings
 contract MixinSystemSettings is MixinResolver {
     // must match the one defined SystemSettingsLib, defined in both places due to sol v0.5 limitations
     bytes32 internal constant SETTING_CONTRACT_NAME = "SystemSettings";
@@ -56,11 +56,18 @@ contract MixinSystemSettings is MixinResolver {
     bytes32 internal constant SETTING_ATOMIC_VOLATILITY_CONSIDERATION_WINDOW = "atomicVolConsiderationWindow";
     bytes32 internal constant SETTING_ATOMIC_VOLATILITY_UPDATE_THRESHOLD = "atomicVolUpdateThreshold";
     bytes32 internal constant SETTING_PURE_CHAINLINK_PRICE_FOR_ATOMIC_SWAPS_ENABLED = "pureChainlinkForAtomicsEnabled";
-    bytes32 internal constant SETTING_CROSS_TRIBEONE_TRANSFER_ENABLED = "crossChainTribeTransferEnabled";
+    bytes32 internal constant SETTING_CROSS_RWAONE_TRANSFER_ENABLED = "crossChainTribeTransferEnabled";
 
     bytes32 internal constant CONTRACT_FLEXIBLESTORAGE = "FlexibleStorage";
 
-    enum CrossDomainMessageGasLimits {Deposit, Escrow, Reward, Withdrawal, CloseFeePeriod, Relay}
+    enum CrossDomainMessageGasLimits {
+        Deposit,
+        Escrow,
+        Reward,
+        Withdrawal,
+        CloseFeePeriod,
+        Relay
+    }
 
     struct DynamicFeeConfig {
         uint threshold;
@@ -304,7 +311,7 @@ contract MixinSystemSettings is MixinResolver {
         return
             flexibleStorage().getUIntValue(
                 SETTING_CONTRACT_NAME,
-                keccak256(abi.encodePacked(SETTING_CROSS_TRIBEONE_TRANSFER_ENABLED, currencyKey))
+                keccak256(abi.encodePacked(SETTING_CROSS_RWAONE_TRANSFER_ENABLED, currencyKey))
             );
     }
 
