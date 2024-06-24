@@ -464,8 +464,8 @@ const rebuildCaches = async ({ deployer, runStep, implementations }) => {
 
 	const requireCache = [];
 	for (const implementation of implementations) {
-		// const isCached = await implementation.target.isResolverCached();
-		if (/* !isCached */ false) {
+		const isCached = await implementation.target.isResolverCached();
+		if (!isCached ) {
 			requireCache.push(implementation.target.address);
 		}
 	}
@@ -585,9 +585,7 @@ const configureMarket = async ({
 	};
 
 	for (const setting in settings) {
-		if (setting == 'maxFundingVelocity' || setting == 'skewScale') {
-			continue;
-		}
+		
 		
 		const capSetting = setting.charAt(0).toUpperCase() + setting.slice(1);
 		const value = settings[setting];

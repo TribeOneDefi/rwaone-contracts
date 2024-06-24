@@ -149,6 +149,7 @@ const defaults = {
 		equities: w3utils.toWei('0.003'),
 		crypto: w3utils.toWei('0.01'),
 		index: w3utils.toWei('0.01'),
+		realEstate:w3utils.toWei('0.01')
 	},
 	EXCHANGE_DYNAMIC_FEE_THRESHOLD: w3utils.toWei('0.0025'),
 	EXCHANGE_DYNAMIC_FEE_WEIGHT_DECAY: w3utils.toWei('0.95'), // dynamic fee weight decay for each round

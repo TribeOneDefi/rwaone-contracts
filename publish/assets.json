@@ -5,6 +5,43 @@
 		"sign": "",
 		"description": "Bayc Coin"
 	},
+	"ATLANTA": {
+		"asset": "ATLANTA",
+		"category": "realEstate",
+		"sign": "",
+		"description": "Atlanta"
+	},
+	"LOSANGLES": {
+		"asset": "LOSANGLES",
+		"category": "realEstate",
+		"sign": "",
+		"description": "LosAngles"
+	},
+	"BOSTON": {
+		"asset": "BOSTON",
+		"category": "realEstate",
+		"sign": "",
+		"description": "Boston"
+	},
+	"NEWYORK": {
+		"asset": "NEWYORK",
+		"category": "realEstate",
+		"sign": "",
+		"description": "NewYork"
+	},
+
+	"NVDA": {
+		"asset": "NVDA",
+		"category": "equities",
+		"sign": "",
+		"description": "NVIDIA Corporation"
+	},
+	"PAX": {
+		"asset": "PAX",
+		"category": "commodity",
+		"sign": "",
+		"description": "PAX"
+	},
 	"USD": {
 		"asset": "USD",
 		"category": "forex",

@@ -50,13 +50,13 @@ const performSafetyChecks = require('./perform-safety-checks');
 const rebuildResolverCaches = require('./rebuild-resolver-caches');
 const rebuildLegacyResolverCaches = require('./rebuild-legacy-resolver-caches');
 const systemAndParameterCheck = require('./system-and-parameter-check');
-// const takeDebtSnapshotWhenRequired = require('./take-debt-snapshot-when-required');
 
 const DEFAULTS = {
 	priorityGasPrice: '1',
 	debtSnapshotMaxDeviation: 0.01, // a 1 percent deviation will trigger a snapshot
 	network: 'sepolia-arbitrum',
 	buildPath: path.join(__dirname, '..', '..', '..', '..', BUILD_FOLDER),
+	providerUrl:'https://arb-sepolia.g.alchemy.com/v2/9ENHYjUcOJ7YRs_N1SULaQUTewK_nwkt'
 };
 
 const deploy = async ({
@@ -75,7 +75,7 @@ const deploy = async ({
 	network = DEFAULTS.network,
 	privateKey,
 	signer,
-	providerUrl,
+	providerUrl=DEFAULTS.providerUrl,
 	provider,
 	skipFeedChecks = false,
 	specifyContracts,

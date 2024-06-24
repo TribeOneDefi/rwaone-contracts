@@ -15,8 +15,53 @@
 		"subclass": "MultiCollateralTribe"
 	},
 	{
-		"name": "hBAYC",
-		"asset": "BAYC",
+		"name": "hJPY",
+		"asset": "JPY",
+		"subclass": "MultiCollateralTribe"
+	},
+	{
+		"name": "hXAU",
+		"asset": "XAU",
+		"subclass": "MultiCollateralTribe"
+	},
+	{
+		"name": "hNVDA",
+		"asset": "NVDA",
+		"subclass": "MultiCollateralTribe"
+	},
+	{
+		"name": "hTSLA",
+		"asset": "TSLA",
+		"subclass": "MultiCollateralTribe"
+	},
+	{
+		"name": "hPAX",
+		"asset": "PAX",
+		"subclass": "MultiCollateralTribe"
+	},
+	{
+		"name": "hEUR",
+		"asset": "EUR",
+		"subclass": "MultiCollateralTribe"
+	},
+	{
+		"name": "hNEWYORK",
+		"asset": "NEWYORK",
+		"subclass": "MultiCollateralTribe"
+	},
+	{
+		"name": "hATLANTA",
+		"asset": "ATLANTA",
+		"subclass": "MultiCollateralTribe"
+	},
+	{
+		"name": "hLOSANGLES",
+		"asset": "LOSANGLES",
+		"subclass": "MultiCollateralTribe"
+	},
+	{
+		"name": "hBOSTON",
+		"asset": "BOSTON",
 		"subclass": "MultiCollateralTribe"
 	}
 ]

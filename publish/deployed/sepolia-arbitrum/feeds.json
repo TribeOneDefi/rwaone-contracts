@@ -5,18 +5,54 @@
 	},
 	"ETH": {
 		"asset": "ETH",
-		"feed": "0xd30e2101a97dcbAeBCBC04F14C3f624E67A35165"
+		"feed": "0xbA8389bf382cd68FDf063353188aBc9426F08343"
 	},
 	"BTC": {
 		"asset": "BTC",
-		"feed": "0x56a43EB56Da12C0dc1D972ACb089c06a5dEF8e69"
+		"feed": "0x5b08AE871145cc3e361deA6F4201597553757A55"
 	},
 	"LINK": {
 		"asset": "LINK",
-		"feed": "0x0FB99723Aee6f420beAD13e6bBB79b7E6F034298"
+		"feed": "0x5c9E0b41F5BcEF0329140A1FCb881746522B1D1F"
 	},
-	"BAYC": {
-		"asset": "BAYC",
-		"feed": "0x13aae33b4a655bE6587b06a057fdB9481a4fA084"
+	"JPY": {
+		"asset": "JPY",
+		"feed": "0xE5F92921e77254040dd0C5B3FA110a0384AD26a9"
+	},
+	"XAU": {
+		"asset": "XAU",
+		"feed": "0x923E0689B04d99Fb8E906487f1da1027322eC78C"
+	},
+	"NVDA": {
+		"asset": "NVDA",
+		"feed": "0x982EbF77F9ADbFEE41086044FdeEecbed64d0444"
+	},
+	"PAX": {
+		"asset": "PAX",
+		"feed": "0x49ed45c994440A30eE56f7615BD4Dd5d71690630"
+	},
+	"TSLA": {
+		"asset": "TSLA",
+		"feed": "0x05A4c72d785566c524A048aAeC0412661F04bAaB"
+	},
+	"EUR": {
+		"asset": "EUR",
+		"feed": "0x2c3a65fB56469Ee5D3F16a24A1F0D0C3E3aBA268"
+	},
+	"ATLANTA": {
+		"asset": "ATLANTA",
+		"feed": "0x79aB321d1e7a6836962ab247ae5E3EbA843975Cf"
+	},
+	"BOSTON": {
+		"asset": "BOSTON",
+		"feed": "0x74E826D6BC543e83CB8799BAAB6Fcfd4CeBfD928"
+	},
+	"LOSANGLES": {
+		"asset": "LOSANGLES",
+		"feed": "0x2840457f75BF6eF8417DE95C7e317CA11C6FcCEB"
+	},
+	"NEWYORK": {
+		"asset": "NEWYORK",
+		"feed": "0x472cD38dD04E6971E94d0e820AFb3c18ec8616b9"
 	}
 }
