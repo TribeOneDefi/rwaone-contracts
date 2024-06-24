@@ -24,7 +24,10 @@
 		"test:etherscan": "node test/etherscan",
 		"test:publish": "concurrently --kill-others --success first \"anvil --prune-history > /dev/null\" \"wait-port 127.0.0.1:8545 && mocha test/publish --bail --timeout 600000\"",
 		"test:integration:l1": "hardhat test:integration:l1 --compile --deploy",
-		"test:integration:l2": "hardhat test:integration:l2 --compile --deploy"
+		"test:integration:l2": "hardhat test:integration:l2 --compile --deploy",
+		"deploy": "node publish deploy -n sepolia-arbitrum -d publish/deployed/sepolia-arbitrum -g 20 --ignore-safety-checks",
+		"verify": "node publish verify -n sepolia-arbitrum",
+		"version": "node publish versions-update -v v3.0.0-alpha"
 	},
 	"husky": {
 		"hooks": {

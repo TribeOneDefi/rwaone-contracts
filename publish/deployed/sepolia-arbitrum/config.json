@@ -1,302 +1,572 @@
 {
 	"AddressResolver": {
-		"deploy": false
+		"deploy": true
 	},
 	"ReadProxyAddressResolver": {
-		"deploy": false
+		"deploy": true
 	},
 	"DebtCache": {
-		"deploy": false
+		"deploy": true
 	},
 	"DelegateApprovals": {
-		"deploy": false
+		"deploy": true
 	},
 	"DelegateApprovalsEternalStorage": {
-		"deploy": false
+		"deploy": true
 	},
 	"Depot": {
-		"deploy": false
+		"deploy": true
 	},
 	"EscrowChecker": {
-		"deploy": false
+		"deploy": true
 	},
 	"ExchangeRates": {
-		"deploy": false
+		"deploy": true
 	},
 	"Exchanger": {
-		"deploy": false
+		"deploy": true
 	},
 	"ExchangeState": {
-		"deploy": false
+		"deploy": true
 	},
 	"FeePool": {
-		"deploy": false
+		"deploy": true
 	},
 	"FeePoolState": {
-		"deploy": false
+		"deploy": true
 	},
 	"FeePoolEternalStorage": {
-		"deploy": false
+		"deploy": true
 	},
 	"Issuer": {
-		"deploy": false
+		"deploy": true
 	},
 	"RewardEscrow": {
-		"deploy": false
+		"deploy": true
 	},
 	"RewardsDistribution": {
-		"deploy": false
+		"deploy": true
 	},
 	"SupplySchedule": {
-		"deploy": false
+		"deploy": true
 	},
 	"Tribeone": {
-		"deploy": false
+		"deploy": true
 	},
 	"TribeoneEscrow": {
-		"deploy": false
+		"deploy": true
 	},
 	"TribeoneState": {
-		"deploy": false
+		"deploy": true
 	},
 	"SystemStatus": {
-		"deploy": false
+		"deploy": true
 	},
 	"TribeUtil": {
-		"deploy": false
+		"deploy": true
 	},
 	"DappMaintenance": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxyFeePool": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxyTribeone": {
-		"deploy": false
+		"deploy": true
 	},
 	"SafeDecimalMath": {
-		"deploy": false
+		"deploy": true
 	},
 	"Math": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStateTribeone": {
-		"deploy": false
+		"deploy": true
 	},
 	"FlexibleStorage": {
-		"deploy": false
+		"deploy": true
 	},
 	"SystemSettings": {
-		"deploy": false
+		"deploy": true
 	},
 	"TradingRewards": {
-		"deploy": false
+		"deploy": true
 	},
 	"CollateralErc20": {
-		"deploy": false
+		"deploy": true
 	},
 	"CollateralEth": {
-		"deploy": false
+		"deploy": true
 	},
 	"CollateralManager": {
-		"deploy": false
+		"deploy": true
 	},
 	"CollateralManagerState": {
-		"deploy": false
+		"deploy": true
 	},
 	"CollateralShort": {
-		"deploy": false
+		"deploy": true
 	},
 	"CollateralUtil": {
-		"deploy": false
+		"deploy": true
 	},
 	"RewardEscrowV2": {
-		"deploy": false
+		"deploy": true
 	},
 	"RewardEscrowV2Frozen": {
-		"deploy": false
+		"deploy": true
 	},
 	"TribeoneBridgeToOptimism": {
-		"deploy": false
+		"deploy": true
 	},
 	"VirtualTribeMastercopy": {
-		"deploy": false
+		"deploy": true
 	},
 	"TribeoneBridgeEscrow": {
-		"deploy": false
+		"deploy": true
 	},
 	"MockToken": {
-		"deploy": false
+		"deploy": true
 	},
 	"EtherWrapper": {
-		"deploy": false
+		"deploy": true
 	},
 	"NativeEtherWrapper": {
-		"deploy": false
+		"deploy": true
 	},
 	"WrapperFactory": {
-		"deploy": false
+		"deploy": true
 	},
 	"OwnerRelayOnEthereum": {
-		"deploy": false
+		"deploy": true
 	},
 	"TribeRedeemer": {
-		"deploy": false
+		"deploy": true
 	},
 	"SystemSettingsLib": {
-		"deploy": false
+		"deploy": true
 	},
 	"TribeoneDebtShare": {
-		"deploy": false
+		"deploy": true
 	},
 	"ExchangeCircuitBreaker": {
-		"deploy": false
+		"deploy": true
 	},
 	"SignedSafeDecimalMath": {
-		"deploy": false
+		"deploy": true
 	},
 	"FuturesMarketManager": {
-		"deploy": false
+		"deploy": true
 	},
 	"FuturesMarketData": {
-		"deploy": false
+		"deploy": true
 	},
 	"FuturesMarketSettings": {
-		"deploy": false
+		"deploy": true
 	},
 	"OneNetAggregatorIssuedTribes": {
-		"deploy": false
+		"deploy": true
 	},
 	"OneNetAggregatorDebtRatio": {
-		"deploy": false
+		"deploy": true
 	},
 	"Liquidator": {
-		"deploy": false
+		"deploy": true
 	},
 	"LiquidatorRewards": {
-		"deploy": false
+		"deploy": true
 	},
 	"CircuitBreaker": {
-		"deploy": false
+		"deploy": true
 	},
 	"RewardEscrowV2Storage": {
-		"deploy": false
+		"deploy": true
 	},
 	"DirectIntegrationManager": {
-		"deploy": false
+		"deploy": true
 	},
 	"ExchangeSettlementLib": {
-		"deploy": false
+		"deploy": true
 	},
 	"DebtMigratorOnEthereum": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStatehUSD": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxyhUSD": {
-		"deploy": false
+		"deploy": true
 	},
 	"TribehUSD": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStatehETH": {
-		"deploy": false
+		"deploy": true
+	},
+	"ProxyhJPY": {
+		"deploy": true
+	},
+	"TribehJPY": {
+		"deploy": true
+	},
+	"TokenStatehJPY": {
+		"deploy": true
+	},
+	"TokenStatehXAU": {
+		"deploy": true
+	},
+	"ProxyhXAU": {
+		"deploy": true
+	},
+	"TribehXAU": {
+		"deploy": true
+	},
+	"TokenStatehNVDA": {
+		"deploy": true
+	},
+	"ProxyhNVDA": {
+		"deploy": true
+	},
+	"TribehNVDA": {
+		"deploy": true
 	},
 	"ProxyhETH": {
-		"deploy": false
+		"deploy": true
 	},
 	"TribehETH": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStatehBTC": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxyhBTC": {
-		"deploy": false
+		"deploy": true
 	},
 	"TribehBTC": {
-		"deploy": false
+		"deploy": true
 	},
 	"PerpsV2MarketSettings": {
-		"deploy": false
+		"deploy": true
 	},
 	"PerpsV2MarketData": {
-		"deploy": false
+		"deploy": true
 	},
 	"PerpsV2ExchangeRate": {
-		"deploy": false
+		"deploy": true
 	},
 	"PerpsV2ProxyETHPERP": {
-		"deploy": false
+		"deploy": true
 	},
 	"PerpsV2MarketStateETHPERP": {
-		"deploy": false
+		"deploy": true
 	},
 	"PerpsV2MarketETHPERP": {
-		"deploy": false
+		"deploy": true
+	},
+	"PerpsV2ProxyJPYPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketStateJPYPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketJPYPERP": {
+		"deploy": true
+	},
+	"PerpsV2ProxyXAUPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketStateXAUPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketXAUPERP": {
+		"deploy": true
+	},
+	"PerpsV2ProxyNVDAPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketStateNVDAPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketNVDAPERP": {
+		"deploy": true
 	},
 	"PerpsV2ProxyBTCPERP": {
-		"deploy": false
+		"deploy": true
 	},
 	"PerpsV2MarketStateBTCPERP": {
-		"deploy": false
+		"deploy": true
 	},
 	"PerpsV2MarketBTCPERP": {
-		"deploy": false
+		"deploy": true
 	},
 	"PerpsV2MarketLiquidateETHPERP": {
-		"deploy": false
+		"deploy": true
 	},
 	"PerpsV2DelayedIntentETHPERP": {
-		"deploy": false
+		"deploy": true
 	},
 	"PerpsV2DelayedExecutionETHPERP": {
-		"deploy": false
+		"deploy": true
+	},
+	"PerpsV2MarketLiquidateJPYPERP": {
+		"deploy": true
+	},
+	"PerpsV2DelayedIntentJPYPERP": {
+		"deploy": true
+	},
+	"PerpsV2DelayedExecutionJPYPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketLiquidateXAUPERP": {
+		"deploy": true
+	},
+	"PerpsV2DelayedIntentXAUPERP": {
+		"deploy": true
+	},
+	"PerpsV2DelayedExecutionXAUPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketLiquidateNVDAPERP": {
+		"deploy": true
+	},
+	"PerpsV2DelayedIntentNVDAPERP": {
+		"deploy": true
+	},
+	"PerpsV2DelayedExecutionNVDAPERP": {
+		"deploy": true
 	},
 	"PerpsV2MarketLiquidateBTCPERP": {
-		"deploy": false
+		"deploy": true
 	},
 	"PerpsV2DelayedIntentBTCPERP": {
-		"deploy": false
+		"deploy": true
 	},
 	"PerpsV2DelayedExecutionBTCPERP": {
-		"deploy": false
+		"deploy": true
 	},
 	"PerpsV2MarketViewsETHPERP": {
-		"deploy": false
+		"deploy": true
+	},
+	"PerpsV2MarketViewsJPYPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketViewsXAUPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketViewsNVDAPERP": {
+		"deploy": true
 	},
 	"PerpsV2MarketViewsBTCPERP": {
-		"deploy": false
+		"deploy": true
 	},
-	"TokenStatehBAYC": {
-		"deploy": false
+	"TokenStatehTSLA": {
+		"deploy": true
 	},
-	"ProxyhBAYC": {
-		"deploy": false
+	"ProxyhTSLA": {
+		"deploy": true
 	},
-	"TribehBAYC": {
-		"deploy": false
+	"TribehTSLA": {
+		"deploy": true
 	},
-	"PerpsV2ProxyBAYCPERP": {
-		"deploy": false
+	"PerpsV2ProxyTSLAPERP": {
+		"deploy": true
 	},
-	"PerpsV2MarketStateBAYCPERP": {
-		"deploy": false
+	"PerpsV2MarketStateTSLAPERP": {
+		"deploy": true
 	},
-	"PerpsV2MarketBAYCPERP": {
-		"deploy": false
+	"PerpsV2MarketTSLAPERP": {
+		"deploy": true
 	},
-	"PerpsV2MarketLiquidateBAYCPERP": {
-		"deploy": false
+	"PerpsV2MarketLiquidateTSLAPERP": {
+		"deploy": true
 	},
-	"PerpsV2DelayedIntentBAYCPERP": {
-		"deploy": false
+	"PerpsV2DelayedIntentTSLAPERP": {
+		"deploy": true
 	},
-	"PerpsV2DelayedExecutionBAYCPERP": {
-		"deploy": false
+	"PerpsV2DelayedExecutionTSLAPERP": {
+		"deploy": true
 	},
-	"PerpsV2MarketViewsBAYCPERP": {
-		"deploy": false
+	"PerpsV2MarketViewsTSLAPERP": {
+		"deploy": true
+	},
+	"TokenStatehEUR": {
+		"deploy": true
+	},
+	"ProxyhEUR": {
+		"deploy": true
+	},
+	"TribehEUR": {
+		"deploy": true
+	},
+	"PerpsV2ProxyEURPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketStateEURPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketEURPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketLiquidateEURPERP": {
+		"deploy": true
+	},
+	"PerpsV2DelayedIntentEURPERP": {
+		"deploy": true
+	},
+	"PerpsV2DelayedExecutionEURPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketViewsEURPERP": {
+		"deploy": true
+	},
+	"TokenStatehPAX": {
+		"deploy": true
+	},
+	"ProxyhPAX": {
+		"deploy": true
+	},
+	"TribehPAX": {
+		"deploy": true
+	},
+	"PerpsV2ProxyPAXPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketStatePAXPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketPAXPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketLiquidatePAXPERP": {
+		"deploy": true
+	},
+	"PerpsV2DelayedIntentPAXPERP": {
+		"deploy": true
+	},
+	"PerpsV2DelayedExecutionPAXPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketViewsPAXPERP": {
+		"deploy": true
+	},
+	"TokenStatehBOSTON": {
+		"deploy": true
+	},
+	"ProxyhBOSTON": {
+		"deploy": true
+	},
+	"TribehBOSTON": {
+		"deploy": true
+	},
+	"PerpsV2ProxyBOSTONPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketStateBOSTONPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketBOSTONPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketLiquidateBOSTONPERP": {
+		"deploy": true
+	},
+	"PerpsV2DelayedIntentBOSTONPERP": {
+		"deploy": true
+	},
+	"PerpsV2DelayedExecutionBOSTONPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketViewsBOSTONPERP": {
+		"deploy": true
+	},
+	"TokenStatehLOSANGLES": {
+		"deploy": true
+	},
+	"ProxyhLOSANGLES": {
+		"deploy": true
+	},
+	"TribehLOSANGLES": {
+		"deploy": true
+	},
+	"PerpsV2ProxyLOSANGLESPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketStateLOSANGLESPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketLOSANGLESPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketLiquidateLOSANGLESPERP": {
+		"deploy": true
+	},
+	"PerpsV2DelayedIntentLOSANGLESPERP": {
+		"deploy": true
+	},
+	"PerpsV2DelayedExecutionLOSANGLESPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketViewsLOSANGLESPERP": {
+		"deploy": true
+	},
+	"TokenStatehNEWYORK": {
+		"deploy": true
+	},
+	"ProxyhNEWYORK": {
+		"deploy": true
+	},
+	"TribehNEWYORK": {
+		"deploy": true
+	},
+	"PerpsV2ProxyNEWYORKPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketStateNEWYORKPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketNEWYORKPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketLiquidateNEWYORKPERP": {
+		"deploy": true
+	},
+	"PerpsV2DelayedIntentNEWYORKPERP": {
+		"deploy": true
+	},
+	"PerpsV2DelayedExecutionNEWYORKPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketViewsNEWYORKPERP": {
+		"deploy": true
+	},
+	"TribehATLANTA": {
+		"deploy": true
+	},
+	"TokenStatehATLANTA": {
+		"deploy": true
+	},
+	"ProxyhATLANTA": {
+		"deploy": true
+	},
+	"PerpsV2ProxyATLANTAPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketStateATLANTAPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketATLANTAPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketLiquidateATLANTAPERP": {
+		"deploy": true
+	},
+	"PerpsV2DelayedIntentATLANTAPERP": {
+		"deploy": true
+	},
+	"PerpsV2DelayedExecutionATLANTAPERP": {
+		"deploy": true
+	},
+	"PerpsV2MarketViewsATLANTAPERP": {
+		"deploy": true
 	}
 }
