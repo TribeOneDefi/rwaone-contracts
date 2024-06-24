@@ -9,7 +9,7 @@ const { prepareSmocks } = require('../contracts/helpers');
 const VirtualTribe = artifacts.require('VirtualTribe');
 
 // note: cannot use fat-arrow here otherwise this function will be bound to this outer context
-module.exports = function({ accounts }) {
+module.exports = function ({ accounts }) {
 	beforeEach(async () => {
 		({ mocks: this.mocks, resolver: this.resolver } = await prepareSmocks({
 			owner: accounts[1],
@@ -20,7 +20,7 @@ module.exports = function({ accounts }) {
 
 	return {
 		// note: use fat-arrow to persist context rather
-		whenInstantiated: ({ amount, user, tribe = 'hETH' }, cb) => {
+		whenInstantiated: ({ amount, user, tribe = 'rETH' }, cb) => {
 			describe(`when instantiated for user ${user.slice(0, 7)}`, () => {
 				beforeEach(async () => {
 					this.instance = await VirtualTribe.new();

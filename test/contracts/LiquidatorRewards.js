@@ -14,7 +14,7 @@ const { artifacts } = require('hardhat');
 const { toUnit, fastForward } = require('../utils')();
 
 contract('LiquidatorRewards', accounts => {
-	const [sAUD, sEUR, wRWAX, hETH, ETH] = ['sAUD', 'sEUR', 'wRWAX', 'hETH', 'ETH'].map(toBytes32);
+	const [sAUD, sEUR, wRWAX, rETH, ETH] = ['sAUD', 'sEUR', 'wRWAX', 'rETH', 'ETH'].map(toBytes32);
 	const [, owner, , , stakingAccount1, stakingAccount2, mockRwaone] = accounts;
 
 	let addressResolver,
@@ -61,7 +61,7 @@ contract('LiquidatorRewards', accounts => {
 	addSnapshotBeforeRestoreAfterEach();
 
 	before(async () => {
-		tribes = ['rUSD', 'sAUD', 'sEUR', 'hETH'];
+		tribes = ['rUSD', 'sAUD', 'sEUR', 'rETH'];
 		({
 			AddressResolver: addressResolver,
 			CircuitBreaker: circuitBreaker,
@@ -95,7 +95,7 @@ contract('LiquidatorRewards', accounts => {
 		// use implementation ABI on the proxy address to simplify calling
 		rwaone = await artifacts.require('Rwaone').at(tribeetixProxy.address);
 
-		await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, hETH, ETH]);
+		await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, rETH, ETH]);
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
@@ -105,7 +105,7 @@ contract('LiquidatorRewards', accounts => {
 		await updateAggregatorRates(
 			exchangeRates,
 			circuitBreaker,
-			[sAUD, sEUR, wRWAX, hETH],
+			[sAUD, sEUR, wRWAX, rETH],
 			['0.5', '1.25', '0.1', '200'].map(toUnit)
 		);
 		await debtCache.takeDebtSnapshot();

@@ -111,7 +111,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 
 	const feeds = [
 		{ assetId: baseAsset, feedId: toBytes32('feed-hBTC') },
-		{ assetId: toBytes32('hETH'), feedId: toBytes32('feed-hETH') },
+		{ assetId: toBytes32('rETH'), feedId: toBytes32('feed-rETH') },
 	];
 
 	const defaultFeedId = feeds[0].feedId;
@@ -208,7 +208,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'hBTC', 'hETH'],
+			tribes: ['rUSD', 'hBTC', 'rETH'],
 			contracts: [
 				'FuturesMarketManager',
 				{ contract: 'PerpsV2MarketStateBTC', properties: { perpSuffix: marketKeySuffix } },
@@ -6840,7 +6840,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 					await perpsV2MarketHelper.fillPriceWithMeta(toUnit('1'), priceImpactDelta, 0)
 				)[1];
 				await perpsV2Market.modifyPosition(toUnit('1'), desiredFillPrice, { from: trader });
-				// base rate of hETH is 100 from shared setup above
+				// base rate of rETH is 100 from shared setup above
 				await setPrice(baseAsset, toUnit('300'), false);
 			});
 
@@ -6855,7 +6855,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 					await perpsV2MarketHelper.fillPriceWithMeta(toUnit('1'), priceImpactDelta, 0)
 				)[1];
 				await perpsV2Market.modifyPosition(toUnit('1'), desiredFillPrice, { from: trader });
-				// base rate of hETH is 100 from shared setup above
+				// base rate of rETH is 100 from shared setup above
 				await setPrice(baseAsset, toUnit('30'), false);
 			});
 

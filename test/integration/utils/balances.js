@@ -29,9 +29,9 @@ async function _getAmount({ ctx, symbol, user, amount }) {
 		await _getWETH({ ctx, user, amount });
 	} else if (symbol === 'rUSD') {
 		await _getrUSD({ ctx, user, amount });
-	} else if (symbol === 'hETHBTC') {
+	} else if (symbol === 'rETHBTC') {
 		await _getTribe({ ctx, symbol, user, amount });
-	} else if (symbol === 'hETH') {
+	} else if (symbol === 'rETH') {
 		await _getTribe({ ctx, symbol, user, amount });
 	} else if (symbol === 'ETH') {
 		await _getETHFromOtherUsers({ ctx, user, amount });

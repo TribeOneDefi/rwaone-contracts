@@ -21,8 +21,8 @@ const { toBytes32 } = require('../..');
 const { toBN } = require('web3-utils');
 
 contract('WrapperFactory', async accounts => {
-	const tribes = ['rUSD', 'hETH', 'ETH', 'wRWAX'];
-	const [hETH, ETH] = ['hETH', 'ETH'].map(toBytes32);
+	const tribes = ['rUSD', 'rETH', 'ETH', 'wRWAX'];
+	const [rETH, ETH] = ['rETH', 'ETH'].map(toBytes32);
 
 	const [, owner, , , account1] = accounts;
 
@@ -69,8 +69,8 @@ contract('WrapperFactory', async accounts => {
 		FEE_ADDRESS = await feePool.FEE_ADDRESS();
 
 		// Depot requires ETH rates
-		await setupPriceAggregators(exchangeRates, owner, [hETH, ETH]);
-		await updateAggregatorRates(exchangeRates, null, [hETH, ETH], ['1500', '1500'].map(toUnit));
+		await setupPriceAggregators(exchangeRates, owner, [rETH, ETH]);
+		await updateAggregatorRates(exchangeRates, null, [rETH, ETH], ['1500', '1500'].map(toUnit));
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
@@ -130,7 +130,7 @@ contract('WrapperFactory', async accounts => {
 			let txn;
 
 			before(async () => {
-				txn = await wrapperFactory.createWrapper(weth.address, hETH, toBytes32('TribehETH'), {
+				txn = await wrapperFactory.createWrapper(weth.address, rETH, toBytes32('TriberETH'), {
 					from: owner,
 				});
 			});
@@ -165,7 +165,7 @@ contract('WrapperFactory', async accounts => {
 
 		before(async () => {
 			// deploy a wrapper
-			const txn = await wrapperFactory.createWrapper(weth.address, hETH, toBytes32('TribehETH'), {
+			const txn = await wrapperFactory.createWrapper(weth.address, rETH, toBytes32('TriberETH'), {
 				from: owner,
 			});
 

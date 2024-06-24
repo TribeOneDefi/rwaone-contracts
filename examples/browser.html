@@ -29,14 +29,14 @@
         rwaone.toBytes32("wRWAX") ===
           "0x534e580000000000000000000000000000000000000000000000000000000000"
       );
-      const hETHContract = new ethers.Contract(
-        targets.TribehETH.address,
-        sources[targets.TribehETH.source].abi,
+      const rETHContract = new ethers.Contract(
+        targets.TriberETH.address,
+        sources[targets.TriberETH.source].abi,
         ethers.getDefaultProvider(network)
       );
-      hETHContract.totalSupply().then(unformattedTotalSupply => {
+      rETHContract.totalSupply().then(unformattedTotalSupply => {
         console.log(
-          "hETH supply",
+          "rETH supply",
           ethers.utils.formatEther(unformattedTotalSupply)
         );
       });

@@ -144,7 +144,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 	});
 
 	describe('Market management', () => {
-		const currencyKeys = ['hBTC', 'hETH'].map(toBytes32);
+		const currencyKeys = ['hBTC', 'rETH'].map(toBytes32);
 		let markets, marketProxies, proxyAddresses;
 		beforeEach(async () => {
 			markets = await Promise.all(
@@ -241,8 +241,8 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 				contract: 'MockPerpsV2Market',
 				args: [
 					futuresMarketManager.address,
-					toBytes32('hETH'),
-					toBytes32('hETH'),
+					toBytes32('rETH'),
+					toBytes32('rETH'),
 					toUnit('1000'),
 					false,
 				],
@@ -260,7 +260,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 			const market1 = markets[1];
 			const proxy1 = marketProxies[1];
 
-			const secondKey = toBytes32('hETH-2'); // different market key
+			const secondKey = toBytes32('rETH-2'); // different market key
 			const market2 = await setupContract({
 				accounts,
 				contract: 'MockPerpsV2Market',
@@ -320,7 +320,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 		});
 
 		it('Removing markets by key', async () => {
-			await futuresMarketManager.removeMarketsByKey([toBytes32('hETH')], { from: owner });
+			await futuresMarketManager.removeMarketsByKey([toBytes32('rETH')], { from: owner });
 
 			let markets = await futuresMarketManager.allMarkets();
 			assert.bnEqual(await futuresMarketManager.numMarkets(), toBN(1));
@@ -413,7 +413,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 
 			await onlyGivenAddressCanInvoke({
 				fnc: futuresMarketManager.removeMarketsByKey,
-				args: [['hETH', 'hBTC'].map(toBytes32)],
+				args: [['rETH', 'hBTC'].map(toBytes32)],
 				accounts,
 				address: owner,
 				skipPassCheck: false,
@@ -637,7 +637,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 
 		describe('when there are multiple markets', () => {
 			const individualDebt = toUnit('1000');
-			const currencyKeys = ['hBTC', 'hETH', 'sLINK'].map(toBytes32);
+			const currencyKeys = ['hBTC', 'rETH', 'sLINK'].map(toBytes32);
 			let markets, proxies;
 			beforeEach(async () => {
 				markets = await Promise.all(
@@ -1118,7 +1118,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 			const summaries = await futuresMarketManager.allMarketSummaries();
 
 			const btcSummary = summaries.find(summary => summary.marketKey === toBytes32('hBTC'));
-			const ethSummary = summaries.find(summary => summary.marketKey === toBytes32('hETH'));
+			const ethSummary = summaries.find(summary => summary.marketKey === toBytes32('rETH'));
 			const linkSummary = summaries.find(summary => summary.marketKey === toBytes32('sLINK'));
 
 			assert.equal(btcSummary.market, markets[0].address);
@@ -1150,7 +1150,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 	});
 
 	describe('Legacy Markets management', () => {
-		const currencies = ['hBTC', 'hETH'];
+		const currencies = ['hBTC', 'rETH'];
 		const currencyKeys = currencies.map(toBytes32);
 		let legacyMarkets, legacyMarketsAddress, markets, marketProxies, proxyAddresses;
 		beforeEach(async () => {

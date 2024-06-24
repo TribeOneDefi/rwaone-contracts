@@ -75,7 +75,7 @@ function itCanTrade({ ctx }) {
 			PerpsV2MarketLiquidateETHPERP,
 			PerpsV2DelayedIntentETHPERP,
 			PerpsV2DelayedExecutionETHPERP,
-			PerpsV2MarketViewhETHPERP,
+			PerpsV2MarketViewrETHPERP,
 			PerpsV2MarketStateETHPERP,
 			PerpsV2ProxyETHPERP,
 			FuturesMarketBTC,
@@ -94,7 +94,7 @@ function itCanTrade({ ctx }) {
 				PerpsV2MarketLiquidateETHPERP,
 				PerpsV2DelayedIntentETHPERP,
 				PerpsV2DelayedExecutionETHPERP,
-				PerpsV2MarketViewhETHPERP,
+				PerpsV2MarketViewrETHPERP,
 				PerpsV2MarketStateETHPERP,
 				PerpsV2ProxyETHPERP,
 				FuturesMarketBTC,
@@ -123,7 +123,7 @@ function itCanTrade({ ctx }) {
 
 			const unifiedAbis = unifyAbis([
 				PerpsV2MarketImplETHPERP,
-				PerpsV2MarketViewhETHPERP,
+				PerpsV2MarketViewrETHPERP,
 				PerpsV2MarketLiquidateETHPERP,
 				PerpsV2DelayedIntentETHPERP,
 				PerpsV2DelayedExecutionETHPERP,

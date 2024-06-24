@@ -264,8 +264,8 @@ contract('Tribe', async accounts => {
 				});
 			});
 		});
-		describe('when hETH is suspended', () => {
-			const tribe = toBytes32('hETH');
+		describe('when rETH is suspended', () => {
+			const tribe = toBytes32('rETH');
 			beforeEach(async () => {
 				await setStatus({ owner, systemStatus, section: 'Tribe', tribe, suspend: true });
 			});
@@ -289,7 +289,7 @@ contract('Tribe', async accounts => {
 						from: owner,
 					});
 				});
-				it('when transferFrom() is invoked for hETH, it works as expected', async () => {
+				it('when transferFrom() is invoked for rETH, it works as expected', async () => {
 					await rUSDProxy.transferFrom(owner, account1, amount, {
 						from: account1,
 					});
@@ -529,8 +529,8 @@ contract('Tribe', async accounts => {
 					});
 				});
 			});
-			describe('when hETH is suspended', () => {
-				const tribe = toBytes32('hETH');
+			describe('when rETH is suspended', () => {
+				const tribe = toBytes32('rETH');
 				beforeEach(async () => {
 					await setStatus({ owner, systemStatus, section: 'Tribe', tribe, suspend: true });
 				});

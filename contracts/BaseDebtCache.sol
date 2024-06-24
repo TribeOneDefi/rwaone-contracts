@@ -37,7 +37,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
     /* ========== ENCODED NAMES ========== */
 
     bytes32 internal constant rUSD = "rUSD";
-    bytes32 internal constant hETH = "hETH";
+    bytes32 internal constant rETH = "rETH";
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
@@ -247,7 +247,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         excludedDebt = longValue.add(shortValue);
 
         // 2. EtherWrapper.
-        // Subtract hETH and rUSD issued by EtherWrapper.
+        // Subtract rETH and rUSD issued by EtherWrapper.
         excludedDebt = excludedDebt.add(etherWrapper().totalIssuedTribes());
 
         // 3. WrapperFactory.

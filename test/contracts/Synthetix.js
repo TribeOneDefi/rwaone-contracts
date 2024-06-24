@@ -23,7 +23,7 @@ const {
 } = require('../..');
 
 contract('Rwaone', async accounts => {
-	const [sAUD, sEUR, rUSD, hETH] = ['sAUD', 'sEUR', 'rUSD', 'hETH'].map(toBytes32);
+	const [sAUD, sEUR, rUSD, rETH] = ['sAUD', 'sEUR', 'rUSD', 'rETH'].map(toBytes32);
 
 	const [, owner, account1, account2, account3] = accounts;
 
@@ -37,7 +37,7 @@ contract('Rwaone', async accounts => {
 		addressResolver,
 		systemStatus,
 		rUSDContract,
-		hETHContract;
+		rETHContract;
 
 	before(async () => {
 		({
@@ -51,10 +51,10 @@ contract('Rwaone', async accounts => {
 			RewardEscrowV2: rewardEscrowV2,
 			SupplySchedule: supplySchedule,
 			TriberUSD: rUSDContract,
-			TribehETH: hETHContract,
+			TriberETH: rETHContract,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'hETH', 'sEUR', 'sAUD'],
+			tribes: ['rUSD', 'rETH', 'sEUR', 'sAUD'],
 			contracts: [
 				'Rwaone',
 				'SupplySchedule',
@@ -75,7 +75,7 @@ contract('Rwaone', async accounts => {
 		// use implementation ABI on the proxy address to simplify calling
 		tribeetixProxy = await artifacts.require('Rwaone').at(tribeetixProxy.address);
 
-		await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, hETH]);
+		await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, rETH]);
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
@@ -310,16 +310,16 @@ contract('Rwaone', async accounts => {
 			describe('when Barrie invokes the exchange function on the contract', () => {
 				let txn;
 				beforeEach(async () => {
-					// Barrie has no hETH to start
-					assert.equal(await hETHContract.balanceOf(account3), '0');
+					// Barrie has no rETH to start
+					assert.equal(await rETHContract.balanceOf(account3), '0');
 
-					txn = await contractExample.exchange(rUSD, amountOfrUSD, hETH, { from: account3 });
+					txn = await contractExample.exchange(rUSD, amountOfrUSD, rETH, { from: account3 });
 				});
 				it('then Barrie has the tribes in her account', async () => {
-					assert.bnGt(await hETHContract.balanceOf(account3), toUnit('0.01'));
+					assert.bnGt(await rETHContract.balanceOf(account3), toUnit('0.01'));
 				});
 				it('and the contract has none', async () => {
-					assert.equal(await hETHContract.balanceOf(contractExample.address), '0');
+					assert.equal(await rETHContract.balanceOf(contractExample.address), '0');
 				});
 				it('and the event emitted indicates that Barrie was the destinationAddress', async () => {
 					const logs = artifacts.require('Rwaone').decodeLogs(txn.receipt.rawLogs);
@@ -330,7 +330,7 @@ contract('Rwaone', async accounts => {
 							account: contractExample.address,
 							fromCurrencyKey: rUSD,
 							fromAmount: amountOfrUSD,
-							toCurrencyKey: hETH,
+							toCurrencyKey: rETH,
 							toAddress: account3,
 						}
 					);

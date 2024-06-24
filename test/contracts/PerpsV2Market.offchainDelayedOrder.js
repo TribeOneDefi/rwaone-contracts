@@ -47,7 +47,7 @@ contract('PerpsV2Market PerpsV2MarketOffchainOrders', accounts => {
 
 	const feeds = [
 		{ assetId: baseAsset, feedId: toBytes32('feed-hBTC') },
-		{ assetId: toBytes32('hETH'), feedId: toBytes32('feed-hETH') },
+		{ assetId: toBytes32('rETH'), feedId: toBytes32('feed-rETH') },
 	];
 
 	const defaultFeedId = feeds[0].feedId;
@@ -117,7 +117,7 @@ contract('PerpsV2Market PerpsV2MarketOffchainOrders', accounts => {
 			DebtCache: debtCache,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'hBTC', 'hETH'],
+			tribes: ['rUSD', 'hBTC', 'rETH'],
 			contracts: [
 				'FuturesMarketManager',
 				'PerpsV2MarketSettings',

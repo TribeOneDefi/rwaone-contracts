@@ -22,7 +22,7 @@ let ExchangerWithFeeRecAlternatives;
 
 contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 	const [, owner] = accounts;
-	const [rUSD, hETH, iETH] = ['rUSD', 'hETH', 'iETH'].map(toBytes32);
+	const [rUSD, rETH, iETH] = ['rUSD', 'rETH', 'iETH'].map(toBytes32);
 	const maxAtomicValuePerBlock = toUnit('1000000');
 	const baseFeeRate = toUnit('0.003'); // 30bps
 	const overrideFeeRate = toUnit('0.01'); // 100bps
@@ -77,21 +77,21 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 					describe('feeRateForAtomicExchange()', () => {
 						// Mimic settings not being configured
 						behaviors.whenMockedWithTribeUintSystemSetting(
-							{ setting: 'exchangeFeeRate', tribe: hETH, value: '0' },
+							{ setting: 'exchangeFeeRate', tribe: rETH, value: '0' },
 							() => {
 								it('is set to 0', async () => {
-									assert.bnEqual(await this.instance.feeRateForAtomicExchange(rUSD, hETH), '0');
+									assert.bnEqual(await this.instance.feeRateForAtomicExchange(rUSD, rETH), '0');
 								});
 							}
 						);
 
 						// With configured override value
 						behaviors.whenMockedWithTribeUintSystemSetting(
-							{ setting: 'atomicExchangeFeeRate', tribe: hETH, value: overrideFeeRate },
+							{ setting: 'atomicExchangeFeeRate', tribe: rETH, value: overrideFeeRate },
 							() => {
 								it('is set to the configured atomic override value', async () => {
 									assert.bnEqual(
-										await this.instance.feeRateForAtomicExchange(rUSD, hETH),
+										await this.instance.feeRateForAtomicExchange(rUSD, rETH),
 										overrideFeeRate
 									);
 								});
@@ -100,21 +100,21 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 
 						// With configured base and override values
 						behaviors.whenMockedWithTribeUintSystemSetting(
-							{ setting: 'exchangeFeeRate', tribe: hETH, value: baseFeeRate },
+							{ setting: 'exchangeFeeRate', tribe: rETH, value: baseFeeRate },
 							() => {
 								it('is set to the configured base value', async () => {
 									assert.bnEqual(
-										await this.instance.feeRateForAtomicExchange(rUSD, hETH),
+										await this.instance.feeRateForAtomicExchange(rUSD, rETH),
 										baseFeeRate
 									);
 								});
 
 								behaviors.whenMockedWithTribeUintSystemSetting(
-									{ setting: 'atomicExchangeFeeRate', tribe: hETH, value: overrideFeeRate },
+									{ setting: 'atomicExchangeFeeRate', tribe: rETH, value: overrideFeeRate },
 									() => {
 										it('is set to the configured atomic override value', async () => {
 											assert.bnEqual(
-												await this.instance.feeRateForAtomicExchange(rUSD, hETH),
+												await this.instance.feeRateForAtomicExchange(rUSD, rETH),
 												overrideFeeRate
 											);
 										});
@@ -134,7 +134,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 						amountReceived,
 						fee,
 						exchangeFeeRate,
-					} = await instance.getAmountsForAtomicExchange(amountIn, rUSD, hETH);
+					} = await instance.getAmountsForAtomicExchange(amountIn, rUSD, rETH);
 					const expectedAmountReceivedWithoutFees = multiplyDecimal(amountIn, atomicRate);
 
 					assert.bnEqual(amountReceived, expectedAmountReceivedWithoutFees.sub(fee));
@@ -153,7 +153,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 					() => {
 						// No fees
 						behaviors.whenMockedWithTribeUintSystemSetting(
-							{ setting: 'exchangeFeeRate', tribe: hETH, value: '0' },
+							{ setting: 'exchangeFeeRate', tribe: rETH, value: '0' },
 							() => {
 								it('gives exact amounts when no fees are configured', async () => {
 									await assertAmountsReported({
@@ -168,7 +168,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 
 						// With fees
 						behaviors.whenMockedWithTribeUintSystemSetting(
-							{ setting: 'exchangeFeeRate', tribe: hETH, value: baseFeeRate },
+							{ setting: 'exchangeFeeRate', tribe: rETH, value: baseFeeRate },
 							() => {
 								it('gives amounts with base fee', async () => {
 									await assertAmountsReported({
@@ -180,7 +180,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 								});
 
 								behaviors.whenMockedWithTribeUintSystemSetting(
-									{ setting: 'atomicExchangeFeeRate', tribe: hETH, value: overrideFeeRate },
+									{ setting: 'atomicExchangeFeeRate', tribe: rETH, value: overrideFeeRate },
 									() => {
 										it('gives amounts with atomic override fee', async () => {
 											await assertAmountsReported({
@@ -196,7 +196,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 						);
 
 						behaviors.whenMockedWithTribeUintSystemSetting(
-							{ setting: 'atomicExchangeFeeRate', tribe: hETH, value: overrideFeeRate },
+							{ setting: 'atomicExchangeFeeRate', tribe: rETH, value: overrideFeeRate },
 							() => {
 								it('gives amounts with atomic override fee', async () => {
 									await assertAmountsReported({
@@ -215,7 +215,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 			describe('exchanging', () => {
 				describe('exchange with virtual tribes', () => {
 					const sourceCurrency = rUSD;
-					const destinationCurrency = hETH;
+					const destinationCurrency = rETH;
 
 					const getExchangeArgs = ({
 						from = owner,
@@ -304,7 +304,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 														it('emits a VirtualTribeCreated event with the correct underlying tribe and amount', async () => {
 															assert.eventEqual(txn, 'VirtualTribeCreated', {
 																tribe: this.mocks.tribe.proxy.will.returnValue,
-																currencyKey: hETH,
+																currencyKey: rETH,
 																amount: amountIn,
 																recipient: owner,
 															});
@@ -356,7 +356,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 
 				describe('exchange atomically', () => {
 					const sourceCurrency = rUSD;
-					const destinationCurrency = hETH;
+					const destinationCurrency = rETH;
 
 					const getExchangeArgs = ({
 						from = owner,
@@ -430,11 +430,11 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 										systemDestinationRate: lastRate,
 									},
 									() => {
-										behaviors.whenMockedWithVolatileTribe({ tribe: hETH, volatile: true }, () => {
+										behaviors.whenMockedWithVolatileTribe({ tribe: rETH, volatile: true }, () => {
 											describe('when tribe pricing is deemed volatile', () => {
 												it('reverts due to src volatility', async () => {
 													const args = getExchangeArgs({
-														sourceCurrencyKey: hETH,
+														sourceCurrencyKey: rETH,
 														destinationCurrencyKey: rUSD,
 													});
 													await assert.revert(
@@ -445,7 +445,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 												it('reverts due to dest volatility', async () => {
 													const args = getExchangeArgs({
 														sourceCurrencyKey: rUSD,
-														destinationCurrencyKey: hETH,
+														destinationCurrencyKey: rETH,
 													});
 													await assert.revert(
 														this.instance.exchangeAtomically(...args),
@@ -491,7 +491,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 							behaviors.whenMockedWithExchangeRatesValidity({ valid: true }, () => {
 								behaviors.whenMockedWithNoPriorExchangesToSettle(() => {
 									behaviors.whenMockedWithTribeUintSystemSetting(
-										{ setting: 'exchangeFeeRate', tribe: hETH, value: '0' },
+										{ setting: 'exchangeFeeRate', tribe: rETH, value: '0' },
 										() => {
 											const lastRate = toUnit('10');
 											const badRate = lastRate.mul(toBN(10)); // should hit deviation factor of 5x
@@ -510,22 +510,22 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 														() => {
 															beforeEach('attempt exchange', async () => {
 																this.mocks.ExchangeRates.rateWithSafetyChecks.returns(currencyKey =>
-																	currencyKey === hETH
+																	currencyKey === rETH
 																		? [badRate.toString(), true, false]
 																		: [lastRate.toString(), false, false]
 																);
 																await this.instance.exchangeAtomically(
 																	...getExchangeArgs({
 																		sourceCurrency: rUSD,
-																		destinationCurrency: hETH,
+																		destinationCurrency: rETH,
 																	})
 																);
 															});
 															it('did not issue or burn tribes', async () => {
 																assert.equal(this.mocks.rUSD.issue.calls.length, 0);
-																assert.equal(this.mocks.hETH.issue.calls.length, 0);
+																assert.equal(this.mocks.rETH.issue.calls.length, 0);
 																assert.equal(this.mocks.rUSD.burn.calls.length, 0);
-																assert.equal(this.mocks.hETH.burn.calls.length, 0);
+																assert.equal(this.mocks.rETH.burn.calls.length, 0);
 															});
 														}
 													);
@@ -535,7 +535,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 											// Dest rate invalid
 											behaviors.whenMockedEntireExchangeRateConfiguration(
 												{
-													sourceCurrency: hETH,
+													sourceCurrency: rETH,
 													atomicRate: lastRate,
 													systemSourceRate: lastRate,
 													systemDestinationRate: badRate,
@@ -546,22 +546,22 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 														() => {
 															beforeEach('attempt exchange', async () => {
 																this.mocks.ExchangeRates.rateWithSafetyChecks.returns(currencyKey =>
-																	currencyKey === hETH
+																	currencyKey === rETH
 																		? [badRate.toString(), true, false]
 																		: [lastRate.toString(), false, false]
 																);
 																await this.instance.exchangeAtomically(
 																	...getExchangeArgs({
-																		sourceCurrency: hETH,
+																		sourceCurrency: rETH,
 																		destinationCurrency: rUSD,
 																	})
 																);
 															});
 															it('did not issue or burn tribes', async () => {
 																assert.equal(this.mocks.rUSD.issue.calls.length, 0);
-																assert.equal(this.mocks.hETH.issue.calls.length, 0);
+																assert.equal(this.mocks.rETH.issue.calls.length, 0);
 																assert.equal(this.mocks.rUSD.burn.calls.length, 0);
-																assert.equal(this.mocks.hETH.burn.calls.length, 0);
+																assert.equal(this.mocks.rETH.burn.calls.length, 0);
 															});
 														}
 													);
@@ -598,7 +598,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 						});
 					});
 
-					describe('when atomic exchange occurs (rUSD -> hETH)', () => {
+					describe('when atomic exchange occurs (rUSD -> rETH)', () => {
 						const unit = toUnit('1');
 						const lastUsdRate = unit;
 						const lastEthRate = toUnit('100'); // 1 ETH -> 100 USD
@@ -611,7 +611,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 											{
 												sourceCurrency,
 
-												// we are always trading rUSD -> hETH
+												// we are always trading rUSD -> rETH
 												atomicRate: lastEthRate,
 												systemSourceRate: unit,
 												systemDestinationRate: lastEthRate,
@@ -640,7 +640,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 																					setting: setAsOverrideRate
 																						? 'atomicExchangeFeeRate'
 																						: 'exchangeFeeRate',
-																					tribe: hETH,
+																					tribe: rETH,
 																					value: exchangeFeeRate,
 																				},
 																				() => {
@@ -669,10 +669,10 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 																							amountIn
 																						);
 																					});
-																					it('issued correct amount of hETH', () => {
-																						assert.equal(this.mocks.hETH.issue.calls[0][0], owner);
+																					it('issued correct amount of rETH', () => {
+																						assert.equal(this.mocks.rETH.issue.calls[0][0], owner);
 																						assert.bnEqual(
-																							this.mocks.hETH.issue.calls[0][1],
+																							this.mocks.rETH.issue.calls[0][1],
 																							expectedAmountReceived
 																						);
 																					});
@@ -687,7 +687,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 																							.updateCachedTribeDebtsWithRates;
 																						assert.deepEqual(debtCacheUpdateCall.calls[0][0], [
 																							rUSD,
-																							hETH,
+																							rETH,
 																						]);
 																						assert.deepEqual(debtCacheUpdateCall.calls[0][1], [
 																							lastUsdRate,
@@ -711,7 +711,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 																						);
 																						assert.equal(
 																							tribeetixEmitExchangeCall.calls[0][3],
-																							hETH
+																							rETH
 																						);
 																						assert.bnEqual(
 																							tribeetixEmitExchangeCall.calls[0][4],
@@ -739,7 +739,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 																						);
 																						assert.equal(
 																							tribeetixEmitAtomicExchangeCall.calls[0][3],
-																							hETH
+																							rETH
 																						);
 																						assert.bnEqual(
 																							tribeetixEmitAtomicExchangeCall.calls[0][4],

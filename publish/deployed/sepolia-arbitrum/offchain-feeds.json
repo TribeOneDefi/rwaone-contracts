@@ -2,7 +2,7 @@
 	{
 		"kind": "pyth",
 		"oracle": "0xc74B562Fd95AF1aEaAC0C5E78B5186f1F522587A",
-		"asset": "hETH",
+		"asset": "rETH",
 		"feedId": "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace"
 	},
 	{

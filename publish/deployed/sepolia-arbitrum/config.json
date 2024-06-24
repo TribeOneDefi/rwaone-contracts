@@ -200,7 +200,7 @@
 	"TriberUSD": {
 		"deploy": true
 	},
-	"TokenStatehETH": {
+	"TokenStaterETH": {
 		"deploy": true
 	},
 	"ProxyhJPY": {
@@ -230,10 +230,10 @@
 	"TribehNVDA": {
 		"deploy": true
 	},
-	"ProxyhETH": {
+	"ProxyrETH": {
 		"deploy": true
 	},
-	"TribehETH": {
+	"TriberETH": {
 		"deploy": true
 	},
 	"TokenStatehBTC": {

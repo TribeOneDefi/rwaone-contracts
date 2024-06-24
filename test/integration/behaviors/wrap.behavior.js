@@ -38,8 +38,8 @@ function itCanWrapETH({ ctx }) {
 
 		await WrapperFactory.createWrapper(
 			ctx.contracts.WETH.address,
-			toBytes32('hETH'),
-			toBytes32('TribehETH')
+			toBytes32('rETH'),
+			toBytes32('TriberETH')
 		);
 
 		const event = await wrapperCreatedEvent;
@@ -53,7 +53,7 @@ function itCanWrapETH({ ctx }) {
 			ctx.provider
 		);
 		wrapperOptions.Wrapper = ctx.contracts.Wrapper;
-		wrapperOptions.Tribe = ctx.contracts.TribehETH;
+		wrapperOptions.Tribe = ctx.contracts.TriberETH;
 		wrapperOptions.Token = ctx.contracts.WETH;
 	});
 
@@ -76,14 +76,14 @@ function itCanWrapETH({ ctx }) {
 		});
 
 		describe('when there is sufficient capacity in the wrapper', () => {
-			before(async function() {
+			before(async function () {
 				const capacity = await Wrapper.capacity();
 				if (capacity.lt(amountToMint)) {
 					console.log(chalk.yellow('> Skipping Wrapper.mint as insufficient capacity'));
 					this.skip();
 				}
 			});
-			describe('when the user mints hETH', () => {
+			describe('when the user mints rETH', () => {
 				before('record balances', async () => {
 					balanceToken = await Token.balanceOf(user.address);
 					balanceTribe = await Tribe.balanceOf(user.address);
@@ -111,7 +111,7 @@ function itCanWrapETH({ ctx }) {
 					assert.bnGt(await Tribe.balanceOf(user.address), balanceTribe);
 				});
 
-				describe('when the user burns hETH', () => {
+				describe('when the user burns rETH', () => {
 					before('record balances', async () => {
 						balanceToken = await Token.balanceOf(user.address);
 						balanceTribe = await Tribe.balanceOf(user.address);

@@ -40,10 +40,10 @@ const {
 contract('Issuer (via Rwaone)', async accounts => {
 	const WEEK = 604800;
 
-	const [rUSD, sAUD, sEUR, wRWAX, hETH, ETH] = ['rUSD', 'sAUD', 'sEUR', 'wRWAX', 'hETH', 'ETH'].map(
+	const [rUSD, sAUD, sEUR, wRWAX, rETH, ETH] = ['rUSD', 'sAUD', 'sEUR', 'wRWAX', 'rETH', 'ETH'].map(
 		toBytes32
 	);
-	const tribeKeys = [rUSD, sAUD, sEUR, hETH, wRWAX];
+	const tribeKeys = [rUSD, sAUD, sEUR, rETH, wRWAX];
 
 	const [, owner, account1, account2, account3, account6, tribeetixBridgeToOptimism] = accounts;
 
@@ -55,7 +55,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 		exchangeRates,
 		feePool,
 		rUSDContract,
-		hETHContract,
+		rETHContract,
 		sEURContract,
 		sAUDContract,
 		escrow,
@@ -74,7 +74,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 	// run this once before all tests to prepare our environment, snapshots on beforeEach will take
 	// care of resetting to this state
 	before(async () => {
-		tribes = ['rUSD', 'sAUD', 'sEUR', 'hETH'];
+		tribes = ['rUSD', 'sAUD', 'sEUR', 'rETH'];
 		({
 			Rwaone: rwaone,
 			ProxyERC20Rwaone: tribeetixProxy,
@@ -84,7 +84,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 			RwaoneEscrow: escrow,
 			RewardEscrowV2: rewardEscrowV2,
 			TriberUSD: rUSDContract,
-			TribehETH: hETHContract,
+			TriberETH: rETHContract,
 			TribesAUD: sAUDContract,
 			TribesEUR: sEURContract,
 			Exchanger: exchanger,
@@ -134,7 +134,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 			{ from: owner }
 		);
 
-		await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, hETH, ETH]);
+		await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, rETH, ETH]);
 	});
 
 	async function updateDebtMonitors() {
@@ -155,7 +155,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 		await updateAggregatorRates(
 			exchangeRates,
 			circuitBreaker,
-			[sAUD, sEUR, wRWAX, hETH],
+			[sAUD, sEUR, wRWAX, rETH],
 			['0.5', '1.25', '0.1', '200'].map(toUnit)
 		);
 
@@ -395,7 +395,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 						await updateAggregatorRates(
 							exchangeRates,
 							circuitBreaker,
-							[sAUD, sEUR, hETH, ETH, wRWAX],
+							[sAUD, sEUR, rETH, ETH, wRWAX],
 							['0.5', '1.25', '100', '100', '2'].map(toUnit)
 						);
 					});
@@ -410,7 +410,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 
 							await sEURContract.issue(account3, toUnit('80')); // 100 rUSD worth
 
-							await hETHContract.issue(account1, toUnit('1')); // 100 rUSD worth
+							await rETHContract.issue(account1, toUnit('1')); // 100 rUSD worth
 
 							// and since we are are bypassing the usual issuance flow here, we must cache the debt snapshot
 							assert.bnEqual(await rwaone.totalIssuedTribes(rUSD), toUnit('0'));
@@ -477,7 +477,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 						await updateAggregatorRates(
 							exchangeRates,
 							circuitBreaker,
-							[sAUD, sEUR, hETH, ETH, wRWAX],
+							[sAUD, sEUR, rETH, ETH, wRWAX],
 							['0.5', '1.25', '100', '100', '2'].map(toUnit)
 						);
 						await updateDebtMonitors();
@@ -525,7 +525,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 
 							await sEURContract.issue(account3, toUnit('80')); // 100 rUSD worth
 
-							await hETHContract.issue(account1, toUnit('1')); // 100 rUSD worth
+							await rETHContract.issue(account1, toUnit('1')); // 100 rUSD worth
 
 							// and since we are are bypassing the usual issuance flow here, we must cache the debt snapshot
 							assert.bnEqual(await rwaone.totalIssuedTribes(rUSD), toUnit('0'));
@@ -835,9 +835,9 @@ contract('Issuer (via Rwaone)', async accounts => {
 					});
 
 					it('should be able to query multiple tribe addresses', async () => {
-						const tribeAddresses = await issuer.getTribes([currencyKey, hETH, rUSD]);
+						const tribeAddresses = await issuer.getTribes([currencyKey, rETH, rUSD]);
 						assert.equal(tribeAddresses[0], tribe.address);
-						assert.equal(tribeAddresses[1], hETHContract.address);
+						assert.equal(tribeAddresses[1], rETHContract.address);
 						assert.equal(tribeAddresses[2], rUSDContract.address);
 						assert.equal(tribeAddresses.length, 3);
 					});
@@ -939,7 +939,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 
 									totalIssuedTribes = await issuer.totalIssuedTribes(rUSD, true);
 
-									// 100 hETH at 2 per hETH is 200 total debt
+									// 100 rETH at 2 per rETH is 200 total debt
 									assert.bnEqual(totalIssuedTribes, toUnit('200'));
 								});
 								describe('when the tribe is removed', () => {
@@ -1302,13 +1302,13 @@ contract('Issuer (via Rwaone)', async accounts => {
 						beforeEach(async () => {
 							beforeCachedDebt = await debtCache.cachedDebt();
 
-							await issuer.issueTribesWithoutDebt(hETH, owner, toUnit(100), {
+							await issuer.issueTribesWithoutDebt(rETH, owner, toUnit(100), {
 								from: tribeetixBridgeToOptimism,
 							});
 						});
 
 						it('issues tribes', async () => {
-							assert.bnEqual(await hETHContract.balanceOf(owner), toUnit(100));
+							assert.bnEqual(await rETHContract.balanceOf(owner), toUnit(100));
 						});
 
 						it('maintains debt cache', async () => {
@@ -1323,16 +1323,16 @@ contract('Issuer (via Rwaone)', async accounts => {
 
 						beforeEach(async () => {
 							beforeCachedDebt = await debtCache.cachedDebt();
-							await issuer.issueTribesWithoutDebt(hETH, owner, toUnit(100), {
+							await issuer.issueTribesWithoutDebt(rETH, owner, toUnit(100), {
 								from: tribeetixBridgeToOptimism,
 							});
-							await issuer.burnTribesWithoutDebt(hETH, owner, toUnit(50), {
+							await issuer.burnTribesWithoutDebt(rETH, owner, toUnit(50), {
 								from: tribeetixBridgeToOptimism,
 							});
 						});
 
 						it('burns tribes', async () => {
-							assert.bnEqual(await hETHContract.balanceOf(owner), toUnit(50));
+							assert.bnEqual(await rETHContract.balanceOf(owner), toUnit(50));
 						});
 
 						it('maintains debt cache', async () => {
@@ -2809,7 +2809,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 						await rwaone.totalIssuedTribesExcludeOtherCollateral(rUSD)
 					);
 				});
-				describe('depositing WETH on the Wrapper to issue hETH', async () => {
+				describe('depositing WETH on the Wrapper to issue rETH', async () => {
 					let etherWrapper;
 					beforeEach(async () => {
 						// mock etherWrapper
@@ -2824,23 +2824,23 @@ contract('Issuer (via Rwaone)', async accounts => {
 						await debtCache.rebuildCache();
 					});
 
-					it('should be able to exclude hETH issued by EtherWrapper from totalIssuedTribes', async () => {
-						const totalSupplyBefore = await rwaone.totalIssuedTribes(hETH);
+					it('should be able to exclude rETH issued by EtherWrapper from totalIssuedTribes', async () => {
+						const totalSupplyBefore = await rwaone.totalIssuedTribes(rETH);
 
 						const amount = toUnit('10');
 
 						await etherWrapper.setTotalIssuedTribes(amount, { from: account1 });
 
-						// totalSupply of tribes should exclude Wrapper issued hETH
+						// totalSupply of tribes should exclude Wrapper issued rETH
 						assert.bnEqual(
 							totalSupplyBefore,
-							await rwaone.totalIssuedTribesExcludeOtherCollateral(hETH)
+							await rwaone.totalIssuedTribesExcludeOtherCollateral(rETH)
 						);
 
 						// totalIssuedTribes after includes amount issued
-						const { rate } = await exchangeRates.rateAndInvalid(hETH);
+						const { rate } = await exchangeRates.rateAndInvalid(rETH);
 						assert.bnEqual(
-							await rwaone.totalIssuedTribes(hETH),
+							await rwaone.totalIssuedTribes(rETH),
 							totalSupplyBefore.add(divideDecimalRound(amount, rate))
 						);
 					});
@@ -2856,12 +2856,12 @@ contract('Issuer (via Rwaone)', async accounts => {
 						reason: 'Only TribeRedeemer',
 					});
 				});
-				describe('when a user has 100 hETH', () => {
+				describe('when a user has 100 rETH', () => {
 					beforeEach(async () => {
-						await hETHContract.issue(account1, toUnit('100'));
+						await rETHContract.issue(account1, toUnit('100'));
 						await updateDebtMonitors();
 					});
-					describe('when burnForRedemption is invoked on the user for 75 hETH', () => {
+					describe('when burnForRedemption is invoked on the user for 75 rETH', () => {
 						beforeEach(async () => {
 							// spoof the tribe redeemer
 							await addressResolver.importAddresses([toBytes32('TribeRedeemer')], [account6], {
@@ -2870,12 +2870,12 @@ contract('Issuer (via Rwaone)', async accounts => {
 							// rebuild the resolver cache in the issuer
 							await issuer.rebuildCache();
 							// now invoke the burn
-							await issuer.burnForRedemption(await hETHContract.proxy(), account1, toUnit('75'), {
+							await issuer.burnForRedemption(await rETHContract.proxy(), account1, toUnit('75'), {
 								from: account6,
 							});
 						});
-						it('then the user has 25 hETH remaining', async () => {
-							assert.bnEqual(await hETHContract.balanceOf(account1), toUnit('25'));
+						it('then the user has 25 rETH remaining', async () => {
+							assert.bnEqual(await rETHContract.balanceOf(account1), toUnit('25'));
 						});
 					});
 				});

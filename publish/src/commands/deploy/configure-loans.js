@@ -60,7 +60,7 @@ module.exports = async ({
 			comment: 'Ensure the CollateralEth is connected to the CollateralManager',
 		});
 
-		const CollateralEthTribes = (await getDeployParameter('COLLATERAL_ETH'))['TRIBES']; // COLLATERAL_ETH tribes - ['rUSD', 'hETH']
+		const CollateralEthTribes = (await getDeployParameter('COLLATERAL_ETH'))['TRIBES']; // COLLATERAL_ETH tribes - ['rUSD', 'rETH']
 		await runStep({
 			contract: 'CollateralEth',
 			gasLimit: 1e6,
@@ -144,7 +144,7 @@ module.exports = async ({
 			comment: 'Ensure the CollateralShort contract is connected to the CollateralManager',
 		});
 
-		const CollateralShortTribes = (await getDeployParameter('COLLATERAL_SHORT'))['TRIBES']; // COLLATERAL_SHORT tribes - ['hBTC', 'hETH']
+		const CollateralShortTribes = (await getDeployParameter('COLLATERAL_SHORT'))['TRIBES']; // COLLATERAL_SHORT tribes - ['hBTC', 'rETH']
 		await runStep({
 			contract: 'CollateralShort',
 			gasLimit: 1e6,

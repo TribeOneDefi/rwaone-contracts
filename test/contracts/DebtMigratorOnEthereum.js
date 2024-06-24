@@ -13,7 +13,7 @@ contract('DebtMigratorOnEthereum', accounts => {
 	let debtMigratorOnEthereum, resolver, rewardEscrowV2, tribes, rwaone, tribeetixDebtShare;
 
 	before(async () => {
-		tribes = ['rUSD', 'hETH'];
+		tribes = ['rUSD', 'rETH'];
 		({
 			AddressResolver: resolver,
 			DebtMigratorOnEthereum: debtMigratorOnEthereum,

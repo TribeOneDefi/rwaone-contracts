@@ -139,7 +139,7 @@ contract('PerpsV2ExchangeRate', accounts => {
 
 		describe('when setting up new feed ids', () => {
 			const feeds = [
-				{ assetId: toBytes32('hETH'), feedId: toBytes32('feed-hETH') },
+				{ assetId: toBytes32('rETH'), feedId: toBytes32('feed-rETH') },
 				{ assetId: toBytes32('hBTC'), feedId: toBytes32('feed-hBTC') },
 			];
 
@@ -272,7 +272,7 @@ contract('PerpsV2ExchangeRate', accounts => {
 
 	describe('Contract operations', () => {
 		const feeds = [
-			{ assetId: toBytes32('hETH'), feedId: toBytes32('feed-hETH') },
+			{ assetId: toBytes32('rETH'), feedId: toBytes32('feed-rETH') },
 			{ assetId: toBytes32('hBTC'), feedId: toBytes32('feed-hBTC') },
 		];
 

@@ -17,18 +17,18 @@ const {
 const { toBytes32 } = require('../..');
 
 contract('ExchangeCircuitBreaker tests', async accounts => {
-	const [rUSD, sAUD, sEUR, wRWAX, hBTC, iBTC, hETH, iETH] = [
+	const [rUSD, sAUD, sEUR, wRWAX, hBTC, iBTC, rETH, iETH] = [
 		'rUSD',
 		'sAUD',
 		'sEUR',
 		'wRWAX',
 		'hBTC',
 		'iBTC',
-		'hETH',
+		'rETH',
 		'iETH',
 	].map(toBytes32);
 
-	const tribeKeys = [rUSD, sAUD, sEUR, hBTC, iBTC, hETH, iETH];
+	const tribeKeys = [rUSD, sAUD, sEUR, hBTC, iBTC, rETH, iETH];
 
 	const [, owner, account1, account2] = accounts;
 
@@ -63,8 +63,8 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 				});
 			};
 
-			describe(`when the price of hETH is ${baseRate}`, () => {
-				updateRate({ target: hETH, rate: baseRate });
+			describe(`when the price of rETH is ${baseRate}`, () => {
+				updateRate({ target: rETH, rate: baseRate });
 
 				describe('when price spike deviation is set to a factor of 2', () => {
 					const baseFactor = 2;
@@ -76,13 +76,13 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 
 					// lastExchangeRate, used for price deviations (SIP-65)
 					describe('lastValue in new CircuitBreaker is persisted during exchanges', () => {
-						describe('when a user exchanges into hETH from rUSD', () => {
+						describe('when a user exchanges into rETH from rUSD', () => {
 							beforeEach(async () => {
-								await rwaone.exchange(rUSD, toUnit('100'), hETH, { from: account1 });
+								await rwaone.exchange(rUSD, toUnit('100'), rETH, { from: account1 });
 							});
 							it('and the dest side has a rate persisted', async () => {
 								assert.bnEqual(
-									await circuitBreaker.lastValue(await exchangeRates.aggregators(hETH)),
+									await circuitBreaker.lastValue(await exchangeRates.aggregators(rETH)),
 									toUnit(baseRate.toString())
 								);
 							});
@@ -90,11 +90,11 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 					});
 
 					describe('the rateWithInvalid() view correctly returns status', () => {
-						updateRate({ target: hETH, rate: baseRate, resetCircuitBreaker: true });
+						updateRate({ target: rETH, rate: baseRate, resetCircuitBreaker: true });
 
 						let res;
 						it('when called with a tribe with only a single rate, returns false', async () => {
-							res = await exchangeCircuitBreaker.rateWithInvalid(hETH);
+							res = await exchangeCircuitBreaker.rateWithInvalid(rETH);
 							assert.bnEqual(res[0], toUnit(baseRate));
 							assert.equal(res[1], false);
 						});
@@ -104,10 +104,10 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 							assert.equal(res[1], true);
 						});
 						describe('when a tribe rate changes outside of the range', () => {
-							updateRate({ target: hETH, rate: baseRate * 3, resetCircuitBreaker: false });
+							updateRate({ target: rETH, rate: baseRate * 3, resetCircuitBreaker: false });
 
 							it('when called with that tribe, returns true', async () => {
-								res = await exchangeCircuitBreaker.rateWithInvalid(hETH);
+								res = await exchangeCircuitBreaker.rateWithInvalid(rETH);
 								assert.bnEqual(res[0], toUnit(baseRate * 3));
 								assert.equal(res[1], true);
 							});
@@ -131,7 +131,7 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 				SystemSettings: systemSettings,
 			} = await setupAllContracts({
 				accounts,
-				tribes: ['rUSD', 'hETH', 'sEUR', 'sAUD', 'hBTC', 'iBTC', 'sTRX'],
+				tribes: ['rUSD', 'rETH', 'sEUR', 'sAUD', 'hBTC', 'iBTC', 'sTRX'],
 				contracts: [
 					'Exchanger',
 					'ExchangeCircuitBreaker',
@@ -165,9 +165,9 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 		addSnapshotBeforeRestoreAfterEach();
 
 		beforeEach(async () => {
-			await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, wRWAX, hETH, hBTC, iBTC]);
+			await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, wRWAX, rETH, hBTC, iBTC]);
 			await updateRates(
-				[sAUD, sEUR, wRWAX, hETH, hBTC, iBTC],
+				[sAUD, sEUR, wRWAX, rETH, hBTC, iBTC],
 				['0.5', '2', '1', '100', '5000', '5000'].map(toUnit)
 			);
 

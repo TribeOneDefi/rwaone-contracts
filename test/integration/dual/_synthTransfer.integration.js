@@ -18,23 +18,23 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 
 	const amountToDeposit = ethers.utils.parseEther('10');
 
-	const [rUSD, hETH] = [toBytes32('rUSD'), toBytes32('hETH')];
+	const [rUSD, rETH] = [toBytes32('rUSD'), toBytes32('rETH')];
 
 	let owner, ownerL2, user, userL2;
-	let TriberUSD, TribehETH, RwaoneBridgeToOptimism, SystemSettings;
+	let TriberUSD, TriberETH, RwaoneBridgeToOptimism, SystemSettings;
 
-	let TriberUSDL2, TribehETHL2, RwaoneBridgeToBase, SystemSettingsL2, SystemStatusL2;
+	let TriberUSDL2, TriberETHL2, RwaoneBridgeToBase, SystemSettingsL2, SystemStatusL2;
 
 	let userBalance, userL2Balance;
 
 	let depositReceipt;
 
-	describe('when the owner sends rUSD and hETH', () => {
+	describe('when the owner sends rUSD and rETH', () => {
 		before('target contracts and users', () => {
-			({ TriberUSD, TribehETH, RwaoneBridgeToOptimism, SystemSettings } = ctx.l1.contracts);
+			({ TriberUSD, TriberETH, RwaoneBridgeToOptimism, SystemSettings } = ctx.l1.contracts);
 			({
 				TriberUSD: TriberUSDL2,
-				TribehETH: TribehETHL2,
+				TriberETH: TriberETHL2,
 				RwaoneBridgeToBase,
 				SystemSettings: SystemSettingsL2,
 				SystemStatus: SystemStatusL2,
@@ -50,24 +50,24 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 			let tx;
 			tx = await SystemSettings.connect(owner).setCrossChainTribeTransferEnabled(rUSD, 1);
 			await tx.wait();
-			tx = await SystemSettings.connect(owner).setCrossChainTribeTransferEnabled(hETH, 1);
+			tx = await SystemSettings.connect(owner).setCrossChainTribeTransferEnabled(rETH, 1);
 			await tx.wait();
 			tx = await SystemSettingsL2.connect(ownerL2).setCrossChainTribeTransferEnabled(rUSD, 1);
 			await tx.wait();
-			tx = await SystemSettingsL2.connect(ownerL2).setCrossChainTribeTransferEnabled(hETH, 1);
+			tx = await SystemSettingsL2.connect(ownerL2).setCrossChainTribeTransferEnabled(rETH, 1);
 			await tx.wait();
 		});
 
 		before('set rates', async () => {
 			await addAggregatorAndSetRate({
 				ctx: ctx.l1,
-				currencyKey: hETH,
+				currencyKey: rETH,
 				rate: ethers.utils.parseEther(ETH_RATE),
 			});
 
 			await addAggregatorAndSetRate({
 				ctx: ctx.l2,
-				currencyKey: hETH,
+				currencyKey: rETH,
 				rate: ethers.utils.parseEther(ETH_RATE),
 			});
 		});
@@ -81,7 +81,7 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 		before('ensure balance', async () => {
 			await ensureBalance({
 				ctx: ctx.l1,
-				symbol: 'hETH',
+				symbol: 'rETH',
 				user: user,
 				balance: amountToDeposit.mul(2),
 			});
@@ -110,7 +110,7 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 
 		before('approve if needed', async () => {
 			await approveIfNeeded({
-				token: TribehETH,
+				token: TriberETH,
 				owner: user,
 				beneficiary: RwaoneBridgeToOptimism,
 				amount: amountToDeposit,
@@ -139,7 +139,7 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 			await tx.wait();
 
 			const tx2 = await RwaoneBridgeToOptimism.initiateTribeTransfer(
-				hETH,
+				rETH,
 				user.address,
 				amountToDeposit
 			);
@@ -176,7 +176,7 @@ describe('initiateTribeTransfer() integration tests (L1, L2)', () => {
 				);
 
 				assert.bnEqual(
-					await TribehETHL2.balanceOf(user.address),
+					await TriberETHL2.balanceOf(user.address),
 					userL2Balance.add(amountToDeposit)
 				);
 			});

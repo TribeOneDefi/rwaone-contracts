@@ -1,7 +1,7 @@
 [
 	{
-		"marketKey": "hETHPERP",
-		"asset": "hETH",
+		"marketKey": "rETHPERP",
+		"asset": "rETH",
 		"makerFee": "0.3",
 		"takerFee": "0.3",
 		"takerFeeDelayedOrder": "0.3",

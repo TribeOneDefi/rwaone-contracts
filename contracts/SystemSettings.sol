@@ -184,7 +184,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     }
 
     // SIP 112: ETH Wrappr
-    // The fee for burning hETH and releasing ETH from the EtherWrapper.
+    // The fee for burning rETH and releasing ETH from the EtherWrapper.
     function etherWrapperBurnFeeRate() external view returns (uint) {
         return getEtherWrapperBurnFeeRate();
     }

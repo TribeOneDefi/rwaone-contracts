@@ -86,7 +86,7 @@ module.exports = async ({ account, addressOf, deployer, getDeployParameter, netw
 			account,
 			addressOf(collateralManager),
 			addressOf(ReadProxyAddressResolver),
-			toBytes32('hETH'),
+			toBytes32('rETH'),
 			(await getDeployParameter('COLLATERAL_ETH'))['MIN_CRATIO'],
 			(await getDeployParameter('COLLATERAL_ETH'))['MIN_COLLATERAL'],
 		],

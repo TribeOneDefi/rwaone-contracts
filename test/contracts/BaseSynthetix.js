@@ -27,7 +27,7 @@ const {
 } = require('../..');
 
 contract('BaseRwaone', async accounts => {
-	const [rUSD, sAUD, sEUR, wRWAX, hETH] = ['rUSD', 'sAUD', 'sEUR', 'wRWAX', 'hETH'].map(toBytes32);
+	const [rUSD, sAUD, sEUR, wRWAX, rETH] = ['rUSD', 'sAUD', 'sEUR', 'wRWAX', 'rETH'].map(toBytes32);
 
 	const [, owner, account1, account2, account3] = accounts;
 
@@ -58,7 +58,7 @@ contract('BaseRwaone', async accounts => {
 			'ext:AggregatorDebtRatio': aggregatorDebtRatio,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'hETH', 'sEUR', 'sAUD'],
+			tribes: ['rUSD', 'rETH', 'sEUR', 'sAUD'],
 			contracts: [
 				'BaseRwaone',
 				'SupplySchedule',
@@ -86,7 +86,7 @@ contract('BaseRwaone', async accounts => {
 		// use implementation ABI on the proxy address to simplify calling
 		baseRwaoneProxy = await artifacts.require('BaseRwaone').at(baseRwaoneProxy.address);
 
-		await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, hETH]);
+		await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, rETH]);
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
@@ -190,7 +190,7 @@ contract('BaseRwaone', async accounts => {
 			await onlyGivenAddressCanInvoke({
 				fnc: baseRwaoneImpl.exchangeAtomically,
 				accounts,
-				args: [rUSD, amount, hETH, toBytes32('AGGREGATOR'), 0],
+				args: [rUSD, amount, rETH, toBytes32('AGGREGATOR'), 0],
 				reason: 'Cannot be run on this layer',
 			});
 		});
@@ -423,24 +423,24 @@ contract('BaseRwaone', async accounts => {
 
 	describe('isWaitingPeriod()', () => {
 		it('returns false by default', async () => {
-			assert.isFalse(await baseRwaoneImpl.isWaitingPeriod(hETH));
+			assert.isFalse(await baseRwaoneImpl.isWaitingPeriod(rETH));
 		});
-		describe('when a user has exchanged into hETH', () => {
+		describe('when a user has exchanged into rETH', () => {
 			beforeEach(async () => {
 				await updateRatesWithDefaults({ exchangeRates, owner, debtCache });
 
 				await baseRwaoneImpl.issueTribes(toUnit('100'), { from: owner });
-				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), hETH, { from: owner });
+				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), rETH, { from: owner });
 			});
 			it('then waiting period is true', async () => {
-				assert.isTrue(await baseRwaoneImpl.isWaitingPeriod(hETH));
+				assert.isTrue(await baseRwaoneImpl.isWaitingPeriod(rETH));
 			});
 			describe('when the waiting period expires', () => {
 				beforeEach(async () => {
 					await fastForward(await systemSettings.waitingPeriodSecs());
 				});
 				it('returns false by default', async () => {
-					assert.isFalse(await baseRwaoneImpl.isWaitingPeriod(hETH));
+					assert.isFalse(await baseRwaoneImpl.isWaitingPeriod(rETH));
 				});
 			});
 		});
@@ -458,7 +458,7 @@ contract('BaseRwaone', async accounts => {
 				await updateAggregatorRates(
 					exchangeRates,
 					circuitBreaker,
-					[sAUD, sEUR, hETH],
+					[sAUD, sEUR, rETH],
 					['0.5', '1.25', '100'].map(toUnit)
 				);
 				await debtCache.takeDebtSnapshot();
@@ -496,13 +496,13 @@ contract('BaseRwaone', async accounts => {
 
 	describe('availableCurrencyKeys()', () => {
 		it('returns all currency keys by default', async () => {
-			assert.deepEqual(await baseRwaoneImpl.availableCurrencyKeys(), [rUSD, hETH, sEUR, sAUD]);
+			assert.deepEqual(await baseRwaoneImpl.availableCurrencyKeys(), [rUSD, rETH, sEUR, sAUD]);
 		});
 	});
 
 	describe('isWaitingPeriod()', () => {
 		it('returns false by default', async () => {
-			assert.isFalse(await baseRwaoneImpl.isWaitingPeriod(hETH));
+			assert.isFalse(await baseRwaoneImpl.isWaitingPeriod(rETH));
 		});
 	});
 
@@ -784,7 +784,7 @@ contract('BaseRwaone', async accounts => {
 		describe('when the user has issued some rUSD and exchanged for other tribes', () => {
 			beforeEach(async () => {
 				await baseRwaoneImpl.issueTribes(toUnit('100'), { from: owner });
-				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), hETH, { from: owner });
+				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), rETH, { from: owner });
 				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), sAUD, { from: owner });
 				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), sEUR, { from: owner });
 			});
@@ -886,7 +886,7 @@ contract('BaseRwaone', async accounts => {
 					await ensureTransferReverts();
 
 					// the remainder of the tribes have prices
-					await updateAggregatorRates(exchangeRates, circuitBreaker, [hETH], ['100'].map(toUnit));
+					await updateAggregatorRates(exchangeRates, circuitBreaker, [rETH], ['100'].map(toUnit));
 					await debtCache.takeDebtSnapshot();
 
 					await ensureTransferReverts();
@@ -1082,7 +1082,7 @@ contract('BaseRwaone', async accounts => {
 		describe('when the user has issued some rUSD and exchanged for other tribes', () => {
 			beforeEach(async () => {
 				await baseRwaoneImpl.issueTribes(toUnit('100'), { from: owner });
-				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), hETH, { from: owner });
+				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), rETH, { from: owner });
 				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), sAUD, { from: owner });
 				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), sEUR, { from: owner });
 			});

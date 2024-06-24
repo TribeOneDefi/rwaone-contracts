@@ -53,18 +53,18 @@ contract('Rewards Integration Tests', accounts => {
 	// };
 
 	// CURRENCIES
-	const [rUSD, sAUD, sEUR, hBTC, wRWAX, iBTC, hETH, ETH] = [
+	const [rUSD, sAUD, sEUR, hBTC, wRWAX, iBTC, rETH, ETH] = [
 		'rUSD',
 		'sAUD',
 		'sEUR',
 		'hBTC',
 		'wRWAX',
 		'iBTC',
-		'hETH',
+		'rETH',
 		'ETH',
 	].map(toBytes32);
 
-	const tribeKeys = [rUSD, sAUD, sEUR, hBTC, iBTC, hETH, ETH];
+	const tribeKeys = [rUSD, sAUD, sEUR, hBTC, iBTC, rETH, ETH];
 
 	const initialInflationAmount = toUnit(800000);
 
@@ -158,7 +158,7 @@ contract('Rewards Integration Tests', accounts => {
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'sAUD', 'sEUR', 'hBTC', 'iBTC', 'hETH'],
+			tribes: ['rUSD', 'sAUD', 'sEUR', 'hBTC', 'iBTC', 'rETH'],
 			contracts: [
 				'AddressResolver',
 				'Exchanger', // necessary for burnTribes to check settlement of rUSD
@@ -179,7 +179,7 @@ contract('Rewards Integration Tests', accounts => {
 		// use implementation ABI on the proxy address to simplify calling
 		rwaone = await artifacts.require('Rwaone').at(tribeetixProxy.address);
 
-		await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, hBTC, iBTC, hETH, ETH]);
+		await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, hBTC, iBTC, rETH, ETH]);
 
 		MINTER_RWAX_REWARD = await supplySchedule.minterReward();
 

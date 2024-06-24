@@ -383,7 +383,7 @@ const setupContract = async ({
 			owner,
 			tryGetAddressOf('CollateralManager'),
 			tryGetAddressOf('AddressResolver'),
-			toBytes32('hETH'),
+			toBytes32('rETH'),
 			toUnit(1.3),
 			toUnit(2),
 		],
@@ -406,8 +406,8 @@ const setupContract = async ({
 		],
 		FuturesMarketETH: [
 			tryGetAddressOf('AddressResolver'),
-			toBytes32('hETH'), // base asset
-			toBytes32('hETH' + perpSuffix), // market key
+			toBytes32('rETH'), // base asset
+			toBytes32('rETH' + perpSuffix), // market key
 		],
 		FuturesMarketData: [tryGetAddressOf('AddressResolver')],
 		// Perps V2
@@ -425,8 +425,8 @@ const setupContract = async ({
 		PerpsV2MarketStateETH: [
 			owner,
 			[deployerAccount],
-			toBytes32('hETH'), // base asset
-			toBytes32('hETH' + perpSuffix), // market key
+			toBytes32('rETH'), // base asset
+			toBytes32('rETH' + perpSuffix), // market key
 			ethers.constants.AddressZero,
 		],
 		ProxyPerpsV2MarketBTC: [owner],
@@ -436,7 +436,7 @@ const setupContract = async ({
 			owner,
 			tryGetAddressOf('AddressResolver'),
 		],
-		PerpsV2MarketViewhETH: [
+		PerpsV2MarketViewrETH: [
 			tryGetAddressOf('PerpsV2MarketStateETH'),
 			owner,
 			tryGetAddressOf('AddressResolver'),
@@ -797,7 +797,7 @@ const setupContract = async ({
 				)
 			);
 		},
-		async PerpsV2MarketViewhETH() {
+		async PerpsV2MarketViewrETH() {
 			const filteredFunctions = getFunctionSignatures(instance, excludedFunctions);
 
 			await Promise.all(
@@ -1223,7 +1223,7 @@ const setupAllContracts = async ({
 		{
 			contract: 'NativeEtherWrapper',
 			mocks: [],
-			deps: ['AddressResolver', 'EtherWrapper', 'WETH', 'TribehETH'],
+			deps: ['AddressResolver', 'EtherWrapper', 'WETH', 'TriberETH'],
 		},
 		{
 			contract: 'WrapperFactory',
@@ -1583,7 +1583,7 @@ const setupAllContracts = async ({
 
 		// PerpsV2 ETH
 		{
-			contract: 'PerpsV2MarketViewhETH',
+			contract: 'PerpsV2MarketViewrETH',
 			source: 'PerpsV2MarketViews',
 			deps: [
 				'ProxyPerpsV2MarketETH',
@@ -1640,7 +1640,7 @@ const setupAllContracts = async ({
 			deps: [
 				'ProxyPerpsV2MarketETH',
 				'PerpsV2MarketStateETH',
-				'PerpsV2MarketViewhETH',
+				'PerpsV2MarketViewrETH',
 				'PerpsV2MarketLiquidateETH',
 				'PerpsV2MarketDelayedIntentETH',
 				'PerpsV2MarketDelayedExecutionETH',

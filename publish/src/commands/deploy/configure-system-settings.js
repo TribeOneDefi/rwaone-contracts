@@ -436,7 +436,7 @@ module.exports = async ({
 		expected: allowZeroOrUpdateIfNonZero(etherWrapperMintFeeRate),
 		write: 'setEtherWrapperMintFeeRate',
 		writeArg: etherWrapperMintFeeRate,
-		comment: 'Set the fee rate for minting hETH from ETH in the EtherWrapper (SIP-112)',
+		comment: 'Set the fee rate for minting rETH from ETH in the EtherWrapper (SIP-112)',
 	});
 
 	// Disable checking this as now the current value is set to 0
@@ -449,7 +449,7 @@ module.exports = async ({
 		expected: allowZeroOrUpdateIfNonZero(etherWrapperBurnFeeRate),
 		write: 'setEtherWrapperBurnFeeRate',
 		writeArg: etherWrapperBurnFeeRate,
-		comment: 'Set the fee rate for burning hETH for ETH in the EtherWrapper (SIP-112)',
+		comment: 'Set the fee rate for burning rETH for ETH in the EtherWrapper (SIP-112)',
 	});
 
 	// SIP-184 Exchange Dynamic Fee Rate

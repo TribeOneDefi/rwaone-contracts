@@ -79,19 +79,19 @@ contract('SystemStatus', async accounts => {
 			'Restricted to access control list'
 		);
 		await assert.revert(
-			systemStatus.suspendTribeExchange(toBytes32('hETH'), '1', { from: owner }),
+			systemStatus.suspendTribeExchange(toBytes32('rETH'), '1', { from: owner }),
 			'Restricted to access control list'
 		);
 		await assert.revert(
-			systemStatus.suspendTribe(toBytes32('hETH'), '1', { from: owner }),
+			systemStatus.suspendTribe(toBytes32('rETH'), '1', { from: owner }),
 			'Restricted to access control list'
 		);
 		await assert.revert(
-			systemStatus.suspendFuturesMarket(toBytes32('hETH'), '1', { from: owner }),
+			systemStatus.suspendFuturesMarket(toBytes32('rETH'), '1', { from: owner }),
 			'Restricted to access control list'
 		);
 		await assert.revert(
-			systemStatus.suspendFuturesMarkets([toBytes32('hETH')], '1', { from: owner }),
+			systemStatus.suspendFuturesMarkets([toBytes32('rETH')], '1', { from: owner }),
 			'Restricted to access control list'
 		);
 	});
@@ -120,14 +120,14 @@ contract('SystemStatus', async accounts => {
 				await systemStatus.requireIssuanceActive();
 				await systemStatus.requireExchangeActive();
 				await systemStatus.requireFuturesActive();
-				await systemStatus.requireTribeActive(toBytes32('hETH'));
-				await systemStatus.requireTribesActive(toBytes32('hBTC'), toBytes32('hETH'));
+				await systemStatus.requireTribeActive(toBytes32('rETH'));
+				await systemStatus.requireTribesActive(toBytes32('hBTC'), toBytes32('rETH'));
 				await systemStatus.requireFuturesMarketActive(toBytes32('hBTC'));
 			});
 
 			it('and all the bool views are correct', async () => {
 				assert.isFalse(await systemStatus.systemSuspended());
-				assert.isFalse(await systemStatus.tribeSuspended(toBytes32('hETH')));
+				assert.isFalse(await systemStatus.tribeSuspended(toBytes32('rETH')));
 				assert.isFalse(await systemStatus.tribeSuspended(toBytes32('hBTC')));
 			});
 
@@ -168,17 +168,17 @@ contract('SystemStatus', async accounts => {
 					await assert.revert(systemStatus.requireSystemActive(), reason);
 					await assert.revert(systemStatus.requireIssuanceActive(), reason);
 					await assert.revert(systemStatus.requireFuturesActive(), reason);
-					await assert.revert(systemStatus.requireTribeActive(toBytes32('hETH')), reason);
-					await assert.revert(systemStatus.requireFuturesMarketActive(toBytes32('hETH')), reason);
+					await assert.revert(systemStatus.requireTribeActive(toBytes32('rETH')), reason);
+					await assert.revert(systemStatus.requireFuturesMarketActive(toBytes32('rETH')), reason);
 					await assert.revert(
-						systemStatus.requireTribesActive(toBytes32('hBTC'), toBytes32('hETH')),
+						systemStatus.requireTribesActive(toBytes32('hBTC'), toBytes32('rETH')),
 						reason
 					);
 				});
 
 				it('and all the bool views are correct', async () => {
 					assert.isTrue(await systemStatus.systemSuspended());
-					assert.isTrue(await systemStatus.tribeSuspended(toBytes32('hETH')));
+					assert.isTrue(await systemStatus.tribeSuspended(toBytes32('rETH')));
 					assert.isTrue(await systemStatus.tribeSuspended(toBytes32('hBTC')));
 				});
 			});
@@ -216,10 +216,10 @@ contract('SystemStatus', async accounts => {
 						await assert.revert(systemStatus.requireSystemActive(), reason);
 						await assert.revert(systemStatus.requireIssuanceActive(), reason);
 						await assert.revert(systemStatus.requireFuturesActive(), reason);
-						await assert.revert(systemStatus.requireTribeActive(toBytes32('hETH')), reason);
-						await assert.revert(systemStatus.requireFuturesMarketActive(toBytes32('hETH')), reason);
+						await assert.revert(systemStatus.requireTribeActive(toBytes32('rETH')), reason);
+						await assert.revert(systemStatus.requireFuturesMarketActive(toBytes32('rETH')), reason);
 						await assert.revert(
-							systemStatus.requireTribesActive(toBytes32('hBTC'), toBytes32('hETH')),
+							systemStatus.requireTribesActive(toBytes32('hBTC'), toBytes32('rETH')),
 							reason
 						);
 					});
@@ -236,20 +236,20 @@ contract('SystemStatus', async accounts => {
 						await assert.revert(systemStatus.suspendIssuance('0', { from: account1 }));
 						await assert.revert(systemStatus.resumeIssuance({ from: account1 }));
 						await assert.revert(
-							systemStatus.suspendTribe(toBytes32('hETH'), '0', { from: account1 })
+							systemStatus.suspendTribe(toBytes32('rETH'), '0', { from: account1 })
 						);
 						await assert.revert(
-							systemStatus.suspendFuturesMarket(toBytes32('hETH'), '0', { from: account1 })
+							systemStatus.suspendFuturesMarket(toBytes32('rETH'), '0', { from: account1 })
 						);
 						await assert.revert(
-							systemStatus.suspendFuturesMarkets([toBytes32('hETH')], '0', { from: account1 })
+							systemStatus.suspendFuturesMarkets([toBytes32('rETH')], '0', { from: account1 })
 						);
-						await assert.revert(systemStatus.resumeTribe(toBytes32('hETH'), { from: account1 }));
+						await assert.revert(systemStatus.resumeTribe(toBytes32('rETH'), { from: account1 }));
 						await assert.revert(
-							systemStatus.resumeFuturesMarket(toBytes32('hETH'), { from: account1 })
+							systemStatus.resumeFuturesMarket(toBytes32('rETH'), { from: account1 })
 						);
 						await assert.revert(
-							systemStatus.resumeFuturesMarkets([toBytes32('hETH')], { from: account1 })
+							systemStatus.resumeFuturesMarkets([toBytes32('rETH')], { from: account1 })
 						);
 					});
 					it('yet the owner can still resume', async () => {
@@ -310,8 +310,8 @@ contract('SystemStatus', async accounts => {
 						it('and all the require checks succeed', async () => {
 							await systemStatus.requireSystemActive();
 							await systemStatus.requireIssuanceActive();
-							await systemStatus.requireTribeActive(toBytes32('hETH'));
-							await systemStatus.requireFuturesMarketActive(toBytes32('hETH'));
+							await systemStatus.requireTribeActive(toBytes32('rETH'));
+							await systemStatus.requireFuturesMarketActive(toBytes32('rETH'));
 						});
 
 						it('yet that address cannot suspend', async () => {
@@ -330,20 +330,20 @@ contract('SystemStatus', async accounts => {
 							);
 							await assert.revert(systemStatus.resumeIssuance({ from: account1 }));
 							await assert.revert(
-								systemStatus.suspendTribe(toBytes32('hETH'), '66', { from: account1 })
+								systemStatus.suspendTribe(toBytes32('rETH'), '66', { from: account1 })
 							);
 							await assert.revert(
-								systemStatus.suspendFuturesMarket(toBytes32('hETH'), '66', { from: account1 })
+								systemStatus.suspendFuturesMarket(toBytes32('rETH'), '66', { from: account1 })
 							);
 							await assert.revert(
-								systemStatus.suspendFuturesMarkets([toBytes32('hETH')], '66', { from: account1 })
+								systemStatus.suspendFuturesMarkets([toBytes32('rETH')], '66', { from: account1 })
 							);
-							await assert.revert(systemStatus.resumeTribe(toBytes32('hETH'), { from: account1 }));
+							await assert.revert(systemStatus.resumeTribe(toBytes32('rETH'), { from: account1 }));
 							await assert.revert(
-								systemStatus.resumeFuturesMarket(toBytes32('hETH'), { from: account1 })
+								systemStatus.resumeFuturesMarket(toBytes32('rETH'), { from: account1 })
 							);
 							await assert.revert(
-								systemStatus.resumeFuturesMarkets([toBytes32('hETH')], { from: account1 })
+								systemStatus.resumeFuturesMarkets([toBytes32('rETH')], { from: account1 })
 							);
 						});
 					});
@@ -418,8 +418,8 @@ contract('SystemStatus', async accounts => {
 					});
 					it('but not the others', async () => {
 						await systemStatus.requireSystemActive();
-						await systemStatus.requireTribeActive(toBytes32('hETH'));
-						await systemStatus.requireFuturesMarketActive(toBytes32('hETH'));
+						await systemStatus.requireTribeActive(toBytes32('rETH'));
+						await systemStatus.requireFuturesMarketActive(toBytes32('rETH'));
 					});
 					it('yet that address cannot resume', async () => {
 						await assert.revert(
@@ -436,14 +436,14 @@ contract('SystemStatus', async accounts => {
 						);
 						await assert.revert(systemStatus.resumeSystem({ from: account2 }));
 						await assert.revert(
-							systemStatus.suspendTribe(toBytes32('hETH'), '55', { from: account2 })
+							systemStatus.suspendTribe(toBytes32('rETH'), '55', { from: account2 })
 						);
 						await assert.revert(
-							systemStatus.suspendFuturesMarket(toBytes32('hETH'), '55', { from: account2 })
+							systemStatus.suspendFuturesMarket(toBytes32('rETH'), '55', { from: account2 })
 						);
-						await assert.revert(systemStatus.resumeTribe(toBytes32('hETH'), { from: account2 }));
+						await assert.revert(systemStatus.resumeTribe(toBytes32('rETH'), { from: account2 }));
 						await assert.revert(
-							systemStatus.resumeFuturesMarket(toBytes32('hETH'), { from: account2 })
+							systemStatus.resumeFuturesMarket(toBytes32('rETH'), { from: account2 })
 						);
 					});
 					it('yet the owner can still resume', async () => {
@@ -501,8 +501,8 @@ contract('SystemStatus', async accounts => {
 						it('and all the require checks succeed', async () => {
 							await systemStatus.requireSystemActive();
 							await systemStatus.requireIssuanceActive();
-							await systemStatus.requireTribeActive(toBytes32('hETH'));
-							await systemStatus.requireFuturesMarketActive(toBytes32('hETH'));
+							await systemStatus.requireTribeActive(toBytes32('rETH'));
+							await systemStatus.requireFuturesMarketActive(toBytes32('rETH'));
 						});
 
 						it('yet that address cannot suspend', async () => {
@@ -519,14 +519,14 @@ contract('SystemStatus', async accounts => {
 							await assert.revert(systemStatus.suspendSystem('8', { from: account2 }));
 							await assert.revert(systemStatus.resumeSystem({ from: account2 }));
 							await assert.revert(
-								systemStatus.suspendTribe(toBytes32('hETH'), '5', { from: account2 })
+								systemStatus.suspendTribe(toBytes32('rETH'), '5', { from: account2 })
 							);
 							await assert.revert(
-								systemStatus.suspendFuturesMarket(toBytes32('hETH'), '5', { from: account2 })
+								systemStatus.suspendFuturesMarket(toBytes32('rETH'), '5', { from: account2 })
 							);
-							await assert.revert(systemStatus.resumeTribe(toBytes32('hETH'), { from: account2 }));
+							await assert.revert(systemStatus.resumeTribe(toBytes32('rETH'), { from: account2 }));
 							await assert.revert(
-								systemStatus.resumeFuturesMarket(toBytes32('hETH'), { from: account2 })
+								systemStatus.resumeFuturesMarket(toBytes32('rETH'), { from: account2 })
 							);
 						});
 					});
@@ -605,14 +605,14 @@ contract('SystemStatus', async accounts => {
 							'Exchange is suspended. Operation prohibited'
 						);
 						await assert.revert(
-							systemStatus.requireFuturesMarketActive(toBytes32('hETH')),
+							systemStatus.requireFuturesMarketActive(toBytes32('rETH')),
 							'Exchange is suspended. Operation prohibited'
 						);
 					});
 					it('and requireExchangeBetweenTribesAllowed reverts as expected', async () => {
 						await assert.revert(
 							systemStatus.requireExchangeBetweenTribesAllowed(
-								toBytes32('hETH'),
+								toBytes32('rETH'),
 								toBytes32('hBTC')
 							),
 							'Exchange is suspended. Operation prohibited'
@@ -620,7 +620,7 @@ contract('SystemStatus', async accounts => {
 					});
 					it('but not the others', async () => {
 						await systemStatus.requireSystemActive();
-						await systemStatus.requireTribeActive(toBytes32('hETH'));
+						await systemStatus.requireTribeActive(toBytes32('rETH'));
 					});
 
 					it('yet that address cannot resume', async () => {
@@ -638,14 +638,14 @@ contract('SystemStatus', async accounts => {
 						);
 						await assert.revert(systemStatus.resumeSystem({ from: account2 }));
 						await assert.revert(
-							systemStatus.suspendTribe(toBytes32('hETH'), '55', { from: account2 })
+							systemStatus.suspendTribe(toBytes32('rETH'), '55', { from: account2 })
 						);
 						await assert.revert(
-							systemStatus.suspendFuturesMarket(toBytes32('hETH'), '55', { from: account2 })
+							systemStatus.suspendFuturesMarket(toBytes32('rETH'), '55', { from: account2 })
 						);
-						await assert.revert(systemStatus.resumeTribe(toBytes32('hETH'), { from: account2 }));
+						await assert.revert(systemStatus.resumeTribe(toBytes32('rETH'), { from: account2 }));
 						await assert.revert(
-							systemStatus.resumeFuturesMarket(toBytes32('hETH'), { from: account2 })
+							systemStatus.resumeFuturesMarket(toBytes32('rETH'), { from: account2 })
 						);
 					});
 					it('yet the owner can still resume', async () => {
@@ -705,11 +705,11 @@ contract('SystemStatus', async accounts => {
 							await systemStatus.requireExchangeActive();
 							await systemStatus.requireFuturesActive();
 							await systemStatus.requireExchangeBetweenTribesAllowed(
-								toBytes32('hETH'),
+								toBytes32('rETH'),
 								toBytes32('hBTC')
 							);
-							await systemStatus.requireTribeActive(toBytes32('hETH'));
-							await systemStatus.requireFuturesMarketActive(toBytes32('hETH'));
+							await systemStatus.requireTribeActive(toBytes32('rETH'));
+							await systemStatus.requireFuturesMarketActive(toBytes32('rETH'));
 						});
 
 						it('yet that address cannot suspend', async () => {
@@ -726,14 +726,14 @@ contract('SystemStatus', async accounts => {
 							await assert.revert(systemStatus.suspendSystem('8', { from: account2 }));
 							await assert.revert(systemStatus.resumeSystem({ from: account2 }));
 							await assert.revert(
-								systemStatus.suspendTribe(toBytes32('hETH'), '5', { from: account2 })
+								systemStatus.suspendTribe(toBytes32('rETH'), '5', { from: account2 })
 							);
 							await assert.revert(
-								systemStatus.suspendFuturesMarket(toBytes32('hETH'), '5', { from: account2 })
+								systemStatus.suspendFuturesMarket(toBytes32('rETH'), '5', { from: account2 })
 							);
-							await assert.revert(systemStatus.resumeTribe(toBytes32('hETH'), { from: account2 }));
+							await assert.revert(systemStatus.resumeTribe(toBytes32('rETH'), { from: account2 }));
 							await assert.revert(
-								systemStatus.resumeFuturesMarket(toBytes32('hETH'), { from: account2 })
+								systemStatus.resumeFuturesMarket(toBytes32('rETH'), { from: account2 })
 							);
 						});
 					});
@@ -761,9 +761,9 @@ contract('SystemStatus', async accounts => {
 				});
 			});
 
-			it('getTribeExchangeSuspensions(hETH, hBTC, iBTC) is empty', async () => {
+			it('getTribeExchangeSuspensions(rETH, hBTC, iBTC) is empty', async () => {
 				const { exchangeSuspensions, reasons } = await systemStatus.getTribeExchangeSuspensions(
-					['hETH', 'hBTC', 'iBTC'].map(toBytes32)
+					['rETH', 'hBTC', 'iBTC'].map(toBytes32)
 				);
 				assert.deepEqual(exchangeSuspensions, [false, false, false]);
 				assert.deepEqual(reasons, ['0', '0', '0']);
@@ -780,9 +780,9 @@ contract('SystemStatus', async accounts => {
 					assert.equal(reason, givenReason);
 					assert.eventEqual(txn, 'TribeExchangeSuspended', [hBTC, reason]);
 				});
-				it('getTribeExchangeSuspensions(hETH, hBTC, iBTC) returns values for hBTC', async () => {
+				it('getTribeExchangeSuspensions(rETH, hBTC, iBTC) returns values for hBTC', async () => {
 					const { exchangeSuspensions, reasons } = await systemStatus.getTribeExchangeSuspensions(
-						['hETH', 'hBTC', 'iBTC'].map(toBytes32)
+						['rETH', 'hBTC', 'iBTC'].map(toBytes32)
 					);
 					assert.deepEqual(exchangeSuspensions, [false, true, false]);
 					assert.deepEqual(reasons, ['0', givenReason, '0']);
@@ -831,12 +831,12 @@ contract('SystemStatus', async accounts => {
 						await systemStatus.requireFuturesActive();
 						await systemStatus.requireTribeActive(hBTC);
 						await systemStatus.requireFuturesMarketActive(hBTC);
-						await systemStatus.requireTribesActive(toBytes32('hETH'), hBTC);
+						await systemStatus.requireTribesActive(toBytes32('rETH'), hBTC);
 					});
 					it('and requireExchangeBetweenTribesAllowed() reverts if one is the given tribe', async () => {
 						const reason = 'Tribe exchange suspended. Operation prohibited';
 						await assert.revert(
-							systemStatus.requireExchangeBetweenTribesAllowed(toBytes32('hETH'), hBTC),
+							systemStatus.requireExchangeBetweenTribesAllowed(toBytes32('rETH'), hBTC),
 							reason
 						);
 						await assert.revert(
@@ -844,7 +844,7 @@ contract('SystemStatus', async accounts => {
 							reason
 						);
 						await systemStatus.requireExchangeBetweenTribesAllowed(
-							toBytes32('hETH'),
+							toBytes32('rETH'),
 							toBytes32('rUSD')
 						); // no issues
 						await systemStatus.requireExchangeBetweenTribesAllowed(
@@ -917,11 +917,11 @@ contract('SystemStatus', async accounts => {
 							await systemStatus.requireSystemActive();
 							await systemStatus.requireIssuanceActive();
 							await systemStatus.requireFuturesActive();
-							await systemStatus.requireExchangeBetweenTribesAllowed(toBytes32('hETH'), hBTC);
+							await systemStatus.requireExchangeBetweenTribesAllowed(toBytes32('rETH'), hBTC);
 							await systemStatus.requireTribeActive(hBTC);
 							await systemStatus.requireFuturesMarketActive(hBTC);
-							await systemStatus.requireTribesActive(hBTC, toBytes32('hETH'));
-							await systemStatus.requireTribesActive(toBytes32('hETH'), hBTC);
+							await systemStatus.requireTribesActive(hBTC, toBytes32('rETH'));
+							await systemStatus.requireTribesActive(toBytes32('rETH'), hBTC);
 						});
 
 						it('yet that address cannot suspend', async () => {
@@ -931,12 +931,12 @@ contract('SystemStatus', async accounts => {
 							);
 						});
 
-						it('getTribeExchangeSuspensions(hETH, hBTC, iBTC) is empty', async () => {
+						it('getTribeExchangeSuspensions(rETH, hBTC, iBTC) is empty', async () => {
 							const {
 								exchangeSuspensions,
 								reasons,
 							} = await systemStatus.getTribeExchangeSuspensions(
-								['hETH', 'hBTC', 'iBTC'].map(toBytes32)
+								['rETH', 'hBTC', 'iBTC'].map(toBytes32)
 							);
 							assert.deepEqual(exchangeSuspensions, [false, false, false]);
 							assert.deepEqual(reasons, ['0', '0', '0']);
@@ -948,14 +948,14 @@ contract('SystemStatus', async accounts => {
 
 		describe('suspendTribesExchange()', () => {
 			let txn;
-			const [hBTC, hETH] = ['hBTC', 'hETH'].map(toBytes32);
+			const [hBTC, rETH] = ['hBTC', 'rETH'].map(toBytes32);
 
 			it('can only be invoked by the owner initially', async () => {
 				await onlyGivenAddressCanInvoke({
 					fnc: systemStatus.suspendTribesExchange,
 					accounts,
 					address: owner,
-					args: [[hBTC, hETH], '0'],
+					args: [[hBTC, rETH], '0'],
 					reason: 'Restricted to access control list',
 				});
 			});
@@ -963,7 +963,7 @@ contract('SystemStatus', async accounts => {
 			describe('when the owner suspends', () => {
 				const givenReason = '150';
 				beforeEach(async () => {
-					txn = await systemStatus.suspendTribesExchange([hBTC, hETH], givenReason, {
+					txn = await systemStatus.suspendTribesExchange([hBTC, rETH], givenReason, {
 						from: owner,
 					});
 				});
@@ -974,14 +974,14 @@ contract('SystemStatus', async accounts => {
 					assert.eventEqual(txn.logs[0], 'TribeExchangeSuspended', [hBTC, reason]);
 				});
 				it('and for ETH', async () => {
-					const { suspended, reason } = await systemStatus.tribeExchangeSuspension(hETH);
+					const { suspended, reason } = await systemStatus.tribeExchangeSuspension(rETH);
 					assert.equal(suspended, true);
 					assert.equal(reason, givenReason);
-					assert.eventEqual(txn.logs[1], 'TribeExchangeSuspended', [hETH, reason]);
+					assert.eventEqual(txn.logs[1], 'TribeExchangeSuspended', [rETH, reason]);
 				});
-				it('getTribeExchangeSuspensions(hETH, hBTC, iBTC) returns values for hETH and hBTC', async () => {
+				it('getTribeExchangeSuspensions(rETH, hBTC, iBTC) returns values for rETH and hBTC', async () => {
 					const { exchangeSuspensions, reasons } = await systemStatus.getTribeExchangeSuspensions(
-						['hETH', 'hBTC', 'iBTC'].map(toBytes32)
+						['rETH', 'hBTC', 'iBTC'].map(toBytes32)
 					);
 					assert.deepEqual(exchangeSuspensions, [true, true, false]);
 					assert.deepEqual(reasons, [givenReason, givenReason, '0']);
@@ -991,14 +991,14 @@ contract('SystemStatus', async accounts => {
 
 		describe('resumeTribesExchange()', () => {
 			let txn;
-			const [hBTC, hETH] = ['hBTC', 'hETH'].map(toBytes32);
+			const [hBTC, rETH] = ['hBTC', 'rETH'].map(toBytes32);
 
 			it('can only be invoked by the owner initially', async () => {
 				await onlyGivenAddressCanInvoke({
 					fnc: systemStatus.resumeTribesExchange,
 					accounts,
 					address: owner,
-					args: [[hBTC, hETH]],
+					args: [[hBTC, rETH]],
 					reason: 'Restricted to access control list',
 				});
 			});
@@ -1006,7 +1006,7 @@ contract('SystemStatus', async accounts => {
 			describe('when the owner suspends', () => {
 				const givenReason = '55';
 				beforeEach(async () => {
-					await systemStatus.suspendTribesExchange([hBTC, hETH], givenReason, { from: owner });
+					await systemStatus.suspendTribesExchange([hBTC, rETH], givenReason, { from: owner });
 				});
 
 				describe('when the owner adds an address to resume only', () => {
@@ -1018,7 +1018,7 @@ contract('SystemStatus', async accounts => {
 
 					describe('and that address invokes resume', () => {
 						beforeEach(async () => {
-							txn = await systemStatus.resumeTribesExchange([hBTC, hETH], { from: account3 });
+							txn = await systemStatus.resumeTribesExchange([hBTC, rETH], { from: account3 });
 						});
 
 						it('it succeeds for hBTC', async () => {
@@ -1028,11 +1028,11 @@ contract('SystemStatus', async accounts => {
 							assert.eventEqual(txn.logs[0], 'TribeExchangeResumed', [hBTC, givenReason]);
 						});
 
-						it('and for hETH', async () => {
-							const { suspended, reason } = await systemStatus.tribeExchangeSuspension(hETH);
+						it('and for rETH', async () => {
+							const { suspended, reason } = await systemStatus.tribeExchangeSuspension(rETH);
 							assert.equal(suspended, false);
 							assert.equal(reason, '0');
-							assert.eventEqual(txn.logs[1], 'TribeExchangeResumed', [hETH, givenReason]);
+							assert.eventEqual(txn.logs[1], 'TribeExchangeResumed', [rETH, givenReason]);
 						});
 
 						it('and all the require checks succeed', async () => {
@@ -1040,8 +1040,8 @@ contract('SystemStatus', async accounts => {
 							await systemStatus.requireIssuanceActive();
 							await systemStatus.requireFuturesActive();
 							await systemStatus.requireFuturesMarketActive(hBTC);
-							await systemStatus.requireExchangeBetweenTribesAllowed(hETH, hBTC);
-							await systemStatus.requireTribesActive(hBTC, hETH);
+							await systemStatus.requireExchangeBetweenTribesAllowed(rETH, hBTC);
+							await systemStatus.requireTribesActive(hBTC, rETH);
 						});
 					});
 				});
@@ -1122,7 +1122,7 @@ contract('SystemStatus', async accounts => {
 					it('but not the others', async () => {
 						await systemStatus.requireSystemActive();
 						await systemStatus.requireExchangeActive();
-						await systemStatus.requireTribeActive(toBytes32('hETH'));
+						await systemStatus.requireTribeActive(toBytes32('rETH'));
 					});
 
 					it('yet that address cannot resume', async () => {
@@ -1140,9 +1140,9 @@ contract('SystemStatus', async accounts => {
 						);
 						await assert.revert(systemStatus.resumeSystem({ from: account2 }));
 						await assert.revert(
-							systemStatus.suspendTribe(toBytes32('hETH'), '55', { from: account2 })
+							systemStatus.suspendTribe(toBytes32('rETH'), '55', { from: account2 })
 						);
-						await assert.revert(systemStatus.resumeTribe(toBytes32('hETH'), { from: account2 }));
+						await assert.revert(systemStatus.resumeTribe(toBytes32('rETH'), { from: account2 }));
 					});
 					it('yet the owner can still resume', async () => {
 						await systemStatus.resumeFutures({ from: owner });
@@ -1216,9 +1216,9 @@ contract('SystemStatus', async accounts => {
 							await assert.revert(systemStatus.suspendSystem('8', { from: account2 }));
 							await assert.revert(systemStatus.resumeSystem({ from: account2 }));
 							await assert.revert(
-								systemStatus.suspendTribe(toBytes32('hETH'), '5', { from: account2 })
+								systemStatus.suspendTribe(toBytes32('rETH'), '5', { from: account2 })
 							);
-							await assert.revert(systemStatus.resumeTribe(toBytes32('hETH'), { from: account2 }));
+							await assert.revert(systemStatus.resumeTribe(toBytes32('rETH'), { from: account2 }));
 						});
 					});
 				});
@@ -1228,7 +1228,7 @@ contract('SystemStatus', async accounts => {
 		describe('suspendFuturesMarket(s)', () => {
 			let txn;
 			const hBTC = toBytes32('hBTC');
-			const hETH = toBytes32('hETH');
+			const rETH = toBytes32('rETH');
 
 			it('is not suspended initially', async () => {
 				const { suspended, reason } = await systemStatus.futuresMarketSuspension(hBTC);
@@ -1248,14 +1248,14 @@ contract('SystemStatus', async accounts => {
 					fnc: systemStatus.suspendFuturesMarkets,
 					accounts,
 					address: owner,
-					args: [[hBTC, hETH], '0'],
+					args: [[hBTC, rETH], '0'],
 					reason: 'Restricted to access control list',
 				});
 			});
 
-			it('getFuturesMarketSuspensions(hETH, hBTC) is empty', async () => {
+			it('getFuturesMarketSuspensions(rETH, hBTC) is empty', async () => {
 				const { suspensions, reasons } = await systemStatus.getFuturesMarketSuspensions(
-					['hETH', 'hBTC'].map(toBytes32)
+					['rETH', 'hBTC'].map(toBytes32)
 				);
 				assert.deepEqual(suspensions, [false, false]);
 				assert.deepEqual(reasons, ['0', '0']);
@@ -1271,9 +1271,9 @@ contract('SystemStatus', async accounts => {
 					assert.equal(reason, '5');
 					assert.eventEqual(txn, 'FuturesMarketSuspended', [hBTC, '5']);
 				});
-				it('getFuturesMarketSuspensions(hETH, hBTC) returns values for hBTC', async () => {
+				it('getFuturesMarketSuspensions(rETH, hBTC) returns values for hBTC', async () => {
 					const { suspensions, reasons } = await systemStatus.getFuturesMarketSuspensions(
-						['hETH', 'hBTC'].map(toBytes32)
+						['rETH', 'hBTC'].map(toBytes32)
 					);
 					assert.deepEqual(suspensions, [false, true]);
 					assert.deepEqual(reasons, ['0', '5']);
@@ -1282,15 +1282,15 @@ contract('SystemStatus', async accounts => {
 
 			describe('when the owner suspends multiple markets', () => {
 				beforeEach(async () => {
-					txn = await systemStatus.suspendFuturesMarkets([hBTC, hETH], '5', { from: owner });
+					txn = await systemStatus.suspendFuturesMarkets([hBTC, rETH], '5', { from: owner });
 				});
 				it('it succeeds', async () => {
 					assert.equal((await systemStatus.futuresMarketSuspension(hBTC)).suspended, true);
-					assert.equal((await systemStatus.futuresMarketSuspension(hETH)).suspended, true);
+					assert.equal((await systemStatus.futuresMarketSuspension(rETH)).suspended, true);
 				});
-				it('getFuturesMarketSuspensions(hETH, hBTC) returns values for both', async () => {
+				it('getFuturesMarketSuspensions(rETH, hBTC) returns values for both', async () => {
 					const { suspensions, reasons } = await systemStatus.getFuturesMarketSuspensions(
-						['hETH', 'hBTC'].map(toBytes32)
+						['rETH', 'hBTC'].map(toBytes32)
 					);
 					assert.deepEqual(suspensions, [true, true]);
 					assert.deepEqual(reasons, ['5', '5']);
@@ -1336,10 +1336,10 @@ contract('SystemStatus', async accounts => {
 						await systemStatus.requireSystemActive();
 						await systemStatus.requireExchangeActive();
 						await systemStatus.requireFuturesActive();
-						await systemStatus.requireTribeActive(toBytes32('hETH'));
+						await systemStatus.requireTribeActive(toBytes32('rETH'));
 					});
 					it('and not other markets', async () => {
-						await systemStatus.requireFuturesMarketActive(toBytes32('hETH'));
+						await systemStatus.requireFuturesMarketActive(toBytes32('rETH'));
 					});
 
 					it('yet that address cannot resume', async () => {
@@ -1357,9 +1357,9 @@ contract('SystemStatus', async accounts => {
 						);
 						await assert.revert(systemStatus.resumeSystem({ from: account2 }));
 						await assert.revert(
-							systemStatus.suspendTribe(toBytes32('hETH'), '55', { from: account2 })
+							systemStatus.suspendTribe(toBytes32('rETH'), '55', { from: account2 })
 						);
-						await assert.revert(systemStatus.resumeTribe(toBytes32('hETH'), { from: account2 }));
+						await assert.revert(systemStatus.resumeTribe(toBytes32('rETH'), { from: account2 }));
 					});
 					it('yet the owner can still resume', async () => {
 						await systemStatus.resumeFutures({ from: owner });
@@ -1368,21 +1368,21 @@ contract('SystemStatus', async accounts => {
 
 				describe('and that address invokes suspend for multiple market', () => {
 					beforeEach(async () => {
-						txn = await systemStatus.suspendFuturesMarkets([hBTC, hETH], '33', { from: account2 });
+						txn = await systemStatus.suspendFuturesMarkets([hBTC, rETH], '33', { from: account2 });
 					});
 					it('it succeeds', async () => {
 						assert.equal((await systemStatus.futuresMarketSuspension(hBTC)).suspended, true);
-						assert.equal((await systemStatus.futuresMarketSuspension(hETH)).suspended, true);
+						assert.equal((await systemStatus.futuresMarketSuspension(rETH)).suspended, true);
 					});
 					it('and the require checks reverts as expected', async () => {
 						await assert.revert(systemStatus.requireFuturesMarketActive(hBTC), 'Market suspended');
-						await assert.revert(systemStatus.requireFuturesMarketActive(hETH), 'Market suspended');
+						await assert.revert(systemStatus.requireFuturesMarketActive(rETH), 'Market suspended');
 					});
 					it('but not the other checks', async () => {
 						await systemStatus.requireSystemActive();
 						await systemStatus.requireExchangeActive();
 						await systemStatus.requireFuturesActive();
-						await systemStatus.requireTribeActive(toBytes32('hETH'));
+						await systemStatus.requireTribeActive(toBytes32('rETH'));
 					});
 					it('and not other markets', async () => {
 						await systemStatus.requireFuturesMarketActive(toBytes32('sOTHER'));
@@ -1403,9 +1403,9 @@ contract('SystemStatus', async accounts => {
 						);
 						await assert.revert(systemStatus.resumeSystem({ from: account2 }));
 						await assert.revert(
-							systemStatus.suspendTribe(toBytes32('hETH'), '55', { from: account2 })
+							systemStatus.suspendTribe(toBytes32('rETH'), '55', { from: account2 })
 						);
-						await assert.revert(systemStatus.resumeTribe(toBytes32('hETH'), { from: account2 }));
+						await assert.revert(systemStatus.resumeTribe(toBytes32('rETH'), { from: account2 }));
 					});
 					it('yet the owner can still resume', async () => {
 						await systemStatus.resumeFutures({ from: owner });
@@ -1417,7 +1417,7 @@ contract('SystemStatus', async accounts => {
 		describe('resumeFuturesMarket(s)', () => {
 			let txn;
 			const hBTC = toBytes32('hBTC');
-			const hETH = toBytes32('hETH');
+			const rETH = toBytes32('rETH');
 			const sLINK = toBytes32('sLINK');
 
 			it('can only be invoked by the owner initially', async () => {
@@ -1432,7 +1432,7 @@ contract('SystemStatus', async accounts => {
 					fnc: systemStatus.resumeFuturesMarkets,
 					accounts,
 					address: owner,
-					args: [[hBTC, hETH]],
+					args: [[hBTC, rETH]],
 					reason: 'Restricted to access control list',
 				});
 			});
@@ -1440,7 +1440,7 @@ contract('SystemStatus', async accounts => {
 			describe('when the owner suspends multiple markets', () => {
 				const givenReason = '5';
 				beforeEach(async () => {
-					await systemStatus.suspendFuturesMarkets([hBTC, hETH, sLINK], givenReason, {
+					await systemStatus.suspendFuturesMarkets([hBTC, rETH, sLINK], givenReason, {
 						from: owner,
 					});
 				});
@@ -1481,7 +1481,7 @@ contract('SystemStatus', async accounts => {
 
 						it('but not for second market', async () => {
 							await assert.revert(
-								systemStatus.requireFuturesMarketActive(hETH),
+								systemStatus.requireFuturesMarketActive(rETH),
 								'Market suspended'
 							);
 						});
@@ -1500,27 +1500,27 @@ contract('SystemStatus', async accounts => {
 							await assert.revert(systemStatus.suspendSystem('8', { from: account2 }));
 							await assert.revert(systemStatus.resumeSystem({ from: account2 }));
 							await assert.revert(
-								systemStatus.suspendTribe(toBytes32('hETH'), '5', { from: account2 })
+								systemStatus.suspendTribe(toBytes32('rETH'), '5', { from: account2 })
 							);
-							await assert.revert(systemStatus.resumeTribe(toBytes32('hETH'), { from: account2 }));
+							await assert.revert(systemStatus.resumeTribe(toBytes32('rETH'), { from: account2 }));
 						});
 					});
 
 					describe('and that address invokes resume for two markets', () => {
 						beforeEach(async () => {
-							txn = await systemStatus.resumeFuturesMarkets([hBTC, hETH], { from: account2 });
+							txn = await systemStatus.resumeFuturesMarkets([hBTC, rETH], { from: account2 });
 						});
 
 						it('it succeeds', async () => {
 							assert.equal((await systemStatus.futuresMarketSuspension(hBTC)).suspended, false);
-							assert.equal((await systemStatus.futuresMarketSuspension(hETH)).suspended, false);
+							assert.equal((await systemStatus.futuresMarketSuspension(rETH)).suspended, false);
 						});
 
 						it('and all the require checks succeed', async () => {
 							await systemStatus.requireSystemActive();
 							await systemStatus.requireFuturesActive();
 							await systemStatus.requireFuturesMarketActive(hBTC);
-							await systemStatus.requireFuturesMarketActive(hETH);
+							await systemStatus.requireFuturesMarketActive(rETH);
 						});
 
 						it('but not for third market', async () => {
@@ -1554,9 +1554,9 @@ contract('SystemStatus', async accounts => {
 				});
 			});
 
-			it('getTribeSuspensions(hETH, hBTC, iBTC) is empty', async () => {
+			it('getTribeSuspensions(rETH, hBTC, iBTC) is empty', async () => {
 				const { suspensions, reasons } = await systemStatus.getTribeSuspensions(
-					['hETH', 'hBTC', 'iBTC'].map(toBytes32)
+					['rETH', 'hBTC', 'iBTC'].map(toBytes32)
 				);
 				assert.deepEqual(suspensions, [false, false, false]);
 				assert.deepEqual(reasons, ['0', '0', '0']);
@@ -1573,9 +1573,9 @@ contract('SystemStatus', async accounts => {
 					assert.equal(reason, givenReason);
 					assert.eventEqual(txn, 'TribeSuspended', [hBTC, reason]);
 				});
-				it('getTribeSuspensions(hETH, hBTC, iBTC) returns values for hBTC', async () => {
+				it('getTribeSuspensions(rETH, hBTC, iBTC) returns values for hBTC', async () => {
 					const { suspensions, reasons } = await systemStatus.getTribeSuspensions(
-						['hETH', 'hBTC', 'iBTC'].map(toBytes32)
+						['rETH', 'hBTC', 'iBTC'].map(toBytes32)
 					);
 					assert.deepEqual(suspensions, [false, true, false]);
 					assert.deepEqual(reasons, ['0', givenReason, '0']);
@@ -1620,7 +1620,7 @@ contract('SystemStatus', async accounts => {
 						assert.isTrue(await systemStatus.tribeSuspended(hBTC));
 					});
 					it('but not other tribe bool view', async () => {
-						assert.isFalse(await systemStatus.tribeSuspended(toBytes32('hETH')));
+						assert.isFalse(await systemStatus.tribeSuspended(toBytes32('rETH')));
 					});
 					it('but others do not revert', async () => {
 						await systemStatus.requireSystemActive();
@@ -1628,15 +1628,15 @@ contract('SystemStatus', async accounts => {
 					});
 					it('and requireTribesActive() reverts if one is the given tribe', async () => {
 						const reason = 'Tribe is suspended. Operation prohibited';
-						await assert.revert(systemStatus.requireTribesActive(toBytes32('hETH'), hBTC), reason);
+						await assert.revert(systemStatus.requireTribesActive(toBytes32('rETH'), hBTC), reason);
 						await assert.revert(systemStatus.requireTribesActive(hBTC, toBytes32('sTRX')), reason);
-						await systemStatus.requireTribesActive(toBytes32('hETH'), toBytes32('rUSD')); // no issues
+						await systemStatus.requireTribesActive(toBytes32('rETH'), toBytes32('rUSD')); // no issues
 						await systemStatus.requireTribesActive(toBytes32('iTRX'), toBytes32('iBTC')); // no issues
 					});
 					it('and requireExchangeBetweenTribesAllowed() reverts if one is the given tribe', async () => {
 						const reason = 'Tribe is suspended. Operation prohibited';
 						await assert.revert(
-							systemStatus.requireExchangeBetweenTribesAllowed(toBytes32('hETH'), hBTC),
+							systemStatus.requireExchangeBetweenTribesAllowed(toBytes32('rETH'), hBTC),
 							reason
 						);
 						await assert.revert(
@@ -1644,7 +1644,7 @@ contract('SystemStatus', async accounts => {
 							reason
 						);
 						await systemStatus.requireExchangeBetweenTribesAllowed(
-							toBytes32('hETH'),
+							toBytes32('rETH'),
 							toBytes32('rUSD')
 						); // no issues
 						await systemStatus.requireExchangeBetweenTribesAllowed(
@@ -1676,14 +1676,14 @@ contract('SystemStatus', async accounts => {
 
 		describe('suspendTribes()', () => {
 			let txn;
-			const [hBTC, hETH] = ['hBTC', 'hETH'].map(toBytes32);
+			const [hBTC, rETH] = ['hBTC', 'rETH'].map(toBytes32);
 
 			it('can only be invoked by the owner initially', async () => {
 				await onlyGivenAddressCanInvoke({
 					fnc: systemStatus.suspendTribes,
 					accounts,
 					address: owner,
-					args: [[hBTC, hETH], '0'],
+					args: [[hBTC, rETH], '0'],
 					reason: 'Restricted to access control list',
 				});
 			});
@@ -1691,7 +1691,7 @@ contract('SystemStatus', async accounts => {
 			describe('when the owner suspends', () => {
 				const givenReason = '150';
 				beforeEach(async () => {
-					txn = await systemStatus.suspendTribes([hBTC, hETH], givenReason, { from: owner });
+					txn = await systemStatus.suspendTribes([hBTC, rETH], givenReason, { from: owner });
 				});
 				it('it succeeds for hBTC', async () => {
 					const { suspended, reason } = await systemStatus.tribeSuspension(hBTC);
@@ -1699,15 +1699,15 @@ contract('SystemStatus', async accounts => {
 					assert.equal(reason, givenReason);
 					assert.eventEqual(txn.logs[0], 'TribeSuspended', [hBTC, reason]);
 				});
-				it('and for hETH', async () => {
-					const { suspended, reason } = await systemStatus.tribeSuspension(hETH);
+				it('and for rETH', async () => {
+					const { suspended, reason } = await systemStatus.tribeSuspension(rETH);
 					assert.equal(suspended, true);
 					assert.equal(reason, givenReason);
-					assert.eventEqual(txn.logs[1], 'TribeSuspended', [hETH, reason]);
+					assert.eventEqual(txn.logs[1], 'TribeSuspended', [rETH, reason]);
 				});
-				it('getTribeSuspensions(hETH, hBTC, iBTC) returns values for both', async () => {
+				it('getTribeSuspensions(rETH, hBTC, iBTC) returns values for both', async () => {
 					const { suspensions, reasons } = await systemStatus.getTribeSuspensions(
-						['hETH', 'hBTC', 'iBTC'].map(toBytes32)
+						['rETH', 'hBTC', 'iBTC'].map(toBytes32)
 					);
 					assert.deepEqual(suspensions, [true, true, false]);
 					assert.deepEqual(reasons, [givenReason, givenReason, '0']);
@@ -1764,8 +1764,8 @@ contract('SystemStatus', async accounts => {
 							await systemStatus.requireSystemActive();
 							await systemStatus.requireIssuanceActive();
 							await systemStatus.requireTribeActive(hBTC);
-							await systemStatus.requireTribesActive(hBTC, toBytes32('hETH'));
-							await systemStatus.requireTribesActive(toBytes32('hETH'), hBTC);
+							await systemStatus.requireTribesActive(hBTC, toBytes32('rETH'));
+							await systemStatus.requireTribesActive(toBytes32('rETH'), hBTC);
 						});
 
 						it('yet that address cannot suspend', async () => {
@@ -1785,9 +1785,9 @@ contract('SystemStatus', async accounts => {
 							await assert.revert(systemStatus.resumeIssuance({ from: account3 }));
 						});
 
-						it('getTribeSuspensions(hETH, hBTC, iBTC) is empty', async () => {
+						it('getTribeSuspensions(rETH, hBTC, iBTC) is empty', async () => {
 							const { suspensions, reasons } = await systemStatus.getTribeSuspensions(
-								['hETH', 'hBTC', 'iBTC'].map(toBytes32)
+								['rETH', 'hBTC', 'iBTC'].map(toBytes32)
 							);
 							assert.deepEqual(suspensions, [false, false, false]);
 							assert.deepEqual(reasons, ['0', '0', '0']);
@@ -1798,7 +1798,7 @@ contract('SystemStatus', async accounts => {
 		});
 
 		describe('resumeTribes()', () => {
-			const [hBTC, hETH] = ['hBTC', 'hETH'].map(toBytes32);
+			const [hBTC, rETH] = ['hBTC', 'rETH'].map(toBytes32);
 
 			let txn;
 			it('can only be invoked by the owner initially', async () => {
@@ -1806,7 +1806,7 @@ contract('SystemStatus', async accounts => {
 					fnc: systemStatus.resumeTribes,
 					accounts,
 					address: owner,
-					args: [[hBTC, hETH]],
+					args: [[hBTC, rETH]],
 					reason: 'Restricted to access control list',
 				});
 			});
@@ -1814,7 +1814,7 @@ contract('SystemStatus', async accounts => {
 			describe('when the owner suspends', () => {
 				const givenReason = '55';
 				beforeEach(async () => {
-					await systemStatus.suspendTribes([hBTC, hETH], givenReason, { from: owner });
+					await systemStatus.suspendTribes([hBTC, rETH], givenReason, { from: owner });
 				});
 
 				describe('when the owner adds an address to resume only', () => {
@@ -1829,7 +1829,7 @@ contract('SystemStatus', async accounts => {
 
 					describe('and that address invokes resume', () => {
 						beforeEach(async () => {
-							txn = await systemStatus.resumeTribes([hBTC, hETH], { from: account3 });
+							txn = await systemStatus.resumeTribes([hBTC, rETH], { from: account3 });
 						});
 
 						it('it succeeds for hBTC', async () => {
@@ -1839,16 +1839,16 @@ contract('SystemStatus', async accounts => {
 							assert.eventEqual(txn.logs[0], 'TribeResumed', [hBTC, givenReason]);
 						});
 
-						it('and for hETH', async () => {
-							const { suspended, reason } = await systemStatus.tribeSuspension(hETH);
+						it('and for rETH', async () => {
+							const { suspended, reason } = await systemStatus.tribeSuspension(rETH);
 							assert.equal(suspended, false);
 							assert.equal(reason, '0');
-							assert.eventEqual(txn.logs[1], 'TribeResumed', [hETH, givenReason]);
+							assert.eventEqual(txn.logs[1], 'TribeResumed', [rETH, givenReason]);
 						});
 
-						it('getTribeSuspensions(hETH, hBTC, iBTC) is empty', async () => {
+						it('getTribeSuspensions(rETH, hBTC, iBTC) is empty', async () => {
 							const { suspensions, reasons } = await systemStatus.getTribeSuspensions(
-								['hETH', 'hBTC', 'iBTC'].map(toBytes32)
+								['rETH', 'hBTC', 'iBTC'].map(toBytes32)
 							);
 							assert.deepEqual(suspensions, [false, false, false]);
 							assert.deepEqual(reasons, ['0', '0', '0']);
@@ -1859,7 +1859,7 @@ contract('SystemStatus', async accounts => {
 		});
 
 		describe('updateAccessControl()', () => {
-			const tribe = toBytes32('hETH');
+			const tribe = toBytes32('rETH');
 
 			it('can only be invoked by the owner', async () => {
 				await onlyGivenAddressCanInvoke({
@@ -1961,7 +1961,7 @@ contract('SystemStatus', async accounts => {
 
 			describe('when invoked by the owner', () => {
 				let txn;
-				const tribe = toBytes32('hETH');
+				const tribe = toBytes32('rETH');
 				beforeEach(async () => {
 					txn = await systemStatus.updateAccessControls(
 						[SYSTEM, RWAONE_EXCHANGE, TRIBE],

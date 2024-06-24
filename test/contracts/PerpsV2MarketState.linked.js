@@ -6,8 +6,8 @@ const { assert } = require('./common');
 const { getDecodedLogs, decodedEventEqual } = require('./helpers');
 
 // const { ensureOnlyExpectedMutativeFunctions, onlyGivenAddressCanInvoke } = require('./helpers');
-const marketKey = toBytes32('hETH-perps');
-const baseAsset = toBytes32('hETH');
+const marketKey = toBytes32('rETH-perps');
+const baseAsset = toBytes32('rETH');
 
 const generateFakeActivity = ({
 	fundingSequenceItemsCount,

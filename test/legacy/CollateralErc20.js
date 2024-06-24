@@ -34,7 +34,7 @@ contract('CollateralErc20', async accounts => {
 	const INTERACTION_DELAY = 300;
 
 	const rUSD = toBytes32('rUSD');
-	const hETH = toBytes32('hETH');
+	const rETH = toBytes32('rETH');
 	const hBTC = toBytes32('hBTC');
 
 	const oneRenBTC = web3.utils.toBN('100000000');
@@ -90,7 +90,7 @@ contract('CollateralErc20', async accounts => {
 	};
 
 	const updateRatesWithDefaults = async () => {
-		await updateAggregatorRates(exchangeRates, null, [hETH, hBTC], [100, 10000].map(toUnit));
+		await updateAggregatorRates(exchangeRates, null, [rETH, hBTC], [100, 10000].map(toUnit));
 	};
 
 	const fastForwardAndUpdateRates = async seconds => {
@@ -142,7 +142,7 @@ contract('CollateralErc20', async accounts => {
 			],
 		}));
 
-		await setupPriceAggregators(exchangeRates, owner, [hBTC, hETH]);
+		await setupPriceAggregators(exchangeRates, owner, [hBTC, rETH]);
 
 		managerState = await CollateralManagerState.new(owner, ZERO_ADDRESS, { from: deployerAccount });
 
@@ -349,10 +349,10 @@ contract('CollateralErc20', async accounts => {
 
 			assert.bnClose(rUSDAmount, toUnit(100), 100);
 
-			// $150 worth of btc should allow $100 (1) of hETH to be issued.
-			const hETHAmount = await cerc20.maxLoan(toUnit(0.015), hETH);
+			// $150 worth of btc should allow $100 (1) of rETH to be issued.
+			const rETHAmount = await cerc20.maxLoan(toUnit(0.015), rETH);
 
-			assert.bnEqual(hETHAmount, toUnit(1));
+			assert.bnEqual(rETHAmount, toUnit(1));
 		});
 	});
 

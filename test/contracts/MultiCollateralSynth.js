@@ -23,7 +23,7 @@ const { setupAllContracts } = require('./setup');
 contract('MultiCollateralTribe', accounts => {
 	const [deployerAccount, owner, , , account1] = accounts;
 
-	const hETH = toBytes32('hETH');
+	const rETH = toBytes32('rETH');
 	const hBTC = toBytes32('hBTC');
 
 	let issuer,
@@ -86,8 +86,8 @@ contract('MultiCollateralTribe', accounts => {
 			],
 		}));
 
-		await setupPriceAggregators(exchangeRates, owner, [hETH, hBTC]);
-		await updateAggregatorRates(exchangeRates, null, [hETH, hBTC], [100, 10000].map(toUnit));
+		await setupPriceAggregators(exchangeRates, owner, [rETH, hBTC]);
+		await updateAggregatorRates(exchangeRates, null, [rETH, hBTC], [100, 10000].map(toUnit));
 
 		await managerState.setAssociatedContract(manager.address, { from: owner });
 

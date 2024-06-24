@@ -21,15 +21,15 @@ const { toBytes32 } = require('../..');
 const { toBN } = require('web3-utils');
 
 contract('NativeEtherWrapper', async accounts => {
-	const tribes = ['rUSD', 'hETH', 'ETH', 'wRWAX'];
-	const [hETH, ETH] = ['hETH', 'ETH'].map(toBytes32);
+	const tribes = ['rUSD', 'rETH', 'ETH', 'wRWAX'];
+	const [rETH, ETH] = ['rETH', 'ETH'].map(toBytes32);
 
 	const [, owner, , , account1] = accounts;
 
 	let systemSettings,
 		exchangeRates,
 		addressResolver,
-		hETHTribe,
+		rETHTribe,
 		etherWrapper,
 		nativeEtherWrapper,
 		weth;
@@ -41,7 +41,7 @@ contract('NativeEtherWrapper', async accounts => {
 			ExchangeRates: exchangeRates,
 			EtherWrapper: etherWrapper,
 			NativeEtherWrapper: nativeEtherWrapper,
-			TribehETH: hETHTribe,
+			TriberETH: rETHTribe,
 			WETH: weth,
 		} = await setupAllContracts({
 			accounts,
@@ -64,10 +64,10 @@ contract('NativeEtherWrapper', async accounts => {
 			],
 		}));
 
-		await setupPriceAggregators(exchangeRates, owner, [hETH, ETH]);
+		await setupPriceAggregators(exchangeRates, owner, [rETH, ETH]);
 
 		// Depot requires ETH rates
-		await updateAggregatorRates(exchangeRates, null, [hETH, ETH], ['1500', '1500'].map(toUnit));
+		await updateAggregatorRates(exchangeRates, null, [rETH, ETH], ['1500', '1500'].map(toUnit));
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
@@ -92,7 +92,7 @@ contract('NativeEtherWrapper', async accounts => {
 		});
 
 		it('should access its dependencies via the address resolver', async () => {
-			assert.equal(await addressResolver.getAddress(toBytes32('TribehETH')), hETHTribe.address);
+			assert.equal(await addressResolver.getAddress(toBytes32('TriberETH')), rETHTribe.address);
 			assert.equal(
 				await addressResolver.getAddress(toBytes32('EtherWrapper')),
 				etherWrapper.address
@@ -152,8 +152,8 @@ contract('NativeEtherWrapper', async accounts => {
 						.find(({ name }) => name === 'Minted'),
 				});
 			});
-			it('transfers hETH to msg.sender', async () => {
-				assert.bnEqual(await hETHTribe.balanceOf(account1), amount);
+			it('transfers rETH to msg.sender', async () => {
+				assert.bnEqual(await rETHTribe.balanceOf(account1), amount);
 			});
 		});
 	});
@@ -171,7 +171,7 @@ contract('NativeEtherWrapper', async accounts => {
 				);
 			});
 		});
-		describe('when called with 0 hETH balance', async () => {
+		describe('when called with 0 rETH balance', async () => {
 			it('reverts', async () => {
 				await assert.revert(
 					nativeEtherWrapper.burn('1', { from: account1 }),
@@ -179,20 +179,20 @@ contract('NativeEtherWrapper', async accounts => {
 				);
 			});
 		});
-		describe('when called with hETH balance', async () => {
+		describe('when called with rETH balance', async () => {
 			let hethBalanceBefore;
 			let ethBalanceBefore, ethBalanceAfter;
 			let tx;
 			let amount;
 
 			beforeEach(async () => {
-				// Mint some hETH.
+				// Mint some rETH.
 				await nativeEtherWrapper.mint({ value: toUnit('1'), from: account1 });
-				hethBalanceBefore = await hETHTribe.balanceOf(account1);
+				hethBalanceBefore = await rETHTribe.balanceOf(account1);
 				amount = hethBalanceBefore;
 
-				// Approve hETH.
-				await hETHTribe.approve(nativeEtherWrapper.address, amount, { from: account1 });
+				// Approve rETH.
+				await rETHTribe.approve(nativeEtherWrapper.address, amount, { from: account1 });
 
 				// Burn.
 				ethBalanceBefore = await web3.eth.getBalance(account1);
@@ -200,8 +200,8 @@ contract('NativeEtherWrapper', async accounts => {
 				ethBalanceAfter = await web3.eth.getBalance(account1);
 			});
 
-			it('transfers hETH from msg.sender to contract', async () => {
-				assert.bnEqual(await hETHTribe.balanceOf(account1), hethBalanceBefore.sub(amount));
+			it('transfers rETH from msg.sender to contract', async () => {
+				assert.bnEqual(await rETHTribe.balanceOf(account1), hethBalanceBefore.sub(amount));
 			});
 			it('calls EtherWrapper.burn(amount)', async () => {
 				const logs = await getDecodedLogs({

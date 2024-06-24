@@ -11,11 +11,11 @@ function itCanExchange({ ctx }) {
 		const rUSDAmount = ethers.utils.parseEther('100');
 
 		let owner;
-		let balancehETH, originialPendingSettlements;
-		let Rwaone, Exchanger, TribehETH;
+		let balancerETH, originialPendingSettlements;
+		let Rwaone, Exchanger, TriberETH;
 
 		before('target contracts and users', () => {
-			({ Rwaone, Exchanger, TribehETH } = ctx.contracts);
+			({ Rwaone, Exchanger, TriberETH } = ctx.contracts);
 
 			owner = ctx.users.owner;
 		});
@@ -24,13 +24,13 @@ function itCanExchange({ ctx }) {
 			await ensureBalance({ ctx, symbol: 'rUSD', user: owner, balance: rUSDAmount });
 		});
 
-		describe('when the owner exchanges rUSD to hETH', () => {
+		describe('when the owner exchanges rUSD to rETH', () => {
 			before('record balances', async () => {
-				balancehETH = await TribehETH.balanceOf(owner.address);
+				balancerETH = await TriberETH.balanceOf(owner.address);
 			});
 
 			before('record pending settlements', async () => {
-				const { numEntries } = await Exchanger.settlementOwing(owner.address, toBytes32('hETH'));
+				const { numEntries } = await Exchanger.settlementOwing(owner.address, toBytes32('rETH'));
 
 				originialPendingSettlements = numEntries;
 			});
@@ -40,19 +40,19 @@ function itCanExchange({ ctx }) {
 
 				await updateCache({ ctx });
 
-				const tx = await Rwaone.exchange(toBytes32('rUSD'), rUSDAmount, toBytes32('hETH'));
+				const tx = await Rwaone.exchange(toBytes32('rUSD'), rUSDAmount, toBytes32('rETH'));
 				const { gasUsed } = await tx.wait();
 				console.log(`exchange() gas used: ${Math.round(gasUsed / 1000).toString()}k`);
 			});
 
-			it('receives the expected amount of hETH', async () => {
+			it('receives the expected amount of rETH', async () => {
 				const [expectedAmount, ,] = await Exchanger.getAmountsForExchange(
 					rUSDAmount,
 					toBytes32('rUSD'),
-					toBytes32('hETH')
+					toBytes32('rETH')
 				);
 
-				assert.bnEqual(await TribehETH.balanceOf(owner.address), balancehETH.add(expectedAmount));
+				assert.bnEqual(await TriberETH.balanceOf(owner.address), balancerETH.add(expectedAmount));
 			});
 
 			before('skip if waiting period is zero', async function () {
@@ -66,7 +66,7 @@ function itCanExchange({ ctx }) {
 			});
 
 			it('shows that the user now has pending settlements', async () => {
-				const { numEntries } = await Exchanger.settlementOwing(owner.address, toBytes32('hETH'));
+				const { numEntries } = await Exchanger.settlementOwing(owner.address, toBytes32('rETH'));
 
 				assert.bnEqual(numEntries, originialPendingSettlements.add(ethers.constants.One));
 			});
@@ -77,13 +77,13 @@ function itCanExchange({ ctx }) {
 				});
 
 				before('settle', async () => {
-					const tx = await Rwaone.settle(toBytes32('hETH'));
+					const tx = await Rwaone.settle(toBytes32('rETH'));
 					const { gasUsed } = await tx.wait();
 					console.log(`settle() gas used: ${Math.round(gasUsed / 1000).toString()}k`);
 				});
 
 				it('shows that the user no longer has pending settlements', async () => {
-					const { numEntries } = await Exchanger.settlementOwing(owner.address, toBytes32('hETH'));
+					const { numEntries } = await Exchanger.settlementOwing(owner.address, toBytes32('rETH'));
 
 					assert.bnEqual(numEntries, ethers.constants.Zero);
 				});

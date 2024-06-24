@@ -31,7 +31,7 @@ contract('ShortingRewards', accounts => {
 	] = accounts;
 
 	const rUSD = toBytes32('rUSD');
-	const hETH = toBytes32('hETH');
+	const rETH = toBytes32('rETH');
 	const iETH = toBytes32('iETH');
 	const hBTC = toBytes32('hBTC');
 	const iBTC = toBytes32('iBTC');
@@ -48,7 +48,7 @@ contract('ShortingRewards', accounts => {
 		short,
 		rUSDTribe,
 		hBTCTribe,
-		hETHTribe,
+		rETHTribe,
 		issuer,
 		debtCache,
 		managerState,
@@ -89,8 +89,8 @@ contract('ShortingRewards', accounts => {
 		await hBTCTribe.issue(receiver, issueAmount, { from: owner });
 	};
 
-	const issuehETHToAccount = async (issueAmount, receiver) => {
-		await hETHTribe.issue(receiver, issueAmount, { from: owner });
+	const issuerETHToAccount = async (issueAmount, receiver) => {
+		await rETHTribe.issue(receiver, issueAmount, { from: owner });
 	};
 
 	const deployShort = async ({ owner, manager, resolver, collatKey, minColat, minSize }) => {
@@ -109,12 +109,12 @@ contract('ShortingRewards', accounts => {
 	});
 
 	before(async () => {
-		tribes = ['rUSD', 'hBTC', 'hETH', 'iBTC', 'iETH'];
+		tribes = ['rUSD', 'hBTC', 'rETH', 'iBTC', 'iETH'];
 		({
 			ExchangeRates: exchangeRates,
 			TriberUSD: rUSDTribe,
 			TribehBTC: hBTCTribe,
-			TribehETH: hETHTribe,
+			TriberETH: rETHTribe,
 			FeePool: feePool,
 			AddressResolver: addressResolver,
 			Issuer: issuer,
@@ -145,7 +145,7 @@ contract('ShortingRewards', accounts => {
 		// use implementation ABI on the proxy address to simplify calling
 		rewardsToken = await artifacts.require('Rwaone').at(rewardsTokenProxy.address);
 
-		await setupPriceAggregators(exchangeRates, owner, [hBTC, iBTC, hETH, iETH]);
+		await setupPriceAggregators(exchangeRates, owner, [hBTC, iBTC, rETH, iETH]);
 
 		managerState = await CollateralManagerState.new(owner, ZERO_ADDRESS, { from: deployerAccount });
 
@@ -191,14 +191,14 @@ contract('ShortingRewards', accounts => {
 		await manager.addCollaterals([short.address], { from: owner });
 
 		await short.addTribes(
-			['TribehBTC', 'TribehETH'].map(toBytes32),
-			['hBTC', 'hETH'].map(toBytes32),
+			['TribehBTC', 'TriberETH'].map(toBytes32),
+			['hBTC', 'rETH'].map(toBytes32),
 			{ from: owner }
 		);
 
 		await manager.addShortableTribes(
-			['TribehBTC', 'TribehETH'].map(toBytes32),
-			['hBTC', 'hETH'].map(toBytes32),
+			['TribehBTC', 'TriberETH'].map(toBytes32),
+			['hBTC', 'rETH'].map(toBytes32),
 			{ from: owner }
 		);
 
@@ -229,15 +229,15 @@ contract('ShortingRewards', accounts => {
 	});
 
 	beforeEach(async () => {
-		await updateAggregatorRates(exchangeRates, null, [hETH, hBTC], [100, 10000].map(toUnit));
+		await updateAggregatorRates(exchangeRates, null, [rETH, hBTC], [100, 10000].map(toUnit));
 
 		await issuerUSDToAccount(toUnit(100000), owner);
 		await issuehBTCtoAccount(toUnit(10), owner);
-		await issuehETHToAccount(toUnit(100), owner);
+		await issuerETHToAccount(toUnit(100), owner);
 
 		await issuerUSDToAccount(toUnit(20000), account1);
 		await issuehBTCtoAccount(toUnit(2), account1);
-		await issuehETHToAccount(toUnit(10), account1);
+		await issuerETHToAccount(toUnit(10), account1);
 
 		await debtCache.takeDebtSnapshot();
 	});

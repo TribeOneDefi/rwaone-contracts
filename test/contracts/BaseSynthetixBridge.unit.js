@@ -12,7 +12,7 @@ const BaseRwaoneBridge = artifacts.require('BaseRwaoneBridge');
 contract('BaseRwaoneBridge (unit tests)', accounts => {
 	const [, owner, user1, smockedMessenger] = accounts;
 
-	const [rUSD, hETH] = [toBytes32('rUSD'), toBytes32('hETH')];
+	const [rUSD, rETH] = [toBytes32('rUSD'), toBytes32('rETH')];
 
 	it('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
@@ -195,7 +195,7 @@ contract('BaseRwaoneBridge (unit tests)', accounts => {
 			describe('initiateTribeTransfer', () => {
 				it('fails if requested tribe is not enabled for cross chain transfer', async () => {
 					await assert.revert(
-						instance.initiateTribeTransfer(hETH, user1, toUnit('50'), { from: owner }),
+						instance.initiateTribeTransfer(rETH, user1, toUnit('50'), { from: owner }),
 						'Tribe not enabled for cross chain transfer'
 					);
 				});
@@ -205,7 +205,7 @@ contract('BaseRwaoneBridge (unit tests)', accounts => {
 					systemStatus.requireTribeActive.reverts('suspended');
 
 					await assert.revert(
-						instance.initiateTribeTransfer(hETH, user1, toUnit('50'), { from: owner }),
+						instance.initiateTribeTransfer(rETH, user1, toUnit('50'), { from: owner }),
 						'Transaction reverted without a reason string'
 					);
 				});
@@ -219,7 +219,7 @@ contract('BaseRwaoneBridge (unit tests)', accounts => {
 						flexibleStorage.getUIntValue.returns(toUnit('50').toString());
 
 						// two initiate calls to verify summation
-						await instance.initiateTribeTransfer(hETH, user1, toUnit('50'), { from: owner });
+						await instance.initiateTribeTransfer(rETH, user1, toUnit('50'), { from: owner });
 
 						txn = await instance.initiateTribeTransfer(rUSD, owner, toUnit('100'), { from: user1 });
 					});
@@ -228,7 +228,7 @@ contract('BaseRwaoneBridge (unit tests)', accounts => {
 						await instance.suspendInitiation({ from: owner });
 
 						await assert.revert(
-							instance.initiateTribeTransfer(hETH, user1, toUnit('50'), { from: owner }),
+							instance.initiateTribeTransfer(rETH, user1, toUnit('50'), { from: owner }),
 							'Initiation deactivated'
 						);
 					});
@@ -278,7 +278,7 @@ contract('BaseRwaoneBridge (unit tests)', accounts => {
 						flexibleStorage.getUIntValue.returns(toUnit('50').toString());
 
 						// two calls to verify summation
-						await instance.finalizeTribeTransfer(hETH, owner, toUnit('50'), {
+						await instance.finalizeTribeTransfer(rETH, owner, toUnit('50'), {
 							from: smockedMessenger,
 						});
 
@@ -304,7 +304,7 @@ contract('BaseRwaoneBridge (unit tests)', accounts => {
 			describe('tribeTransferSent & tribeTransferReceived', () => {
 				beforeEach('set fake values', () => {
 					// create some fake tribes
-					issuer.availableCurrencyKeys.returns([rUSD, hETH]);
+					issuer.availableCurrencyKeys.returns([rUSD, rETH]);
 
 					// set some exchange rates
 					exchangeRates.ratesAndInvalidForCurrencies.returns([

@@ -133,9 +133,9 @@ contract Migration_CaphOptimismStep13 is BaseMigration {
         perpsv2proxyethperp_i.addRoute(0x9cfbf4e4, 0x989D359dBF9C531aE6C305c37AC37220b8Dd99Eb, true);
         perpsv2proxyethperp_i.addRoute(0x917e77f5, 0x989D359dBF9C531aE6C305c37AC37220b8Dd99Eb, true);
         futuresmarketmanager_updateMarketsImplementations_57();
-        perpsv2marketsettings_i.setMaxLiquidationDelta("hETHPERP", 1500000000000000);
-        perpsv2marketsettings_i.setLiquidationBufferRatio("hETHPERP", 10000000000000000);
-        perpsv2marketsettings_i.setMaxPD("hETHPERP", 3000000000000000);
+        perpsv2marketsettings_i.setMaxLiquidationDelta("rETHPERP", 1500000000000000);
+        perpsv2marketsettings_i.setLiquidationBufferRatio("rETHPERP", 10000000000000000);
+        perpsv2marketsettings_i.setMaxPD("rETHPERP", 3000000000000000);
         perpsv2marketstatebtcperp_i.linkOrInitializeState();
         perpsv2marketstatebtcperplegacy_addAssociatedContracts_62();
         perpsv2exchangerate_addAssociatedContracts_63();

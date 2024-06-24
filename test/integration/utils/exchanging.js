@@ -13,7 +13,7 @@ async function exchangeSomething({ ctx }) {
 
 	await updateCache({ ctx });
 
-	const tx = await Rwaone.exchange(toBytes32('rUSD'), rUSDAmount, toBytes32('hETH'));
+	const tx = await Rwaone.exchange(toBytes32('rUSD'), rUSDAmount, toBytes32('rETH'));
 	await tx.wait();
 }
 

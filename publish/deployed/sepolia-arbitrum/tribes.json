@@ -5,7 +5,7 @@
 		"subclass": "MultiCollateralTribe"
 	},
 	{
-		"name": "hETH",
+		"name": "rETH",
 		"asset": "ETH",
 		"subclass": "MultiCollateralTribe"
 	},

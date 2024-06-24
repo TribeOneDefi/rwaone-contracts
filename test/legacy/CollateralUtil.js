@@ -21,7 +21,7 @@ const {
 
 contract('CollateralUtil', async accounts => {
 	const rUSD = toBytes32('rUSD');
-	const hETH = toBytes32('hETH');
+	const rETH = toBytes32('rETH');
 	const hBTC = toBytes32('hBTC');
 
 	const oneRenBTC = web3.utils.toBN('100000000');
@@ -121,7 +121,7 @@ contract('CollateralUtil', async accounts => {
 			],
 		}));
 
-		await setupPriceAggregators(exchangeRates, owner, [hBTC, hETH]);
+		await setupPriceAggregators(exchangeRates, owner, [hBTC, rETH]);
 
 		await managerState.setAssociatedContract(manager.address, { from: owner });
 
@@ -184,7 +184,7 @@ contract('CollateralUtil', async accounts => {
 	addSnapshotBeforeRestoreAfterEach();
 
 	beforeEach(async () => {
-		await updateAggregatorRates(exchangeRates, null, [hETH, hBTC], [100, 10000].map(toUnit));
+		await updateAggregatorRates(exchangeRates, null, [rETH, hBTC], [100, 10000].map(toUnit));
 
 		await issuerUSDToAccount(toUnit(1000), owner);
 		await issuehBTCtoAccount(toUnit(10), owner);
@@ -304,7 +304,7 @@ contract('CollateralUtil', async accounts => {
 			assert.bnClose(collateralRedeemed, toUnit(0.392857142857142857), '100');
 		});
 
-		it('regardless of BTC price, we liquidate 1.1 * amount when doing hETH', async () => {
+		it('regardless of BTC price, we liquidate 1.1 * amount when doing rETH', async () => {
 			collateralRedeemed = await util.collateralRedeemed(hBTC, toUnit(1), collateralKey);
 
 			assert.bnEqual(collateralRedeemed, toUnit(1.1));

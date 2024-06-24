@@ -35,10 +35,10 @@ const MockAggregator = artifacts.require('MockAggregatorV2V3');
 
 contract('Exchange Rates', async accounts => {
 	const [deployerAccount, owner, oracle, dexPriceAggregator, accountOne, accountTwo] = accounts;
-	const [wRWAX, sJPY, hETH, sXTZ, sBNB, rUSD, sEUR, sAUD, GOLD, fastGasPrice, debtRatio] = [
+	const [wRWAX, sJPY, rETH, sXTZ, sBNB, rUSD, sEUR, sAUD, GOLD, fastGasPrice, debtRatio] = [
 		'wRWAX',
 		'sJPY',
-		'hETH',
+		'rETH',
 		'sXTZ',
 		'sBNB',
 		'rUSD',
@@ -1262,10 +1262,10 @@ contract('Exchange Rates', async accounts => {
 		describe('src/dest do not have an atomic equivalent for dex pricing', () => {
 			beforeEach(async () => {
 				const MockToken = artifacts.require('MockToken');
-				const hethDexEquivalentToken = await MockToken.new('ehETH equivalent', 'ehETH', '18');
-				// set hETH equivalent but don't set rUSD equivalent
+				const hethDexEquivalentToken = await MockToken.new('erETH equivalent', 'erETH', '18');
+				// set rETH equivalent but don't set rUSD equivalent
 				await systemSettings.setAtomicEquivalentForDexPricing(
-					hETH,
+					rETH,
 					hethDexEquivalentToken.address,
 					{ from: owner }
 				);
@@ -1273,13 +1273,13 @@ contract('Exchange Rates', async accounts => {
 
 			it('reverts on src not having equivalent', async () => {
 				await assert.revert(
-					instance.effectiveAtomicValueAndRates(rUSD, toUnit('1'), hETH),
+					instance.effectiveAtomicValueAndRates(rUSD, toUnit('1'), rETH),
 					'No atomic equivalent for source'
 				);
 			});
 			it('reverts on dest not having equivalent', async () => {
 				await assert.revert(
-					instance.effectiveAtomicValueAndRates(hETH, toUnit('1'), rUSD),
+					instance.effectiveAtomicValueAndRates(rETH, toUnit('1'), rUSD),
 					'No atomic equivalent for dest'
 				);
 			});
@@ -1379,13 +1379,13 @@ contract('Exchange Rates', async accounts => {
 				dexPriceAggregator = await MockDexPriceAggregator.new();
 
 				rusdDexEquivalentToken = await MockToken.new('erUSD equivalent', 'erUSD', '18');
-				hethDexEquivalentToken = await MockToken.new('ehETH equivalent', 'ehETH', '18');
+				hethDexEquivalentToken = await MockToken.new('erETH equivalent', 'erETH', '18');
 			});
 
 			beforeEach('set initial configuration', async () => {
 				await ethAggregator.setDecimals('8');
 				await ethAggregator.setLatestAnswer(convertToDecimals(1, 8), await currentTime()); // this will be overwritten by the appropriate rate as needed
-				await instance.addAggregator(hETH, ethAggregator.address, {
+				await instance.addAggregator(rETH, ethAggregator.address, {
 					from: owner,
 				});
 				await instance.setDexPriceAggregator(dexPriceAggregator.address, {
@@ -1399,7 +1399,7 @@ contract('Exchange Rates', async accounts => {
 					}
 				);
 				await systemSettings.setAtomicEquivalentForDexPricing(
-					hETH,
+					rETH,
 					hethDexEquivalentToken.address,
 					{
 						from: owner,
@@ -1422,16 +1422,16 @@ contract('Exchange Rates', async accounts => {
 				});
 				it('reverts', async () => {
 					await assert.revert(
-						instance.effectiveAtomicValueAndRates(rUSD, one, hETH),
+						instance.effectiveAtomicValueAndRates(rUSD, one, rETH),
 						'mock assetToAsset() reverted'
 					);
 				});
 			});
 
-			describe('trades rUSD -> hETH', () => {
+			describe('trades rUSD -> rETH', () => {
 				const amountIn = toUnit('1000');
 				const srcToken = rUSD;
-				const destToken = hETH;
+				const destToken = rETH;
 
 				// P_DEX of 0.01, P_CL of 0.011
 				itGivesTheCorrectRates({
@@ -1512,9 +1512,9 @@ contract('Exchange Rates', async accounts => {
 				});
 			});
 
-			describe('trades hETH -> rUSD', () => {
+			describe('trades rETH -> rUSD', () => {
 				const amountIn = toUnit('10');
-				const srcToken = hETH;
+				const srcToken = rETH;
 				const destToken = rUSD;
 
 				// P_DEX of 100, P_CL of 110
@@ -1599,7 +1599,7 @@ contract('Exchange Rates', async accounts => {
 			describe('when tokens use non-18 decimals', () => {
 				beforeEach('set up non-18 decimal tokens', async () => {
 					rusdDexEquivalentToken = await MockToken.new('rUSD equivalent', 'erUSD', '6'); // mimic USDC and USDT
-					hethDexEquivalentToken = await MockToken.new('hETH equivalent', 'ehETH', '8'); // mimic WBTC
+					hethDexEquivalentToken = await MockToken.new('rETH equivalent', 'erETH', '8'); // mimic WBTC
 					await systemSettings.setAtomicEquivalentForDexPricing(
 						rUSD,
 						rusdDexEquivalentToken.address,
@@ -1608,7 +1608,7 @@ contract('Exchange Rates', async accounts => {
 						}
 					);
 					await systemSettings.setAtomicEquivalentForDexPricing(
-						hETH,
+						rETH,
 						hethDexEquivalentToken.address,
 						{
 							from: owner,
@@ -1616,9 +1616,9 @@ contract('Exchange Rates', async accounts => {
 					);
 				});
 
-				describe('rUSD -> hETH', () => {
+				describe('rUSD -> rETH', () => {
 					const rate = '100';
-					// ehETH has 8 decimals
+					// erETH has 8 decimals
 					const rateIn8 = convertToDecimals(rate, 8);
 
 					const amountIn = toUnit('1000');
@@ -1647,13 +1647,13 @@ contract('Exchange Rates', async accounts => {
 
 					// TODO: update decimals test
 					xit('still provides results in 18 decimals', async () => {
-						const rates = await instance.effectiveAtomicValueAndRates(rUSD, amountIn, hETH);
+						const rates = await instance.effectiveAtomicValueAndRates(rUSD, amountIn, rETH);
 						const expectedOutput = multiplyDecimal(amountIn, rateIn8, unitIn8); // use 8 as decimal base to get 18 decimals
 						assert.bnEqual(rates.value, expectedOutput);
 					});
 				});
 
-				describe('hETH -> rUSD', () => {
+				describe('rETH -> rUSD', () => {
 					const rate = '100';
 					// erUSD has 6 decimals
 					const rateIn6 = convertToDecimals(rate, 6);
@@ -1685,7 +1685,7 @@ contract('Exchange Rates', async accounts => {
 					});
 
 					it('still provides results in 18 decimals', async () => {
-						const rates = await instance.effectiveAtomicValueAndRates(hETH, amountIn, rUSD);
+						const rates = await instance.effectiveAtomicValueAndRates(rETH, amountIn, rUSD);
 						const expectedOutput = multiplyDecimal(amountIn, rateIn6, unitIn6); // use 6 as decimal base to get 18 decimals
 						assert.bnEqual(rates.value, expectedOutput);
 					});
@@ -1698,7 +1698,7 @@ contract('Exchange Rates', async accounts => {
 		describe('Atomic exchange pricing', () => {
 			it('errors with not implemented when attempting to fetch atomic rate', async () => {
 				await assert.revert(
-					instance.effectiveAtomicValueAndRates(hETH, toUnit('10'), rUSD),
+					instance.effectiveAtomicValueAndRates(rETH, toUnit('10'), rUSD),
 					'Cannot be run on this layer'
 				);
 			});
@@ -1708,7 +1708,7 @@ contract('Exchange Rates', async accounts => {
 	const itReportsRateTooVolatileForAtomicExchanges = () => {
 		describe('tribeTooVolatileForAtomicExchange', async () => {
 			const minute = 60;
-			const tribe = hETH;
+			const tribe = rETH;
 			let aggregator;
 
 			beforeEach('set up eth aggregator mock', async () => {
@@ -1900,7 +1900,7 @@ contract('Exchange Rates', async accounts => {
 		describe('Atomic exchange volatility control', () => {
 			it('errors with not implemented when attempting to assess volatility for atomic exchanges', async () => {
 				await assert.revert(
-					instance.methods['tribeTooVolatileForAtomicExchange(bytes32)'](hETH),
+					instance.methods['tribeTooVolatileForAtomicExchange(bytes32)'](rETH),
 					'Cannot be run on this layer'
 				);
 			});

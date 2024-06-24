@@ -156,7 +156,7 @@
 				"FeePool",
 				"Issuer",
 				"TribehBTC",
-				"TribehETH",
+				"TriberETH",
 				"TriberUSD"
 			]
 		},
@@ -273,7 +273,7 @@
 				"EtherWrapper",
 				"FeePool",
 				"NativeEtherWrapper",
-				"TribehETH",
+				"TriberETH",
 				"TriberUSD",
 				"SystemSettings"
 			]
@@ -342,7 +342,7 @@
 				"CollateralShort",
 				"CollateralUtil",
 				"TribehBTC",
-				"TribehETH",
+				"TriberETH",
 				"TribesLINK",
 				"TriberUSD",
 				"SystemSettings"
@@ -382,7 +382,7 @@
 				"FeePool",
 				"Issuer",
 				"Rwaone",
-				"TribehETH",
+				"TriberETH",
 				"TriberUSD",
 				"TribehBTC"
 			]

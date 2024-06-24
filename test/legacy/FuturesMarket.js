@@ -118,7 +118,7 @@ contract('FuturesMarket', accounts => {
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'hBTC', 'hETH'],
+			tribes: ['rUSD', 'hBTC', 'rETH'],
 			contracts: [
 				'FuturesMarketManager',
 				'FuturesMarketSettings',
@@ -3636,7 +3636,7 @@ contract('FuturesMarket', accounts => {
 			beforeEach(async () => {
 				await futuresMarket.transferMargin(toUnit('1000'), { from: trader });
 				await futuresMarket.modifyPosition(toUnit('1'), { from: trader });
-				// base rate of hETH is 100 from shared setup above
+				// base rate of rETH is 100 from shared setup above
 				await setPrice(baseAsset, toUnit('300'), false);
 			});
 
@@ -3647,7 +3647,7 @@ contract('FuturesMarket', accounts => {
 			beforeEach(async () => {
 				await futuresMarket.transferMargin(toUnit('1000'), { from: trader });
 				await futuresMarket.modifyPosition(toUnit('1'), { from: trader });
-				// base rate of hETH is 100 from shared setup above
+				// base rate of rETH is 100 from shared setup above
 				await setPrice(baseAsset, toUnit('30'), false);
 			});
 

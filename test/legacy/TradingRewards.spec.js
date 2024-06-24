@@ -21,12 +21,12 @@ const { toBytes32 } = require('../..');
 contract('TradingRewards', accounts => {
 	const [, owner, account1] = accounts;
 
-	const tribes = ['rUSD', 'hETH', 'hBTC', 'wRWAX'];
+	const tribes = ['rUSD', 'rETH', 'hBTC', 'wRWAX'];
 	const tribeKeys = tribes.map(toBytes32);
-	const [rUSD, hETH, hBTC, wRWAX] = tribeKeys;
+	const [rUSD, rETH, hBTC, wRWAX] = tribeKeys;
 
 	let rwaone, exchanger, exchangeRates, rewards, resolver, systemSettings;
-	let rUSDContract, hETHContract, hBTCContract;
+	let rUSDContract, rETHContract, hBTCContract;
 
 	let exchangeLogs;
 
@@ -35,7 +35,7 @@ contract('TradingRewards', accounts => {
 	const amountIssued = toUnit('1000');
 	const allExchangeFeeRates = toUnit('0.001');
 	const rates = {
-		[hETH]: toUnit('100'),
+		[rETH]: toUnit('100'),
 		[hBTC]: toUnit('12000'),
 		[wRWAX]: toUnit('0.2'),
 	};
@@ -82,7 +82,7 @@ contract('TradingRewards', accounts => {
 				Exchanger: exchanger,
 				ExchangeRates: exchangeRates,
 				TriberUSD: rUSDContract,
-				TribehETH: hETHContract,
+				TriberETH: rETHContract,
 				TribehBTC: hBTCContract,
 				SystemSettings: systemSettings,
 			} = await setupAllContracts({
@@ -99,17 +99,17 @@ contract('TradingRewards', accounts => {
 				],
 			}));
 
-			await setupPriceAggregators(exchangeRates, owner, [hETH, hBTC]);
+			await setupPriceAggregators(exchangeRates, owner, [rETH, hBTC]);
 		});
 
 		before('BRRRRRR', async () => {
 			await rUSDContract.issue(account1, amountIssued);
-			await hETHContract.issue(account1, amountIssued);
+			await rETHContract.issue(account1, amountIssued);
 			await hBTCContract.issue(account1, amountIssued);
 		});
 
 		before('set exchange rates', async () => {
-			await updateAggregatorRates(exchangeRates, null, [hETH, hBTC, wRWAX], Object.values(rates));
+			await updateAggregatorRates(exchangeRates, null, [rETH, hBTC, wRWAX], Object.values(rates));
 
 			await setExchangeFeeRateForTribes({
 				owner,
@@ -121,7 +121,7 @@ contract('TradingRewards', accounts => {
 
 		it('has expected balances for accounts', async () => {
 			assert.bnEqual(amountIssued, await rUSDContract.balanceOf(account1));
-			assert.bnEqual(amountIssued, await hETHContract.balanceOf(account1));
+			assert.bnEqual(amountIssued, await rETHContract.balanceOf(account1));
 			assert.bnEqual(amountIssued, await hBTCContract.balanceOf(account1));
 		});
 
@@ -146,7 +146,7 @@ contract('TradingRewards', accounts => {
 						account: account1,
 						fromCurrencyKey: rUSD,
 						fromCurrencyAmount: toUnit('100'),
-						toCurrencyKey: hETH,
+						toCurrencyKey: rETH,
 					});
 				});
 
@@ -221,7 +221,7 @@ contract('TradingRewards', accounts => {
 				account: account1,
 				fromCurrencyKey: rUSD,
 				fromCurrencyAmount: toUnit('100'),
-				toCurrencyKey: hETH,
+				toCurrencyKey: rETH,
 			});
 
 			itCorrectlyPerformsAnExchange({
@@ -233,7 +233,7 @@ contract('TradingRewards', accounts => {
 
 			itCorrectlyPerformsAnExchange({
 				account: account1,
-				fromCurrencyKey: hETH,
+				fromCurrencyKey: rETH,
 				fromCurrencyAmount: toUnit('10'),
 				toCurrencyKey: hBTC,
 			});
@@ -242,7 +242,7 @@ contract('TradingRewards', accounts => {
 				account: account1,
 				fromCurrencyKey: hBTC,
 				fromCurrencyAmount: toUnit('1'),
-				toCurrencyKey: hETH,
+				toCurrencyKey: rETH,
 			});
 
 			describe('when exchangeFeeRate is set to 0', () => {
@@ -265,7 +265,7 @@ contract('TradingRewards', accounts => {
 							account: account1,
 							fromCurrencyKey: rUSD,
 							fromCurrencyAmount: toUnit('100'),
-							toCurrencyKey: hETH,
+							toCurrencyKey: rETH,
 						});
 					});
 
@@ -287,7 +287,7 @@ contract('TradingRewards', accounts => {
 						const exchangeTx = await rwaone.exchangeWithTracking(
 							rUSD,
 							toUnit('100'),
-							hETH,
+							rETH,
 							account1,
 							toBytes32('1INCH'),
 							{
@@ -312,7 +312,7 @@ contract('TradingRewards', accounts => {
 						const exchangeTx = await rwaone.exchangeWithTracking(
 							rUSD,
 							toUnit('100'),
-							hETH,
+							rETH,
 							zeroAddress, // No reward address = 0x0
 							toBytes32('1INCH'),
 							{

@@ -16,7 +16,7 @@ import "./interfaces/IEtherWrapper.sol";
 // https://docs.rwaone.io/contracts/source/contracts/nativeetherwrapper
 contract NativeEtherWrapper is Owned, MixinResolver {
     bytes32 private constant CONTRACT_ETHER_WRAPPER = "EtherWrapper";
-    bytes32 private constant CONTRACT_RWAONEHETH = "TribehETH";
+    bytes32 private constant CONTRACT_RWAONEHETH = "TriberETH";
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinResolver(_resolver) {}
 
@@ -38,7 +38,7 @@ contract NativeEtherWrapper is Owned, MixinResolver {
         return etherWrapper().weth();
     }
 
-    function tribehETH() internal view returns (IERC20) {
+    function triberETH() internal view returns (IERC20) {
         return IERC20(requireAndGetAddress(CONTRACT_RWAONEHETH));
     }
 
@@ -57,8 +57,8 @@ contract NativeEtherWrapper is Owned, MixinResolver {
         // Now call mint.
         etherWrapper().mint(amount);
 
-        // Transfer the hETH to msg.sender.
-        tribehETH().transfer(msg.sender, tribehETH().balanceOf(address(this)));
+        // Transfer the rETH to msg.sender.
+        triberETH().transfer(msg.sender, triberETH().balanceOf(address(this)));
 
         emit Minted(msg.sender, amount);
     }
@@ -67,11 +67,11 @@ contract NativeEtherWrapper is Owned, MixinResolver {
         require(amount > 0, "amount must be greater than 0");
         IWETH weth = weth();
 
-        // Transfer hETH from the msg.sender.
-        tribehETH().transferFrom(msg.sender, address(this), amount);
+        // Transfer rETH from the msg.sender.
+        triberETH().transferFrom(msg.sender, address(this), amount);
 
         // Approve for the EtherWrapper.
-        tribehETH().approve(address(etherWrapper()), amount);
+        triberETH().approve(address(etherWrapper()), amount);
 
         // Now call burn.
         etherWrapper().burn(amount);

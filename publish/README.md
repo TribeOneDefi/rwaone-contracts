@@ -112,7 +112,7 @@ node publish remove-tribes # "--help" for options
 ### Example
 
 ```bash
-node publish remove-tribes -n goerli -d publish/deployed/goerli -g 3 -s sRUB -s hETH
+node publish remove-tribes -n goerli -d publish/deployed/goerli -g 3 -s sRUB -s rETH
 ```
 
 ## 7. Replace Tribes

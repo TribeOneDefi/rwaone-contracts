@@ -12,7 +12,7 @@ const { setupAllContracts } = require('./setup');
 
 const ZERO_BYTES32 = ethers.utils.formatBytes32String('');
 
-const hETH = ethers.utils.formatBytes32String('hETH');
+const rETH = ethers.utils.formatBytes32String('rETH');
 
 contract('DirectIntegrationManager', async accounts => {
 	let systemSettings, directIntegration, exchangeRates, resolver;
@@ -33,13 +33,13 @@ contract('DirectIntegrationManager', async accounts => {
 
 	before('apply systemsettings', async () => {
 		await exchangeRates.setDexPriceAggregator(fakeAddress, { from: owner });
-		await systemSettings.setAtomicEquivalentForDexPricing(hETH, fakeAddress, { from: owner });
-		await systemSettings.setAtomicExchangeFeeRate(hETH, 100, { from: owner });
+		await systemSettings.setAtomicEquivalentForDexPricing(rETH, fakeAddress, { from: owner });
+		await systemSettings.setAtomicExchangeFeeRate(rETH, 100, { from: owner });
 		await systemSettings.setAtomicTwapWindow(200, { from: owner });
 		await systemSettings.setAtomicMaxVolumePerBlock(400, { from: owner });
-		await systemSettings.setAtomicVolatilityConsiderationWindow(hETH, 500, { from: owner });
-		await systemSettings.setAtomicVolatilityUpdateThreshold(hETH, 700, { from: owner });
-		await systemSettings.setExchangeFeeRateForTribes([hETH], [800], { from: owner });
+		await systemSettings.setAtomicVolatilityConsiderationWindow(rETH, 500, { from: owner });
+		await systemSettings.setAtomicVolatilityUpdateThreshold(rETH, 700, { from: owner });
+		await systemSettings.setExchangeFeeRateForTribes([rETH], [800], { from: owner });
 		await systemSettings.setExchangeMaxDynamicFee(900, { from: owner });
 		await systemSettings.setExchangeDynamicFeeRounds(1000, { from: owner });
 		await systemSettings.setExchangeDynamicFeeThreshold(1100, { from: owner });
@@ -68,7 +68,7 @@ contract('DirectIntegrationManager', async accounts => {
 				fnc: directIntegration.setExchangeParameters,
 				args: [
 					address1,
-					[hETH],
+					[rETH],
 					[
 						ZERO_BYTES32,
 						address1,
@@ -94,7 +94,7 @@ contract('DirectIntegrationManager', async accounts => {
 			before('override', async () => {
 				await directIntegration.setExchangeParameters(
 					address1,
-					[hETH],
+					[rETH],
 					[
 						ZERO_BYTES32,
 						ethers.constants.AddressZero,
@@ -115,10 +115,10 @@ contract('DirectIntegrationManager', async accounts => {
 			});
 
 			it('applies no overrides', async () => {
-				const params = await directIntegration.getExchangeParameters(address1, hETH);
+				const params = await directIntegration.getExchangeParameters(address1, rETH);
 
 				assert.deepEqual(params, [
-					hETH,
+					rETH,
 					fakeAddress,
 					fakeAddress,
 					'100',
@@ -139,17 +139,17 @@ contract('DirectIntegrationManager', async accounts => {
 			before('override', async () => {
 				await directIntegration.setExchangeParameters(
 					address1,
-					[hETH],
+					[rETH],
 					[ZERO_BYTES32, address1, ethers.constants.AddressZero, 123, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 					{ from: owner }
 				);
 			});
 
 			it('applies some overrides', async () => {
-				const params = await directIntegration.getExchangeParameters(address1, hETH);
+				const params = await directIntegration.getExchangeParameters(address1, rETH);
 
 				assert.deepEqual(params, [
-					hETH,
+					rETH,
 					address1, // applied
 					fakeAddress,
 					'123', // applied
@@ -170,7 +170,7 @@ contract('DirectIntegrationManager', async accounts => {
 			before('override', async () => {
 				await directIntegration.setExchangeParameters(
 					address1,
-					[hETH],
+					[rETH],
 					[
 						ZERO_BYTES32,
 						address1,
@@ -191,10 +191,10 @@ contract('DirectIntegrationManager', async accounts => {
 			});
 
 			it('applies no overrides', async () => {
-				const params = await directIntegration.getExchangeParameters(address1, hETH);
+				const params = await directIntegration.getExchangeParameters(address1, rETH);
 
 				assert.deepEqual(params, [
-					hETH,
+					rETH,
 					address1,
 					address1,
 					'123',

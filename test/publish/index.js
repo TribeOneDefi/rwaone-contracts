@@ -91,7 +91,7 @@ describe('publish scripts', () => {
 	let accounts;
 	let rUSD;
 	let hBTC;
-	let hETH;
+	let rETH;
 	let provider;
 	let overrides;
 	let MockAggregatorFactory;
@@ -154,7 +154,7 @@ describe('publish scripts', () => {
 
 		MockAggregatorFactory = await createMockAggregatorFactory(accounts.deployer);
 
-		[rUSD, hBTC, hETH] = ['rUSD', 'hBTC', 'hETH'].map(toBytes32);
+		[rUSD, hBTC, rETH] = ['rUSD', 'hBTC', 'rETH'].map(toBytes32);
 
 		gasLimit = 8000000;
 		gasPrice = ethers.utils.parseUnits('5', 'gwei');
@@ -177,7 +177,7 @@ describe('publish scripts', () => {
 			let timestamp;
 			let rUSDContract;
 			let hBTCContract;
-			let hETHContract;
+			let rETHContract;
 			let FeePool;
 			let DebtCache;
 			let Exchanger;
@@ -257,7 +257,7 @@ describe('publish scripts', () => {
 				rUSDContract = getContract({ target: 'ProxyrUSD', source: 'Tribe' });
 
 				hBTCContract = getContract({ target: 'ProxyhBTC', source: 'Tribe' });
-				hETHContract = getContract({ target: 'ProxyhETH', source: 'Tribe' });
+				rETHContract = getContract({ target: 'ProxyrETH', source: 'Tribe' });
 				SystemSettings = getContract({ target: 'SystemSettings' });
 
 				Liquidator = getContract({ target: 'Liquidator' });
@@ -481,13 +481,13 @@ describe('publish scripts', () => {
 						JSON.parse(tribesJSON).map(({ name }) => name)
 					);
 				});
-				describe('when only rUSD and hETH is chosen as a tribe', () => {
+				describe('when only rUSD and rETH is chosen as a tribe', () => {
 					beforeEach(async () => {
 						fs.writeFileSync(
 							tribesJSONPath,
 							JSON.stringify([
 								{ name: 'rUSD', asset: 'USD' },
-								{ name: 'hETH', asset: 'ETH' },
+								{ name: 'rETH', asset: 'ETH' },
 							])
 						);
 					});
@@ -515,7 +515,7 @@ describe('publish scripts', () => {
 						});
 						it('then only rUSD is added to the issuer', async () => {
 							const keys = await Issuer.availableCurrencyKeys();
-							assert.deepStrictEqual(keys.map(hexToString), ['rUSD', 'hETH']);
+							assert.deepStrictEqual(keys.map(hexToString), ['rUSD', 'rETH']);
 						});
 					});
 				});
@@ -523,7 +523,7 @@ describe('publish scripts', () => {
 			describe('deploy-staking-rewards', () => {
 				beforeEach(async () => {
 					const rewardsToDeploy = [
-						'hETHUniswapV1',
+						'rETHUniswapV1',
 						'sXAUUniswapV2',
 						'rUSDCurve',
 						'iETH',
@@ -581,7 +581,7 @@ describe('publish scripts', () => {
 
 			describe('deploy-shorting-rewards', () => {
 				beforeEach(async () => {
-					const rewardsToDeploy = ['hBTC', 'hETH'];
+					const rewardsToDeploy = ['hBTC', 'rETH'];
 
 					await commands.deployShortingRewards({
 						network,
@@ -797,12 +797,12 @@ describe('publish scripts', () => {
 								'Balance should match'
 							);
 						});
-						describe('when user1 exchange 1000 rUSD for hETH (the MultiCollateralTribe)', () => {
-							let hETHBalanceAfterExchange;
+						describe('when user1 exchange 1000 rUSD for rETH (the MultiCollateralTribe)', () => {
+							let rETHBalanceAfterExchange;
 							beforeEach(async () => {
-								await Rwaone.exchange(rUSD, ethers.utils.parseEther('1000'), hETH, overrides);
-								hETHBalanceAfterExchange = await callMethodWithRetry(
-									hETHContract.balanceOf(accounts.first.address)
+								await Rwaone.exchange(rUSD, ethers.utils.parseEther('1000'), rETH, overrides);
+								rETHBalanceAfterExchange = await callMethodWithRetry(
+									rETHContract.balanceOf(accounts.first.address)
 								);
 							});
 							it('then their rUSD balance is 5000', async () => {
@@ -815,12 +815,12 @@ describe('publish scripts', () => {
 									'Balance should match'
 								);
 							});
-							it('and their hETH balance is 1000 - the fee', async () => {
+							it('and their rETH balance is 1000 - the fee', async () => {
 								const { amountReceived } = await callMethodWithRetry(
-									Exchanger.getAmountsForExchange(ethers.utils.parseEther('1000'), rUSD, hETH)
+									Exchanger.getAmountsForExchange(ethers.utils.parseEther('1000'), rUSD, rETH)
 								);
 								assert.strictEqual(
-									ethers.utils.formatEther(hETHBalanceAfterExchange.toString()),
+									ethers.utils.formatEther(rETHBalanceAfterExchange.toString()),
 									ethers.utils.formatEther(amountReceived.toString()),
 									'Balance should match'
 								);
@@ -837,7 +837,7 @@ describe('publish scripts', () => {
 										const tx = await Rwaone.exchange(
 											rUSD,
 											ethers.utils.parseEther('1'),
-											hETH,
+											rETH,
 											overrides
 										);
 										await tx.wait();
@@ -1117,7 +1117,7 @@ describe('publish scripts', () => {
 									'Rwaone',
 									'RwaoneDebtShare',
 									'RwaoneEscrow',
-									'TribehETH',
+									'TriberETH',
 									'TriberUSD',
 									'SystemStatus',
 								].map(contractName =>

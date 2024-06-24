@@ -56,7 +56,7 @@ contract('FuturesMarket MixinFuturesNextPriceOrders', accounts => {
 			SystemStatus: systemStatus,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'hBTC', 'hETH'],
+			tribes: ['rUSD', 'hBTC', 'rETH'],
 			contracts: [
 				'FuturesMarketManager',
 				'FuturesMarketSettings',

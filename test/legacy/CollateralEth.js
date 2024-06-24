@@ -24,7 +24,7 @@ contract('CollateralEth', async accounts => {
 	const INTERACTION_DELAY = 300;
 
 	const rUSD = toBytes32('rUSD');
-	const hETH = toBytes32('hETH');
+	const rETH = toBytes32('rETH');
 	const hBTC = toBytes32('hBTC');
 
 	const oneETH = toUnit(1);
@@ -53,7 +53,7 @@ contract('CollateralEth', async accounts => {
 		exchangeRates,
 		addressResolver,
 		rUSDTribe,
-		hETHTribe,
+		rETHTribe,
 		systemStatus,
 		debtCache,
 		FEE_ADDRESS;
@@ -70,17 +70,17 @@ contract('CollateralEth', async accounts => {
 		});
 	};
 
-	const issuehETHToAccount = async (issueAmount, receiver) => {
-		await hETHTribe.issue(receiver, issueAmount, { from: owner });
+	const issuerETHToAccount = async (issueAmount, receiver) => {
+		await rETHTribe.issue(receiver, issueAmount, { from: owner });
 	};
 
 	const setupMultiCollateral = async () => {
-		tribes = ['rUSD', 'hETH'];
+		tribes = ['rUSD', 'rETH'];
 		({
 			SystemStatus: systemStatus,
 			ExchangeRates: exchangeRates,
 			TriberUSD: rUSDTribe,
-			TribehETH: hETHTribe,
+			TriberETH: rETHTribe,
 			FeePool: feePool,
 			AddressResolver: addressResolver,
 			Issuer: issuer,
@@ -107,7 +107,7 @@ contract('CollateralEth', async accounts => {
 			],
 		}));
 
-		await setupPriceAggregators(exchangeRates, owner, [hBTC, hETH]);
+		await setupPriceAggregators(exchangeRates, owner, [hBTC, rETH]);
 
 		await managerState.setAssociatedContract(manager.address, { from: owner });
 
@@ -130,14 +130,14 @@ contract('CollateralEth', async accounts => {
 		await manager.addCollaterals([ceth.address], { from: owner });
 
 		await ceth.addTribes(
-			['TriberUSD', 'TribehETH'].map(toBytes32),
-			['rUSD', 'hETH'].map(toBytes32),
+			['TriberUSD', 'TriberETH'].map(toBytes32),
+			['rUSD', 'rETH'].map(toBytes32),
 			{ from: owner }
 		);
 
 		await manager.addTribes(
-			['TriberUSD', 'TribehETH'].map(toBytes32),
-			['rUSD', 'hETH'].map(toBytes32),
+			['TriberUSD', 'TriberETH'].map(toBytes32),
+			['rUSD', 'rETH'].map(toBytes32),
 			{ from: owner }
 		);
 		// rebuild the cache to add the tribes we need.
@@ -147,7 +147,7 @@ contract('CollateralEth', async accounts => {
 	};
 
 	const updateRatesWithDefaults = async () => {
-		await updateAggregatorRates(exchangeRates, null, [hETH, hBTC], [100, 10000].map(toUnit));
+		await updateAggregatorRates(exchangeRates, null, [rETH, hBTC], [100, 10000].map(toUnit));
 	};
 
 	const fastForwardAndUpdateRates = async seconds => {
@@ -165,7 +165,7 @@ contract('CollateralEth', async accounts => {
 		await updateRatesWithDefaults();
 
 		await issuerUSDToAccount(toUnit(1000), owner);
-		await issuehETHToAccount(toUnit(10), owner);
+		await issuerETHToAccount(toUnit(10), owner);
 
 		await debtCache.takeDebtSnapshot();
 	});
@@ -174,9 +174,9 @@ contract('CollateralEth', async accounts => {
 		// assert.equal(await ceth.proxy(), account1);
 		assert.equal(await ceth.owner(), owner);
 		assert.equal(await ceth.resolver(), addressResolver.address);
-		assert.equal(await ceth.collateralKey(), hETH);
+		assert.equal(await ceth.collateralKey(), rETH);
 		assert.equal(await ceth.tribes(0), toBytes32('TriberUSD'));
-		assert.equal(await ceth.tribes(1), toBytes32('TribehETH'));
+		assert.equal(await ceth.tribes(1), toBytes32('TriberETH'));
 		assert.bnEqual(await ceth.minCratio(), toUnit('1.3'));
 		assert.bnEqual(await ceth.minCollateral(), toUnit('2'));
 	});
@@ -217,26 +217,26 @@ contract('CollateralEth', async accounts => {
 			});
 
 			it('when the price falls by 25% our c ratio is 150%', async () => {
-				await updateAggregatorRates(exchangeRates, null, [hETH], [toUnit(75)]);
+				await updateAggregatorRates(exchangeRates, null, [rETH], [toUnit(75)]);
 				const ratio = await ceth.collateralRatio(id);
 				assert.bnEqual(ratio, toUnit(1.5));
 			});
 
 			it('when the price increases by 100% our c ratio is 400%', async () => {
-				await updateAggregatorRates(exchangeRates, null, [hETH], [toUnit(200)]);
+				await updateAggregatorRates(exchangeRates, null, [rETH], [toUnit(200)]);
 				const ratio = await ceth.collateralRatio(id);
 				assert.bnEqual(ratio, toUnit(4));
 			});
 
 			it('when the price falls by 50% our cratio is 100%', async () => {
-				await updateAggregatorRates(exchangeRates, null, [hETH], [toUnit(50)]);
+				await updateAggregatorRates(exchangeRates, null, [rETH], [toUnit(50)]);
 				const ratio = await ceth.collateralRatio(id);
 				assert.bnEqual(ratio, toUnit(1));
 			});
 		});
-		describe('hETH loans', async () => {
+		describe('rETH loans', async () => {
 			beforeEach(async () => {
-				tx = await ceth.open(oneETH, hETH, {
+				tx = await ceth.open(oneETH, rETH, {
 					value: twoETH,
 					from: account1,
 				});
@@ -250,7 +250,7 @@ contract('CollateralEth', async accounts => {
 			});
 
 			it('price changes should not change the cratio', async () => {
-				await updateAggregatorRates(exchangeRates, null, [hETH], [toUnit(75)]);
+				await updateAggregatorRates(exchangeRates, null, [rETH], [toUnit(75)]);
 				const ratio = await ceth.collateralRatio(id);
 				assert.bnEqual(ratio, toUnit(2));
 			});
@@ -388,9 +388,9 @@ contract('CollateralEth', async accounts => {
 			});
 		});
 
-		describe('should open an eth loan denominated in hETH', async () => {
+		describe('should open an eth loan denominated in rETH', async () => {
 			beforeEach(async () => {
-				tx = await ceth.open(fiveETH, hETH, {
+				tx = await ceth.open(fiveETH, rETH, {
 					value: tenETH,
 					from: account1,
 				});
@@ -403,7 +403,7 @@ contract('CollateralEth', async accounts => {
 			it('should set the loan correctly', async () => {
 				assert.equal(loan.account, account1);
 				assert.equal(loan.collateral, tenETH.toString());
-				assert.equal(loan.currency, hETH);
+				assert.equal(loan.currency, rETH);
 				assert.equal(loan.amount, fiveETH.toString());
 				assert.bnEqual(loan.accruedInterest, toUnit(0));
 			});
@@ -412,7 +412,7 @@ contract('CollateralEth', async accounts => {
 				// 0.001% issue fee rate.
 				const expectedBal = toUnit('4.995');
 
-				assert.bnEqual(await hETHTribe.balanceOf(account1), expectedBal);
+				assert.bnEqual(await rETHTribe.balanceOf(account1), expectedBal);
 			});
 
 			it('should issue the minting fee to the fee pool', async () => {
@@ -427,7 +427,7 @@ contract('CollateralEth', async accounts => {
 					id: id,
 					amount: fiveETH,
 					collateral: tenETH,
-					currency: hETH,
+					currency: rETH,
 				});
 			});
 		});
@@ -668,12 +668,12 @@ contract('CollateralEth', async accounts => {
 			});
 		});
 
-		describe('it should allow repayments on an hETH loan', async () => {
+		describe('it should allow repayments on an rETH loan', async () => {
 			// I don't want to test interest here. I just want to test repayment.
 			const expectedString = '40000';
 
 			beforeEach(async () => {
-				tx = await ceth.open(fiveETH, hETH, {
+				tx = await ceth.open(fiveETH, rETH, {
 					value: tenETH,
 					from: account1,
 				});
@@ -682,7 +682,7 @@ contract('CollateralEth', async accounts => {
 
 				id = getid(tx);
 
-				await issuehETHToAccount(twoETH, account2);
+				await issuerETHToAccount(twoETH, account2);
 
 				tx = await ceth.repay(account1, id, oneETH, { from: account2 });
 
@@ -692,7 +692,7 @@ contract('CollateralEth', async accounts => {
 			it('should work reduce the repayers balance', async () => {
 				const expectedBalance = oneETH;
 
-				assert.bnEqual(await hETHTribe.balanceOf(account2), expectedBalance);
+				assert.bnEqual(await rETHTribe.balanceOf(account2), expectedBalance);
 			});
 
 			it('should update the loan', async () => {
@@ -777,7 +777,7 @@ contract('CollateralEth', async accounts => {
 			let liquidationAmount;
 
 			beforeEach(async () => {
-				await updateAggregatorRates(exchangeRates, null, [hETH], [toUnit(90)]);
+				await updateAggregatorRates(exchangeRates, null, [rETH], [toUnit(90)]);
 				await issuerUSDToAccount(toUnit(1000), account2);
 
 				liquidatorEthBalBefore = new BN(await getEthBalance(account2));
@@ -836,7 +836,7 @@ contract('CollateralEth', async accounts => {
 			let liquidatorEthBalBefore;
 
 			beforeEach(async () => {
-				await updateAggregatorRates(exchangeRates, null, [hETH], [toUnit(50)]);
+				await updateAggregatorRates(exchangeRates, null, [rETH], [toUnit(50)]);
 				loan = await ceth.loans(id);
 
 				await issuerUSDToAccount(toUnit(1000), account2);

@@ -16,10 +16,10 @@ function itCanOpenAndCloseShort({ ctx }) {
 	describe('shorting', () => {
 		const amountOfrUSDRequired = parseEther('5000'); // rUSD
 		const amountToDeposit = parseEther('1000'); // rUSD
-		const amountToBorrow = parseEther('0.00000000001'); // hETH
+		const amountToBorrow = parseEther('0.00000000001'); // rETH
 		const amountToExchange = parseEther('100'); // rUSD
 
-		const shortableTribe = toBytes32('hETH');
+		const shortableTribe = toBytes32('rETH');
 
 		let user, owner;
 		let CollateralShort, CollateralManager, Rwaone, TriberUSD, interactionDelay;
@@ -49,12 +49,12 @@ function itCanOpenAndCloseShort({ ctx }) {
 				await ensureBalance({ ctx, symbol: 'rUSD', user, balance: amountOfrUSDRequired });
 			});
 
-			before('ensure hETH supply exists', async () => {
-				// CollateralManager.getShortRate requires existing hETH else div by zero
+			before('ensure rETH supply exists', async () => {
+				// CollateralManager.getShortRate requires existing rETH else div by zero
 				await exchangeTribes({
 					ctx,
 					src: 'rUSD',
-					dest: 'hETH',
+					dest: 'rETH',
 					amount: parseEther('1'),
 					user: ctx.users.otherUser,
 				});
@@ -93,13 +93,13 @@ function itCanOpenAndCloseShort({ ctx }) {
 
 					before('add the shortable tribes if needed', async () => {
 						await CollateralShort.connect(owner).addTribes(
-							[toBytes32(`TribehETH`)],
+							[toBytes32(`TriberETH`)],
 							[shortableTribe]
 						);
 
-						await CollateralManager.addTribes([toBytes32(`TribehETH`)], [shortableTribe]);
+						await CollateralManager.addTribes([toBytes32(`TriberETH`)], [shortableTribe]);
 
-						await CollateralManager.addShortableTribes([toBytes32(`TribehETH`)], [shortableTribe]);
+						await CollateralManager.addShortableTribes([toBytes32(`TriberETH`)], [shortableTribe]);
 					});
 
 					before('approve the tribes for collateral short', async () => {
@@ -172,14 +172,14 @@ function itCanOpenAndCloseShort({ ctx }) {
 							await exchangeTribes({
 								ctx,
 								src: 'rUSD',
-								dest: 'hETH',
+								dest: 'rETH',
 								amount: amountToExchange,
 								user,
 							});
 						});
 
 						before('skip waiting period', async () => {
-							// Ignore settlement period for rUSD --> hETH closing the loan
+							// Ignore settlement period for rUSD --> rETH closing the loan
 							await skipWaitingPeriod({ ctx });
 						});
 

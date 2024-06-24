@@ -165,21 +165,21 @@ contract('AddressResolver', accounts => {
 			});
 		});
 		describe('when a Rwaone is created with a few added tribes', () => {
-			let hETHContract;
+			let rETHContract;
 			let rUSDContract;
 			beforeEach(async () => {
-				({ TribehETH: hETHContract, TriberUSD: rUSDContract } = await setupAllContracts({
+				({ TriberETH: rETHContract, TriberUSD: rUSDContract } = await setupAllContracts({
 					accounts,
 					existing: {
 						AddressResolver: resolver,
 					},
-					tribes: ['rUSD', 'hETH', 'sEUR', 'sAUD'],
+					tribes: ['rUSD', 'rETH', 'sEUR', 'sAUD'],
 					contracts: ['Rwaone'],
 				}));
 			});
 			it('when getTribe() is invoked with these tribe keys, they are returned correctly', async () => {
 				assert.equal(await resolver.getTribe(toBytes32('rUSD')), rUSDContract.address);
-				assert.equal(await resolver.getTribe(toBytes32('hETH')), hETHContract.address);
+				assert.equal(await resolver.getTribe(toBytes32('rETH')), rETHContract.address);
 			});
 		});
 	});

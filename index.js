@@ -184,15 +184,15 @@ const defaults = {
 	CROSS_DOMAIN_FEE_PERIOD_CLOSE_GAS_LIMIT: `${8e6}`,
 
 	COLLATERAL_MANAGER: {
-		TRIBES: ['rUSD', 'hBTC', 'hETH'],
-		SHORTS: ['hBTC', 'hETH'],
+		TRIBES: ['rUSD', 'hBTC', 'rETH'],
+		SHORTS: ['hBTC', 'rETH'],
 		MAX_DEBT: w3utils.toWei('75000000'), // 75 million rUSD
 		MAX_SKEW_RATE: w3utils.toWei('0.2'),
 		BASE_BORROW_RATE: Math.round((0.005 * 1e18) / 31556926).toString(), // 31556926 is CollateralManager seconds per year
 		BASE_SHORT_RATE: Math.round((0.005 * 1e18) / 31556926).toString(),
 	},
 	COLLATERAL_ETH: {
-		TRIBES: ['rUSD', 'hETH'],
+		TRIBES: ['rUSD', 'rETH'],
 		MIN_CRATIO: w3utils.toWei('1.3'),
 		MIN_COLLATERAL: w3utils.toWei('2'),
 		ISSUE_FEE_RATE: w3utils.toWei('0.001'),
@@ -204,7 +204,7 @@ const defaults = {
 		ISSUE_FEE_RATE: w3utils.toWei('0.001'),
 	},
 	COLLATERAL_SHORT: {
-		TRIBES: ['hBTC', 'hETH'],
+		TRIBES: ['hBTC', 'rETH'],
 		MIN_CRATIO: w3utils.toWei('1.2'),
 		MIN_COLLATERAL: w3utils.toWei('1000'),
 		ISSUE_FEE_RATE: w3utils.toWei('0.005'),
@@ -481,10 +481,10 @@ const getFuturesMarkets = ({
 	return futuresMarkets.map(futuresMarket => {
 		/**
 		 * We expect the asset key to not start with an 's'. ie. AVAX rather than sAVAX
-		 * Unfortunately due to some historical reasons 'hBTC', 'hETH' and 'sLINK' does not follow this format
+		 * Unfortunately due to some historical reasons 'hBTC', 'rETH' and 'sLINK' does not follow this format
 		 * We adjust for that here.
 		 */
-		const marketsWithIncorrectAssetKey = ['hBTC', 'hETH', 'sLINK'];
+		const marketsWithIncorrectAssetKey = ['hBTC', 'rETH', 'sLINK'];
 		const assetKeyNeedsAdjustment = marketsWithIncorrectAssetKey.includes(futuresMarket.asset);
 		const assetKey = assetKeyNeedsAdjustment ? futuresMarket.asset.slice(1) : futuresMarket.asset;
 		// mixin the asset details
@@ -522,10 +522,10 @@ const getPerpsMarkets = ({
 	return perpsMarkets.map(perpsMarket => {
 		/**
 		 * We expect the asset key to not start with an 's'. ie. AVAX rather than sAVAX
-		 * Unfortunately due to some historical reasons 'hBTC' and 'hETH' does not follow this format
+		 * Unfortunately due to some historical reasons 'hBTC' and 'rETH' does not follow this format
 		 * We adjust for that here.
 		 */
-		const marketsWithIncorrectAssetKey = ['hBTC', 'hETH'];
+		const marketsWithIncorrectAssetKey = ['hBTC', 'rETH'];
 		const assetKeyNeedsAdjustment = marketsWithIncorrectAssetKey.includes(perpsMarket.asset);
 		const assetKey = assetKeyNeedsAdjustment ? perpsMarket.asset.slice(1) : perpsMarket.asset;
 		// mixin the asset details
