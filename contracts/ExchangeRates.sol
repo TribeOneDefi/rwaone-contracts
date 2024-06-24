@@ -30,7 +30,6 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
 
     //slither-disable-next-line naming-convention
     bytes32 internal constant hUSD = "hUSD";
-    bytes32 internal constant hBAYC = "hBAYC";
 
     // Decentralized oracle networks that feed into pricing aggregators
     mapping(bytes32 => AggregatorV2V3Interface) public aggregators;
@@ -40,8 +39,8 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     // List of aggregator keys for convenient iteration
     bytes32[] public aggregatorKeys;
 
-    // Enable BAYC Oracle price update
-    bool public enableUpdateDiaOracle = true;
+    // Enable Oracle price update
+    mapping(bytes32 => bool) public enableUpdateOracle;
 
     // ========== CONSTRUCTOR ==========
 
@@ -49,8 +48,8 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
 
     /* ========== MUTATIVE FUNCTIONS ========== */
 
-    function setEnableUpdateDiaOracle(bool _enableUpdateDiaOracle) external onlyOwner {
-        enableUpdateDiaOracle = _enableUpdateDiaOracle;
+    function setEnableUpdateOracle(bytes32 _currencyKey, bool _enableUpdateOracle) external onlyOwner {
+        enableUpdateOracle[_currencyKey] = _enableUpdateOracle;
     }
     
     function addAggregator(bytes32 currencyKey, address aggregatorAddress) external onlyOwner {
@@ -85,8 +84,8 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         }
     }
 
-    /* ========== Dia Oracle Update for BAYC ========== */ 
-    function updateDiaOracle(AggregatorV2V3Interface aggregator) internal {
+    /* ========== Oracle Update for and Other Assets ========== */
+    function updateOracle(AggregatorV2V3Interface aggregator) internal {
         bytes memory payload = abi.encodeWithSignature("setLatestAnswer()");
         (bool success, ) = address(aggregator).call(payload);
         require(success, "Call to setLatestAnswer failed");
@@ -103,14 +102,13 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         address aggregatorAddress = address(aggregators[currencyKey]);
         require(currencyKey == hUSD || aggregatorAddress != address(0), "No aggregator for asset");
 
+        if (enableUpdateOracle[currencyKey] == true) {
+            updateOracle(aggregators[currencyKey]);
+        }
         RateAndUpdatedTime memory rateAndTime = _getRateAndUpdatedTime(currencyKey);
 
         if (currencyKey == hUSD) {
             return (rateAndTime.rate, false, false);
-        }
-
-        if (currencyKey == hBAYC && enableUpdateDiaOracle == true) {
-            updateDiaOracle(aggregators[currencyKey]);
         }
 
         rate = rateAndTime.rate;

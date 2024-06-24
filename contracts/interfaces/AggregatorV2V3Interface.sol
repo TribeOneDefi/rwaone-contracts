@@ -31,8 +31,5 @@ interface AggregatorV2V3Interface {
             uint256 startedAt,
             uint256 updatedAt,
             uint80 answeredInRound
-        );
-    
-    function setLatestAnswer() external;
-    
+        );    
 }
