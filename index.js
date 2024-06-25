@@ -5,20 +5,20 @@ const abiDecoder = require('abi-decoder');
 
 // load the data in explicitly (not programmatically) so webpack knows what to bundle
 const data = {
-	mainnet: require('./publish/deployed/mainnet'),
-	goerli: require('./publish/deployed/goerli'),
+	//mainnet: require('./publish/deployed/mainnet'),
+	//goerli: require('./publish/deployed/goerli'),
 	// 'goerli-arbitrum': require('./publish/deployed/goerli-arbitrum'),
 	'sepolia-arbitrum': require('./publish/deployed/sepolia-arbitrum'),
-	'goerli-ovm': require('./publish/deployed/goerli-ovm'),
-	'local-ovm': require('./publish/deployed/local-ovm'),
-	'mainnet-ovm': require('./publish/deployed/mainnet-ovm'),
+	//'goerli-ovm': require('./publish/deployed/goerli-ovm'),
+	//'local-ovm': require('./publish/deployed/local-ovm'),
+	//'mainnet-ovm': require('./publish/deployed/mainnet-ovm'),
 };
 
 const assets = require('./publish/assets.json');
 const nonUpgradeable = require('./publish/non-upgradeable.json');
 const releases = require('./publish/releases.json');
 
-const networks = ['local', 'mainnet', 'goerli', 'sepolia-arbitrum'];
+const networks = ['sepolia-arbitrum'];
 
 const chainIdMapping = Object.entries({
 	1: {
