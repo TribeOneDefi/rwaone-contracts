@@ -43,8 +43,8 @@ contract RewardEscrow is Owned, IRewardEscrow {
 
     /* ========== CONSTRUCTOR ========== */
 
-    constructor(address _owner, IRwaone _tribeetix, IFeePool _feePool) public Owned(_owner) {
-        rwaone = _tribeetix;
+    constructor(address _owner, IRwaone _rwaone, IFeePool _feePool) public Owned(_owner) {
+        rwaone = _rwaone;
         feePool = _feePool;
     }
 
@@ -53,9 +53,9 @@ contract RewardEscrow is Owned, IRewardEscrow {
     /**
      * @notice set the rwaone contract address as we need to transfer wRWAX when the user vests
      */
-    function setRwaone(IRwaone _tribeetix) external onlyOwner {
-        rwaone = _tribeetix;
-        emit RwaoneUpdated(address(_tribeetix));
+    function setRwaone(IRwaone _rwaone) external onlyOwner {
+        rwaone = _rwaone;
+        emit RwaoneUpdated(address(_rwaone));
     }
 
     /**

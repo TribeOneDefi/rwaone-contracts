@@ -19,9 +19,9 @@ const commands = {
 	deploy: deployCmd.deploy,
 	deployStakingRewards: deployStakingRewardsCmd.deployStakingRewards,
 	deployShortingRewards: deployShortingRewardsCmd.deployShortingRewards,
-	replaceTribes: require('../../publish/src/commands/replace-tribes').replaceTribes,
-	purgeTribes: require('../../publish/src/commands/purge-tribes').purgeTribes,
-	removeTribes: require('../../publish/src/commands/remove-tribes').removeTribes,
+	replaceRwas: require('../../publish/src/commands/replace-rwas').replaceRwas,
+	purgeRwas: require('../../publish/src/commands/purge-rwas').purgeRwas,
+	removeRwas: require('../../publish/src/commands/remove-rwas').removeRwas,
 };
 
 const snx = require('../..');
@@ -62,7 +62,7 @@ describe('publish scripts', () => {
 	const {
 		getSource,
 		getTarget,
-		getTribes,
+		getRwas,
 		getPathToNetwork,
 		getStakingRewards,
 		getShortingRewards,
@@ -77,8 +77,8 @@ describe('publish scripts', () => {
 	// track these files to revert them later on
 	const rewardsJSONPath = path.join(deploymentPath, STAKING_REWARDS_FILENAME);
 	const rewardsJSON = fs.readFileSync(rewardsJSONPath);
-	const tribesJSONPath = path.join(deploymentPath, RWAONES_FILENAME);
-	const tribesJSON = fs.readFileSync(tribesJSONPath);
+	const rwasJSONPath = path.join(deploymentPath, RWAONES_FILENAME);
+	const rwasJSON = fs.readFileSync(rwasJSONPath);
 	const configJSONPath = path.join(deploymentPath, CONFIG_FILENAME);
 	const configJSON = fs.readFileSync(configJSONPath);
 	const deploymentJSONPath = path.join(deploymentPath, DEPLOYMENT_FILENAME);
@@ -96,9 +96,9 @@ describe('publish scripts', () => {
 	let overrides;
 	let MockAggregatorFactory;
 
-	const resetConfigAndTribeFiles = () => {
-		// restore the tribes and config files for this env (cause removal updated it)
-		fs.writeFileSync(tribesJSONPath, tribesJSON);
+	const resetConfigAndRwaFiles = () => {
+		// restore the rwas and config files for this env (cause removal updated it)
+		fs.writeFileSync(rwasJSONPath, rwasJSON);
 		fs.writeFileSync(rewardsJSONPath, rewardsJSON);
 		fs.writeFileSync(configJSONPath, configJSON);
 		fs.writeFileSync(feedsJSONPath, feedsJSON);
@@ -165,14 +165,14 @@ describe('publish scripts', () => {
 		};
 	});
 
-	afterEach(resetConfigAndTribeFiles);
+	afterEach(resetConfigAndRwaFiles);
 
 	describe('integrated actions test', () => {
 		describe('when deployed', () => {
 			let rewards;
 			let sources;
 			let targets;
-			let tribes;
+			let rwas;
 			let Rwaone;
 			let timestamp;
 			let rUSDContract;
@@ -245,7 +245,7 @@ describe('publish scripts', () => {
 
 				sources = getSource();
 				targets = getTarget();
-				tribes = getTribes().filter(({ name }) => name !== 'rUSD');
+				rwas = getRwas().filter(({ name }) => name !== 'rUSD');
 
 				Rwaone = getContract({ target: 'ProxyRwaone', source: 'Rwaone' });
 				FeePool = getContract({ target: 'ProxyFeePool', source: 'FeePool' });
@@ -254,10 +254,10 @@ describe('publish scripts', () => {
 
 				Issuer = getContract({ target: 'Issuer' });
 
-				rUSDContract = getContract({ target: 'ProxyrUSD', source: 'Tribe' });
+				rUSDContract = getContract({ target: 'ProxyrUSD', source: 'Rwa' });
 
-				rBTCContract = getContract({ target: 'ProxyrBTC', source: 'Tribe' });
-				rETHContract = getContract({ target: 'ProxyrETH', source: 'Tribe' });
+				rBTCContract = getContract({ target: 'ProxyrBTC', source: 'Rwa' });
+				rETHContract = getContract({ target: 'ProxyrETH', source: 'Rwa' });
 				SystemSettings = getContract({ target: 'SystemSettings' });
 
 				Liquidator = getContract({ target: 'Liquidator' });
@@ -389,7 +389,7 @@ describe('publish scripts', () => {
 						tx = await SystemSettings.setMinimumStakeTime(newMinimumStakeTime, overrides);
 						await tx.wait();
 
-						tx = await SystemSettings.setExchangeFeeRateForTribes(
+						tx = await SystemSettings.setExchangeFeeRateForRwas(
 							[toBytes32('rUSD')],
 							[newRateForrUSD],
 							overrides
@@ -471,20 +471,20 @@ describe('publish scripts', () => {
 				});
 			});
 
-			describe('tribes added to Issuer', () => {
+			describe('rwas added to Issuer', () => {
 				const hexToString = hex => ethers.utils.toUtf8String(hex).replace(/\0/g, '');
 
-				it('then all tribes are added to the issuer', async () => {
+				it('then all rwas are added to the issuer', async () => {
 					const keys = await Issuer.availableCurrencyKeys();
 					assert.deepStrictEqual(
 						keys.map(hexToString),
-						JSON.parse(tribesJSON).map(({ name }) => name)
+						JSON.parse(rwasJSON).map(({ name }) => name)
 					);
 				});
-				describe('when only rUSD and rETH is chosen as a tribe', () => {
+				describe('when only rUSD and rETH is chosen as a rwa', () => {
 					beforeEach(async () => {
 						fs.writeFileSync(
-							tribesJSONPath,
+							rwasJSONPath,
 							JSON.stringify([
 								{ name: 'rUSD', asset: 'USD' },
 								{ name: 'rETH', asset: 'ETH' },
@@ -503,7 +503,7 @@ describe('publish scripts', () => {
 
 							await commands.deploy({
 								concurrency,
-								addNewTribes: true,
+								addNewRwas: true,
 								network,
 								yes: true,
 								includeFutures: false,
@@ -714,7 +714,7 @@ describe('publish scripts', () => {
 				});
 			});
 
-			describe('when ExchangeRates has prices wRWAX $0.30 and all tribes $1', () => {
+			describe('when ExchangeRates has prices wRWAX $0.30 and all rwas $1', () => {
 				beforeEach(async () => {
 					// set default issuance of 0.2
 					const tx = await SystemSettings.setIssuanceRatio(
@@ -726,7 +726,7 @@ describe('publish scripts', () => {
 					// make sure exchange rates has prices for specific assets
 
 					const answersToSet = [{ asset: 'wRWAX', rate: 0.3 }].concat(
-						tribes.map(({ asset }) => {
+						rwas.map(({ asset }) => {
 							// as the same assets are used for long and shorts, search by asset rather than
 							// name (currencyKey) here so that we don't accidentially override an inverse with
 							// another rate
@@ -784,7 +784,7 @@ describe('publish scripts', () => {
 						beforeEach(async () => {
 							Rwaone = Rwaone.connect(accounts.first);
 
-							const tx = await Rwaone.issueMaxTribes(overrides);
+							const tx = await Rwaone.issueMaxRwas(overrides);
 							await tx.wait();
 						});
 						it('then the rUSD balanced must be 100k * 0.3 * 0.2 (default SystemSettings.issuanceRatio) = 6000', async () => {
@@ -797,7 +797,7 @@ describe('publish scripts', () => {
 								'Balance should match'
 							);
 						});
-						describe('when user1 exchange 1000 rUSD for rETH (the MultiCollateralTribe)', () => {
+						describe('when user1 exchange 1000 rUSD for rETH (the MultiCollateralRwa)', () => {
 							let rETHBalanceAfterExchange;
 							beforeEach(async () => {
 								await Rwaone.exchange(rUSD, ethers.utils.parseEther('1000'), rETH, overrides);
@@ -826,14 +826,14 @@ describe('publish scripts', () => {
 								);
 							});
 
-							describe('tribe suspension', () => {
+							describe('rwa suspension', () => {
 								let CircuitBreaker;
-								describe('when one tribe has a price well outside of range, triggering price deviation', () => {
+								describe('when one rwa has a price well outside of range, triggering price deviation', () => {
 									beforeEach(async () => {
 										CircuitBreaker = getContract({ target: 'CircuitBreaker' });
 										await setAggregatorAnswer({ asset: 'ETH', rate: 20 });
 									});
-									it('when exchange occurs into that tribe, the tribe is suspended', async () => {
+									it('when exchange occurs into that rwa, the rwa is suspended', async () => {
 										const tx = await Rwaone.exchange(
 											rUSD,
 											ethers.utils.parseEther('1'),
@@ -893,7 +893,7 @@ describe('publish scripts', () => {
 									await tx.wait();
 
 									// burn
-									tx = await Rwaone.burnTribes(ethers.utils.parseEther('10'), overrides);
+									tx = await Rwaone.burnRwas(ethers.utils.parseEther('10'), overrides);
 									await tx.wait();
 								});
 								it('then their rUSD balance is 4990', async () => {
@@ -907,14 +907,14 @@ describe('publish scripts', () => {
 									);
 								});
 
-								describe('when deployer replaces rBTC with PurgeableTribe', () => {
+								describe('when deployer replaces rBTC with PurgeableRwa', () => {
 									beforeEach(async () => {
-										await commands.replaceTribes({
+										await commands.replaceRwas({
 											network,
 											yes: true,
 											privateKey: accounts.deployer.privateKey,
-											subclass: 'PurgeableTribe',
-											tribesToReplace: ['rBTC'],
+											subclass: 'PurgeableRwa',
+											rwasToReplace: ['rBTC'],
 											methodCallGasLimit: gasLimit,
 										});
 									});
@@ -922,12 +922,12 @@ describe('publish scripts', () => {
 										beforeEach(async () => {
 											await fastForward({ seconds: 500, provider }); // fast forward through waiting period
 
-											await commands.purgeTribes({
+											await commands.purgeRwas({
 												network,
 												yes: true,
 												privateKey: accounts.deployer.privateKey,
 												addresses: [accounts.first.address],
-												tribesToPurge: ['rBTC'],
+												rwasToPurge: ['rBTC'],
 												gasLimit,
 											});
 										});
@@ -967,13 +967,13 @@ describe('publish scripts', () => {
 				beforeEach(async () => {
 					mockAggregator = await createMockAggregator();
 				});
-				describe('when Rwaone.anyTribeOrRWAXRateIsInvalid() is invoked', () => {
+				describe('when Rwaone.anyRwaOrRWAXRateIsInvalid() is invoked', () => {
 					it('then it returns true as expected', async () => {
-						const response = await Rwaone.anyTribeOrRWAXRateIsInvalid();
-						assert.strictEqual(response, true, 'anyTribeOrRWAXRateIsInvalid must be true');
+						const response = await Rwaone.anyRwaOrRWAXRateIsInvalid();
+						assert.strictEqual(response, true, 'anyRwaOrRWAXRateIsInvalid must be true');
 					});
 				});
-				describe('when one tribe is configured to have a pricing aggregator', () => {
+				describe('when one rwa is configured to have a pricing aggregator', () => {
 					beforeEach(async () => {
 						const currentFeeds = JSON.parse(fs.readFileSync(feedsJSONPath));
 
@@ -1012,21 +1012,21 @@ describe('publish scripts', () => {
 							assert.strictEqual(aggregator, mockAggregator.address);
 						});
 
-						describe('when ExchangeRates has rates for all tribes except the aggregated tribe rBTC', () => {
+						describe('when ExchangeRates has rates for all rwas except the aggregated rwa rBTC', () => {
 							beforeEach(async () => {
 								// update rates
-								const tribesToUpdate = tribes
+								const rwasToUpdate = rwas
 									.filter(({ name }) => name !== 'rBTC')
 									.concat({ asset: 'wRWAX', rate: 1 });
 
-								for (const { asset } of tribesToUpdate) {
+								for (const { asset } of rwasToUpdate) {
 									await setAggregatorAnswer({ asset, rate: 1 });
 								}
 							});
-							describe('when Rwaone.anyTribeOrRWAXRateIsInvalid() is invoked', () => {
+							describe('when Rwaone.anyRwaOrRWAXRateIsInvalid() is invoked', () => {
 								it('then it returns true as rBTC still is', async () => {
-									const response = await Rwaone.anyTribeOrRWAXRateIsInvalid();
-									assert.strictEqual(response, true, 'anyTribeOrRWAXRateIsInvalid must be true');
+									const response = await Rwaone.anyRwaOrRWAXRateIsInvalid();
+									assert.strictEqual(response, true, 'anyRwaOrRWAXRateIsInvalid must be true');
 								});
 							});
 
@@ -1051,10 +1051,10 @@ describe('publish scripts', () => {
 									});
 								});
 
-								describe('when Rwaone.anyTribeOrRWAXRateIsInvalid() is invoked', () => {
+								describe('when Rwaone.anyRwaOrRWAXRateIsInvalid() is invoked', () => {
 									it('then it returns false as expected', async () => {
-										const response = await Rwaone.anyTribeOrRWAXRateIsInvalid();
-										assert.strictEqual(response, false, 'anyTribeOrRWAXRateIsInvalid must be false');
+										const response = await Rwaone.anyRwaOrRWAXRateIsInvalid();
+										assert.strictEqual(response, false, 'anyRwaOrRWAXRateIsInvalid must be false');
 									});
 								});
 							});
@@ -1117,8 +1117,8 @@ describe('publish scripts', () => {
 									'Rwaone',
 									'RwaoneDebtShare',
 									'RwaoneEscrow',
-									'TriberETH',
-									'TriberUSD',
+									'RwarETH',
+									'RwarUSD',
 									'SystemStatus',
 								].map(contractName =>
 									callMethodWithRetry(
@@ -1189,8 +1189,8 @@ describe('publish scripts', () => {
 									.filter(([contract]) => !/^ext:/.test(contract))
 									// remove debt oracles
 									.filter(([contract]) => !/^OneNet/.test(contract))
-									// Note: the VirtualTribe mastercopy is null-initialized and shouldn't be checked
-									.filter(([contract]) => !/^VirtualTribeMastercopy/.test(contract))
+									// Note: the VirtualRwa mastercopy is null-initialized and shouldn't be checked
+									.filter(([contract]) => !/^VirtualRwaMastercopy/.test(contract))
 									.filter(([, { source }]) =>
 										sources[source].abi.find(({ name }) => name === 'resolver')
 									)

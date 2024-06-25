@@ -4,7 +4,7 @@ const { artifacts, contract, web3 } = require('hardhat');
 
 const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 
-let MultiCollateralTribe;
+let MultiCollateralRwa;
 
 const {
 	onlyGivenAddressCanInvoke,
@@ -20,7 +20,7 @@ const {
 
 const { setupAllContracts } = require('./setup');
 
-contract('MultiCollateralTribe', accounts => {
+contract('MultiCollateralRwa', accounts => {
 	const [deployerAccount, owner, , , account1] = accounts;
 
 	const rETH = toBytes32('rETH');
@@ -33,9 +33,9 @@ contract('MultiCollateralTribe', accounts => {
 		exchangeRates,
 		managerState,
 		debtCache,
-		rUSDTribe,
+		rUSDRwa,
 		feePool,
-		tribes;
+		rwas;
 
 	const getid = async tx => {
 		const event = tx.logs.find(log => log.event === 'LoanCreated');
@@ -43,24 +43,24 @@ contract('MultiCollateralTribe', accounts => {
 	};
 
 	const issuerUSDToAccount = async (issueAmount, receiver) => {
-		// Set up the depositor with an amount of tribes to deposit.
-		await rUSDTribe.issue(receiver, issueAmount, {
+		// Set up the depositor with an amount of rwas to deposit.
+		await rUSDRwa.issue(receiver, issueAmount, {
 			from: owner,
 		});
 	};
 
 	before(async () => {
-		MultiCollateralTribe = artifacts.require('MultiCollateralTribe');
+		MultiCollateralRwa = artifacts.require('MultiCollateralRwa');
 	});
 
 	const onlyInternalString = 'Only internal contracts allowed';
 
 	before(async () => {
-		tribes = ['rUSD'];
+		rwas = ['rUSD'];
 		({
 			AddressResolver: resolver,
 			Issuer: issuer,
-			TriberUSD: rUSDTribe,
+			RwarUSD: rUSDRwa,
 			ExchangeRates: exchangeRates,
 			DebtCache: debtCache,
 			FeePool: feePool,
@@ -69,7 +69,7 @@ contract('MultiCollateralTribe', accounts => {
 			CollateralEth: ceth,
 		} = await setupAllContracts({
 			accounts,
-			tribes,
+			rwas,
 			contracts: [
 				'AddressResolver',
 				'Rwaone',
@@ -103,7 +103,7 @@ contract('MultiCollateralTribe', accounts => {
 
 	addSnapshotBeforeRestoreAfterEach();
 
-	const deployTribe = async ({ currencyKey, proxy, tokenState }) => {
+	const deployRwa = async ({ currencyKey, proxy, tokenState }) => {
 		// As either of these could be legacy, we require them in the testing context (see buidler.config.js)
 		const TokenState = artifacts.require('TokenState');
 		const Proxy = artifacts.require('Proxy');
@@ -116,10 +116,10 @@ contract('MultiCollateralTribe', accounts => {
 
 		proxy = proxy || (await Proxy.new(owner, { from: deployerAccount }));
 
-		const tribe = await MultiCollateralTribe.new(
+		const rwa = await MultiCollateralRwa.new(
 			proxy.address,
 			tokenState.address,
-			`Tribe${currencyKey}`,
+			`Rwa${currencyKey}`,
 			currencyKey,
 			owner,
 			toBytes32(currencyKey),
@@ -130,43 +130,43 @@ contract('MultiCollateralTribe', accounts => {
 			}
 		);
 
-		await resolver.importAddresses([toBytes32(`Tribe${currencyKey}`)], [tribe.address], {
+		await resolver.importAddresses([toBytes32(`Rwa${currencyKey}`)], [rwa.address], {
 			from: owner,
 		});
 
-		await tribe.rebuildCache();
+		await rwa.rebuildCache();
 		await manager.rebuildCache();
 		await debtCache.rebuildCache();
 
-		await ceth.addTribes([toBytes32(`Tribe${currencyKey}`)], [toBytes32(currencyKey)], {
+		await ceth.addRwas([toBytes32(`Rwa${currencyKey}`)], [toBytes32(currencyKey)], {
 			from: owner,
 		});
 
-		return { tribe, tokenState, proxy };
+		return { rwa, tokenState, proxy };
 	};
 
-	describe('when a MultiCollateral tribe is added and connected to Rwaone', () => {
+	describe('when a MultiCollateral rwa is added and connected to Rwaone', () => {
 		beforeEach(async () => {
-			const { tribe, tokenState, proxy } = await deployTribe({
+			const { rwa, tokenState, proxy } = await deployRwa({
 				currencyKey: 'sXYZ',
 			});
-			await tokenState.setAssociatedContract(tribe.address, { from: owner });
-			await proxy.setTarget(tribe.address, { from: owner });
-			await issuer.addTribe(tribe.address, { from: owner });
-			this.tribe = tribe;
-			this.tribeViaProxy = await MultiCollateralTribe.at(proxy.address);
+			await tokenState.setAssociatedContract(rwa.address, { from: owner });
+			await proxy.setTarget(rwa.address, { from: owner });
+			await issuer.addRwa(rwa.address, { from: owner });
+			this.rwa = rwa;
+			this.rwaViaProxy = await MultiCollateralRwa.at(proxy.address);
 		});
 
 		it('ensure only known functions are mutative', () => {
 			ensureOnlyExpectedMutativeFunctions({
-				abi: this.tribe.abi,
-				ignoreParents: ['Tribe'],
-				expected: [], // issue and burn are both overridden in MultiCollateral from Tribe
+				abi: this.rwa.abi,
+				ignoreParents: ['Rwa'],
+				expected: [], // issue and burn are both overridden in MultiCollateral from Rwa
 			});
 		});
 
 		it('ensure the list of resolver addresses are as expected', async () => {
-			const actual = await this.tribe.resolverAddressesRequired();
+			const actual = await this.rwa.resolverAddressesRequired();
 			assert.deepEqual(
 				actual,
 				[
@@ -188,29 +188,29 @@ contract('MultiCollateralTribe', accounts => {
 			const amount = toUnit('100');
 			beforeEach(async () => {
 				// approve for transferFrom to work
-				await this.tribeViaProxy.approve(account1, amount, { from: owner });
+				await this.rwaViaProxy.approve(account1, amount, { from: owner });
 			});
 			it('approve does not revert', async () => {
-				await this.tribe.approve(account1, amount, { from: owner });
+				await this.rwa.approve(account1, amount, { from: owner });
 			});
 			it('transfer reverts', async () => {
-				await assert.revert(this.tribe.transfer(account1, amount, { from: owner }), revertMsg);
+				await assert.revert(this.rwa.transfer(account1, amount, { from: owner }), revertMsg);
 			});
 			it('transferFrom reverts', async () => {
 				await assert.revert(
-					this.tribe.transferFrom(owner, account1, amount, { from: account1 }),
+					this.rwa.transferFrom(owner, account1, amount, { from: account1 }),
 					revertMsg
 				);
 			});
 			it('transferAndSettle reverts', async () => {
 				await assert.revert(
-					this.tribe.transferAndSettle(account1, amount, { from: account1 }),
+					this.rwa.transferAndSettle(account1, amount, { from: account1 }),
 					revertMsg
 				);
 			});
 			it('transferFromAndSettle reverts', async () => {
 				await assert.revert(
-					this.tribe.transferFromAndSettle(owner, account1, amount, { from: account1 }),
+					this.rwa.transferFromAndSettle(owner, account1, amount, { from: account1 }),
 					revertMsg
 				);
 			});
@@ -219,7 +219,7 @@ contract('MultiCollateralTribe', accounts => {
 		describe('when non-multiCollateral tries to issue', () => {
 			it('then it fails', async () => {
 				await onlyGivenAddressCanInvoke({
-					fnc: this.tribe.issue,
+					fnc: this.rwa.issue,
 					args: [account1, toUnit('1')],
 					accounts,
 					reason: onlyInternalString,
@@ -229,7 +229,7 @@ contract('MultiCollateralTribe', accounts => {
 		describe('when non-multiCollateral tries to burn', () => {
 			it('then it fails', async () => {
 				await onlyGivenAddressCanInvoke({
-					fnc: this.tribe.burn,
+					fnc: this.rwa.burn,
 					args: [account1, toUnit('1')],
 					accounts,
 					reason: onlyInternalString,
@@ -244,25 +244,25 @@ contract('MultiCollateralTribe', accounts => {
 				await updateAggregatorRates(exchangeRates, null, [sXYZ], [toUnit(5)]);
 			});
 			describe('when multiCollateral tries to issue', () => {
-				it('then it can issue new tribes', async () => {
+				it('then it can issue new rwas', async () => {
 					const accountToIssue = account1;
 					const issueAmount = toUnit('1');
-					const totalSupplyBefore = await this.tribe.totalSupply();
-					const balanceOfBefore = await this.tribe.balanceOf(accountToIssue);
+					const totalSupplyBefore = await this.rwa.totalSupply();
+					const balanceOfBefore = await this.rwa.balanceOf(accountToIssue);
 
 					await ceth.open(issueAmount, toBytes32('sXYZ'), { value: toUnit(2), from: account1 });
 
-					assert.bnEqual(await this.tribe.totalSupply(), totalSupplyBefore.add(issueAmount));
+					assert.bnEqual(await this.rwa.totalSupply(), totalSupplyBefore.add(issueAmount));
 					assert.bnEqual(
-						await this.tribe.balanceOf(accountToIssue),
+						await this.rwa.balanceOf(accountToIssue),
 						balanceOfBefore.add(issueAmount)
 					);
 				});
 			});
 			describe('when multiCollateral tries to burn', () => {
-				it('then it can burn tribes', async () => {
-					const totalSupplyBefore = await this.tribe.totalSupply();
-					const balanceOfBefore = await this.tribe.balanceOf(account1);
+				it('then it can burn rwas', async () => {
+					const totalSupplyBefore = await this.rwa.totalSupply();
+					const balanceOfBefore = await this.rwa.balanceOf(account1);
 					const amount = toUnit('5');
 
 					const tx = await ceth.open(amount, toBytes32('sXYZ'), {
@@ -274,13 +274,13 @@ contract('MultiCollateralTribe', accounts => {
 
 					await fastForward(300);
 
-					assert.bnEqual(await this.tribe.totalSupply(), totalSupplyBefore.add(amount));
-					assert.bnEqual(await this.tribe.balanceOf(account1), balanceOfBefore.add(amount));
+					assert.bnEqual(await this.rwa.totalSupply(), totalSupplyBefore.add(amount));
+					assert.bnEqual(await this.rwa.balanceOf(account1), balanceOfBefore.add(amount));
 
 					await ceth.repay(account1, id, toUnit(3), { from: account1 });
 
-					assert.bnEqual(await this.tribe.totalSupply(), toUnit(2));
-					assert.bnEqual(await this.tribe.balanceOf(account1), toUnit(2));
+					assert.bnEqual(await this.rwa.totalSupply(), toUnit(2));
+					assert.bnEqual(await this.rwa.balanceOf(account1), toUnit(2));
 				});
 			});
 
@@ -291,19 +291,19 @@ contract('MultiCollateralTribe', accounts => {
 				beforeEach(async () => {
 					// have account1 simulate being Issuer so we can invoke issue and burn
 					await resolver.importAddresses([toBytes32('Issuer')], [accountToIssue], { from: owner });
-					// now have the tribe resync its cache
-					await this.tribe.rebuildCache();
+					// now have the rwa resync its cache
+					await this.rwa.rebuildCache();
 				});
 
-				it('then it can issue new tribes as account1', async () => {
-					const totalSupplyBefore = await this.tribe.totalSupply();
-					const balanceOfBefore = await this.tribe.balanceOf(accountToIssue);
+				it('then it can issue new rwas as account1', async () => {
+					const totalSupplyBefore = await this.rwa.totalSupply();
+					const balanceOfBefore = await this.rwa.balanceOf(accountToIssue);
 
-					await this.tribe.issue(accountToIssue, issueAmount, { from: accountToIssue });
+					await this.rwa.issue(accountToIssue, issueAmount, { from: accountToIssue });
 
-					assert.bnEqual(await this.tribe.totalSupply(), totalSupplyBefore.add(issueAmount));
+					assert.bnEqual(await this.rwa.totalSupply(), totalSupplyBefore.add(issueAmount));
 					assert.bnEqual(
-						await this.tribe.balanceOf(accountToIssue),
+						await this.rwa.balanceOf(accountToIssue),
 						balanceOfBefore.add(issueAmount)
 					);
 				});

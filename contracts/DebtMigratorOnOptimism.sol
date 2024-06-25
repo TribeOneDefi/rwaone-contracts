@@ -52,7 +52,7 @@ contract DebtMigratorOnOptimism is BaseDebtMigrator, IDebtMigrator {
         uint amountPerEntry = escrowMigrated.multiplyDecimal(1e17);
 
         // Make sure to approve the creation of the escrow entries.
-        _tribeetixERC20().approve(address(_rewardEscrowV2()), escrowMigrated);
+        _rwaoneERC20().approve(address(_rewardEscrowV2()), escrowMigrated);
 
         // Create ten distinct entries that vest each month for a year. First entry vests in 8 weeks.
         uint amountEscrowed = 0;
@@ -100,7 +100,7 @@ contract DebtMigratorOnOptimism is BaseDebtMigrator, IDebtMigrator {
         }
 
         if (liquidSnxMigrated > 0) {
-            _tribeetixERC20().transfer(account, liquidSnxMigrated);
+            _rwaoneERC20().transfer(account, liquidSnxMigrated);
         }
 
         emit MigrationFinalized(account, debtSharesMigrated, escrowMigrated, liquidSnxMigrated);

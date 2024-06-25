@@ -1,11 +1,11 @@
 pragma solidity ^0.5.16;
 
-import "./VirtualTribe.sol";
+import "./VirtualRwa.sol";
 
-// https://docs.rwaone.io/contracts/source/contracts/virtualtribemastercopy
-// Note: this is the "frozen" mastercopy of the VirtualTribe contract that should be linked to from
+// https://docs.rwaone.io/contracts/source/contracts/virtualrwamastercopy
+// Note: this is the "frozen" mastercopy of the VirtualRwa contract that should be linked to from
 //       proxies.
-contract VirtualTribeMastercopy is VirtualTribe {
+contract VirtualRwaMastercopy is VirtualRwa {
     constructor() public ERC20() {
         // Freeze mastercopy on deployment so it can never be initialized with real arguments
         initialized = true;

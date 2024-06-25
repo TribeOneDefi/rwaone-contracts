@@ -29,13 +29,13 @@ const DEFAULTS = {
 	priorityGasPrice: '1',
 };
 
-const removeTribes = async ({
+const removeRwas = async ({
 	network = DEFAULTS.network,
 	deploymentPath,
 	maxFeePerGas,
 	maxPriorityFeePerGas = DEFAULTS.priorityGasPrice,
 	gasLimit = DEFAULTS.gasLimit,
-	tribesToRemove = [],
+	rwasToRemove = [],
 	yes,
 	useOvm,
 	useFork,
@@ -47,8 +47,8 @@ const removeTribes = async ({
 	ensureDeploymentPath(deploymentPath);
 
 	const {
-		tribes,
-		tribesFile,
+		rwas,
+		rwasFile,
 		deployment,
 		deploymentFile,
 		config,
@@ -60,19 +60,19 @@ const removeTribes = async ({
 		network,
 	});
 
-	if (tribesToRemove.length < 1) {
-		console.log(gray('No tribes provided. Please use --tribes-to-remove option'));
+	if (rwasToRemove.length < 1) {
+		console.log(gray('No rwas provided. Please use --rwas-to-remove option'));
 		return;
 	}
 
-	// sanity-check the tribe list
-	for (const tribe of tribesToRemove) {
-		if (tribes.filter(({ name }) => name === tribe).length < 1) {
-			console.error(red(`Tribe ${tribe} not found!`));
+	// sanity-check the rwa list
+	for (const rwa of rwasToRemove) {
+		if (rwas.filter(({ name }) => name === rwa).length < 1) {
+			console.error(red(`Rwa ${rwa} not found!`));
 			process.exitCode = 1;
 			return;
-		} else if (['rUSD'].indexOf(tribe) >= 0) {
-			console.error(red(`Tribe ${tribe} cannot be removed`));
+		} else if (['rUSD'].indexOf(rwa) >= 0) {
+			console.error(red(`Rwa ${rwa} cannot be removed`));
 			process.exitCode = 1;
 			return;
 		}
@@ -114,7 +114,7 @@ const removeTribes = async ({
 				cyan(
 					`${yellow(
 						'⚠ WARNING'
-					)}: This action will remove the following tribes from the Rwaone contract on ${network}:\n- ${tribesToRemove.join(
+					)}: This action will remove the following rwas from the Rwaone contract on ${network}:\n- ${rwasToRemove.join(
 						'\n- '
 					)}`
 				) + '\nDo you want to continue? (y/n) '
@@ -156,31 +156,31 @@ const removeTribes = async ({
 	// deep clone these configurations so we can mutate and persist them
 	const updatedConfig = JSON.parse(JSON.stringify(config));
 	const updatedDeployment = JSON.parse(JSON.stringify(deployment));
-	let updatedTribes = JSON.parse(fs.readFileSync(tribesFile));
+	let updatedRwas = JSON.parse(fs.readFileSync(rwasFile));
 
-	for (const currencyKey of tribesToRemove) {
-		const { address: tribeAddress, source: tribeSource } = deployment.targets[
-			`Tribe${currencyKey}`
+	for (const currencyKey of rwasToRemove) {
+		const { address: rwaAddress, source: rwaSource } = deployment.targets[
+			`Rwa${currencyKey}`
 		];
-		const { abi: tribeABI } = deployment.sources[tribeSource];
-		const Tribe = new ethers.Contract(tribeAddress, tribeABI, wallet);
+		const { abi: rwaABI } = deployment.sources[rwaSource];
+		const Rwa = new ethers.Contract(rwaAddress, rwaABI, wallet);
 
-		const currentTribeInRWAX = await Rwaone.tribes(toBytes32(currencyKey));
+		const currentRwaInRWAX = await Rwaone.rwas(toBytes32(currencyKey));
 
-		if (tribeAddress !== currentTribeInRWAX) {
+		if (rwaAddress !== currentRwaInRWAX) {
 			console.error(
 				red(
-					`Tribe address in Rwaone for ${currencyKey} is different from what's deployed in Rwaone to the local ${DEPLOYMENT_FILENAME} of ${network} \ndeployed: ${yellow(
-						currentTribeInRWAX
-					)}\nlocal:    ${yellow(tribeAddress)}`
+					`Rwa address in Rwaone for ${currencyKey} is different from what's deployed in Rwaone to the local ${DEPLOYMENT_FILENAME} of ${network} \ndeployed: ${yellow(
+						currentRwaInRWAX
+					)}\nlocal:    ${yellow(rwaAddress)}`
 				)
 			);
 			process.exitCode = 1;
 			return;
 		}
 
-		// now check total supply (is required in Rwaone.removeTribe)
-		const totalSupply = ethers.utils.formatEther(await Tribe.totalSupply());
+		// now check total supply (is required in Rwaone.removeRwa)
+		const totalSupply = ethers.utils.formatEther(await Rwa.totalSupply());
 		if (Number(totalSupply) > 0) {
 			const totalSupplyInUSD = ethers.utils.formatEther(
 				await ExchangeRates.effectiveValue(
@@ -192,9 +192,9 @@ const removeTribes = async ({
 			try {
 				await confirmAction(
 					cyan(
-						`Tribe${currencyKey}.totalSupply is non-zero: ${yellow(totalSupply)} which is $${yellow(
+						`Rwa${currencyKey}.totalSupply is non-zero: ${yellow(totalSupply)} which is $${yellow(
 							totalSupplyInUSD
-						)}\n${red(`THIS WILL DEPRECATE THE TRIBE BY ITS PROXY. ARE YOU SURE???.`)}`
+						)}\n${red(`THIS WILL DEPRECATE THE RWA BY ITS PROXY. ARE YOU SURE???.`)}`
 					) + '\nDo you want to continue? (y/n) '
 				);
 			} catch (err) {
@@ -205,13 +205,13 @@ const removeTribes = async ({
 
 		// perform transaction if owner of Rwaone or append to owner actions list
 		if (dryRun) {
-			console.log(green('Would attempt to remove the tribe:', currencyKey));
+			console.log(green('Would attempt to remove the rwa:', currencyKey));
 		} else {
 			await performTransactionalStep({
 				signer: wallet,
 				contract: 'Issuer',
 				target: Issuer,
-				write: 'removeTribe',
+				write: 'removeRwa',
 				writeArg: toBytes32(currencyKey),
 				gasLimit,
 				maxFeePerGas,
@@ -223,7 +223,7 @@ const removeTribes = async ({
 			});
 
 			// now update the config and deployment JSON files
-			const contracts = ['Proxy', 'TokenState', 'Tribe'].map(name => `${name}${currencyKey}`);
+			const contracts = ['Proxy', 'TokenState', 'Rwa'].map(name => `${name}${currencyKey}`);
 			for (const contract of contracts) {
 				delete updatedConfig[contract];
 				delete updatedDeployment.targets[contract];
@@ -231,9 +231,9 @@ const removeTribes = async ({
 			fs.writeFileSync(configFile, stringify(updatedConfig));
 			fs.writeFileSync(deploymentFile, stringify(updatedDeployment));
 
-			// and update the tribes.json file
-			updatedTribes = updatedTribes.filter(({ name }) => name !== currencyKey);
-			fs.writeFileSync(tribesFile, stringify(updatedTribes));
+			// and update the rwas.json file
+			updatedRwas = updatedRwas.filter(({ name }) => name !== currencyKey);
+			fs.writeFileSync(rwasFile, stringify(updatedRwas));
 		}
 
 		// now try to remove rate
@@ -257,18 +257,18 @@ const removeTribes = async ({
 			});
 		}
 
-		// now try to unsuspend the tribe
+		// now try to unsuspend the rwa
 		if (dryRun) {
-			console.log(green('Would attempt to remove the tribe:', currencyKey));
+			console.log(green('Would attempt to remove the rwa:', currencyKey));
 		} else {
 			await performTransactionalStep({
 				signer: wallet,
 				contract: 'SystemStatus',
 				target: SystemStatus,
-				read: 'tribeSuspension',
+				read: 'rwaSuspension',
 				readArg: toBytes32(currencyKey),
 				expected: input => !input.suspended,
-				write: 'resumeTribe',
+				write: 'resumeRwa',
 				writeArg: toBytes32(currencyKey),
 				gasLimit,
 				explorerLinkPrefix,
@@ -281,11 +281,11 @@ const removeTribes = async ({
 };
 
 module.exports = {
-	removeTribes,
+	removeRwas,
 	cmd: program =>
 		program
-			.command('remove-tribes')
-			.description('Remove a number of tribes from the system')
+			.command('remove-rwas')
+			.description('Remove a number of rwas from the system')
 			.option(
 				'-d, --deployment-path <value>',
 				`Path to a folder that has your input configuration file ${CONFIG_FILENAME} and where your ${DEPLOYMENT_FILENAME} files will go`
@@ -307,13 +307,13 @@ module.exports = {
 			.option('-z, --use-ovm', 'Target deployment for the OVM (Optimism).')
 			.option('-y, --yes', 'Dont prompt, just reply yes.')
 			.option(
-				'-s, --tribes-to-remove <value>',
-				'The list of tribes to remove',
+				'-s, --rwas-to-remove <value>',
+				'The list of rwas to remove',
 				(val, memo) => {
 					memo.push(val);
 					return memo;
 				},
 				[]
 			)
-			.action(removeTribes),
+			.action(removeRwas),
 };

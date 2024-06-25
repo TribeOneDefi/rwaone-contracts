@@ -144,11 +144,11 @@ const verify = async ({ buildPath, deploymentPath, network, useOvm }) => {
 						`\nAlways use this address in your applications and never the TARGET as it is liable to change.` +
 						'\n\n*/'
 					);
-				} else if (config[`Proxy${name}`] || /^Tribe(i|s)/.test(name)) {
+				} else if (config[`Proxy${name}`] || /^Rwa(i|s)/.test(name)) {
 					const optionalProxyLink = () => {
-						// Tribes source code will be reused by Etherscan, so don't include link to
+						// Rwas source code will be reused by Etherscan, so don't include link to
 						// proxy as it may not be the correct one
-						if (/^Tribe(s|i)/.test(name)) {
+						if (/^Rwa(s|i)/.test(name)) {
 							return '\nThe proxy can be found by looking up the PROXY property on this contract.';
 						}
 						return (

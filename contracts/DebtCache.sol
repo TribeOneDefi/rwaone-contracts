@@ -19,28 +19,28 @@ contract DebtCache is BaseDebtCache {
 
     /* ========== MUTATIVE FUNCTIONS ========== */
 
-    // This function exists in case a tribe is ever somehow removed without its snapshot being updated.
-    function purgeCachedTribeDebt(bytes32 currencyKey) external onlyOwner {
-        require(issuer().tribes(currencyKey) == ITribe(0), "Tribe exists");
-        delete _cachedTribeDebt[currencyKey];
+    // This function exists in case a rwa is ever somehow removed without its snapshot being updated.
+    function purgeCachedRwaDebt(bytes32 currencyKey) external onlyOwner {
+        require(issuer().rwas(currencyKey) == IRwa(0), "Rwa exists");
+        delete _cachedRwaDebt[currencyKey];
     }
 
     function takeDebtSnapshot() external requireSystemActiveIfNotOwner {
         bytes32[] memory currencyKeys = issuer().availableCurrencyKeys();
-        (uint[] memory values, uint futuresDebt, uint excludedDebt, bool isInvalid) = _currentTribeDebts(currencyKeys);
+        (uint[] memory values, uint futuresDebt, uint excludedDebt, bool isInvalid) = _currentRwaDebts(currencyKeys);
 
-        // The total wRWAX-backed debt is the debt of futures markets plus the debt of circulating tribes.
+        // The total wRWAX-backed debt is the debt of futures markets plus the debt of circulating rwas.
         uint snxCollateralDebt = futuresDebt;
-        _cachedTribeDebt[FUTURES_DEBT_KEY] = futuresDebt;
+        _cachedRwaDebt[FUTURES_DEBT_KEY] = futuresDebt;
         uint numValues = values.length;
         for (uint i; i < numValues; i++) {
             uint value = values[i];
             snxCollateralDebt = snxCollateralDebt.add(value);
-            _cachedTribeDebt[currencyKeys[i]] = value;
+            _cachedRwaDebt[currencyKeys[i]] = value;
         }
 
         // Subtract out the excluded non-wRWAX backed debt from our total
-        _cachedTribeDebt[EXCLUDED_DEBT_KEY] = excludedDebt;
+        _cachedRwaDebt[EXCLUDED_DEBT_KEY] = excludedDebt;
         uint newDebt = snxCollateralDebt.floorsub(excludedDebt);
         _cachedDebt = newDebt;
         _cacheTimestamp = block.timestamp;
@@ -51,24 +51,24 @@ contract DebtCache is BaseDebtCache {
         _updateDebtCacheValidity(isInvalid);
     }
 
-    function updateCachedTribeDebts(bytes32[] calldata currencyKeys) external requireSystemActiveIfNotOwner {
+    function updateCachedRwaDebts(bytes32[] calldata currencyKeys) external requireSystemActiveIfNotOwner {
         (uint[] memory rates, bool anyRateInvalid) = exchangeRates().ratesAndInvalidForCurrencies(currencyKeys);
-        _updateCachedTribeDebtsWithRates(currencyKeys, rates, anyRateInvalid);
+        _updateCachedRwaDebtsWithRates(currencyKeys, rates, anyRateInvalid);
     }
 
-    function updateCachedTribeDebtWithRate(bytes32 currencyKey, uint currencyRate) external onlyIssuer {
-        bytes32[] memory tribeKeyArray = new bytes32[](1);
-        tribeKeyArray[0] = currencyKey;
-        uint[] memory tribeRateArray = new uint[](1);
-        tribeRateArray[0] = currencyRate;
-        _updateCachedTribeDebtsWithRates(tribeKeyArray, tribeRateArray, false);
+    function updateCachedRwaDebtWithRate(bytes32 currencyKey, uint currencyRate) external onlyIssuer {
+        bytes32[] memory rwaKeyArray = new bytes32[](1);
+        rwaKeyArray[0] = currencyKey;
+        uint[] memory rwaRateArray = new uint[](1);
+        rwaRateArray[0] = currencyRate;
+        _updateCachedRwaDebtsWithRates(rwaKeyArray, rwaRateArray, false);
     }
 
-    function updateCachedTribeDebtsWithRates(
+    function updateCachedRwaDebtsWithRates(
         bytes32[] calldata currencyKeys,
         uint[] calldata currencyRates
     ) external onlyIssuerOrExchanger {
-        _updateCachedTribeDebtsWithRates(currencyKeys, currencyRates, false);
+        _updateCachedRwaDebtsWithRates(currencyKeys, currencyRates, false);
     }
 
     function updateDebtCacheValidity(bool currentlyInvalid) external onlyIssuer {
@@ -86,10 +86,10 @@ contract DebtCache is BaseDebtCache {
     function updateCachedrUSDDebt(int amount) external onlyIssuer {
         uint delta = SafeDecimalMath.abs(amount);
         if (amount > 0) {
-            _cachedTribeDebt[rUSD] = _cachedTribeDebt[rUSD].add(delta);
+            _cachedRwaDebt[rUSD] = _cachedRwaDebt[rUSD].add(delta);
             _cachedDebt = _cachedDebt.add(delta);
         } else {
-            _cachedTribeDebt[rUSD] = _cachedTribeDebt[rUSD].sub(delta);
+            _cachedRwaDebt[rUSD] = _cachedRwaDebt[rUSD].sub(delta);
             _cachedDebt = _cachedDebt.sub(delta);
         }
 
@@ -105,8 +105,8 @@ contract DebtCache is BaseDebtCache {
         }
     }
 
-    // Updated the global debt according to a rate/supply change in a subset of issued tribes.
-    function _updateCachedTribeDebtsWithRates(
+    // Updated the global debt according to a rate/supply change in a subset of issued rwas.
+    function _updateCachedRwaDebtsWithRates(
         bytes32[] memory currencyKeys,
         uint[] memory currentRates,
         bool anyRateIsInvalid
@@ -114,19 +114,19 @@ contract DebtCache is BaseDebtCache {
         uint numKeys = currencyKeys.length;
         require(numKeys == currentRates.length, "Input array lengths differ");
 
-        // Compute the cached and current debt sum for the subset of tribes provided.
+        // Compute the cached and current debt sum for the subset of rwas provided.
         uint cachedSum;
         uint currentSum;
-        uint[] memory currentValues = _issuedTribeValues(currencyKeys, currentRates);
+        uint[] memory currentValues = _issuedRwaValues(currencyKeys, currentRates);
 
         for (uint i = 0; i < numKeys; i++) {
             bytes32 key = currencyKeys[i];
-            uint currentTribeDebt = currentValues[i];
+            uint currentRwaDebt = currentValues[i];
 
-            cachedSum = cachedSum.add(_cachedTribeDebt[key]);
-            currentSum = currentSum.add(currentTribeDebt);
+            cachedSum = cachedSum.add(_cachedRwaDebt[key]);
+            currentSum = currentSum.add(currentRwaDebt);
 
-            _cachedTribeDebt[key] = currentTribeDebt;
+            _cachedRwaDebt[key] = currentRwaDebt;
         }
 
         // Apply the debt update.

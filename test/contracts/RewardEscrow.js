@@ -42,8 +42,8 @@ contract('RewardEscrow', async accounts => {
 
 	describe('Constructor & Settings ', async () => {
 		it('should set rwaone on contructor', async () => {
-			const tribeetixAddress = await rewardEscrow.rwaone();
-			assert.equal(tribeetixAddress, rwaone.address);
+			const rwaoneAddress = await rewardEscrow.rwaone();
+			assert.equal(rwaoneAddress, rwaone.address);
 		});
 
 		it('should set feePool on contructor', async () => {
@@ -58,8 +58,8 @@ contract('RewardEscrow', async accounts => {
 
 		it('should allow owner to set rwaone', async () => {
 			await rewardEscrow.setRwaone(ZERO_ADDRESS, { from: owner });
-			const tribeetixAddress = await rewardEscrow.rwaone();
-			assert.equal(tribeetixAddress, ZERO_ADDRESS);
+			const rwaoneAddress = await rewardEscrow.rwaone();
+			assert.equal(rwaoneAddress, ZERO_ADDRESS);
 		});
 
 		it('should allow owner to set feePool', async () => {

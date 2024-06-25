@@ -17,7 +17,7 @@ async function exchangeSomething({ ctx }) {
 	await tx.wait();
 }
 
-async function exchangeTribes({ ctx, src, dest, amount, user }) {
+async function exchangeRwas({ ctx, src, dest, amount, user }) {
 	let { Rwaone, CircuitBreaker } = ctx.contracts;
 	const { ExchangeRates } = ctx.contracts;
 	Rwaone = Rwaone.connect(user);
@@ -46,5 +46,5 @@ async function exchangeTribes({ ctx, src, dest, amount, user }) {
 
 module.exports = {
 	exchangeSomething,
-	exchangeTribes,
+	exchangeRwas,
 };

@@ -22,13 +22,13 @@ contract('SystemSettings', async accounts => {
 	const oneYear = toBN(3600 * 24 * 365);
 	const ONE = toBN('1');
 
-	let short, tribes, systemSettings;
+	let short, rwas, systemSettings;
 
 	const setupSettings = async () => {
-		tribes = ['rUSD', 'rBTC', 'rETH'];
+		rwas = ['rUSD', 'rBTC', 'rETH'];
 		({ SystemSettings: systemSettings, CollateralShort: short } = await setupAllContracts({
 			accounts,
-			tribes,
+			rwas,
 			contracts: [
 				'Rwaone',
 				'FeePool',
@@ -64,13 +64,13 @@ contract('SystemSettings', async accounts => {
 				'setAtomicVolatilityConsiderationWindow',
 				'setAtomicVolatilityUpdateThreshold',
 				'setCollapseFeeRate',
-				'setCrossChainTribeTransferEnabled',
+				'setCrossChainRwaTransferEnabled',
 				'setCrossDomainMessageGasLimit',
 				'setDebtSnapshotStaleTime',
 				'setEtherWrapperBurnFeeRate',
 				'setEtherWrapperMaxETH',
 				'setEtherWrapperMintFeeRate',
-				'setExchangeFeeRateForTribes',
+				'setExchangeFeeRateForRwas',
 				'setFeePeriodDuration',
 				'setInteractionDelay',
 				'setIssuanceRatio',
@@ -849,15 +849,15 @@ contract('SystemSettings', async accounts => {
 		});
 	});
 
-	describe('setExchangeFeeRateForTribes()', () => {
-		describe('Given tribe exchange fee rates to set', async () => {
+	describe('setExchangeFeeRateForRwas()', () => {
+		describe('Given rwa exchange fee rates to set', async () => {
 			const [rUSD, rETH, sAUD, rBTC] = ['rUSD', 'rETH', 'sAUD', 'rBTC'].map(toBytes32);
 			const fxBIPS = toUnit('0.01');
 			const cryptoBIPS = toUnit('0.03');
 
 			it('when a non owner calls then revert', async () => {
 				await onlyGivenAddressCanInvoke({
-					fnc: systemSettings.setExchangeFeeRateForTribes,
+					fnc: systemSettings.setExchangeFeeRateForRwas,
 					args: [[rUSD], [toUnit('0.1')]],
 					accounts,
 					address: owner,
@@ -866,7 +866,7 @@ contract('SystemSettings', async accounts => {
 			});
 			it('when input array lengths dont match then revert ', async () => {
 				await assert.revert(
-					systemSettings.setExchangeFeeRateForTribes([rUSD, sAUD], [toUnit('0.1')], {
+					systemSettings.setExchangeFeeRateForRwas([rUSD, sAUD], [toUnit('0.1')], {
 						from: owner,
 					}),
 					'Array lengths dont match'
@@ -874,16 +874,16 @@ contract('SystemSettings', async accounts => {
 			});
 			it('when owner sets an exchange fee rate larger than MAX_EXCHANGE_FEE_RATE then revert', async () => {
 				await assert.revert(
-					systemSettings.setExchangeFeeRateForTribes([rUSD], [toUnit('11')], {
+					systemSettings.setExchangeFeeRateForRwas([rUSD], [toUnit('11')], {
 						from: owner,
 					}),
 					'MAX_EXCHANGE_FEE_RATE exceeded'
 				);
 			});
 
-			describe('Given new tribe exchange fee rates to store', async () => {
+			describe('Given new rwa exchange fee rates to store', async () => {
 				it('when 1 exchange rate then store it to be readable', async () => {
-					await systemSettings.setExchangeFeeRateForTribes([rUSD], [fxBIPS], {
+					await systemSettings.setExchangeFeeRateForRwas([rUSD], [fxBIPS], {
 						from: owner,
 					});
 					let rUSDRate = await systemSettings.exchangeFeeRate(rUSD);
@@ -893,17 +893,17 @@ contract('SystemSettings', async accounts => {
 					assert.bnEqual(rUSDRate, fxBIPS);
 				});
 				it('when 1 exchange rate then emits update event', async () => {
-					const transaction = await systemSettings.setExchangeFeeRateForTribes([rUSD], [fxBIPS], {
+					const transaction = await systemSettings.setExchangeFeeRateForRwas([rUSD], [fxBIPS], {
 						from: owner,
 					});
 					assert.eventEqual(transaction, 'ExchangeFeeUpdated', {
-						tribeKey: rUSD,
+						rwaKey: rUSD,
 						newExchangeFeeRate: fxBIPS,
 					});
 				});
 				it('when multiple exchange rates then store them to be readable', async () => {
 					// Store multiple rates
-					await systemSettings.setExchangeFeeRateForTribes(
+					await systemSettings.setExchangeFeeRateForRwas(
 						[rUSD, sAUD, rBTC, rETH],
 						[fxBIPS, fxBIPS, cryptoBIPS, cryptoBIPS],
 						{
@@ -922,7 +922,7 @@ contract('SystemSettings', async accounts => {
 				});
 				it('when multiple exchange rates then each update event is emitted', async () => {
 					// Update multiple rates
-					const transaction = await systemSettings.setExchangeFeeRateForTribes(
+					const transaction = await systemSettings.setExchangeFeeRateForRwas(
 						[rUSD, sAUD, rBTC, rETH],
 						[fxBIPS, fxBIPS, cryptoBIPS, cryptoBIPS],
 						{
@@ -934,22 +934,22 @@ contract('SystemSettings', async accounts => {
 						transaction,
 						'ExchangeFeeUpdated',
 						{
-							tribeKey: rUSD,
+							rwaKey: rUSD,
 							newExchangeFeeRate: fxBIPS,
 						},
 						'ExchangeFeeUpdated',
 						{
-							tribeKey: sAUD,
+							rwaKey: sAUD,
 							newExchangeFeeRate: fxBIPS,
 						},
 						'ExchangeFeeUpdated',
 						{
-							tribeKey: rBTC,
+							rwaKey: rBTC,
 							newExchangeFeeRate: cryptoBIPS,
 						},
 						'ExchangeFeeUpdated',
 						{
-							tribeKey: rETH,
+							rwaKey: rETH,
 							newExchangeFeeRate: cryptoBIPS,
 						}
 					);
@@ -1458,12 +1458,12 @@ contract('SystemSettings', async accounts => {
 		});
 	});
 
-	describe('setCrossChainTribeTransferEnabled', () => {
+	describe('setCrossChainRwaTransferEnabled', () => {
 		const rETH = toBytes32('rETH');
 		const enabled = 1;
 		it('can only be invoked by owner', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: systemSettings.setCrossChainTribeTransferEnabled,
+				fnc: systemSettings.setCrossChainRwaTransferEnabled,
 				args: [rETH, enabled],
 				address: owner,
 				accounts,
@@ -1474,25 +1474,25 @@ contract('SystemSettings', async accounts => {
 		describe('when successfully invoked', () => {
 			let txn;
 			beforeEach(async () => {
-				txn = await systemSettings.setCrossChainTribeTransferEnabled(rETH, enabled, {
+				txn = await systemSettings.setCrossChainRwaTransferEnabled(rETH, enabled, {
 					from: owner,
 				});
 			});
 
 			it('then it changes the value as expected', async () => {
-				assert.bnEqual(await systemSettings.crossChainTribeTransferEnabled(rETH), enabled);
+				assert.bnEqual(await systemSettings.crossChainRwaTransferEnabled(rETH), enabled);
 			});
 
 			it('and emits an AtomicVolatilityUpdateThresholdUpdated event', async () => {
-				assert.eventEqual(txn, 'CrossChainTribeTransferEnabledUpdated', [rETH, enabled]);
+				assert.eventEqual(txn, 'CrossChainRwaTransferEnabledUpdated', [rETH, enabled]);
 			});
 
 			it('allows to be changed', async () => {
 				const newValue = 0;
-				await systemSettings.setCrossChainTribeTransferEnabled(rETH, newValue, {
+				await systemSettings.setCrossChainRwaTransferEnabled(rETH, newValue, {
 					from: owner,
 				});
-				assert.bnEqual(await systemSettings.crossChainTribeTransferEnabled(rETH), newValue);
+				assert.bnEqual(await systemSettings.crossChainRwaTransferEnabled(rETH), newValue);
 			});
 		});
 	});

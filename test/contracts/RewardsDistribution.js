@@ -28,21 +28,21 @@ contract('RewardsDistribution', async accounts => {
 		account5,
 	] = accounts;
 
-	let rewardsDistribution, rwaone, tribeetixProxy, feePool, mockRewardsRecipient;
+	let rewardsDistribution, rwaone, rwaoneProxy, feePool, mockRewardsRecipient;
 
 	before(async () => {
 		({
 			RewardsDistribution: rewardsDistribution,
 			FeePool: feePool,
 			Rwaone: rwaone,
-			ProxyERC20Rwaone: tribeetixProxy,
+			ProxyERC20Rwaone: rwaoneProxy,
 		} = await setupAllContracts({
 			accounts,
 			contracts: ['RewardsDistribution', 'Rwaone', 'FeePool', 'Issuer'],
 		}));
 
 		// use implementation ABI on the proxy address to simplify calling
-		rwaone = await artifacts.require('Rwaone').at(tribeetixProxy.address);
+		rwaone = await artifacts.require('Rwaone').at(rwaoneProxy.address);
 
 		mockRewardsRecipient = await MockRewardsRecipient.new(owner, { from: owner });
 		await mockRewardsRecipient.setRewardsDistribution(rewardsDistribution.address, { from: owner });
@@ -64,7 +64,7 @@ contract('RewardsDistribution', async accounts => {
 
 		assert.equal(await instance.owner(), account1);
 		assert.equal(await instance.authority(), account2);
-		assert.equal(await instance.tribeetixProxy(), account3);
+		assert.equal(await instance.rwaoneProxy(), account3);
 		assert.equal(await instance.rewardEscrow(), account4);
 		assert.equal(await instance.feePoolProxy(), account5);
 	});

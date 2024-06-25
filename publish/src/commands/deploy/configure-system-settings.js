@@ -19,7 +19,7 @@ module.exports = async ({
 	getDeployParameter,
 	network,
 	runStep,
-	tribes,
+	rwas,
 }) => {
 	const { CollateralShort, SystemSettings, ExchangeRates } = deployer.deployedContracts;
 
@@ -47,39 +47,39 @@ module.exports = async ({
 		);
 	}
 
-	let tribeRates = [];
-	// Now ensure all the fee rates are set for various tribes (this must be done after the AddressResolver
+	let rwaRates = [];
+	// Now ensure all the fee rates are set for various rwas (this must be done after the AddressResolver
 	// has populated all references).
-	// Note: this populates rates for new tribes regardless of the addNewTribes flag
-	tribeRates = await Promise.all(
-		tribes.map(({ name }) =>
+	// Note: this populates rates for new rwas regardless of the addNewRwas flag
+	rwaRates = await Promise.all(
+		rwas.map(({ name }) =>
 			(previousSystemSettings || SystemSettings).exchangeFeeRate(toBytes32(name))
 		)
 	);
 
 	const exchangeFeeRates = await getDeployParameter('EXCHANGE_FEE_RATES');
 
-	// update all tribes with 0 current rate, except rUSD
-	const tribesRatesToUpdate = tribes
-		.map((tribe, i) =>
+	// update all rwas with 0 current rate, except rUSD
+	const rwasRatesToUpdate = rwas
+		.map((rwa, i) =>
 			Object.assign(
 				{
-					currentRate: parseUnits((tribeRates[i] || '').toString() || '0').toString(),
-					targetRate: exchangeFeeRates[tribe.category],
+					currentRate: parseUnits((rwaRates[i] || '').toString() || '0').toString(),
+					targetRate: exchangeFeeRates[rwa.category],
 				},
-				tribe
+				rwa
 			)
 		)
 		.filter(({ currentRate }) => currentRate === '0')
 		.filter(({ name }) => name !== 'rUSD'); // SCCP-190: rUSD rate is 0 despite it being in forex category
 
-	console.log(gray(`Found ${tribesRatesToUpdate.length} tribes needs exchange rate pricing`));
+	console.log(gray(`Found ${rwasRatesToUpdate.length} rwas needs exchange rate pricing`));
 
-	if (tribesRatesToUpdate.length) {
+	if (rwasRatesToUpdate.length) {
 		console.log(
 			gray(
 				'Setting the following:',
-				tribesRatesToUpdate
+				rwasRatesToUpdate
 					.map(
 						({ name, targetRate, currentRate }) =>
 							`\t${name} from ${currentRate * 100}% to ${formatUnits(targetRate) * 100}%`
@@ -89,16 +89,16 @@ module.exports = async ({
 		);
 
 		await runStep({
-			gasLimit: Math.max(methodCallGasLimit, 150e3 * tribesRatesToUpdate.length), // higher gas required, 150k per tribe is sufficient (in OVM)
+			gasLimit: Math.max(methodCallGasLimit, 150e3 * rwasRatesToUpdate.length), // higher gas required, 150k per rwa is sufficient (in OVM)
 			contract: 'SystemSettings',
 			target: SystemSettings,
 			readTarget: previousSystemSettings,
-			write: 'setExchangeFeeRateForTribes',
+			write: 'setExchangeFeeRateForRwas',
 			writeArg: [
-				tribesRatesToUpdate.map(({ name }) => toBytes32(name)),
-				tribesRatesToUpdate.map(({ targetRate }) => targetRate),
+				rwasRatesToUpdate.map(({ name }) => toBytes32(name)),
+				rwasRatesToUpdate.map(({ targetRate }) => targetRate),
 			],
-			comment: 'Set the exchange rates for various tribes',
+			comment: 'Set the exchange rates for various rwas',
 		});
 	}
 
@@ -543,7 +543,7 @@ module.exports = async ({
 				write: 'setAtomicEquivalentForDexPricing',
 				writeArg: [toBytes32(currencyKey), equivalent],
 				comment:
-					'SIP-120 Set the equivalent token - used in uniswap pools - corresponding to this tribe',
+					'SIP-120 Set the equivalent token - used in uniswap pools - corresponding to this rwa',
 			});
 		}
 	}
@@ -560,7 +560,7 @@ module.exports = async ({
 				expected: input => input !== 0, // only change if zero
 				write: 'setAtomicExchangeFeeRate',
 				writeArg: [toBytes32(currencyKey), rate],
-				comment: 'SIP-120 Set the exchange fee rate for swapping atomically into this tribe',
+				comment: 'SIP-120 Set the exchange fee rate for swapping atomically into this rwa',
 			});
 		}
 	}
@@ -579,7 +579,7 @@ module.exports = async ({
 				expected: input => input !== 0, // only change if zero
 				write: 'setAtomicVolatilityConsiderationWindow',
 				writeArg: [toBytes32(currencyKey), seconds],
-				comment: 'SIP-120 Set the atomic volatility window for this tribe (in seconds)',
+				comment: 'SIP-120 Set the atomic volatility window for this rwa (in seconds)',
 			});
 		}
 	}
@@ -599,7 +599,7 @@ module.exports = async ({
 				write: 'setAtomicVolatilityUpdateThreshold',
 				writeArg: [toBytes32(currencyKey), threshold],
 				comment:
-					'SIP-120 Set the atomic volatility count for this tribe during the volatility window',
+					'SIP-120 Set the atomic volatility count for this rwa during the volatility window',
 			});
 		}
 	}

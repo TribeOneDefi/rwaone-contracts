@@ -49,11 +49,11 @@ contract('FuturesMarketData', accounts => {
 			FuturesMarketData: futuresMarketData,
 			ExchangeRates: exchangeRates,
 			CircuitBreaker: circuitBreaker,
-			TriberUSD: rUSD,
+			RwarUSD: rUSD,
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'rBTC', 'rETH', 'sLINK'],
+			rwas: ['rUSD', 'rBTC', 'rETH', 'sLINK'],
 			contracts: [
 				'FuturesMarketManager',
 				'FuturesMarketSettings',

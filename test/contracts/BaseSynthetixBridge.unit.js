@@ -21,8 +21,8 @@ contract('BaseRwaoneBridge (unit tests)', accounts => {
 			expected: [
 				'resumeInitiation',
 				'suspendInitiation',
-				'initiateTribeTransfer',
-				'finalizeTribeTransfer',
+				'initiateRwaTransfer',
+				'finalizeRwaTransfer',
 			],
 		});
 	});
@@ -192,20 +192,20 @@ contract('BaseRwaoneBridge (unit tests)', accounts => {
 				});
 			});
 
-			describe('initiateTribeTransfer', () => {
-				it('fails if requested tribe is not enabled for cross chain transfer', async () => {
+			describe('initiateRwaTransfer', () => {
+				it('fails if requested rwa is not enabled for cross chain transfer', async () => {
 					await assert.revert(
-						instance.initiateTribeTransfer(rETH, user1, toUnit('50'), { from: owner }),
-						'Tribe not enabled for cross chain transfer'
+						instance.initiateRwaTransfer(rETH, user1, toUnit('50'), { from: owner }),
+						'Rwa not enabled for cross chain transfer'
 					);
 				});
 
-				it('fails if tribe is not enabled', async () => {
+				it('fails if rwa is not enabled', async () => {
 					flexibleStorage.getUIntValue.returns(toUnit('50').toString());
-					systemStatus.requireTribeActive.reverts('suspended');
+					systemStatus.requireRwaActive.reverts('suspended');
 
 					await assert.revert(
-						instance.initiateTribeTransfer(rETH, user1, toUnit('50'), { from: owner }),
+						instance.initiateRwaTransfer(rETH, user1, toUnit('50'), { from: owner }),
 						'Transaction reverted without a reason string'
 					);
 				});
@@ -213,57 +213,57 @@ contract('BaseRwaoneBridge (unit tests)', accounts => {
 				describe('when enabled for cross chain transfer', () => {
 					let txn;
 
-					beforeEach('run tribe transfer calls', async () => {
-						// fake the value that would be set by first `initiateTribeTransfer`
-						// this also simultaneously enables tribe trade
+					beforeEach('run rwa transfer calls', async () => {
+						// fake the value that would be set by first `initiateRwaTransfer`
+						// this also simultaneously enables rwa trade
 						flexibleStorage.getUIntValue.returns(toUnit('50').toString());
 
 						// two initiate calls to verify summation
-						await instance.initiateTribeTransfer(rETH, user1, toUnit('50'), { from: owner });
+						await instance.initiateRwaTransfer(rETH, user1, toUnit('50'), { from: owner });
 
-						txn = await instance.initiateTribeTransfer(rUSD, owner, toUnit('100'), { from: user1 });
+						txn = await instance.initiateRwaTransfer(rUSD, owner, toUnit('100'), { from: user1 });
 					});
 
 					it('fails if initiation is not active', async () => {
 						await instance.suspendInitiation({ from: owner });
 
 						await assert.revert(
-							instance.initiateTribeTransfer(rETH, user1, toUnit('50'), { from: owner }),
+							instance.initiateRwaTransfer(rETH, user1, toUnit('50'), { from: owner }),
 							'Initiation deactivated'
 						);
 					});
 
-					it('burns tribes from caller', () => {
-						issuer.burnTribesWithoutDebt.returnsAtCall(0, toUnit('100'));
+					it('burns rwas from caller', () => {
+						issuer.burnRwasWithoutDebt.returnsAtCall(0, toUnit('100'));
 					});
 
 					it('calls messenger', () => {
 						messenger.sendMessage.returnsAtCall(0, issuer.address);
 					});
 
-					it('increments tribeTransferSent', async () => {
+					it('increments rwaTransferSent', async () => {
 						flexibleStorage.setUIntValue.returnsAtCall(0, toUnit('150'));
 					});
 
 					it('emits event', () => {
-						assert.eventEqual(txn, 'InitiateTribeTransfer', [rUSD, owner, toUnit('100')]);
+						assert.eventEqual(txn, 'InitiateRwaTransfer', [rUSD, owner, toUnit('100')]);
 					});
 				});
 			});
 
-			describe('finalizeTribeTransfer', () => {
+			describe('finalizeRwaTransfer', () => {
 				beforeEach('set counterpart bridge', async () => {
 					messenger.xDomainMessageSender.returns(issuer.address);
 				});
 
 				it('fails if xdomainmessagesender doesnt match counterpart', async () => {
 					messenger.xDomainMessageSender.returns(owner);
-					await assert.revert(instance.finalizeTribeTransfer(rUSD, owner, '100'));
+					await assert.revert(instance.finalizeRwaTransfer(rUSD, owner, '100'));
 				});
 
 				it('can only be called by messenger and registered counterpart', async () => {
 					await onlyGivenAddressCanInvoke({
-						fnc: instance.finalizeTribeTransfer,
+						fnc: instance.finalizeRwaTransfer,
 						accounts,
 						address: smockedMessenger,
 						args: [rUSD, owner, '100'],
@@ -274,36 +274,36 @@ contract('BaseRwaoneBridge (unit tests)', accounts => {
 				describe('when successfully invoked', () => {
 					let txn;
 					beforeEach(async () => {
-						// fake the value that would be set by previous `finalizeTribeTransfer`
+						// fake the value that would be set by previous `finalizeRwaTransfer`
 						flexibleStorage.getUIntValue.returns(toUnit('50').toString());
 
 						// two calls to verify summation
-						await instance.finalizeTribeTransfer(rETH, owner, toUnit('50'), {
+						await instance.finalizeRwaTransfer(rETH, owner, toUnit('50'), {
 							from: smockedMessenger,
 						});
 
-						txn = await instance.finalizeTribeTransfer(rUSD, user1, toUnit('125'), {
+						txn = await instance.finalizeRwaTransfer(rUSD, user1, toUnit('125'), {
 							from: smockedMessenger,
 						});
 					});
 
-					it('mints tribes to the destination', () => {
-						issuer.issueTribesWithoutDebt.returnsAtCall(0, toUnit('125'));
+					it('mints rwas to the destination', () => {
+						issuer.issueRwasWithoutDebt.returnsAtCall(0, toUnit('125'));
 					});
 
-					it('increments tribeTransferReceived', async () => {
+					it('increments rwaTransferReceived', async () => {
 						flexibleStorage.setUIntValue.returnsAtCall(0, toUnit('175'));
 					});
 
 					it('emits event', () => {
-						assert.eventEqual(txn, 'FinalizeTribeTransfer', [rUSD, user1, toUnit('125')]);
+						assert.eventEqual(txn, 'FinalizeRwaTransfer', [rUSD, user1, toUnit('125')]);
 					});
 				});
 			});
 
-			describe('tribeTransferSent & tribeTransferReceived', () => {
+			describe('rwaTransferSent & rwaTransferReceived', () => {
 				beforeEach('set fake values', () => {
-					// create some fake tribes
+					// create some fake rwas
 					issuer.availableCurrencyKeys.returns([rUSD, rETH]);
 
 					// set some exchange rates
@@ -325,12 +325,12 @@ contract('BaseRwaoneBridge (unit tests)', accounts => {
 						true,
 					]);
 
-					await assert.revert(instance.tribeTransferSent(), 'Rates are invalid');
+					await assert.revert(instance.rwaTransferSent(), 'Rates are invalid');
 				});
 
 				it('correctly sums', async () => {
-					assert.bnEqual(await instance.tribeTransferSent(), toUnit(700));
-					assert.bnEqual(await instance.tribeTransferReceived(), toUnit(700));
+					assert.bnEqual(await instance.rwaTransferSent(), toUnit(700));
+					assert.bnEqual(await instance.rwaTransferReceived(), toUnit(700));
 				});
 			});
 		});

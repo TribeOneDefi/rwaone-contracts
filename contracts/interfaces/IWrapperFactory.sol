@@ -6,7 +6,7 @@ import "./IERC20.sol";
 interface IWrapperFactory {
     function isWrapper(address possibleWrapper) external view returns (bool);
 
-    function createWrapper(IERC20 token, bytes32 currencyKey, bytes32 tribeContractName) external returns (address);
+    function createWrapper(IERC20 token, bytes32 currencyKey, bytes32 rwaContractName) external returns (address);
 
     function distributeFees() external;
 }

@@ -1,6 +1,6 @@
 pragma solidity >=0.4.24;
 pragma experimental ABIEncoderV2;
-import "./IVirtualTribe.sol";
+import "./IVirtualRwa.sol";
 
 // https://docs.rwaone.io/contracts/source/interfaces/iexchanger
 interface IExchanger {
@@ -34,7 +34,7 @@ interface IExchanger {
         uint refunded
     ) external view returns (uint amountAfterSettlement);
 
-    function isTribeRateInvalid(bytes32 currencyKey) external view returns (bool);
+    function isRwaRateInvalid(bytes32 currencyKey) external view returns (bool);
 
     function maxSecsLeftInWaitingPeriod(address account, bytes32 currencyKey) external view returns (uint);
 
@@ -72,10 +72,10 @@ interface IExchanger {
         uint sourceAmount,
         bytes32 destinationCurrencyKey,
         address destinationAddress,
-        bool virtualTribe,
+        bool virtualRwa,
         address rewardAddress,
         bytes32 trackingCode
-    ) external returns (uint amountReceived, IVirtualTribe vTribe);
+    ) external returns (uint amountReceived, IVirtualRwa vRwa);
 
     function exchangeAtomically(
         address from,
@@ -94,7 +94,7 @@ interface IExchanger {
 interface IRwaoneInternal {
     function emitExchangeTracking(bytes32 trackingCode, bytes32 toCurrencyKey, uint256 toAmount, uint256 fee) external;
 
-    function emitTribeExchange(
+    function emitRwaExchange(
         address account,
         bytes32 fromCurrencyKey,
         uint fromAmount,
@@ -103,7 +103,7 @@ interface IRwaoneInternal {
         address toAddress
     ) external;
 
-    function emitAtomicTribeExchange(
+    function emitAtomicRwaExchange(
         address account,
         bytes32 fromCurrencyKey,
         uint fromAmount,
@@ -118,7 +118,7 @@ interface IRwaoneInternal {
 }
 
 interface IExchangerInternalDebtCache {
-    function updateCachedTribeDebtsWithRates(bytes32[] calldata currencyKeys, uint[] calldata currencyRates) external;
+    function updateCachedRwaDebtsWithRates(bytes32[] calldata currencyKeys, uint[] calldata currencyRates) external;
 
-    function updateCachedTribeDebts(bytes32[] calldata currencyKeys) external;
+    function updateCachedRwaDebts(bytes32[] calldata currencyKeys) external;
 }

@@ -2,66 +2,66 @@
 	{
 		"name": "rUSD",
 		"asset": "USD",
-		"subclass": "MultiCollateralTribe"
+		"subclass": "MultiCollateralRwa"
 	},
 	{
 		"name": "rETH",
 		"asset": "ETH",
-		"subclass": "MultiCollateralTribe"
+		"subclass": "MultiCollateralRwa"
 	},
 	{
 		"name": "rBTC",
 		"asset": "BTC",
-		"subclass": "MultiCollateralTribe"
+		"subclass": "MultiCollateralRwa"
 	},
 	{
 		"name": "rJPY",
 		"asset": "JPY",
-		"subclass": "MultiCollateralTribe"
+		"subclass": "MultiCollateralRwa"
 	},
 	{
 		"name": "rXAU",
 		"asset": "XAU",
-		"subclass": "MultiCollateralTribe"
+		"subclass": "MultiCollateralRwa"
 	},
 	{
 		"name": "rNVDA",
 		"asset": "NVDA",
-		"subclass": "MultiCollateralTribe"
+		"subclass": "MultiCollateralRwa"
 	},
 	{
 		"name": "rTSLA",
 		"asset": "TSLA",
-		"subclass": "MultiCollateralTribe"
+		"subclass": "MultiCollateralRwa"
 	},
 	{
 		"name": "rPAX",
 		"asset": "PAX",
-		"subclass": "MultiCollateralTribe"
+		"subclass": "MultiCollateralRwa"
 	},
 	{
 		"name": "rEUR",
 		"asset": "EUR",
-		"subclass": "MultiCollateralTribe"
+		"subclass": "MultiCollateralRwa"
 	},
 	{
 		"name": "rNEWYORK",
 		"asset": "NEWYORK",
-		"subclass": "MultiCollateralTribe"
+		"subclass": "MultiCollateralRwa"
 	},
 	{
 		"name": "rATLANTA",
 		"asset": "ATLANTA",
-		"subclass": "MultiCollateralTribe"
+		"subclass": "MultiCollateralRwa"
 	},
 	{
 		"name": "rLOSANGLES",
 		"asset": "LOSANGLES",
-		"subclass": "MultiCollateralTribe"
+		"subclass": "MultiCollateralRwa"
 	},
 	{
 		"name": "rWASHINGTON",
 		"asset": "WASHINGTON",
-		"subclass": "MultiCollateralTribe"
+		"subclass": "MultiCollateralRwa"
 	}
 ]

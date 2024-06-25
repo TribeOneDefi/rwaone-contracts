@@ -1,6 +1,6 @@
 pragma solidity >=0.4.24;
 
-// https://docs.rwaone.io/contracts/source/interfaces/itribeetixdebtshare
+// https://docs.rwaone.io/contracts/source/interfaces/irwaonedebtshare
 interface IRwaoneDebtShare {
     // Views
 

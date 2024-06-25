@@ -136,7 +136,7 @@ target = [
     "Liquidator",
     "LiquidatorRewards",
     "OneNetAggregatorDebtRatio",
-    "OneNetAggregatorIssuedTribes",
+    "OneNetAggregatorIssuedRwas",
     "ProxyFeePool",
     "ProxyRwaone",
     "ProxyrUSD",
@@ -148,9 +148,9 @@ target = [
     "RwaoneBridgeToBase",
     "RwaoneDebtShare",
     "RwaoneEscrow",
-    "TriberUSD",
-    "TriberETH",
-    "TriberBTC",
+    "RwarUSD",
+    "RwarETH",
+    "RwarBTC",
     "SystemSettings",
     "SystemStatus",
     "TokenStaterUSD",
@@ -194,7 +194,7 @@ target = [
     "Liquidator",
     "LiquidatorRewards",
     "OneNetAggregatorDebtRatio",
-    "OneNetAggregatorIssuedTribes",
+    "OneNetAggregatorIssuedRwas",
     "OwnerRelayOnOptimism",
     "ProxyFeePool",
     "ProxyRwaone",
@@ -207,9 +207,9 @@ target = [
     "RwaoneBridgeToBase",
     "RwaoneDebtShare",
     "RwaoneEscrow",
-    "TriberUSD",
-    "TriberETH",
-    "TriberBTC",
+    "RwarUSD",
+    "RwarETH",
+    "RwarBTC",
     "SystemSettings",
     "SystemStatus",
     "TokenStaterUSD",
@@ -290,7 +290,7 @@ depends = ["invoke.transfer_owner_snx"]
 target = ["Rwaone"]
 
 from = "<%= settings.test_user %>"
-func = "issueTribes"
+func = "issueRwas"
 args = ["1000000000000000000000"]
 #args = ['1']
 

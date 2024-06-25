@@ -15,7 +15,7 @@ import "./interfaces/ICircuitBreaker.sol";
 import "./interfaces/IFeePool.sol";
 import "./interfaces/IDelegateApprovals.sol";
 import "./interfaces/ITradingRewards.sol";
-import "./interfaces/IVirtualTribe.sol";
+import "./interfaces/IVirtualRwa.sol";
 
 import "./ExchangeSettlementLib.sol";
 
@@ -35,7 +35,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     bytes32 private constant CONTRACT_SYSTEMSTATUS = "SystemStatus";
     bytes32 private constant CONTRACT_EXCHANGESTATE = "ExchangeState";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
-    bytes32 private constant CONTRACT_RWAONEETIX = "Rwaone";
+    bytes32 private constant CONTRACT_RWAONE = "Rwaone";
     bytes32 private constant CONTRACT_FEEPOOL = "FeePool";
     bytes32 private constant CONTRACT_TRADING_REWARDS = "TradingRewards";
     bytes32 private constant CONTRACT_DELEGATEAPPROVALS = "DelegateApprovals";
@@ -54,7 +54,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         newAddresses[0] = CONTRACT_SYSTEMSTATUS;
         newAddresses[1] = CONTRACT_EXCHANGESTATE;
         newAddresses[2] = CONTRACT_EXRATES;
-        newAddresses[3] = CONTRACT_RWAONEETIX;
+        newAddresses[3] = CONTRACT_RWAONE;
         newAddresses[4] = CONTRACT_FEEPOOL;
         newAddresses[5] = CONTRACT_TRADING_REWARDS;
         newAddresses[6] = CONTRACT_DELEGATEAPPROVALS;
@@ -82,7 +82,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     }
 
     function rwaone() internal view returns (IRwaone) {
-        return IRwaone(requireAndGetAddress(CONTRACT_RWAONEETIX));
+        return IRwaone(requireAndGetAddress(CONTRACT_RWAONE));
     }
 
     function feePool() internal view returns (IFeePool) {
@@ -177,8 +177,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     ) public view returns (uint amountAfterSettlement) {
         amountAfterSettlement = amount;
 
-        // balance of a tribe will show an amount after settlement
-        uint balanceOfSourceAfterSettlement = IERC20(address(issuer().tribes(currencyKey))).balanceOf(from);
+        // balance of a rwa will show an amount after settlement
+        uint balanceOfSourceAfterSettlement = IERC20(address(issuer().rwas(currencyKey))).balanceOf(from);
 
         // when there isn't enough supply (either due to reclamation settlement or because the number is too high)
         if (amountAfterSettlement > balanceOfSourceAfterSettlement) {
@@ -191,7 +191,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         }
     }
 
-    function isTribeRateInvalid(bytes32 currencyKey) external view returns (bool) {
+    function isRwaRateInvalid(bytes32 currencyKey) external view returns (bool) {
         (, bool invalid) = exchangeRates().rateAndInvalid(currencyKey);
         return invalid;
     }
@@ -204,10 +204,10 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         uint sourceAmount,
         bytes32 destinationCurrencyKey,
         address destinationAddress,
-        bool virtualTribe,
+        bool virtualRwa,
         address rewardAddress,
         bytes32 trackingCode
-    ) external onlyRwaoneorTribe returns (uint amountReceived, IVirtualTribe vTribe) {
+    ) external onlyRwaoneorRwa returns (uint amountReceived, IVirtualRwa vRwa) {
         uint fee;
         if (from != exchangeForAddress) {
             require(delegateApprovals().canExchangeFor(exchangeForAddress, from), "Not approved to act on behalf");
@@ -222,13 +222,13 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
             destinationCurrencyKey
         );
 
-        (amountReceived, fee, vTribe) = _exchange(
+        (amountReceived, fee, vRwa) = _exchange(
             exchangeForAddress,
             sourceSettings,
             sourceAmount,
             destinationSettings,
             destinationAddress,
-            virtualTribe
+            virtualRwa
         );
 
         _processTradingRewards(fee, rewardAddress);
@@ -271,7 +271,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
 
         // Note that exchanges can't invalidate the debt cache, since if a rate is invalid,
         // the exchange will have failed already.
-        debtCache().updateCachedTribeDebtsWithRates(keys, rates);
+        debtCache().updateCachedRwaDebtsWithRates(keys, rates);
     }
 
     function _settleAndCalcSourceAmountRemaining(
@@ -302,10 +302,10 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         uint sourceAmount,
         IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings,
         address destinationAddress,
-        bool virtualTribe
-    ) internal returns (uint amountReceived, uint fee, IVirtualTribe vTribe) {
+        bool virtualRwa
+    ) internal returns (uint amountReceived, uint fee, IVirtualRwa vRwa) {
         if (!_ensureCanExchange(sourceSettings.currencyKey, destinationSettings.currencyKey, sourceAmount)) {
-            return (0, 0, IVirtualTribe(0));
+            return (0, 0, IVirtualRwa(0));
         }
 
         // Using struct to resolve stack too deep error
@@ -324,7 +324,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         // If, after settlement the user has no balance left (highly unlikely), then return to prevent
         // emitting events of 0 and don't revert so as to ensure the settlement queue is emptied
         if (entry.sourceAmountAfterSettlement == 0) {
-            return (0, 0, IVirtualTribe(0));
+            return (0, 0, IVirtualRwa(0));
         }
 
         (entry.destinationAmount, entry.sourceRate, entry.destinationRate) = addrs
@@ -356,7 +356,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         if (tooVolatile) {
             // do not exchange if rates are too volatile, this to prevent charging
             // dynamic fees that are over the max value
-            return (0, 0, IVirtualTribe(0));
+            return (0, 0, IVirtualRwa(0));
         }
 
         amountReceived = ExchangeSettlementLib._deductFeesFromAmount(entry.destinationAmount, entry.exchangeFeeRate);
@@ -365,19 +365,19 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
 
         // Note: We don't need to check their balance as the _convert() below will do a safe subtraction which requires
         // the subtraction to not overflow, which would happen if their balance is not sufficient.
-        vTribe = _convert(
+        vRwa = _convert(
             sourceSettings.currencyKey,
             from,
             entry.sourceAmountAfterSettlement,
             destinationSettings.currencyKey,
             amountReceived,
             destinationAddress,
-            virtualTribe
+            virtualRwa
         );
 
-        // When using a virtual tribe, it becomes the destinationAddress for event and settlement tracking
-        if (vTribe != IVirtualTribe(0)) {
-            destinationAddress = address(vTribe);
+        // When using a virtual rwa, it becomes the destinationAddress for event and settlement tracking
+        if (vRwa != IVirtualRwa(0)) {
+            destinationAddress = address(vRwa);
         }
 
         // Remit the fee if required
@@ -387,7 +387,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
             fee = addrs.exchangeRates.effectiveValue(destinationSettings.currencyKey, fee, rUSD);
 
             // Remit the fee in rUSDs
-            issuer().tribes(rUSD).issue(feePool().FEE_ADDRESS(), fee);
+            issuer().rwas(rUSD).issue(feePool().FEE_ADDRESS(), fee);
 
             // Tell the fee pool about this
             feePool().recordFeePaid(fee);
@@ -403,8 +403,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
             [entry.sourceRate, entry.destinationRate]
         );
 
-        // Let the DApps know there was a Tribe exchange
-        IRwaoneInternal(address(rwaone())).emitTribeExchange(
+        // Let the DApps know there was a Rwa exchange
+        IRwaoneInternal(address(rwaone())).emitRwaExchange(
             from,
             sourceSettings.currencyKey,
             entry.sourceAmountAfterSettlement,
@@ -435,24 +435,24 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         bytes32 destinationCurrencyKey,
         uint amountReceived,
         address recipient,
-        bool virtualTribe
-    ) internal returns (IVirtualTribe vTribe) {
+        bool virtualRwa
+    ) internal returns (IVirtualRwa vRwa) {
         // Burn the source amount
-        issuer().tribes(sourceCurrencyKey).burn(from, sourceAmountAfterSettlement);
+        issuer().rwas(sourceCurrencyKey).burn(from, sourceAmountAfterSettlement);
 
-        // Issue their new tribes
-        ITribe dest = issuer().tribes(destinationCurrencyKey);
+        // Issue their new rwas
+        IRwa dest = issuer().rwas(destinationCurrencyKey);
 
-        if (virtualTribe) {
-            Proxyable tribe = Proxyable(address(dest));
-            vTribe = _createVirtualTribe(IERC20(address(tribe.proxy())), recipient, amountReceived, destinationCurrencyKey);
-            dest.issue(address(vTribe), amountReceived);
+        if (virtualRwa) {
+            Proxyable rwa = Proxyable(address(dest));
+            vRwa = _createVirtualRwa(IERC20(address(rwa.proxy())), recipient, amountReceived, destinationCurrencyKey);
+            dest.issue(address(vRwa), amountReceived);
         } else {
             dest.issue(recipient, amountReceived);
         }
     }
 
-    function _createVirtualTribe(IERC20, address, uint, bytes32) internal returns (IVirtualTribe) {
+    function _createVirtualRwa(IERC20, address, uint, bytes32) internal returns (IVirtualRwa) {
         _notImplemented();
     }
 
@@ -461,7 +461,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         address from,
         bytes32 currencyKey
     ) external returns (uint reclaimed, uint refunded, uint numEntriesSettled) {
-        systemStatus().requireTribeActive(currencyKey);
+        systemStatus().requireRwaActive(currencyKey);
         return ExchangeSettlementLib.internalSettle(resolvedAddresses(), from, currencyKey, true, getWaitingPeriodSecs());
     }
 
@@ -482,7 +482,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         bytes32 destinationCurrencyKey,
         uint sourceAmount
     ) internal returns (bool) {
-        require(sourceCurrencyKey != destinationCurrencyKey, "Can't be same tribe");
+        require(sourceCurrencyKey != destinationCurrencyKey, "Can't be same rwa");
         require(sourceAmount > 0, "Zero amount");
 
         (, bool srcBroken, bool srcStaleOrInvalid) = sourceCurrencyKey != rUSD
@@ -505,16 +505,16 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         uint roundIdForSrc,
         uint roundIdForDest
     ) internal view {
-        require(sourceCurrencyKey != destinationCurrencyKey, "Can't be same tribe");
+        require(sourceCurrencyKey != destinationCurrencyKey, "Can't be same rwa");
 
-        bytes32[] memory tribeKeys = new bytes32[](2);
-        tribeKeys[0] = sourceCurrencyKey;
-        tribeKeys[1] = destinationCurrencyKey;
+        bytes32[] memory rwaKeys = new bytes32[](2);
+        rwaKeys[0] = sourceCurrencyKey;
+        rwaKeys[1] = destinationCurrencyKey;
 
         uint[] memory roundIds = new uint[](2);
         roundIds[0] = roundIdForSrc;
         roundIds[1] = roundIdForDest;
-        require(!exchangeRates().anyRateIsInvalidAtRound(tribeKeys, roundIds), "src/dest rate stale or flagged");
+        require(!exchangeRates().anyRateIsInvalidAtRound(rwaKeys, roundIds), "src/dest rate stale or flagged");
     }
 
     /* ========== Exchange Related Fees ========== */
@@ -722,20 +722,20 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
             destinationCurrencyKey
         );
 
-        require(sourceCurrencyKey == rUSD || !exchangeRates().rateIsInvalid(sourceCurrencyKey), "src tribe rate invalid");
+        require(sourceCurrencyKey == rUSD || !exchangeRates().rateIsInvalid(sourceCurrencyKey), "src rwa rate invalid");
 
         require(
             destinationCurrencyKey == rUSD || !exchangeRates().rateIsInvalid(destinationCurrencyKey),
-            "dest tribe rate invalid"
+            "dest rwa rate invalid"
         );
 
         // The checks are added for consistency with the checks performed in _exchange()
         // The reverts (instead of no-op returns) are used order to prevent incorrect usage in calling contracts
         // (The no-op in _exchange() is in order to trigger system suspension if needed)
 
-        // check tribes active
-        systemStatus().requireTribeActive(sourceCurrencyKey);
-        systemStatus().requireTribeActive(destinationCurrencyKey);
+        // check rwas active
+        systemStatus().requireRwaActive(sourceCurrencyKey);
+        systemStatus().requireRwaActive(destinationCurrencyKey);
 
         bool tooVolatile;
         (exchangeFeeRate, tooVolatile) = _feeRateForExchange(sourceSettings, destinationSettings);
@@ -759,11 +759,11 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
 
     // ========== MODIFIERS ==========
 
-    modifier onlyRwaoneorTribe() {
-        IRwaone _tribeetix = rwaone();
+    modifier onlyRwaoneorRwa() {
+        IRwaone _rwaone = rwaone();
         require(
-            msg.sender == address(_tribeetix) || _tribeetix.tribesByAddress(msg.sender) != bytes32(0),
-            "Exchanger: Only rwaone or a tribe contract can perform this action"
+            msg.sender == address(_rwaone) || _rwaone.rwasByAddress(msg.sender) != bytes32(0),
+            "Exchanger: Only rwaone or a rwa contract can perform this action"
         );
         _;
     }

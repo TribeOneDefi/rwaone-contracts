@@ -22,21 +22,21 @@ contract('SupplySchedule', async accounts => {
 
 	const [, owner, rwaone, account1, account2] = accounts;
 
-	let supplySchedule, tribeetixProxy;
+	let supplySchedule, rwaoneProxy;
 
 	addSnapshotBeforeRestoreAfterEach(); // ensure EVM timestamp resets to inflationStartDate
 
 	beforeEach(async () => {
 		supplySchedule = await setupContract({ accounts, contract: 'SupplySchedule' });
 
-		tribeetixProxy = await setupContract({
+		rwaoneProxy = await setupContract({
 			accounts,
 			contract: 'ProxyRwaone',
 			source: 'ProxyERC20',
 		});
 
-		await supplySchedule.setRwaoneProxy(tribeetixProxy.address, { from: owner });
-		await tribeetixProxy.setTarget(rwaone, { from: owner });
+		await supplySchedule.setRwaoneProxy(rwaoneProxy.address, { from: owner });
+		await rwaoneProxy.setTarget(rwaone, { from: owner });
 	});
 
 	it('only expected functions should be mutative', () => {
@@ -71,8 +71,8 @@ contract('SupplySchedule', async accounts => {
 
 	describe('linking rwaone', async () => {
 		it('should have set rwaone proxy', async () => {
-			const tribeetixProxy = await supplySchedule.tribeetixProxy();
-			assert.equal(tribeetixProxy, tribeetixProxy);
+			const rwaoneProxy = await supplySchedule.rwaoneProxy();
+			assert.equal(rwaoneProxy, rwaoneProxy);
 		});
 		it('should revert when setting rwaone proxy to ZERO_ADDRESS', async () => {
 			await assert.revert(supplySchedule.setRwaoneProxy(ZERO_ADDRESS, { from: owner }));
@@ -377,8 +377,8 @@ contract('SupplySchedule', async accounts => {
 					});
 
 					// setup new instance
-					await instance.setRwaoneProxy(tribeetixProxy.address, { from: owner });
-					await tribeetixProxy.setTarget(rwaone, { from: owner });
+					await instance.setRwaoneProxy(rwaoneProxy.address, { from: owner });
+					await rwaoneProxy.setTarget(rwaone, { from: owner });
 					await instance.setInflationAmount(initialWeeklySupply, { from: owner });
 				});
 

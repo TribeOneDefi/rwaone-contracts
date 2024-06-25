@@ -8,7 +8,7 @@ module.exports = async ({ deployer, runStep, offchainFeeds, useOvm }) => {
 
 	console.log(gray(`\n------ CONFIGURE OFFCHAIN FEEDS (PYTH) ------\n`));
 
-	// Setup remaining price feeds (that aren't tribes)
+	// Setup remaining price feeds (that aren't rwas)
 	const { PerpsV2ExchangeRate } = deployer.deployedContracts;
 
 	const pythFeeds = offchainFeeds.filter(p => p.kind === 'pyth');

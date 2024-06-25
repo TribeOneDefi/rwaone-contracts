@@ -7,7 +7,7 @@ interface IDebtCache {
 
     function cachedDebt() external view returns (uint);
 
-    function cachedTribeDebt(bytes32 currencyKey) external view returns (uint);
+    function cachedRwaDebt(bytes32 currencyKey) external view returns (uint);
 
     function cacheTimestamp() external view returns (uint);
 
@@ -17,11 +17,11 @@ interface IDebtCache {
 
     function isInitialized() external view returns (bool);
 
-    function currentTribeDebts(
+    function currentRwaDebts(
         bytes32[] calldata currencyKeys
     ) external view returns (uint[] memory debtValues, uint futuresDebt, uint excludedDebt, bool anyRateIsInvalid);
 
-    function cachedTribeDebts(bytes32[] calldata currencyKeys) external view returns (uint[] memory debtValues);
+    function cachedRwaDebts(bytes32[] calldata currencyKeys) external view returns (uint[] memory debtValues);
 
     function totalNonSnxBackedDebt() external view returns (uint excludedDebt, bool isInvalid);
 
@@ -33,15 +33,15 @@ interface IDebtCache {
 
     // Mutative functions
 
-    function updateCachedTribeDebts(bytes32[] calldata currencyKeys) external;
+    function updateCachedRwaDebts(bytes32[] calldata currencyKeys) external;
 
-    function updateCachedTribeDebtWithRate(bytes32 currencyKey, uint currencyRate) external;
+    function updateCachedRwaDebtWithRate(bytes32 currencyKey, uint currencyRate) external;
 
-    function updateCachedTribeDebtsWithRates(bytes32[] calldata currencyKeys, uint[] calldata currencyRates) external;
+    function updateCachedRwaDebtsWithRates(bytes32[] calldata currencyKeys, uint[] calldata currencyRates) external;
 
     function updateDebtCacheValidity(bool currentlyInvalid) external;
 
-    function purgeCachedTribeDebt(bytes32 currencyKey) external;
+    function purgeCachedRwaDebt(bytes32 currencyKey) external;
 
     function takeDebtSnapshot() external;
 

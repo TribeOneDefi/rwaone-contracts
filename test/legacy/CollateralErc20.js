@@ -59,11 +59,11 @@ contract('CollateralErc20', async accounts => {
 		feePool,
 		exchangeRates,
 		addressResolver,
-		rUSDTribe,
-		rBTCTribe,
+		rUSDRwa,
+		rBTCRwa,
 		renBTC,
 		systemStatus,
-		tribes,
+		rwas,
 		manager,
 		issuer,
 		debtCache,
@@ -75,14 +75,14 @@ contract('CollateralErc20', async accounts => {
 	};
 
 	const issuerUSDToAccount = async (issueAmount, receiver) => {
-		// Set up the depositor with an amount of tribes to deposit.
-		await rUSDTribe.issue(receiver, issueAmount, {
+		// Set up the depositor with an amount of rwas to deposit.
+		await rUSDRwa.issue(receiver, issueAmount, {
 			from: owner,
 		});
 	};
 
 	const issuerBTCtoAccount = async (issueAmount, receiver) => {
-		await rBTCTribe.issue(receiver, issueAmount, { from: owner });
+		await rBTCRwa.issue(receiver, issueAmount, { from: owner });
 	};
 
 	const issueRenBTCtoAccount = async (issueAmount, receiver) => {
@@ -116,19 +116,19 @@ contract('CollateralErc20', async accounts => {
 	};
 
 	const setupMultiCollateral = async () => {
-		tribes = ['rUSD', 'rBTC'];
+		rwas = ['rUSD', 'rBTC'];
 		({
 			SystemStatus: systemStatus,
 			ExchangeRates: exchangeRates,
-			TriberUSD: rUSDTribe,
-			TriberBTC: rBTCTribe,
+			RwarUSD: rUSDRwa,
+			RwarBTC: rBTCRwa,
 			FeePool: feePool,
 			AddressResolver: addressResolver,
 			Issuer: issuer,
 			DebtCache: debtCache,
 		} = await setupAllContracts({
 			accounts,
-			tribes,
+			rwas,
 			contracts: [
 				'Rwaone',
 				'FeePool',
@@ -215,18 +215,18 @@ contract('CollateralErc20', async accounts => {
 
 		await manager.addCollaterals([cerc20.address], { from: owner });
 
-		await cerc20.addTribes(
-			['TriberUSD', 'TriberBTC'].map(toBytes32),
+		await cerc20.addRwas(
+			['RwarUSD', 'RwarBTC'].map(toBytes32),
 			['rUSD', 'rBTC'].map(toBytes32),
 			{ from: owner }
 		);
 
-		await manager.addTribes(
-			['TriberUSD', 'TriberBTC'].map(toBytes32),
+		await manager.addRwas(
+			['RwarUSD', 'RwarBTC'].map(toBytes32),
 			['rUSD', 'rBTC'].map(toBytes32),
 			{ from: owner }
 		);
-		// rebuild the cache to add the tribes we need.
+		// rebuild the cache to add the rwas we need.
 		await manager.rebuildCache();
 
 		// Issue ren and set allowance
@@ -258,8 +258,8 @@ contract('CollateralErc20', async accounts => {
 		assert.equal(await cerc20.owner(), owner);
 		assert.equal(await cerc20.resolver(), addressResolver.address);
 		assert.equal(await cerc20.collateralKey(), rBTC);
-		assert.equal(await cerc20.tribes(0), toBytes32('TriberUSD'));
-		assert.equal(await cerc20.tribes(1), toBytes32('TriberBTC'));
+		assert.equal(await cerc20.rwas(0), toBytes32('RwarUSD'));
+		assert.equal(await cerc20.rwas(1), toBytes32('RwarBTC'));
 		assert.bnEqual(await cerc20.minCratio(), toUnit(1.5));
 		assert.bnEqual(await cerc20.minCollateral(), toUnit(0.1));
 		assert.equal(await cerc20.underlyingContract(), renBTC.address);
@@ -275,7 +275,7 @@ contract('CollateralErc20', async accounts => {
 	});
 
 	it('should access its dependencies via the address resolver', async () => {
-		assert.equal(await addressResolver.getAddress(toBytes32('TriberUSD')), rUSDTribe.address);
+		assert.equal(await addressResolver.getAddress(toBytes32('RwarUSD')), rUSDRwa.address);
 		assert.equal(await addressResolver.getAddress(toBytes32('FeePool')), feePool.address);
 		assert.equal(
 			await addressResolver.getAddress(toBytes32('ExchangeRates')),
@@ -496,11 +496,11 @@ contract('CollateralErc20', async accounts => {
 			it('should issue the correct amount to the borrower', async () => {
 				const expectedBal = fiveHundredRUSD.sub(issueFee);
 
-				assert.bnEqual(await rUSDTribe.balanceOf(account1), expectedBal);
+				assert.bnEqual(await rUSDRwa.balanceOf(account1), expectedBal);
 			});
 
 			it('should issue the minting fee to the fee pool', async () => {
-				const feePoolBalance = await rUSDTribe.balanceOf(FEE_ADDRESS);
+				const feePoolBalance = await rUSDRwa.balanceOf(FEE_ADDRESS);
 
 				assert.equal(issueFee.toString(), feePoolBalance.toString());
 			});
@@ -544,11 +544,11 @@ contract('CollateralErc20', async accounts => {
 			it('should issue the correct amount to the borrower', async () => {
 				const expecetdBalance = toUnit(2).sub(issueFee);
 
-				assert.bnEqual(await rBTCTribe.balanceOf(account1), expecetdBalance);
+				assert.bnEqual(await rBTCRwa.balanceOf(account1), expecetdBalance);
 			});
 
 			it('should issue the minting fee to the fee pool', async () => {
-				const feePoolBalance = await rUSDTribe.balanceOf(FEE_ADDRESS);
+				const feePoolBalance = await rUSDRwa.balanceOf(FEE_ADDRESS);
 
 				assert.equal(issueFee.toString(), feePoolBalance.toString());
 			});
@@ -775,7 +775,7 @@ contract('CollateralErc20', async accounts => {
 
 			it('should work reduce the repayers balance', async () => {
 				const expectedBalance = toUnit(90);
-				assert.bnEqual(await rUSDTribe.balanceOf(account2), expectedBalance);
+				assert.bnEqual(await rUSDRwa.balanceOf(account2), expectedBalance);
 			});
 
 			it('should update the loan', async () => {
@@ -815,7 +815,7 @@ contract('CollateralErc20', async accounts => {
 			it('should work reduce the repayers balance', async () => {
 				const expectedBalance = oneRenBTC;
 
-				assert.bnEqual(await rBTCTribe.balanceOf(account2), expectedBalance);
+				assert.bnEqual(await rBTCRwa.balanceOf(account2), expectedBalance);
 			});
 
 			it('should update the loan', async () => {
@@ -916,8 +916,8 @@ contract('CollateralErc20', async accounts => {
 				});
 			});
 
-			it('should reduce the liquidators tribe amount', async () => {
-				const liquidatorBalance = await rUSDTribe.balanceOf(account2);
+			it('should reduce the liquidators rwa amount', async () => {
+				const liquidatorBalance = await rUSDRwa.balanceOf(account2);
 				const expectedBalance = toUnit(5000).sub(liquidationAmount);
 
 				assert.bnEqual(liquidatorBalance, expectedBalance);
@@ -930,7 +930,7 @@ contract('CollateralErc20', async accounts => {
 			});
 
 			it('should pay the interest to the fee pool', async () => {
-				const balance = await rUSDTribe.balanceOf(FEE_ADDRESS);
+				const balance = await rUSDRwa.balanceOf(FEE_ADDRESS);
 
 				assert.bnGt(balance, toUnit(0));
 			});
@@ -980,8 +980,8 @@ contract('CollateralErc20', async accounts => {
 				assert.bnEqual(bal, oneRenBTC);
 			});
 
-			it('should reduce the liquidators tribe balance', async () => {
-				const liquidatorBalance = await rUSDTribe.balanceOf(account2);
+			it('should reduce the liquidators rwa balance', async () => {
+				const liquidatorBalance = await rUSDRwa.balanceOf(account2);
 				const expectedBalance = toUnit(10000).sub(toUnit(5000));
 
 				assert.bnClose(liquidatorBalance, expectedBalance, '10000000000000000');
@@ -1056,7 +1056,7 @@ contract('CollateralErc20', async accounts => {
 			});
 
 			it('should pay the fee pool', async () => {
-				const balance = await rUSDTribe.balanceOf(FEE_ADDRESS);
+				const balance = await rUSDRwa.balanceOf(FEE_ADDRESS);
 
 				assert.bnGt(balance, toUnit(0));
 			});

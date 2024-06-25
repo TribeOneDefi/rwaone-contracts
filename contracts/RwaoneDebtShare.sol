@@ -8,7 +8,7 @@ import "./MixinResolver.sol";
 // Libraries
 import "./SafeDecimalMath.sol";
 
-// https://docs.rwaone.io/contracts/source/contracts/tribeetixdebtshare
+// https://docs.rwaone.io/contracts/source/contracts/rwaonedebtshare
 contract RwaoneDebtShare is Owned, MixinResolver, IRwaoneDebtShare {
     using SafeMath for uint;
     using SafeDecimalMath for uint;

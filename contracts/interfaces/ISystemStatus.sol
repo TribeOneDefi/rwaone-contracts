@@ -29,13 +29,13 @@ interface ISystemStatus {
 
     function requireFuturesMarketActive(bytes32 marketKey) external view;
 
-    function requireExchangeBetweenTribesAllowed(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey) external view;
+    function requireExchangeBetweenRwasAllowed(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey) external view;
 
-    function requireTribeActive(bytes32 currencyKey) external view;
+    function requireRwaActive(bytes32 currencyKey) external view;
 
-    function tribeSuspended(bytes32 currencyKey) external view returns (bool);
+    function rwaSuspended(bytes32 currencyKey) external view returns (bool);
 
-    function requireTribesActive(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey) external view;
+    function requireRwasActive(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey) external view;
 
     function systemSuspension() external view returns (bool suspended, uint248 reason);
 
@@ -45,18 +45,18 @@ interface ISystemStatus {
 
     function futuresSuspension() external view returns (bool suspended, uint248 reason);
 
-    function tribeExchangeSuspension(bytes32 currencyKey) external view returns (bool suspended, uint248 reason);
+    function rwaExchangeSuspension(bytes32 currencyKey) external view returns (bool suspended, uint248 reason);
 
-    function tribeSuspension(bytes32 currencyKey) external view returns (bool suspended, uint248 reason);
+    function rwaSuspension(bytes32 currencyKey) external view returns (bool suspended, uint248 reason);
 
     function futuresMarketSuspension(bytes32 marketKey) external view returns (bool suspended, uint248 reason);
 
-    function getTribeExchangeSuspensions(
-        bytes32[] calldata tribes
+    function getRwaExchangeSuspensions(
+        bytes32[] calldata rwas
     ) external view returns (bool[] memory exchangeSuspensions, uint256[] memory reasons);
 
-    function getTribeSuspensions(
-        bytes32[] calldata tribes
+    function getRwaSuspensions(
+        bytes32[] calldata rwas
     ) external view returns (bool[] memory suspensions, uint256[] memory reasons);
 
     function getFuturesMarketSuspensions(
@@ -66,7 +66,7 @@ interface ISystemStatus {
     // Restricted functions
     function suspendIssuance(uint256 reason) external;
 
-    function suspendTribe(bytes32 currencyKey, uint256 reason) external;
+    function suspendRwa(bytes32 currencyKey, uint256 reason) external;
 
     function suspendFuturesMarket(bytes32 marketKey, uint256 reason) external;
 

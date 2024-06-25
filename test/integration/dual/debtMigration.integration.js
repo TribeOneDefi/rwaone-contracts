@@ -77,9 +77,9 @@ describe('migrateDebt() integration tests (L1, L2)', () => {
 	before('stake some wRWAX', async () => {
 		Rwaone = Rwaone.connect(user);
 
-		const tx = await Rwaone.issueTribes(amountToIssue);
+		const tx = await Rwaone.issueRwas(amountToIssue);
 		const { gasUsed } = await tx.wait();
-		console.log(`debtMigration: issueTribes() gas used: ${Math.round(gasUsed / 1000).toString()}k`);
+		console.log(`debtMigration: issueRwas() gas used: ${Math.round(gasUsed / 1000).toString()}k`);
 	});
 
 	before('record balances on L1', async () => {

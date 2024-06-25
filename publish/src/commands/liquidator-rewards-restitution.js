@@ -66,9 +66,9 @@ const liquidatorRewardsRestitution = async ({
 	console.log(gray(`Using account with public key ${signer.address}`));
 
 	// Instantiate Rwaone contract
-	const { address: tribeetixAddress } = deployment.targets['Rwaone'];
-	const { abi: tribeetixABI } = deployment.sources[deployment.targets['Rwaone'].source];
-	const Rwaone = new ethers.Contract(tribeetixAddress, tribeetixABI, signer);
+	const { address: rwaoneAddress } = deployment.targets['Rwaone'];
+	const { abi: rwaoneABI } = deployment.sources[deployment.targets['Rwaone'].source];
+	const Rwaone = new ethers.Contract(rwaoneAddress, rwaoneABI, signer);
 
 	// Instantiate RewardEscrowV2 contract
 	const { address: rewardEscrowV2Address } = deployment.targets['RewardEscrowV2'];

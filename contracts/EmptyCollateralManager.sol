@@ -8,7 +8,7 @@ contract EmptyCollateralManager is ICollateralManager {
         return false;
     }
 
-    function isTribeManaged(bytes32) external view returns (bool) {
+    function isRwaManaged(bytes32) external view returns (bool) {
         return false;
     }
 
@@ -52,11 +52,11 @@ contract EmptyCollateralManager is ICollateralManager {
         return (false, false);
     }
 
-    function areTribesAndCurrenciesSet(bytes32[] calldata, bytes32[] calldata) external view returns (bool) {
+    function areRwasAndCurrenciesSet(bytes32[] calldata, bytes32[] calldata) external view returns (bool) {
         return false;
     }
 
-    function areShortableTribesSet(bytes32[] calldata, bytes32[] calldata) external view returns (bool) {
+    function areShortableRwasSet(bytes32[] calldata, bytes32[] calldata) external view returns (bool) {
         return false;
     }
 
@@ -70,13 +70,13 @@ contract EmptyCollateralManager is ICollateralManager {
 
     function removeCollaterals(address[] calldata) external {}
 
-    function addTribes(bytes32[] calldata, bytes32[] calldata) external {}
+    function addRwas(bytes32[] calldata, bytes32[] calldata) external {}
 
-    function removeTribes(bytes32[] calldata, bytes32[] calldata) external {}
+    function removeRwas(bytes32[] calldata, bytes32[] calldata) external {}
 
-    function addShortableTribes(bytes32[2][] calldata, bytes32[] calldata) external {}
+    function addShortableRwas(bytes32[2][] calldata, bytes32[] calldata) external {}
 
-    function removeShortableTribes(bytes32[] calldata) external {}
+    function removeShortableRwas(bytes32[] calldata) external {}
 
     // State mutative
     function updateBorrowRates(uint) external {}

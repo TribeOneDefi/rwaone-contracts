@@ -19,7 +19,7 @@ const ethers = require('ethers');
 contract('OneNetAggregators', async accounts => {
 	const [owner] = accounts;
 
-	let addressResolver, aggregatorDebtRatio, aggregatorIssuedTribes;
+	let addressResolver, aggregatorDebtRatio, aggregatorIssuedRwas;
 
 	let mockRwaoneDebtShare, mockIssuer;
 
@@ -36,16 +36,16 @@ contract('OneNetAggregators', async accounts => {
 			contract: 'OneNetAggregatorDebtRatio',
 		});
 
-		aggregatorIssuedTribes = await setupContract({
+		aggregatorIssuedRwas = await setupContract({
 			accounts,
 			args: [addressResolver.address],
-			contract: 'OneNetAggregatorIssuedTribes',
+			contract: 'OneNetAggregatorIssuedRwas',
 		});
 
 		mockIssuer = await smock.fake('Issuer');
 		mockRwaoneDebtShare = await smock.fake('RwaoneDebtShare');
 
-		mockIssuer.totalIssuedTribes.returns(ethers.utils.parseEther('500'));
+		mockIssuer.totalIssuedRwas.returns(ethers.utils.parseEther('500'));
 		mockRwaoneDebtShare.totalSupply.returns(ethers.utils.parseEther('1000'));
 
 		await addressResolver.importAddresses(
@@ -124,17 +124,17 @@ contract('OneNetAggregators', async accounts => {
 		});
 	});
 
-	describe('OneNetAggregatorIssuedTribes', () => {
+	describe('OneNetAggregatorIssuedRwas', () => {
 		describe('getRoundData(uint80)', () => {
-			it('gets current issued tribes', async () => {
-				assert.bnEqual((await aggregatorIssuedTribes.getRoundData(0))[1], toUnit(500));
+			it('gets current issued rwas', async () => {
+				assert.bnEqual((await aggregatorIssuedRwas.getRoundData(0))[1], toUnit(500));
 			});
 		});
 	});
 
 	describe('OneNetAggregatorDebtRatio', () => {
 		describe('getRoundData(uint80)', async () => {
-			it('gets current issued tribes', async () => {
+			it('gets current issued rwas', async () => {
 				assert.bnEqual((await aggregatorDebtRatio.getRoundData(0))[1], toPreciseUnit('0.5'));
 			});
 		});

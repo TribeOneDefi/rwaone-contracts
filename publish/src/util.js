@@ -30,7 +30,7 @@ const {
 
 const {
 	getPathToNetwork,
-	getTribes,
+	getRwas,
 	getStakingRewards,
 	getVersions,
 	getFeeds,
@@ -75,9 +75,9 @@ const ensureDeploymentPath = deploymentPath => {
 
 // Load up all contracts in the flagged source, get their deployed addresses (if any) and compiled sources
 const loadAndCheckRequiredSources = ({ deploymentPath, network, freshDeploy }) => {
-	console.log(gray(`Loading the list of tribes for ${network.toUpperCase()}...`));
-	const tribesFile = path.join(deploymentPath, RWAONES_FILENAME);
-	const tribes = getTribes({ network, deploymentPath });
+	console.log(gray(`Loading the list of rwas for ${network.toUpperCase()}...`));
+	const rwasFile = path.join(deploymentPath, RWAONES_FILENAME);
+	const rwas = getRwas({ network, deploymentPath });
 
 	console.log(gray(`Loading the list of staking rewards to deploy on ${network.toUpperCase()}...`));
 	const stakingRewardsFile = path.join(deploymentPath, STAKING_REWARDS_FILENAME);
@@ -138,8 +138,8 @@ const loadAndCheckRequiredSources = ({ deploymentPath, network, freshDeploy }) =
 		config,
 		params,
 		configFile,
-		tribes,
-		tribesFile,
+		rwas,
+		rwasFile,
 		stakingRewards,
 		stakingRewardsFile,
 		futuresMarkets,

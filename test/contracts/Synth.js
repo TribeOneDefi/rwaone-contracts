@@ -5,13 +5,13 @@ const { artifacts, contract, web3 } = require('hardhat');
 const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 
 const MockExchanger = artifacts.require('MockExchanger');
-const Tribe = artifacts.require('Tribe');
+const Rwa = artifacts.require('Rwa');
 
 const { setupAllContracts } = require('./setup');
 
 const { toUnit, bytesToString } = require('../utils')();
 const {
-	issueTribesToUser,
+	issueRwasToUser,
 	ensureOnlyExpectedMutativeFunctions,
 	onlyGivenAddressCanInvoke,
 	setStatus,
@@ -24,7 +24,7 @@ const {
 	constants: { ZERO_ADDRESS },
 } = require('../..');
 
-contract('Tribe', async accounts => {
+contract('Rwa', async accounts => {
 	const [rUSD, wRWAX, sEUR] = ['rUSD', 'wRWAX', 'sEUR'].map(toBytes32);
 
 	const [deployerAccount, owner, , , account1, account2] = accounts;
@@ -49,8 +49,8 @@ contract('Tribe', async accounts => {
 			ExchangeRates: exchangeRates,
 			FeePool: feePool,
 			SystemStatus: systemStatus,
-			Tribe: rUSDImpl,
-			ProxyERC20Tribe: rUSDProxy,
+			Rwa: rUSDImpl,
+			ProxyERC20Rwa: rUSDProxy,
 			Exchanger: exchanger,
 			DebtCache: debtCache,
 			Issuer: issuer,
@@ -58,10 +58,10 @@ contract('Tribe', async accounts => {
 		} = await setupAllContracts({
 			accounts,
 			contracts: [
-				'Tribe',
+				'Rwa',
 				'ExchangeRates',
 				'FeePool',
-				'FeePoolEternalStorage', // required for Exchanger/FeePool to access the tribe exchange fee rates
+				'FeePoolEternalStorage', // required for Exchanger/FeePool to access the rwa exchange fee rates
 				'Rwaone',
 				'SystemStatus',
 				'AddressResolver',
@@ -81,7 +81,7 @@ contract('Tribe', async accounts => {
 		FEE_ADDRESS = await feePool.FEE_ADDRESS();
 
 		// use implementation ABI on the proxy address to simplify calling
-		rUSDProxy = await Tribe.at(rUSDProxy.address);
+		rUSDProxy = await Rwa.at(rUSDProxy.address);
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
@@ -96,10 +96,10 @@ contract('Tribe', async accounts => {
 	});
 
 	it('should set constructor params on deployment', async () => {
-		const tribe = await Tribe.new(
+		const rwa = await Rwa.new(
 			account1,
 			account2,
-			'Tribe XYZ',
+			'Rwa XYZ',
 			'sXYZ',
 			owner,
 			toBytes32('sXYZ'),
@@ -108,15 +108,15 @@ contract('Tribe', async accounts => {
 			{ from: deployerAccount }
 		);
 
-		assert.equal(await tribe.proxy(), account1);
-		assert.equal(await tribe.tokenState(), account2);
-		assert.equal(await tribe.name(), 'Tribe XYZ');
-		assert.equal(await tribe.symbol(), 'sXYZ');
-		assert.bnEqual(await tribe.decimals(), 18);
-		assert.equal(await tribe.owner(), owner);
-		assert.equal(bytesToString(await tribe.currencyKey()), 'sXYZ');
-		assert.bnEqual(await tribe.totalSupply(), toUnit('100'));
-		assert.equal(await tribe.resolver(), addressResolver.address);
+		assert.equal(await rwa.proxy(), account1);
+		assert.equal(await rwa.tokenState(), account2);
+		assert.equal(await rwa.name(), 'Rwa XYZ');
+		assert.equal(await rwa.symbol(), 'sXYZ');
+		assert.bnEqual(await rwa.decimals(), 18);
+		assert.equal(await rwa.owner(), owner);
+		assert.equal(bytesToString(await rwa.currencyKey()), 'sXYZ');
+		assert.bnEqual(await rwa.totalSupply(), toUnit('100'));
+		assert.equal(await rwa.resolver(), addressResolver.address);
 	});
 
 	describe('mutative functions and access', () => {
@@ -175,7 +175,7 @@ contract('Tribe', async accounts => {
 			const revertMsg = 'Only the proxy';
 			beforeEach(async () => {
 				// ensure owner has funds
-				await rwaone.issueTribes(amount, { from: owner });
+				await rwaone.issueRwas(amount, { from: owner });
 
 				// approve for transferFrom to work
 				await rUSDProxy.approve(account1, amount, { from: owner });
@@ -206,8 +206,8 @@ contract('Tribe', async accounts => {
 			});
 
 			it('transfer does not revert from a whitelisted contract', async () => {
-				// set owner as TribeRedeemer
-				await addressResolver.importAddresses(['TribeRedeemer'].map(toBytes32), [owner], {
+				// set owner as RwaRedeemer
+				await addressResolver.importAddresses(['RwaRedeemer'].map(toBytes32), [owner], {
 					from: owner,
 				});
 				await rUSDImpl.transfer(account1, amount, { from: owner });
@@ -219,17 +219,17 @@ contract('Tribe', async accounts => {
 		const amount = toUnit('10000');
 		beforeEach(async () => {
 			// ensure owner has funds
-			await rwaone.issueTribes(amount, { from: owner });
+			await rwaone.issueRwas(amount, { from: owner });
 
 			// approve for transferFrom to work
 			await rUSDProxy.approve(account1, amount, { from: owner });
 		});
 
-		['System', 'Tribe'].forEach(section => {
+		['System', 'Rwa'].forEach(section => {
 			describe(`when ${section} is suspended`, () => {
-				const tribe = toBytes32('rUSD');
+				const rwa = toBytes32('rUSD');
 				beforeEach(async () => {
-					await setStatus({ owner, systemStatus, section, suspend: true, tribe });
+					await setStatus({ owner, systemStatus, section, suspend: true, rwa });
 				});
 				it('when transfer() is invoked, it reverts with operation prohibited', async () => {
 					await assert.revert(
@@ -249,7 +249,7 @@ contract('Tribe', async accounts => {
 				});
 				describe('when the system is resumed', () => {
 					beforeEach(async () => {
-						await setStatus({ owner, systemStatus, section, suspend: false, tribe });
+						await setStatus({ owner, systemStatus, section, suspend: false, rwa });
 					});
 					it('when transfer() is invoked, it works as expected', async () => {
 						await rUSDProxy.transfer(account1, amount, {
@@ -265,9 +265,9 @@ contract('Tribe', async accounts => {
 			});
 		});
 		describe('when rETH is suspended', () => {
-			const tribe = toBytes32('rETH');
+			const rwa = toBytes32('rETH');
 			beforeEach(async () => {
-				await setStatus({ owner, systemStatus, section: 'Tribe', tribe, suspend: true });
+				await setStatus({ owner, systemStatus, section: 'Rwa', rwa, suspend: true });
 			});
 			it('when transfer() is invoked for rUSD, it works as expected', async () => {
 				await rUSDProxy.transfer(account1, amount, {
@@ -280,9 +280,9 @@ contract('Tribe', async accounts => {
 				});
 			});
 			describe('when rUSD is suspended for exchanging', () => {
-				const tribe = toBytes32('rUSD');
+				const rwa = toBytes32('rUSD');
 				beforeEach(async () => {
-					await setStatus({ owner, systemStatus, section: 'TribeExchange', tribe, suspend: true });
+					await setStatus({ owner, systemStatus, section: 'RwaExchange', rwa, suspend: true });
 				});
 				it('when transfer() is invoked for rUSD, it works as expected', async () => {
 					await rUSDProxy.transfer(account1, amount, {
@@ -301,7 +301,7 @@ contract('Tribe', async accounts => {
 	it('should transfer (ERC20) without error @gasprofile', async () => {
 		// Issue 10,000 rUSD.
 		const amount = toUnit('10000');
-		await rwaone.issueTribes(amount, { from: owner });
+		await rwaone.issueRwas(amount, { from: owner });
 
 		// Do a single transfer of all our rUSD.
 		const transaction = await rUSDProxy.transfer(account1, amount, {
@@ -311,7 +311,7 @@ contract('Tribe', async accounts => {
 		// Events should be a fee exchange and a transfer to account1
 		assert.eventEqual(
 			transaction,
-			// The original tribe transfer
+			// The original rwa transfer
 			'Transfer',
 			{ from: owner, to: account1, value: amount }
 		);
@@ -326,7 +326,7 @@ contract('Tribe', async accounts => {
 	it('should revert when transferring (ERC20) with insufficient balance', async () => {
 		// Issue 10,000 rUSD.
 		const amount = toUnit('10000');
-		await rwaone.issueTribes(amount, { from: owner });
+		await rwaone.issueRwas(amount, { from: owner });
 
 		// Try to transfer 10,000 + 1 wei, which we don't have the balance for.
 		await assert.revert(
@@ -337,7 +337,7 @@ contract('Tribe', async accounts => {
 	it('should transferFrom (ERC20) without error @gasprofile', async () => {
 		// Issue 10,000 rUSD.
 		const amount = toUnit('10000');
-		await rwaone.issueTribes(amount, { from: owner });
+		await rwaone.issueRwas(amount, { from: owner });
 
 		// Give account1 permission to act on our behalf
 		await rUSDProxy.approve(account1, amount, { from: owner });
@@ -350,7 +350,7 @@ contract('Tribe', async accounts => {
 		// Events should be a transfer to account1
 		assert.eventEqual(
 			transaction,
-			// The original tribe transfer
+			// The original rwa transfer
 			'Transfer',
 			{ from: owner, to: account1, value: amount }
 		);
@@ -368,7 +368,7 @@ contract('Tribe', async accounts => {
 	it('should revert when calling transferFrom (ERC20) with insufficient allowance', async () => {
 		// Issue 10,000 rUSD.
 		const amount = toUnit('10000');
-		await rwaone.issueTribes(amount, { from: owner });
+		await rwaone.issueRwas(amount, { from: owner });
 
 		// Approve for 1 wei less than amount
 		await rUSDProxy.approve(account1, amount.sub(web3.utils.toBN('1')), {
@@ -386,7 +386,7 @@ contract('Tribe', async accounts => {
 	it('should revert when calling transferFrom (ERC20) with insufficient balance', async () => {
 		// Issue 10,000 - 1 wei rUSD.
 		const amount = toUnit('10000');
-		await rwaone.issueTribes(amount.sub(web3.utils.toBN('1')), { from: owner });
+		await rwaone.issueRwas(amount.sub(web3.utils.toBN('1')), { from: owner });
 
 		// Approve for full amount
 		await rUSDProxy.approve(account1, amount, { from: owner });
@@ -401,9 +401,9 @@ contract('Tribe', async accounts => {
 
 	describe('invoking issue/burn directly as Issuer', () => {
 		beforeEach(async () => {
-			// Overwrite Rwaone address to the owner to allow us to invoke issue on the Tribe
+			// Overwrite Rwaone address to the owner to allow us to invoke issue on the Rwa
 			await addressResolver.importAddresses(['Issuer'].map(toBytes32), [owner], { from: owner });
-			// now have the tribe resync its cache
+			// now have the rwa resync its cache
 			await rUSDProxy.rebuildCache();
 		});
 		it('should issue successfully when called by Issuer', async () => {
@@ -427,11 +427,11 @@ contract('Tribe', async accounts => {
 		});
 
 		it('should burn successfully when called by Issuer', async () => {
-			// Issue a bunch of tribes so we can play with them.
+			// Issue a bunch of rwas so we can play with them.
 			await rUSDImpl.issue(owner, toUnit('10000'), {
 				from: owner,
 			});
-			// await rwaone.issueTribes(toUnit('10000'), { from: owner });
+			// await rwaone.issueRwas(toUnit('10000'), { from: owner });
 
 			const transaction = await rUSDImpl.burn(owner, toUnit('10000'), { from: owner });
 
@@ -449,7 +449,7 @@ contract('Tribe', async accounts => {
 		// Issue 10,000 rUSD.
 		const amount = toUnit('10000');
 
-		await rwaone.issueTribes(amount, { from: owner });
+		await rwaone.issueRwas(amount, { from: owner });
 
 		// Do a single transfer of all our rUSD.
 		const transaction = await rUSDProxy.transfer(account1, amount, {
@@ -460,7 +460,7 @@ contract('Tribe', async accounts => {
 		assert.eventEqual(
 			transaction,
 
-			// The original tribe transfer
+			// The original rwa transfer
 			'Transfer',
 			{ from: owner, to: account1, value: amount }
 		);
@@ -481,7 +481,7 @@ contract('Tribe', async accounts => {
 			// Issue 1,000 rUSD.
 			amount = toUnit('1000');
 
-			await rwaone.issueTribes(amount, { from: owner });
+			await rwaone.issueRwas(amount, { from: owner });
 		});
 
 		describe('suspension conditions', () => {
@@ -490,11 +490,11 @@ contract('Tribe', async accounts => {
 				await rUSDProxy.approve(account1, amount, { from: owner });
 			});
 
-			['System', 'Tribe'].forEach(section => {
+			['System', 'Rwa'].forEach(section => {
 				describe(`when ${section} is suspended`, () => {
-					const tribe = toBytes32('rUSD');
+					const rwa = toBytes32('rUSD');
 					beforeEach(async () => {
-						await setStatus({ owner, systemStatus, section, suspend: true, tribe });
+						await setStatus({ owner, systemStatus, section, suspend: true, rwa });
 					});
 					it('when transferAndSettle() is invoked, it reverts with operation prohibited', async () => {
 						await assert.revert(
@@ -514,7 +514,7 @@ contract('Tribe', async accounts => {
 					});
 					describe('when the system is resumed', () => {
 						beforeEach(async () => {
-							await setStatus({ owner, systemStatus, section, suspend: false, tribe });
+							await setStatus({ owner, systemStatus, section, suspend: false, rwa });
 						});
 						it('when transferAndSettle() is invoked, it works as expected', async () => {
 							await rUSDProxy.transferAndSettle(account1, amount, {
@@ -530,9 +530,9 @@ contract('Tribe', async accounts => {
 				});
 			});
 			describe('when rETH is suspended', () => {
-				const tribe = toBytes32('rETH');
+				const rwa = toBytes32('rETH');
 				beforeEach(async () => {
-					await setStatus({ owner, systemStatus, section: 'Tribe', tribe, suspend: true });
+					await setStatus({ owner, systemStatus, section: 'Rwa', rwa, suspend: true });
 				});
 				it('when transferAndSettle() is invoked for rUSD, it works as expected', async () => {
 					await rUSDProxy.transferAndSettle(account1, amount, {
@@ -563,15 +563,15 @@ contract('Tribe', async accounts => {
 				await rwaone.rebuildCache();
 				await rUSDImpl.rebuildCache();
 			});
-			it('then transferableTribes should be the total amount', async () => {
-				assert.bnEqual(await rUSDProxy.transferableTribes(owner), toUnit('1000'));
+			it('then transferableRwas should be the total amount', async () => {
+				assert.bnEqual(await rUSDProxy.transferableRwas(owner), toUnit('1000'));
 			});
 
 			describe('when max seconds in waiting period is non-zero', () => {
 				beforeEach(async () => {
 					await exchanger.setMaxSecsLeft('1');
 				});
-				it('when the tribe is attempted to be transferred away by the user, it reverts', async () => {
+				it('when the rwa is attempted to be transferred away by the user, it reverts', async () => {
 					await assert.revert(
 						rUSDProxy.transfer(account1, toUnit('1'), { from: owner }),
 						'Cannot transfer during waiting period'
@@ -591,8 +591,8 @@ contract('Tribe', async accounts => {
 					await exchanger.setReclaim(reclaimAmount);
 					await exchanger.setNumEntries('1');
 				});
-				it('then transferableTribes should be the total amount minus the reclaim', async () => {
-					assert.bnEqual(await rUSDProxy.transferableTribes(owner), toUnit('990'));
+				it('then transferableRwas should be the total amount minus the reclaim', async () => {
+					assert.bnEqual(await rUSDProxy.transferableRwas(owner), toUnit('990'));
 				});
 				it('should transfer all and settle 1000 rUSD less reclaim amount', async () => {
 					// Do a single transfer of all our rUSD.
@@ -668,7 +668,7 @@ contract('Tribe', async accounts => {
 					});
 				});
 			});
-			describe('when tribe balance after reclamation is less than requested transfer value', async () => {
+			describe('when rwa balance after reclamation is less than requested transfer value', async () => {
 				let balanceBefore;
 				const reclaimAmount = toUnit('600');
 				beforeEach(async () => {
@@ -676,7 +676,7 @@ contract('Tribe', async accounts => {
 					await exchanger.setNumEntries('1');
 					balanceBefore = await rUSDProxy.balanceOf(owner);
 				});
-				describe('when reclaim 600 rUSD and attempting to transfer 500 rUSD tribes', async () => {
+				describe('when reclaim 600 rUSD and attempting to transfer 500 rUSD rwas', async () => {
 					// original balance is 1000, reclaim 600 and should send 400
 					const transferAmount = toUnit('500');
 
@@ -700,8 +700,8 @@ contract('Tribe', async accounts => {
 						});
 					});
 					describe('using transferAndSettle', () => {
-						it('then transferableTribes should be the total amount', async () => {
-							assert.bnEqual(await rUSDProxy.transferableTribes(owner), toUnit('400'));
+						it('then transferableRwas should be the total amount', async () => {
+							assert.bnEqual(await rUSDProxy.transferableRwas(owner), toUnit('400'));
 						});
 
 						it('should transfer remaining balance less reclaimed', async () => {
@@ -741,13 +741,13 @@ contract('Tribe', async accounts => {
 			});
 		});
 	});
-	describe('when transferring tribes to FEE_ADDRESS', async () => {
+	describe('when transferring rwas to FEE_ADDRESS', async () => {
 		let amount;
 		beforeEach(async () => {
 			// Issue 10,000 rUSD.
 			amount = toUnit('10000');
 
-			await rwaone.issueTribes(amount, { from: owner });
+			await rwaone.issueRwas(amount, { from: owner });
 		});
 		it('should transfer to FEE_ADDRESS and recorded as fee', async () => {
 			const feeBalanceBefore = await rUSDProxy.balanceOf(FEE_ADDRESS);
@@ -761,7 +761,7 @@ contract('Tribe', async accounts => {
 			assert.eventEqual(
 				transaction,
 
-				// The original tribe transfer
+				// The original rwa transfer
 				'Transfer',
 				{ from: owner, to: FEE_ADDRESS, value: amount }
 			);
@@ -774,14 +774,14 @@ contract('Tribe', async accounts => {
 			assert.bnEqual(firstFeePeriod.feesToDistribute, feeBalanceBefore.add(amount));
 		});
 
-		describe('when a non-USD tribe exists', () => {
+		describe('when a non-USD rwa exists', () => {
 			let sEURImpl, sEURProxy;
 
 			beforeEach(async () => {
 				const sEUR = toBytes32('sEUR');
 
-				// create a new sEUR tribe
-				({ Tribe: sEURImpl, ProxyERC20Tribe: sEURProxy } = await setupAllContracts({
+				// create a new sEUR rwa
+				({ Rwa: sEURImpl, ProxyERC20Rwa: sEURProxy } = await setupAllContracts({
 					accounts,
 					existing: {
 						ExchangeRates: exchangeRates,
@@ -793,7 +793,7 @@ contract('Tribe', async accounts => {
 						FeePool: feePool,
 						Rwaone: rwaone,
 					},
-					contracts: [{ contract: 'Tribe', properties: { currencyKey: sEUR } }],
+					contracts: [{ contract: 'Rwa', properties: { currencyKey: sEUR } }],
 				}));
 
 				// Send a price update to guarantee we're not stale.
@@ -801,19 +801,19 @@ contract('Tribe', async accounts => {
 				await debtCache.takeDebtSnapshot();
 
 				// use implementation ABI through the proxy
-				sEURProxy = await Tribe.at(sEURProxy.address);
+				sEURProxy = await Rwa.at(sEURProxy.address);
 			});
 
 			it('when transferring it to FEE_ADDRESS it should exchange into rUSD first before sending', async () => {
 				// allocate the user some sEUR
-				await issueTribesToUser({
+				await issueRwasToUser({
 					owner,
 					issuer,
 					addressResolver,
-					tribeContract: sEURImpl,
+					rwaContract: sEURImpl,
 					user: owner,
 					amount,
-					tribe: sEUR,
+					rwa: sEUR,
 				});
 
 				// Get balanceOf FEE_ADDRESS
@@ -840,15 +840,15 @@ contract('Tribe', async accounts => {
 		});
 	});
 
-	describe('when transferring tribes to ZERO_ADDRESS', async () => {
+	describe('when transferring rwas to ZERO_ADDRESS', async () => {
 		let amount;
 		beforeEach(async () => {
 			// Issue 10,000 rUSD.
 			amount = toUnit('1000');
 
-			await rwaone.issueTribes(amount, { from: owner });
+			await rwaone.issueRwas(amount, { from: owner });
 		});
-		it('should burn the tribes and reduce totalSupply', async () => {
+		it('should burn the rwas and reduce totalSupply', async () => {
 			const balanceBefore = await rUSDProxy.balanceOf(owner);
 			const totalSupplyBefore = await rUSDProxy.totalSupply();
 
@@ -869,7 +869,7 @@ contract('Tribe', async accounts => {
 			// owner balance should be less amount burned
 			assert.bnEqual(await rUSDProxy.balanceOf(owner), balanceBefore.sub(amount));
 
-			// total supply of tribe reduced by amount
+			// total supply of rwa reduced by amount
 			assert.bnEqual(await rUSDProxy.totalSupply(), totalSupplyBefore.sub(amount));
 		});
 	});

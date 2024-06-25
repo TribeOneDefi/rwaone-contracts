@@ -6,11 +6,11 @@ contract MockEtherWrapper {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
 
-    uint public totalIssuedTribes;
+    uint public totalIssuedRwas;
 
     constructor() public {}
 
-    function setTotalIssuedTribes(uint value) external {
-        totalIssuedTribes = value;
+    function setTotalIssuedRwas(uint value) external {
+        totalIssuedRwas = value;
     }
 }

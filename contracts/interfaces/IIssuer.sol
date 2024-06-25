@@ -1,6 +1,6 @@
 pragma solidity >=0.4.24;
 
-import "../interfaces/ITribe.sol";
+import "../interfaces/IRwa.sol";
 
 // https://docs.rwaone.io/contracts/source/interfaces/iissuer
 interface IIssuer {
@@ -8,15 +8,15 @@ interface IIssuer {
 
     function allNetworksDebtInfo() external view returns (uint256 debt, uint256 sharesSupply, bool isStale);
 
-    function anyTribeOrRWAXRateIsInvalid() external view returns (bool anyRateInvalid);
+    function anyRwaOrRWAXRateIsInvalid() external view returns (bool anyRateInvalid);
 
     function availableCurrencyKeys() external view returns (bytes32[] memory);
 
-    function availableTribeCount() external view returns (uint);
+    function availableRwaCount() external view returns (uint);
 
-    function availableTribes(uint index) external view returns (ITribe);
+    function availableRwas(uint index) external view returns (IRwa);
 
-    function canBurnTribes(address account) external view returns (bool);
+    function canBurnRwas(address account) external view returns (bool);
 
     function collateral(address account) external view returns (uint);
 
@@ -32,21 +32,21 @@ interface IIssuer {
 
     function lastIssueEvent(address account) external view returns (uint);
 
-    function maxIssuableTribes(address issuer) external view returns (uint maxIssuable);
+    function maxIssuableRwas(address issuer) external view returns (uint maxIssuable);
 
     function minimumStakeTime() external view returns (uint);
 
-    function remainingIssuableTribes(
+    function remainingIssuableRwas(
         address issuer
     ) external view returns (uint maxIssuable, uint alreadyIssued, uint totalSystemDebt);
 
-    function tribes(bytes32 currencyKey) external view returns (ITribe);
+    function rwas(bytes32 currencyKey) external view returns (IRwa);
 
-    function getTribes(bytes32[] calldata currencyKeys) external view returns (ITribe[] memory);
+    function getRwas(bytes32[] calldata currencyKeys) external view returns (IRwa[] memory);
 
-    function tribesByAddress(address tribeAddress) external view returns (bytes32);
+    function rwasByAddress(address rwaAddress) external view returns (bytes32);
 
-    function totalIssuedTribes(bytes32 currencyKey, bool excludeOtherCollateral) external view returns (uint);
+    function totalIssuedRwas(bytes32 currencyKey, bool excludeOtherCollateral) external view returns (uint);
 
     function transferableRwaoneAndAnyRateIsInvalid(
         address account,
@@ -59,25 +59,25 @@ interface IIssuer {
     ) external view returns (uint totalRedeemed, uint debtToRemove, uint escrowToLiquidate, uint initialDebtBalance);
 
     // Restricted: used internally to Rwaone
-    function addTribes(ITribe[] calldata tribesToAdd) external;
+    function addRwas(IRwa[] calldata rwasToAdd) external;
 
-    function issueTribes(address from, uint amount) external;
+    function issueRwas(address from, uint amount) external;
 
-    function issueTribesOnBehalf(address issueFor, address from, uint amount) external;
+    function issueRwasOnBehalf(address issueFor, address from, uint amount) external;
 
-    function issueMaxTribes(address from) external;
+    function issueMaxRwas(address from) external;
 
-    function issueMaxTribesOnBehalf(address issueFor, address from) external;
+    function issueMaxRwasOnBehalf(address issueFor, address from) external;
 
-    function burnTribes(address from, uint amount) external;
+    function burnRwas(address from, uint amount) external;
 
-    function burnTribesOnBehalf(address burnForAddress, address from, uint amount) external;
+    function burnRwasOnBehalf(address burnForAddress, address from, uint amount) external;
 
-    function burnTribesToTarget(address from) external;
+    function burnRwasToTarget(address from) external;
 
-    function burnTribesToTargetOnBehalf(address burnForAddress, address from) external;
+    function burnRwasToTargetOnBehalf(address burnForAddress, address from) external;
 
-    function burnForRedemption(address deprecatedTribeProxy, address account, uint balance) external;
+    function burnForRedemption(address deprecatedRwaProxy, address account, uint balance) external;
 
     function setCurrentPeriodId(uint128 periodId) external;
 
@@ -86,9 +86,9 @@ interface IIssuer {
         bool isSelfLiquidation
     ) external returns (uint totalRedeemed, uint debtRemoved, uint escrowToLiquidate);
 
-    function issueTribesWithoutDebt(bytes32 currencyKey, address to, uint amount) external returns (bool rateInvalid);
+    function issueRwasWithoutDebt(bytes32 currencyKey, address to, uint amount) external returns (bool rateInvalid);
 
-    function burnTribesWithoutDebt(bytes32 currencyKey, address to, uint amount) external returns (bool rateInvalid);
+    function burnRwasWithoutDebt(bytes32 currencyKey, address to, uint amount) external returns (bool rateInvalid);
 
     function modifyDebtSharesForMigration(address account, uint amount) external;
 }

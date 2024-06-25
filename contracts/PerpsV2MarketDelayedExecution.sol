@@ -208,7 +208,7 @@ contract PerpsV2MarketDelayedExecution is IPerpsV2MarketDelayedExecution, PerpsV
     }
 
     /*
-     * The current base price, reverting if it is invalid, or if system or tribe is suspended.
+     * The current base price, reverting if it is invalid, or if system or rwa is suspended.
      */
     function _offchainAssetPriceRequireSystemChecks(uint maxAge) internal returns (uint price, uint publishTime) {
         // Onchain oracle asset price

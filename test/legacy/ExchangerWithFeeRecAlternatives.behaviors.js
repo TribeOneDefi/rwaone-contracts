@@ -32,7 +32,7 @@ module.exports = function ({ accounts }) {
 	});
 
 	beforeEach(async () => {
-		const VirtualTribeMastercopy = artifacts.require('VirtualTribeMastercopy');
+		const VirtualRwaMastercopy = artifacts.require('VirtualRwaMastercopy');
 
 		({ mocks: this.mocks, resolver: this.resolver } = await prepareSmocks({
 			contracts: [
@@ -50,8 +50,8 @@ module.exports = function ({ accounts }) {
 				'TradingRewards',
 			],
 			mocks: {
-				// Use a real VirtualTribeMastercopy so the unit tests can interrogate deployed vTribes
-				VirtualTribeMastercopy: await VirtualTribeMastercopy.new(),
+				// Use a real VirtualRwaMastercopy so the unit tests can interrogate deployed vRwas
+				VirtualRwaMastercopy: await VirtualRwaMastercopy.new(),
 			},
 			accounts: accounts.slice(10), // mock using accounts after the first few
 		}));
@@ -119,7 +119,7 @@ module.exports = function ({ accounts }) {
 		whenMockedToAllowExchangeInvocationChecks: cb => {
 			describe(`when mocked to allow invocation checks`, () => {
 				beforeEach(async () => {
-					this.mocks.Rwaone.tribesByAddress.returns(toBytes32());
+					this.mocks.Rwaone.rwasByAddress.returns(toBytes32());
 				});
 				cb();
 			});
@@ -173,17 +173,17 @@ module.exports = function ({ accounts }) {
 				cb();
 			});
 		},
-		whenMockedWithTribeUintSystemSetting: ({ setting, tribe, value }, cb) => {
-			const settingForTribe = web3.utils.soliditySha3(
+		whenMockedWithRwaUintSystemSetting: ({ setting, rwa, value }, cb) => {
+			const settingForRwa = web3.utils.soliditySha3(
 				{ type: 'bytes32', value: toBytes32(setting) },
-				{ type: 'bytes32', value: tribe }
+				{ type: 'bytes32', value: rwa }
 			);
-			const tribeName = fromBytes32(tribe);
-			describe(`when SystemSetting.${setting} for ${tribeName} is mocked to ${value}`, () => {
+			const rwaName = fromBytes32(rwa);
+			describe(`when SystemSetting.${setting} for ${rwaName} is mocked to ${value}`, () => {
 				beforeEach(async () => {
 					this.flexibleStorageMock.mockSystemSetting({
 						value,
-						setting: settingForTribe,
+						setting: settingForRwa,
 						type: 'uint',
 					});
 				});
@@ -235,13 +235,13 @@ module.exports = function ({ accounts }) {
 				});
 			});
 		},
-		whenMockedWithVolatileTribe: ({ tribe, volatile }, cb) => {
-			describe(`when mocked with ${fromBytes32(tribe)} deemed ${volatile ? 'volatile' : 'not volatile'
+		whenMockedWithVolatileRwa: ({ rwa, volatile }, cb) => {
+			describe(`when mocked with ${fromBytes32(rwa)} deemed ${volatile ? 'volatile' : 'not volatile'
 				}`, () => {
 					beforeEach(async () => {
 						this.mocks.ExchangeRates[
-							'tribeTooVolatileForAtomicExchange((bytes32,address,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256))'
-						].returns(tribeToCheck => (tribeToCheck === tribe ? volatile : false));
+							'rwaTooVolatileForAtomicExchange((bytes32,address,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256))'
+						].returns(rwaToCheck => (rwaToCheck === rwa ? volatile : false));
 					});
 				});
 		},
@@ -275,16 +275,16 @@ module.exports = function ({ accounts }) {
 				cb();
 			});
 		},
-		whenMockedASingleTribeToIssueAndBurn: cb => {
-			describe(`when mocked a tribe to burn`, () => {
+		whenMockedASingleRwaToIssueAndBurn: cb => {
+			describe(`when mocked a rwa to burn`, () => {
 				beforeEach(async () => {
-					// create and share the one tribe for all Issuer.tribes() calls
-					this.mocks.tribe = await smock.fake('Tribe');
-					this.mocks.tribe.proxy.returns(web3.eth.accounts.create().address);
-					this.mocks.Issuer.tribes.returns(currencyKey => {
+					// create and share the one rwa for all Issuer.rwas() calls
+					this.mocks.rwa = await smock.fake('Rwa');
+					this.mocks.rwa.proxy.returns(web3.eth.accounts.create().address);
+					this.mocks.Issuer.rwas.returns(currencyKey => {
 						// but when currency
-						this.mocks.tribe.currencyKey.returns(currencyKey);
-						return this.mocks.tribe.address;
+						this.mocks.rwa.currencyKey.returns(currencyKey);
+						return this.mocks.rwa.address;
 					});
 				});
 				cb();
@@ -292,17 +292,17 @@ module.exports = function ({ accounts }) {
 		},
 		whenMockedSusdAndSethSeparatelyToIssueAndBurn: cb => {
 			describe(`when mocked rUSD and rETH`, () => {
-				async function mockTribe(currencyKey) {
-					const tribe = await smock.fake('Tribe');
-					tribe.currencyKey.returns(currencyKey);
-					tribe.proxy.returns(web3.eth.accounts.create().address);
-					return tribe;
+				async function mockRwa(currencyKey) {
+					const rwa = await smock.fake('Rwa');
+					rwa.currencyKey.returns(currencyKey);
+					rwa.proxy.returns(web3.eth.accounts.create().address);
+					return rwa;
 				}
 
 				beforeEach(async () => {
-					this.mocks.rUSD = await mockTribe(rUSD);
-					this.mocks.rETH = await mockTribe(rETH);
-					this.mocks.Issuer.tribes.returns(currencyKey => {
+					this.mocks.rUSD = await mockRwa(rUSD);
+					this.mocks.rETH = await mockRwa(rETH);
+					this.mocks.Issuer.rwas.returns(currencyKey => {
 						if (currencyKey === rUSD) {
 							return this.mocks.rUSD.address;
 						} else if (currencyKey === rETH) {

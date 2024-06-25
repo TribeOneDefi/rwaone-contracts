@@ -52,17 +52,17 @@ const persistTokens = async ({ network, yes, privateKey, assetsVersion }) => {
 	const output = {
 		name: 'Rwaone',
 		logoURI: `${baseURI}/snx/wRWAX.svg`,
-		keywords: ['rwaone', 'defi', 'derivatives', 'tribes', 'rwaones'],
+		keywords: ['rwaone', 'defi', 'derivatives', 'rwas', 'rwaones'],
 		timestamp: new Date().toISOString(),
 		tags: {
-			tribe: {
-				name: 'Tribe',
+			rwa: {
+				name: 'Rwa',
 				description:
 					'A rwaone asset within the Rwaone protocol which can at any time ' +
-					'be exchanged in its entirety into any other tribe within Rwaone.',
+					'be exchanged in its entirety into any other rwa within Rwaone.',
 			},
 			index: {
-				name: 'Index Tribe',
+				name: 'Index Rwa',
 				description:
 					'Tokens that are compromised of a basket of underlying assets ' +
 					'determined by a set number of units of each. These units are ' +
@@ -78,10 +78,10 @@ const persistTokens = async ({ network, yes, privateKey, assetsVersion }) => {
 			chainId,
 			address,
 			symbol,
-			name: symbol === 'wRWAX' ? 'Rwaone Network Token' : `Tribe ${name}`,
+			name: symbol === 'wRWAX' ? 'Rwaone Network Token' : `Rwa ${name}`,
 			decimals,
-			logoURI: baseURI + (symbol === 'wRWAX' ? '/snx/wRWAX.svg' : `/tribes/${symbol}.svg`),
-			tags: [].concat(index ? 'index' : []).concat(symbol !== 'wRWAX' ? 'tribe' : []),
+			logoURI: baseURI + (symbol === 'wRWAX' ? '/snx/wRWAX.svg' : `/rwas/${symbol}.svg`),
+			tags: [].concat(index ? 'index' : []).concat(symbol !== 'wRWAX' ? 'rwa' : []),
 		})),
 	};
 
@@ -108,7 +108,7 @@ const persistTokens = async ({ network, yes, privateKey, assetsVersion }) => {
 
 	if (!yes) {
 		try {
-			await confirmAction(yellow(`Do you want to continue uploading Tribes JSON to IPFS (y/n) ?`));
+			await confirmAction(yellow(`Do you want to continue uploading Rwas JSON to IPFS (y/n) ?`));
 		} catch (err) {
 			console.log(gray('Operation cancelled'));
 			process.exit();
@@ -120,7 +120,7 @@ const persistTokens = async ({ network, yes, privateKey, assetsVersion }) => {
 		hash = await uploadFileToIPFS({ body: output });
 
 		console.log(
-			gray('Uploaded Tribes JSON to IPFS:'),
+			gray('Uploaded Rwas JSON to IPFS:'),
 			yellow(`https://gateway.ipfs.io/ipfs/${hash}`)
 		);
 	} catch (err) {
@@ -128,7 +128,7 @@ const persistTokens = async ({ network, yes, privateKey, assetsVersion }) => {
 		process.exit(1);
 	}
 
-	const ensName = 'tribes.snx.eth';
+	const ensName = 'rwas.snx.eth';
 	const content = `ipfs://${hash}`;
 
 	console.log(red('setContent not emitted. Not supported at the moment.'));

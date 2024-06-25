@@ -16,9 +16,9 @@ contract('RwaoneBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 	const [, owner, randomAddress] = accounts;
 
 	let rwaone,
-		tribeetixProxy,
-		tribeetixBridgeToOptimism,
-		tribeetixBridgeEscrow,
+		rwaoneProxy,
+		rwaoneBridgeToOptimism,
+		rwaoneBridgeEscrow,
 		systemSettings,
 		rewardsDistribution;
 
@@ -26,10 +26,10 @@ contract('RwaoneBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 		before('deploy all contracts', async () => {
 			({
 				Rwaone: rwaone,
-				ProxyERC20Rwaone: tribeetixProxy,
-				RwaoneBridgeToOptimism: tribeetixBridgeToOptimism,
+				ProxyERC20Rwaone: rwaoneProxy,
+				RwaoneBridgeToOptimism: rwaoneBridgeToOptimism,
 				SystemSettings: systemSettings,
-				RwaoneBridgeEscrow: tribeetixBridgeEscrow,
+				RwaoneBridgeEscrow: rwaoneBridgeEscrow,
 				RewardsDistribution: rewardsDistribution,
 			} = await setupAllContracts({
 				accounts,
@@ -42,7 +42,7 @@ contract('RwaoneBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 			}));
 
 			// use implementation ABI on the proxy address to simplify calling
-			rwaone = await artifacts.require('Rwaone').at(tribeetixProxy.address);
+			rwaone = await artifacts.require('Rwaone').at(rwaoneProxy.address);
 		});
 
 		it('returns the expected cross domain message gas limit', async () => {
@@ -68,7 +68,7 @@ contract('RwaoneBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 			it('reverts when an entriesId subarray contains an empty array', async () => {
 				const entryIdsEmpty = [[1, 2, 3], []];
 				await assert.revert(
-					tribeetixBridgeToOptimism.migrateEscrow(entryIdsEmpty),
+					rwaoneBridgeToOptimism.migrateEscrow(entryIdsEmpty),
 					'Entry IDs required'
 				);
 			});
@@ -78,7 +78,7 @@ contract('RwaoneBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 			it('reverts when an entriesId subarray contains an empty array', async () => {
 				const entryIdsEmpty = [[], [1, 2, 3]];
 				await assert.revert(
-					tribeetixBridgeToOptimism.depositAndMigrateEscrow(1, entryIdsEmpty),
+					rwaoneBridgeToOptimism.depositAndMigrateEscrow(1, entryIdsEmpty),
 					'Entry IDs required'
 				);
 			});
@@ -90,7 +90,7 @@ contract('RwaoneBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 			describe('when a user has not provided allowance to the bridge contract', () => {
 				it('the deposit should fail', async () => {
 					await assert.revert(
-						tribeetixBridgeToOptimism.deposit(amountToDeposit, { from: owner }),
+						rwaoneBridgeToOptimism.deposit(amountToDeposit, { from: owner }),
 						'SafeMath: subtraction overflow'
 					);
 				});
@@ -98,7 +98,7 @@ contract('RwaoneBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 
 			describe('when a user has provided allowance to the bridge contract', () => {
 				before('approve RwaoneBridgeToOptimism', async () => {
-					await rwaone.approve(tribeetixBridgeToOptimism.address, amountToDeposit, {
+					await rwaone.approve(rwaoneBridgeToOptimism.address, amountToDeposit, {
 						from: owner,
 					});
 				});
@@ -111,7 +111,7 @@ contract('RwaoneBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 					});
 
 					before('perform a deposit', async () => {
-						await tribeetixBridgeToOptimism.deposit(amountToDeposit, {
+						await rwaoneBridgeToOptimism.deposit(amountToDeposit, {
 							from: owner,
 						});
 					});
@@ -124,7 +124,7 @@ contract('RwaoneBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 
 					it("increases the escrow's balance", async () => {
 						assert.bnEqual(
-							await rwaone.balanceOf(tribeetixBridgeEscrow.address),
+							await rwaone.balanceOf(rwaoneBridgeEscrow.address),
 							amountToDeposit
 						);
 					});
@@ -138,7 +138,7 @@ contract('RwaoneBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 			describe('when a user has not provided allowance to the bridge contract', () => {
 				it('the deposit should fail', async () => {
 					await assert.revert(
-						tribeetixBridgeToOptimism.depositTo(randomAddress, amountToDeposit, { from: owner }),
+						rwaoneBridgeToOptimism.depositTo(randomAddress, amountToDeposit, { from: owner }),
 						'SafeMath: subtraction overflow'
 					);
 				});
@@ -146,7 +146,7 @@ contract('RwaoneBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 
 			describe('when a user has provided allowance to the bridge contract', () => {
 				before('approve RwaoneBridgeToOptimism', async () => {
-					await rwaone.approve(tribeetixBridgeToOptimism.address, amountToDeposit, {
+					await rwaone.approve(rwaoneBridgeToOptimism.address, amountToDeposit, {
 						from: owner,
 					});
 				});
@@ -157,11 +157,11 @@ contract('RwaoneBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 
 					before('record balances before', async () => {
 						userBalanceBefore = await rwaone.balanceOf(owner);
-						contractBalanceBefore = await rwaone.balanceOf(tribeetixBridgeEscrow.address);
+						contractBalanceBefore = await rwaone.balanceOf(rwaoneBridgeEscrow.address);
 					});
 
 					before('perform a deposit to a separate address', async () => {
-						await tribeetixBridgeToOptimism.depositTo(randomAddress, amountToDeposit, {
+						await rwaoneBridgeToOptimism.depositTo(randomAddress, amountToDeposit, {
 							from: owner,
 						});
 					});
@@ -174,7 +174,7 @@ contract('RwaoneBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 
 					it("increases the escrow's balance", async () => {
 						assert.bnEqual(
-							await rwaone.balanceOf(tribeetixBridgeEscrow.address),
+							await rwaone.balanceOf(rwaoneBridgeEscrow.address),
 							contractBalanceBefore.add(amountToDeposit)
 						);
 					});
@@ -187,7 +187,7 @@ contract('RwaoneBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 				const amountToDeposit = toBN(1);
 
 				before('approve RwaoneBridgeToOptimism', async () => {
-					await rwaone.approve(tribeetixBridgeToOptimism.address, amountToDeposit, {
+					await rwaone.approve(rwaoneBridgeToOptimism.address, amountToDeposit, {
 						from: owner,
 					});
 				});
@@ -198,11 +198,11 @@ contract('RwaoneBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 
 					before('record balance before', async () => {
 						userBalanceBefore = await rwaone.balanceOf(owner);
-						contractBalanceBefore = await rwaone.balanceOf(tribeetixBridgeEscrow.address);
+						contractBalanceBefore = await rwaone.balanceOf(rwaoneBridgeEscrow.address);
 					});
 
 					before('perform a depositReward', async () => {
-						await tribeetixBridgeToOptimism.depositReward(amountToDeposit, {
+						await rwaoneBridgeToOptimism.depositReward(amountToDeposit, {
 							from: owner,
 						});
 					});
@@ -215,7 +215,7 @@ contract('RwaoneBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 
 					it("increases the escrow's balance", async () => {
 						assert.bnEqual(
-							await rwaone.balanceOf(tribeetixBridgeEscrow.address),
+							await rwaone.balanceOf(rwaoneBridgeEscrow.address),
 							contractBalanceBefore.add(amountToDeposit)
 						);
 					});
@@ -228,7 +228,7 @@ contract('RwaoneBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 				const amountToDistribute = toBN(1000);
 				before('addRewardDistribution', async () => {
 					await rewardsDistribution.addRewardDistribution(
-						tribeetixBridgeToOptimism.address,
+						rwaoneBridgeToOptimism.address,
 						amountToDistribute,
 						{
 							from: owner,
@@ -241,8 +241,8 @@ contract('RwaoneBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 					let escrowBalanceBefore;
 
 					before('record balance before', async () => {
-						bridgeBalanceBefore = await rwaone.balanceOf(tribeetixBridgeToOptimism.address);
-						escrowBalanceBefore = await rwaone.balanceOf(tribeetixBridgeEscrow.address);
+						bridgeBalanceBefore = await rwaone.balanceOf(rwaoneBridgeToOptimism.address);
+						escrowBalanceBefore = await rwaone.balanceOf(rwaoneBridgeEscrow.address);
 					});
 
 					before('transfer amount to be distributed and distributeRewards', async () => {
@@ -260,14 +260,14 @@ contract('RwaoneBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 
 					it('the balance of the bridge remains intact', async () => {
 						assert.bnEqual(
-							await rwaone.balanceOf(tribeetixBridgeToOptimism.address),
+							await rwaone.balanceOf(rwaoneBridgeToOptimism.address),
 							bridgeBalanceBefore
 						);
 					});
 
 					it("increases the escrow's balance", async () => {
 						assert.bnEqual(
-							await rwaone.balanceOf(tribeetixBridgeEscrow.address),
+							await rwaone.balanceOf(rwaoneBridgeEscrow.address),
 							escrowBalanceBefore.add(amountToDistribute)
 						);
 					});
@@ -280,22 +280,22 @@ contract('RwaoneBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 				const amount = toBN('999');
 				let initialAmount;
 				before(async () => {
-					initialAmount = await rwaone.balanceOf(tribeetixBridgeEscrow.address);
-					await rwaone.transfer(tribeetixBridgeToOptimism.address, amount, {
+					initialAmount = await rwaone.balanceOf(rwaoneBridgeEscrow.address);
+					await rwaone.transfer(rwaoneBridgeToOptimism.address, amount, {
 						from: owner,
 					});
-					assert.bnEqual(await rwaone.balanceOf(tribeetixBridgeToOptimism.address), amount);
+					assert.bnEqual(await rwaone.balanceOf(rwaoneBridgeToOptimism.address), amount);
 				});
 				describe('when anyone invokeds forwardTokensToEscrow', () => {
 					before(async () => {
-						await tribeetixBridgeToOptimism.forwardTokensToEscrow(rwaone.address, {
+						await rwaoneBridgeToOptimism.forwardTokensToEscrow(rwaone.address, {
 							from: randomAddress,
 						});
 					});
 					it('then the tokens are sent from the bridge to the escrow', async () => {
-						assert.equal(await rwaone.balanceOf(tribeetixBridgeToOptimism.address), '0');
+						assert.equal(await rwaone.balanceOf(rwaoneBridgeToOptimism.address), '0');
 						assert.bnEqual(
-							await rwaone.balanceOf(tribeetixBridgeEscrow.address),
+							await rwaone.balanceOf(rwaoneBridgeEscrow.address),
 							initialAmount.add(amount)
 						);
 					});

@@ -18,7 +18,7 @@ import "./interfaces/ICollateralManager.sol";
 import "./interfaces/ISystemStatus.sol";
 import "./interfaces/IFeePool.sol";
 import "./interfaces/IIssuer.sol";
-import "./interfaces/ITribe.sol";
+import "./interfaces/IRwa.sol";
 import "./interfaces/IExchangeRates.sol";
 import "./interfaces/IExchanger.sol";
 import "./interfaces/IShortingRewards.sol";
@@ -35,7 +35,7 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
 
     // ========== STATE VARIABLES ==========
 
-    // The tribe corresponding to the collateral.
+    // The rwa corresponding to the collateral.
     bytes32 public collateralKey;
 
     // Stores open loans.
@@ -43,11 +43,11 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
 
     ICollateralManager public manager;
 
-    // The tribes that this contract can issue.
-    bytes32[] public tribes;
+    // The rwas that this contract can issue.
+    bytes32[] public rwas;
 
-    // Map from currency key to tribe contract name.
-    mapping(bytes32 => bytes32) public tribesByKey;
+    // Map from currency key to rwa contract name.
+    mapping(bytes32 => bytes32) public rwasByKey;
 
     // Map from currency key to the shorting rewards contract
     mapping(bytes32 => address) public shortingRewards;
@@ -71,7 +71,7 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
     bytes32 private constant CONTRACT_EXCHANGER = "Exchanger";
     bytes32 private constant CONTRACT_FEEPOOL = "FeePool";
-    bytes32 private constant CONTRACT_RWAONERUSD = "TriberUSD";
+    bytes32 private constant CONTRACT_RWAONERUSD = "RwarUSD";
     bytes32 private constant CONTRACT_COLLATERALUTIL = "CollateralUtil";
 
     /* ========== CONSTRUCTOR ========== */
@@ -104,7 +104,7 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
 
         bytes32[] memory combined = combineArrays(existingAddresses, newAddresses);
 
-        addresses = combineArrays(combined, tribes);
+        addresses = combineArrays(combined, rwas);
     }
 
     /* ---------- Related Contracts ---------- */
@@ -113,12 +113,12 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         return ISystemStatus(requireAndGetAddress(CONTRACT_SYSTEMSTATUS));
     }
 
-    function _tribe(bytes32 tribeName) internal view returns (ITribe) {
-        return ITribe(requireAndGetAddress(tribeName));
+    function _rwa(bytes32 rwaName) internal view returns (IRwa) {
+        return IRwa(requireAndGetAddress(rwaName));
     }
 
-    function _triberUSD() internal view returns (ITribe) {
-        return ITribe(requireAndGetAddress(CONTRACT_RWAONERUSD));
+    function _rwarUSD() internal view returns (IRwa) {
+        return IRwa(requireAndGetAddress(CONTRACT_RWAONERUSD));
     }
 
     function _exchangeRates() internal view returns (IExchangeRates) {
@@ -149,25 +149,25 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         return _collateralUtil().liquidationAmount(loan, minCratio, collateralKey);
     }
 
-    // The maximum number of tribes issuable for this amount of collateral
+    // The maximum number of rwas issuable for this amount of collateral
     function maxLoan(uint amount, bytes32 currency) public view returns (uint max) {
         return _collateralUtil().maxLoan(amount, currency, minCratio, collateralKey);
     }
 
-    function areTribesAndCurrenciesSet(
-        bytes32[] calldata _tribeNamesInResolver,
-        bytes32[] calldata _tribeKeys
+    function areRwasAndCurrenciesSet(
+        bytes32[] calldata _rwaNamesInResolver,
+        bytes32[] calldata _rwaKeys
     ) external view returns (bool) {
-        if (tribes.length != _tribeNamesInResolver.length) {
+        if (rwas.length != _rwaNamesInResolver.length) {
             return false;
         }
 
-        for (uint i = 0; i < _tribeNamesInResolver.length; i++) {
-            bytes32 tribeName = _tribeNamesInResolver[i];
-            if (tribes[i] != tribeName) {
+        for (uint i = 0; i < _rwaNamesInResolver.length; i++) {
+            bytes32 rwaName = _rwaNamesInResolver[i];
+            if (rwas[i] != rwaName) {
                 return false;
             }
-            if (tribesByKey[_tribeKeys[i]] != tribes[i]) {
+            if (rwasByKey[_rwaKeys[i]] != rwas[i]) {
                 return false;
             }
         }
@@ -194,9 +194,9 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
 
     /* ---------- UTILITIES ---------- */
 
-    // Check the account has enough of the tribe to make the payment
-    function _checkTribeBalance(address payer, bytes32 key, uint amount) internal view {
-        require(IERC20(address(_tribe(tribesByKey[key]))).balanceOf(payer) >= amount, "Not enough balance");
+    // Check the account has enough of the rwa to make the payment
+    function _checkRwaBalance(address payer, bytes32 key, uint amount) internal view {
+        require(IERC20(address(_rwa(rwasByKey[key]))).balanceOf(payer) >= amount, "Not enough balance");
     }
 
     // We set the interest index to 0 to indicate the loan has been closed.
@@ -211,15 +211,15 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
 
     /* ========== MUTATIVE FUNCTIONS ========== */
 
-    /* ---------- Tribes ---------- */
+    /* ---------- Rwas ---------- */
 
-    function addTribes(bytes32[] calldata _tribeNamesInResolver, bytes32[] calldata _tribeKeys) external onlyOwner {
-        require(_tribeNamesInResolver.length == _tribeKeys.length, "Array length mismatch");
+    function addRwas(bytes32[] calldata _rwaNamesInResolver, bytes32[] calldata _rwaKeys) external onlyOwner {
+        require(_rwaNamesInResolver.length == _rwaKeys.length, "Array length mismatch");
 
-        for (uint i = 0; i < _tribeNamesInResolver.length; i++) {
-            bytes32 tribeName = _tribeNamesInResolver[i];
-            tribes.push(tribeName);
-            tribesByKey[_tribeKeys[i]] = tribeName;
+        for (uint i = 0; i < _rwaNamesInResolver.length; i++) {
+            bytes32 rwaName = _rwaNamesInResolver[i];
+            rwas.push(rwaName);
+            rwasByKey[_rwaKeys[i]] = rwaName;
         }
 
         // ensure cache has the latest
@@ -228,8 +228,8 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
 
     /* ---------- Rewards Contracts ---------- */
 
-    function addRewardsContracts(address rewardsContract, bytes32 tribe) external onlyOwner {
-        shortingRewards[tribe] = rewardsContract;
+    function addRewardsContracts(address rewardsContract, bytes32 rwa) external onlyOwner {
+        shortingRewards[rwa] = rewardsContract;
     }
 
     /* ---------- LOAN INTERACTIONS ---------- */
@@ -243,10 +243,10 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         // 0. Check if able to open loans.
         require(canOpenLoans, "Open disabled");
 
-        // 1. We can only issue certain tribes.
-        require(tribesByKey[currency] > 0, "Not allowed to issue");
+        // 1. We can only issue certain rwas.
+        require(rwasByKey[currency] > 0, "Not allowed to issue");
 
-        // 2. Make sure the tribe rate is not invalid.
+        // 2. Make sure the rwa rate is not invalid.
         require(!_exchangeRates().rateIsInvalid(currency), "Invalid rate");
 
         // 3. Collateral >= minimum collateral size.
@@ -291,14 +291,14 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
 
         // 13. If its short, convert back to rUSD, otherwise issue the loan.
         if (short) {
-            _triberUSD().issue(msg.sender, _exchangeRates().effectiveValue(currency, loanAmountMinusFee, rUSD));
+            _rwarUSD().issue(msg.sender, _exchangeRates().effectiveValue(currency, loanAmountMinusFee, rUSD));
             manager.incrementShorts(currency, amount);
 
             if (shortingRewards[currency] != address(0)) {
                 IShortingRewards(shortingRewards[currency]).enrol(msg.sender, amount);
             }
         } else {
-            _tribe(tribesByKey[currency]).issue(msg.sender, loanAmountMinusFee);
+            _rwa(rwasByKey[currency]).issue(msg.sender, loanAmountMinusFee);
             manager.incrementLongs(currency, amount);
         }
 
@@ -345,11 +345,11 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         // 2. Return collateral to the child class so it knows how much to transfer.
         collateral = loan.collateral;
 
-        // 3. Check that the liquidator has enough tribes.
-        _checkTribeBalance(liquidator, loan.currency, total);
+        // 3. Check that the liquidator has enough rwas.
+        _checkRwaBalance(liquidator, loan.currency, total);
 
-        // 4. Burn the tribes.
-        _tribe(tribesByKey[loan.currency]).burn(liquidator, total);
+        // 4. Burn the rwas.
+        _rwa(rwasByKey[loan.currency]).burn(liquidator, total);
 
         // 5. Tell the manager.
         if (loan.short) {
@@ -419,7 +419,7 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         Loan storage loan = _getLoanAndAccrueInterest(id, borrower);
 
         // 1. Check they have enough balance to make the payment.
-        _checkTribeBalance(msg.sender, loan.currency, payment);
+        _checkRwaBalance(msg.sender, loan.currency, payment);
 
         // 2. Check they are eligible for liquidation.
         // Note: this will revert if collateral is 0, however that should only be possible if the loan amount is 0.
@@ -441,7 +441,7 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         }
 
         // 7. Check they have enough balance to liquidate the loan.
-        _checkTribeBalance(msg.sender, loan.currency, amountToLiquidate);
+        _checkRwaBalance(msg.sender, loan.currency, amountToLiquidate);
 
         // 8. Process the payment to workout interest/principal split.
         _processPayment(loan, amountToLiquidate);
@@ -450,8 +450,8 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         collateralLiquidated = _collateralUtil().collateralRedeemed(loan.currency, amountToLiquidate, collateralKey);
         loan.collateral = loan.collateral.sub(collateralLiquidated);
 
-        // 10. Burn the tribes from the liquidator.
-        _tribe(tribesByKey[loan.currency]).burn(msg.sender, amountToLiquidate);
+        // 10. Burn the rwas from the liquidator.
+        _rwa(rwasByKey[loan.currency]).burn(msg.sender, amountToLiquidate);
 
         // 11. Emit the event for the partial liquidation.
         emit LoanPartiallyLiquidated(borrower, id, msg.sender, amountToLiquidate, collateralLiquidated);
@@ -470,8 +470,8 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         // 1. Check loan is open and last interaction time.
         _checkLoanAvailable(loan);
 
-        // 2. Check the spender has enough tribes to make the repayment
-        _checkTribeBalance(repayer, loan.currency, payment);
+        // 2. Check the spender has enough rwas to make the repayment
+        _checkRwaBalance(repayer, loan.currency, payment);
 
         // 3. Accrue interest on the loan.
         _accrueInterest(loan);
@@ -479,8 +479,8 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         // 4. Process the payment.
         _processPayment(loan, payment);
 
-        // 5. Burn tribes from the payer
-        _tribe(tribesByKey[loan.currency]).burn(repayer, payment);
+        // 5. Burn rwas from the payer
+        _rwa(rwasByKey[loan.currency]).burn(repayer, payment);
 
         // 6. Update the last interaction time.
         loan.lastInteraction = block.timestamp;
@@ -511,17 +511,17 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         // 5. Calculate the minting fee and subtract it from the draw amount
         uint amountMinusFee = amount.sub(issueFee);
 
-        // 6. If its short, issue the tribes.
+        // 6. If its short, issue the rwas.
         if (loan.short) {
             manager.incrementShorts(loan.currency, amount);
-            _triberUSD().issue(msg.sender, _exchangeRates().effectiveValue(loan.currency, amountMinusFee, rUSD));
+            _rwarUSD().issue(msg.sender, _exchangeRates().effectiveValue(loan.currency, amountMinusFee, rUSD));
 
             if (shortingRewards[loan.currency] != address(0)) {
                 IShortingRewards(shortingRewards[loan.currency]).enrol(msg.sender, amount);
             }
         } else {
             manager.incrementLongs(loan.currency, amount);
-            _tribe(tribesByKey[loan.currency]).issue(msg.sender, amountMinusFee);
+            _rwa(rwasByKey[loan.currency]).issue(msg.sender, amountMinusFee);
         }
 
         // 7. Pay the minting fees to the fee pool
@@ -577,13 +577,13 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         }
     }
 
-    // Take an amount of fees in a certain tribe and convert it to rUSD before paying the fee pool.
-    function _payFees(uint amount, bytes32 tribe) internal {
+    // Take an amount of fees in a certain rwa and convert it to rUSD before paying the fee pool.
+    function _payFees(uint amount, bytes32 rwa) internal {
         if (amount > 0) {
-            if (tribe != rUSD) {
-                amount = _exchangeRates().effectiveValue(tribe, amount, rUSD);
+            if (rwa != rUSD) {
+                amount = _exchangeRates().effectiveValue(rwa, amount, rUSD);
             }
-            _triberUSD().issue(_feePool().FEE_ADDRESS(), amount);
+            _rwarUSD().issue(_feePool().FEE_ADDRESS(), amount);
             _feePool().recordFeePaid(amount);
         }
     }

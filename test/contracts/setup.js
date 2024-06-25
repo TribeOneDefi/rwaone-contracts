@@ -62,11 +62,11 @@ const constantsOverrides = {
 };
 
 /**
- * Create a mock ExternStateToken - useful to mock Rwaone or a tribe
+ * Create a mock ExternStateToken - useful to mock Rwaone or a rwa
  */
 const mockToken = async ({
 	accounts,
-	tribe = undefined,
+	rwa = undefined,
 	name = 'name',
 	symbol = 'ABC',
 	supply = 1e8,
@@ -86,10 +86,10 @@ const mockToken = async ({
 		await tokenState.setBalanceOf(owner, totalSupply, { from: deployerAccount });
 	}
 
-	const token = await artifacts.require(tribe ? 'MockTribe' : 'PublicEST').new(
+	const token = await artifacts.require(rwa ? 'MockRwa' : 'PublicEST').new(
 		...[proxy.address, tokenState.address, name, symbol, totalSupply, owner]
-			// add tribe as currency key if needed
-			.concat(tribe ? toBytes32(tribe) : [])
+			// add rwa as currency key if needed
+			.concat(rwa ? toBytes32(rwa) : [])
 			.concat({
 				from: deployerAccount,
 			})
@@ -274,7 +274,7 @@ const setupContract = async ({
 		GenericMock: [],
 		TradingRewards: [owner, owner, tryGetAddressOf('AddressResolver')],
 		AddressResolver: [owner],
-		OneNetAggregatorIssuedTribes: [tryGetAddressOf('AddressResolver')],
+		OneNetAggregatorIssuedRwas: [tryGetAddressOf('AddressResolver')],
 		OneNetAggregatorDebtRatio: [tryGetAddressOf('AddressResolver')],
 		SystemStatus: [owner],
 		FlexibleStorage: [tryGetAddressOf('AddressResolver')],
@@ -286,7 +286,7 @@ const setupContract = async ({
 		ProxyERC20: [owner],
 		ProxyRwaone: [owner],
 		Depot: [owner, fundsWallet, tryGetAddressOf('AddressResolver')],
-		TribeUtil: [tryGetAddressOf('AddressResolver')],
+		RwaUtil: [tryGetAddressOf('AddressResolver')],
 		DappMaintenance: [owner],
 		DebtCache: [owner, tryGetAddressOf('AddressResolver')],
 		Issuer: [owner, tryGetAddressOf('AddressResolver')],
@@ -343,9 +343,9 @@ const setupContract = async ({
 		NativeEtherWrapper: [owner, tryGetAddressOf('AddressResolver')],
 		WrapperFactory: [owner, tryGetAddressOf('AddressResolver')],
 		FeePool: [tryGetAddressOf('ProxyFeePool'), owner, tryGetAddressOf('AddressResolver')],
-		Tribe: [
-			tryGetAddressOf('ProxyERC20Tribe'),
-			tryGetAddressOf('TokenStateTribe'),
+		Rwa: [
+			tryGetAddressOf('ProxyERC20Rwa'),
+			tryGetAddressOf('TokenStateRwa'),
 			tryGetProperty({ property: 'name', otherwise: 'RwaOne rUSD' }),
 			tryGetProperty({ property: 'symbol', otherwise: 'rUSD' }),
 			owner,
@@ -396,7 +396,7 @@ const setupContract = async ({
 			toUnit(100),
 		],
 		WETH: [],
-		TribeRedeemer: [tryGetAddressOf('AddressResolver')],
+		RwaRedeemer: [tryGetAddressOf('AddressResolver')],
 		FuturesMarketManager: [owner, tryGetAddressOf('AddressResolver')],
 		FuturesMarketSettings: [owner, tryGetAddressOf('AddressResolver')],
 		FuturesMarketBTC: [
@@ -660,11 +660,11 @@ const setupContract = async ({
 					)
 			);
 		},
-		async Tribe() {
+		async Rwa() {
 			await Promise.all(
 				[
-					cache['TokenStateTribe'].setAssociatedContract(instance.address, { from: owner }),
-					cache['ProxyERC20Tribe'].setTarget(instance.address, { from: owner }),
+					cache['TokenStateRwa'].setAssociatedContract(instance.address, { from: owner }),
+					cache['ProxyERC20Rwa'].setTarget(instance.address, { from: owner }),
 				] || []
 			);
 		},
@@ -718,7 +718,7 @@ const setupContract = async ({
 		async ExchangeCircuitBreaker() {
 			await Promise.all([
 				cache['SystemStatus'].updateAccessControl(
-					toBytes32('Tribe'),
+					toBytes32('Rwa'),
 					instance.address,
 					true,
 					false,
@@ -731,7 +731,7 @@ const setupContract = async ({
 				cache['ExchangeState'].setAssociatedContract(instance.address, { from: owner }),
 
 				cache['SystemStatus'].updateAccessControl(
-					toBytes32('Tribe'),
+					toBytes32('Rwa'),
 					instance.address,
 					true,
 					false,
@@ -769,7 +769,7 @@ const setupContract = async ({
 		async SystemStatus() {
 			// ensure the owner has suspend/resume control over everything
 			await instance.updateAccessControls(
-				['System', 'Issuance', 'Exchange', 'TribeExchange', 'Tribe', 'Futures'].map(toBytes32),
+				['System', 'Issuance', 'Exchange', 'RwaExchange', 'Rwa', 'Futures'].map(toBytes32),
 				[owner, owner, owner, owner, owner, owner],
 				[true, true, true, true, true, true],
 				[true, true, true, true, true, true],
@@ -981,7 +981,7 @@ const setupContract = async ({
 				await mockGenericContractFnc({
 					instance,
 					mock,
-					fncName: 'totalIssuedTribes',
+					fncName: 'totalIssuedRwas',
 					returns: ['0'],
 				});
 			} else if (mock === 'WrapperFactory') {
@@ -1040,7 +1040,7 @@ const setupContract = async ({
 					mockGenericContractFnc({
 						instance,
 						mock,
-						fncName: 'isTribeManaged',
+						fncName: 'isRwaManaged',
 						returns: [false],
 					}),
 				]);
@@ -1088,7 +1088,7 @@ const setupAllContracts = async ({
 	existing = {},
 	mocks = {},
 	contracts = [],
-	tribes = [],
+	rwas = [],
 	feeds = [],
 }) => {
 	const [, owner] = accounts;
@@ -1105,8 +1105,8 @@ const setupAllContracts = async ({
 	const baseContracts = [
 		{ contract: 'AddressResolver' },
 		{
-			contract: 'OneNetAggregatorIssuedTribes',
-			resolverAlias: 'ext:AggregatorIssuedTribes',
+			contract: 'OneNetAggregatorIssuedRwas',
+			resolverAlias: 'ext:AggregatorIssuedRwas',
 		},
 		{
 			contract: 'OneNetAggregatorDebtRatio',
@@ -1133,7 +1133,7 @@ const setupAllContracts = async ({
 		{ contract: 'ProxyERC20', forContract: 'Rwaone' },
 		{ contract: 'ProxyERC20', forContract: 'MintableRwaone' },
 		{ contract: 'ProxyERC20', forContract: 'BaseRwaone' },
-		{ contract: 'ProxyERC20', forContract: 'Tribe' }, // for generic tribe
+		{ contract: 'ProxyERC20', forContract: 'Rwa' }, // for generic rwa
 		{ contract: 'Proxy', forContract: 'Rwaone' },
 		{ contract: 'Proxy', forContract: 'MintableRwaone' },
 		{ contract: 'Proxy', forContract: 'BaseRwaone' },
@@ -1141,7 +1141,7 @@ const setupAllContracts = async ({
 		{ contract: 'TokenState', forContract: 'Rwaone' },
 		{ contract: 'TokenState', forContract: 'MintableRwaone' },
 		{ contract: 'TokenState', forContract: 'BaseRwaone' },
-		{ contract: 'TokenState', forContract: 'Tribe' }, // for generic tribe
+		{ contract: 'TokenState', forContract: 'Rwa' }, // for generic rwa
 		{ contract: 'RewardEscrow' },
 		{
 			contract: 'BaseRewardEscrowV2Frozen',
@@ -1212,7 +1212,7 @@ const setupAllContracts = async ({
 			mocks: ['Rwaone', 'FeePool', 'RewardEscrow', 'RewardEscrowV2', 'ProxyFeePool'],
 		},
 		{ contract: 'Depot', deps: ['AddressResolver', 'SystemStatus'] },
-		{ contract: 'TribeUtil', deps: ['AddressResolver'] },
+		{ contract: 'RwaUtil', deps: ['AddressResolver'] },
 		{ contract: 'DappMaintenance' },
 		{ contract: 'WETH' },
 		{
@@ -1223,7 +1223,7 @@ const setupAllContracts = async ({
 		{
 			contract: 'NativeEtherWrapper',
 			mocks: [],
-			deps: ['AddressResolver', 'EtherWrapper', 'WETH', 'TriberETH'],
+			deps: ['AddressResolver', 'EtherWrapper', 'WETH', 'RwarETH'],
 		},
 		{
 			contract: 'WrapperFactory',
@@ -1231,7 +1231,7 @@ const setupAllContracts = async ({
 			deps: ['AddressResolver', 'SystemSettings'],
 		},
 		{
-			contract: 'TribeRedeemer',
+			contract: 'RwaRedeemer',
 			mocks: ['Issuer'],
 			deps: ['AddressResolver'],
 		},
@@ -1251,10 +1251,10 @@ const setupAllContracts = async ({
 				'FlexibleStorage',
 				'WrapperFactory',
 				'EtherWrapper',
-				'TribeRedeemer',
+				'RwaRedeemer',
 			],
 			deps: [
-				'OneNetAggregatorIssuedTribes',
+				'OneNetAggregatorIssuedRwas',
 				'OneNetAggregatorDebtRatio',
 				'AddressResolver',
 				'SystemStatus',
@@ -1270,7 +1270,7 @@ const setupAllContracts = async ({
 		},
 		{
 			contract: 'ExchangeCircuitBreaker',
-			mocks: ['Rwaone', 'FeePool', 'DelegateApprovals', 'VirtualTribeMastercopy'],
+			mocks: ['Rwaone', 'FeePool', 'DelegateApprovals', 'VirtualRwaMastercopy'],
 			deps: ['AddressResolver', 'SystemStatus', 'ExchangeRates', 'FlexibleStorage', 'Issuer'],
 		},
 		{
@@ -1302,7 +1302,7 @@ const setupAllContracts = async ({
 				'ExchangeRates',
 				'FeePool',
 				'DelegateApprovals',
-				'VirtualTribeMastercopy',
+				'VirtualRwaMastercopy',
 			],
 			deps: [
 				'AddressResolver',
@@ -1317,10 +1317,10 @@ const setupAllContracts = async ({
 			],
 		},
 		{
-			contract: 'Tribe',
+			contract: 'Rwa',
 			mocks: ['Issuer', 'Exchanger', 'FeePool', 'EtherWrapper', 'WrapperFactory'],
 			deps: ['TokenState', 'ProxyERC20', 'SystemStatus', 'AddressResolver'],
-		}, // a generic tribe
+		}, // a generic rwa
 		{
 			contract: 'Rwaone',
 			mocks: [
@@ -1412,7 +1412,7 @@ const setupAllContracts = async ({
 				'RwaoneBridgeToOptimism',
 			],
 			deps: [
-				'OneNetAggregatorIssuedTribes',
+				'OneNetAggregatorIssuedRwas',
 				'OneNetAggregatorDebtRatio',
 				'SystemStatus',
 				'RwaoneDebtShare',
@@ -1769,28 +1769,28 @@ const setupAllContracts = async ({
 		});
 	}
 
-	// TRIBES
+	// RWAS
 
-	const tribesToAdd = [];
+	const rwasToAdd = [];
 
-	// now setup each tribe and its deps
-	for (const tribe of tribes) {
+	// now setup each rwa and its deps
+	for (const rwa of rwas) {
 		const { token, proxy, tokenState } = await mockToken({
 			accounts,
-			tribe,
-			supply: 0, // add tribes with 0 supply initially
+			rwa,
+			supply: 0, // add rwas with 0 supply initially
 			skipInitialAllocation: true,
-			name: `Tribe ${tribe}`,
-			symbol: tribe,
+			name: `Rwa ${rwa}`,
+			symbol: rwa,
 		});
 
-		returnObj[`ProxyERC20${tribe}`] = proxy;
-		returnObj[`TokenState${tribe}`] = tokenState;
-		returnObj[`Tribe${tribe}`] = token;
+		returnObj[`ProxyERC20${rwa}`] = proxy;
+		returnObj[`TokenState${rwa}`] = tokenState;
+		returnObj[`Rwa${rwa}`] = token;
 
 		// We'll defer adding the tokens into the Issuer as it must
 		// be synchronised with the FlexibleStorage address first.
-		tribesToAdd.push(token.address);
+		rwasToAdd.push(token.address);
 	}
 
 	// now invoke AddressResolver to set all addresses
@@ -1825,14 +1825,14 @@ const setupAllContracts = async ({
 			})
 	);
 
-	// if deploying a real Rwaone, then we add the tribes
+	// if deploying a real Rwaone, then we add the rwas
 	if (returnObj['Issuer'] && !mocks['Issuer']) {
-		if (returnObj['Tribe']) {
-			returnObj['Issuer'].addTribe(returnObj['Tribe'].address, { from: owner });
+		if (returnObj['Rwa']) {
+			returnObj['Issuer'].addRwa(returnObj['Rwa'].address, { from: owner });
 		}
 
-		for (const tribeAddress of tribesToAdd) {
-			await returnObj['Issuer'].addTribe(tribeAddress, { from: owner });
+		for (const rwaAddress of rwasToAdd) {
+			await returnObj['Issuer'].addRwa(rwaAddress, { from: owner });
 		}
 	}
 
@@ -2067,7 +2067,7 @@ const setupAllContracts = async ({
 		}
 	}
 
-	// finally if any of our contracts have setAddressResolver (from MockTribe), then invoke it
+	// finally if any of our contracts have setAddressResolver (from MockRwa), then invoke it
 	await Promise.all(
 		Object.values(returnObj)
 			.filter(contract => contract.setAddressResolver)

@@ -39,7 +39,7 @@ contract BaseRewardEscrowV2 is Owned, IRewardEscrowV2, LimitedSetup(8 weeks), Mi
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
-    bytes32 private constant CONTRACT_RWAONEETIX = "Rwaone";
+    bytes32 private constant CONTRACT_RWAONE = "Rwaone";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_FEEPOOL = "FeePool";
     bytes32 private constant CONTRACT_REWARDESCROWV2STORAGE = "RewardEscrowV2Storage";
@@ -54,8 +54,8 @@ contract BaseRewardEscrowV2 is Owned, IRewardEscrowV2, LimitedSetup(8 weeks), Mi
         return IFeePool(requireAndGetAddress(CONTRACT_FEEPOOL));
     }
 
-    function tribeetixERC20() internal view returns (IERC20) {
-        return IERC20(requireAndGetAddress(CONTRACT_RWAONEETIX));
+    function rwaoneERC20() internal view returns (IERC20) {
+        return IERC20(requireAndGetAddress(CONTRACT_RWAONE));
     }
 
     function issuer() internal view returns (IIssuer) {
@@ -75,7 +75,7 @@ contract BaseRewardEscrowV2 is Owned, IRewardEscrowV2, LimitedSetup(8 weeks), Mi
     // Note: use public visibility so that it can be invoked in a subclass
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         addresses = new bytes32[](4);
-        addresses[0] = CONTRACT_RWAONEETIX;
+        addresses[0] = CONTRACT_RWAONE;
         addresses[1] = CONTRACT_FEEPOOL;
         addresses[2] = CONTRACT_ISSUER;
         addresses[3] = CONTRACT_REWARDESCROWV2STORAGE;
@@ -297,7 +297,7 @@ contract BaseRewardEscrowV2 is Owned, IRewardEscrowV2, LimitedSetup(8 weeks), Mi
     /// remove tokens from vesting aggregates and transfer them to recipient
     function _subtractAndTransfer(address subtractFrom, address transferTo, uint256 amount) internal {
         state().updateEscrowAccountBalance(subtractFrom, -SafeCast.toInt256(amount));
-        tribeetixERC20().transfer(transferTo, amount);
+        rwaoneERC20().transfer(transferTo, amount);
     }
 
     /**
@@ -309,7 +309,7 @@ contract BaseRewardEscrowV2 is Owned, IRewardEscrowV2, LimitedSetup(8 weeks), Mi
         require(beneficiary != address(0), "Cannot create escrow with address(0)");
 
         /* Transfer wRWAX from msg.sender */
-        require(tribeetixERC20().transferFrom(msg.sender, address(this), deposit), "token transfer failed");
+        require(rwaoneERC20().transferFrom(msg.sender, address(this), deposit), "token transfer failed");
 
         /* Append vesting entry for the beneficiary address */
         _appendVestingEntry(beneficiary, deposit, duration);
@@ -337,7 +337,7 @@ contract BaseRewardEscrowV2 is Owned, IRewardEscrowV2, LimitedSetup(8 weeks), Mi
 
         /* There must be enough balance in the contract to provide for the vesting entry. */
         require(
-            totalEscrowedBalance() <= tribeetixERC20().balanceOf(address(this)),
+            totalEscrowedBalance() <= rwaoneERC20().balanceOf(address(this)),
             "Must be enough balance in the contract to provide for the vesting entry"
         );
 
@@ -449,7 +449,7 @@ contract BaseRewardEscrowV2 is Owned, IRewardEscrowV2, LimitedSetup(8 weeks), Mi
     }
 
     modifier onlyRwaone() {
-        require(msg.sender == address(tribeetixERC20()), "Only Rwaone");
+        require(msg.sender == address(rwaoneERC20()), "Only Rwaone");
         _;
     }
 

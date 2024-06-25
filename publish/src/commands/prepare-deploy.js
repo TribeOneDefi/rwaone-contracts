@@ -39,7 +39,7 @@ const getSipSources = ({ sip, useOvm = false }) => {
 
 const prepareDeploy = async ({
 	network = DEFAULTS.network,
-	tribesToAdd = [],
+	rwasToAdd = [],
 	useOvm,
 	useSips,
 	useReleases = true,
@@ -49,19 +49,19 @@ const prepareDeploy = async ({
 	const deploymentPath = getDeploymentPathForNetwork({ network, useOvm });
 	ensureDeploymentPath(deploymentPath);
 
-	// Get config and tribes
-	const { config, configFile, tribes, tribesFile, futuresMarkets } = loadAndCheckRequiredSources({
+	// Get config and rwas
+	const { config, configFile, rwas, rwasFile, futuresMarkets } = loadAndCheckRequiredSources({
 		deploymentPath,
 		network,
 	});
 
-	// now prepare tribes, if any
-	if (tribesToAdd.length) {
-		fs.writeFileSync(tribesFile, stringify(tribes.concat(tribesToAdd)));
+	// now prepare rwas, if any
+	if (rwasToAdd.length) {
+		fs.writeFileSync(rwasFile, stringify(rwas.concat(rwasToAdd)));
 		console.log(
-			yellow(tribesFile),
+			yellow(rwasFile),
 			gray(
-				`updated for ${yellow(network)} with tribes ${yellow(tribesToAdd.map(({ name }) => name))}.`
+				`updated for ${yellow(network)} with rwas ${yellow(rwasToAdd.map(({ name }) => name))}.`
 			)
 		);
 	}

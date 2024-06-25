@@ -8,7 +8,7 @@ contract OneNetAggregatorDebtRatio is BaseOneNetAggregator {
     constructor(AddressResolver _resolver) public BaseOneNetAggregator(_resolver) {}
 
     function getRoundData(uint80) public view returns (uint80, int256, uint256, uint256, uint80) {
-        uint totalIssuedTribes = IIssuer(resolver.requireAndGetAddress("Issuer", "aggregate debt info")).totalIssuedTribes(
+        uint totalIssuedRwas = IIssuer(resolver.requireAndGetAddress("Issuer", "aggregate debt info")).totalIssuedRwas(
             "rUSD",
             true
         );
@@ -17,7 +17,7 @@ contract OneNetAggregatorDebtRatio is BaseOneNetAggregator {
 
         uint result = totalDebtShares == 0
             ? 10 ** 27
-            : totalIssuedTribes.decimalToPreciseDecimal().divideDecimalRound(totalDebtShares);
+            : totalIssuedRwas.decimalToPreciseDecimal().divideDecimalRound(totalDebtShares);
 
         uint dataTimestamp = now;
 

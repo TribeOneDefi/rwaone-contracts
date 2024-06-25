@@ -31,14 +31,14 @@ const DEFAULTS = {
 	priorityGasPrice: '1',
 };
 
-const replaceTribes = async ({
+const replaceRwas = async ({
 	network,
 	buildPath = DEFAULTS.buildPath,
 	deploymentPath,
 	maxFeePerGas,
 	maxPriorityFeePerGas = DEFAULTS.priorityGasPrice,
 	subclass,
-	tribesToReplace,
+	rwasToReplace,
 	privateKey,
 	yes,
 }) => {
@@ -50,8 +50,8 @@ const replaceTribes = async ({
 
 	const {
 		configFile,
-		tribes,
-		tribesFile,
+		rwas,
+		rwasFile,
 		deployment,
 		deploymentFile,
 	} = loadAndCheckRequiredSources({
@@ -59,13 +59,13 @@ const replaceTribes = async ({
 		network,
 	});
 
-	if (tribesToReplace.length < 1) {
-		console.log(yellow('No tribes provided. Please use --tribes-to-replace option'));
+	if (rwasToReplace.length < 1) {
+		console.log(yellow('No rwas provided. Please use --rwas-to-replace option'));
 		return;
 	}
 
 	if (!subclass) {
-		console.log(yellow('Please provide a valid Tribe subclass'));
+		console.log(yellow('Please provide a valid Rwa subclass'));
 		return;
 	}
 
@@ -83,14 +83,14 @@ const replaceTribes = async ({
 		return;
 	}
 
-	// sanity-check the tribe list
-	for (const tribe of tribesToReplace) {
-		if (tribes.filter(({ name }) => name === tribe).length < 1) {
-			console.error(red(`Tribe ${tribe} not found!`));
+	// sanity-check the rwa list
+	for (const rwa of rwasToReplace) {
+		if (rwas.filter(({ name }) => name === rwa).length < 1) {
+			console.error(red(`Rwa ${rwa} not found!`));
 			process.exitCode = 1;
 			return;
-		} else if (['rUSD'].indexOf(tribe) >= 0) {
-			console.error(red(`Tribe ${tribe} cannot be replaced`));
+		} else if (['rUSD'].indexOf(rwa) >= 0) {
+			console.error(red(`Rwa ${rwa} cannot be replaced`));
 			process.exitCode = 1;
 			return;
 		}
@@ -138,10 +138,10 @@ const replaceTribes = async ({
 		gray(`Current gas price is approx: ${ethers.utils.formatUnits(currentGasPrice, 'gwei')} GWEI`)
 	);
 
-	// convert the list of tribes into a list of deployed contracts
-	const deployedTribes = tribesToReplace.map(currencyKey => {
-		const { address: tribeAddress, source: tribeSource } = deployment.targets[
-			`Tribe${currencyKey}`
+	// convert the list of rwas into a list of deployed contracts
+	const deployedRwas = rwasToReplace.map(currencyKey => {
+		const { address: rwaAddress, source: rwaSource } = deployment.targets[
+			`Rwa${currencyKey}`
 		];
 		const { address: proxyAddress, source: proxySource } = deployment.targets[
 			`Proxy${currencyKey}`
@@ -150,30 +150,30 @@ const replaceTribes = async ({
 			`TokenState${currencyKey}`
 		];
 
-		const { abi: tribeABI } = deployment.sources[tribeSource];
+		const { abi: rwaABI } = deployment.sources[rwaSource];
 		const { abi: tokenStateABI } = deployment.sources[tokenStateSource];
 		const { abi: proxyABI } = deployment.sources[proxySource];
 
-		const Tribe = new ethers.Contract(tribeAddress, tribeABI, provider);
+		const Rwa = new ethers.Contract(rwaAddress, rwaABI, provider);
 		const TokenState = new ethers.Contract(tokenStateAddress, tokenStateABI, provider);
 		const Proxy = new ethers.Contract(proxyAddress, proxyABI, provider);
 
 		return {
-			Tribe,
+			Rwa,
 			TokenState,
 			Proxy,
 			currencyKey,
-			tribeAddress,
+			rwaAddress,
 		};
 	});
 
 	const totalSupplies = {};
 	try {
 		const totalSupplyList = await Promise.all(
-			deployedTribes.map(({ Tribe }) => Tribe.totalSupply())
+			deployedRwas.map(({ Rwa }) => Rwa.totalSupply())
 		);
 		totalSupplyList.forEach(
-			(supply, i) => (totalSupplies[tribesToReplace[i]] = totalSupplyList[i])
+			(supply, i) => (totalSupplies[rwasToReplace[i]] = totalSupplyList[i])
 		);
 	} catch (err) {
 		console.error(
@@ -190,10 +190,10 @@ const replaceTribes = async ({
 				cyan(
 					`${yellow(
 						'⚠ WARNING'
-					)}: This action will replace the following tribes into ${subclass} on ${network}:\n- ${tribesToReplace
+					)}: This action will replace the following rwas into ${subclass} on ${network}:\n- ${rwasToReplace
 						.map(
-							tribe =>
-								tribe + ' (totalSupply of: ' + ethers.utils.formatEther(totalSupplies[tribe]) + ')'
+							rwa =>
+								rwa + ' (totalSupply of: ' + ethers.utils.formatEther(totalSupplies[rwa]) + ')'
 						)
 						.join('\n- ')}`
 				) + '\nDo you want to continue? (y/n) '
@@ -209,7 +209,7 @@ const replaceTribes = async ({
 	const Issuer = new ethers.Contract(issuerAddress, issuerABI, provider);
 
 	const resolverAddress = await Issuer.resolver();
-	const updatedTribes = JSON.parse(fs.readFileSync(tribesFile));
+	const updatedRwas = JSON.parse(fs.readFileSync(rwasFile));
 
 	const runStep = async opts =>
 		performTransactionalStep({
@@ -219,50 +219,50 @@ const replaceTribes = async ({
 			explorerLinkPrefix,
 		});
 
-	for (const { currencyKey, Tribe, Proxy, TokenState } of deployedTribes) {
+	for (const { currencyKey, Rwa, Proxy, TokenState } of deployedRwas) {
 		const currencyKeyInBytes = toBytes32(currencyKey);
-		const tribeContractName = `Tribe${currencyKey}`;
+		const rwaContractName = `Rwa${currencyKey}`;
 
 		// STEPS
 		// 1. set old ExternTokenState.setTotalSupply(0) // owner
 		await runStep({
-			contract: tribeContractName,
-			target: Tribe,
+			contract: rwaContractName,
+			target: Rwa,
 			read: 'totalSupply',
 			expected: input => input === '0',
 			write: 'setTotalSupply',
 			writeArg: '0',
 		});
 
-		// 2. invoke Issuer.removeTribe(currencyKey) // owner
+		// 2. invoke Issuer.removeRwa(currencyKey) // owner
 		await runStep({
 			contract: 'Issuer',
 			target: Issuer,
-			read: 'tribes',
+			read: 'rwas',
 			readArg: currencyKeyInBytes,
 			expected: input => input === ZERO_ADDRESS,
-			write: 'removeTribe',
+			write: 'removeRwa',
 			writeArg: currencyKeyInBytes,
 		});
 
 		// 3. use Deployer to deploy
-		const replacementTribe = await deployer.deployContract({
-			name: tribeContractName,
+		const replacementRwa = await deployer.deployContract({
+			name: rwaContractName,
 			source: subclass,
 			force: true,
 			args: [
 				Proxy.address,
 				TokenState.address,
-				`Tribe ${currencyKey}`,
+				`Rwa ${currencyKey}`,
 				currencyKey,
 				account,
 				currencyKeyInBytes,
-				totalSupplies[currencyKey], // ensure new Tribe gets totalSupply set from old Tribe
+				totalSupplies[currencyKey], // ensure new Rwa gets totalSupply set from old Rwa
 				resolverAddress,
 			],
 		});
 
-		// Ensure this new tribe has its resolver cache set
+		// Ensure this new rwa has its resolver cache set
 		const overrides = await assignGasOptions({
 			tx: {},
 			provider,
@@ -270,18 +270,18 @@ const replaceTribes = async ({
 			maxPriorityFeePerGas,
 		});
 
-		const tx = await replacementTribe.rebuildCache(overrides);
+		const tx = await replacementRwa.rebuildCache(overrides);
 		await tx.wait();
 
-		// 4. Issuer.addTribe(newone) // owner
+		// 4. Issuer.addRwa(newone) // owner
 		await runStep({
 			contract: 'Issuer',
 			target: Issuer,
-			read: 'tribes',
+			read: 'rwas',
 			readArg: currencyKeyInBytes,
-			expected: input => input === replacementTribe.address,
-			write: 'addTribe',
-			writeArg: replacementTribe.address,
+			expected: input => input === replacementRwa.address,
+			write: 'addRwa',
+			writeArg: replacementRwa.address,
 		});
 
 		// 5. old TokenState.setAssociatedContract(newone) // owner
@@ -289,9 +289,9 @@ const replaceTribes = async ({
 			contract: `TokenState${currencyKey}`,
 			target: TokenState,
 			read: 'associatedContract',
-			expected: input => input === replacementTribe.address,
+			expected: input => input === replacementRwa.address,
 			write: 'setAssociatedContract',
-			writeArg: replacementTribe.address,
+			writeArg: replacementRwa.address,
 		});
 
 		// 6. old Proxy.setTarget(newone) // owner
@@ -299,24 +299,24 @@ const replaceTribes = async ({
 			contract: `Proxy${currencyKey}`,
 			target: Proxy,
 			read: 'target',
-			expected: input => input === replacementTribe.address,
+			expected: input => input === replacementRwa.address,
 			write: 'setTarget',
-			writeArg: replacementTribe.address,
+			writeArg: replacementRwa.address,
 		});
 
-		// Update the tribes.json file
-		const tribeToUpdateInJSON = updatedTribes.find(({ name }) => name === currencyKey);
-		tribeToUpdateInJSON.subclass = subclass;
-		fs.writeFileSync(tribesFile, stringify(updatedTribes));
+		// Update the rwas.json file
+		const rwaToUpdateInJSON = updatedRwas.find(({ name }) => name === currencyKey);
+		rwaToUpdateInJSON.subclass = subclass;
+		fs.writeFileSync(rwasFile, stringify(updatedRwas));
 	}
 };
 
 module.exports = {
-	replaceTribes,
+	replaceRwas,
 	cmd: program =>
 		program
-			.command('replace-tribes')
-			.description('Replaces a number of existing tribes with a subclass')
+			.command('replace-rwas')
+			.description('Replaces a number of existing rwas with a subclass')
 			.option(
 				'-b, --build-path [value]',
 				'Path to a folder hosting compiled files from the "build" step in this script',
@@ -334,8 +334,8 @@ module.exports = {
 			)
 			.option('-n, --network <value>', 'The network to run off.', x => x.toLowerCase(), 'goerli')
 			.option(
-				'-s, --tribes-to-replace <value>',
-				'The list of tribes to replace',
+				'-s, --rwas-to-replace <value>',
+				'The list of rwas to replace',
 				(val, memo) => {
 					memo.push(val);
 					return memo;
@@ -347,7 +347,7 @@ module.exports = {
 				'-v, --private-key [value]',
 				'The private key to transact with (only works in local mode, otherwise set in .env).'
 			)
-			.option('-x, --max-supply-to-purge-in-usd [value]', 'For PurgeableTribe, max supply', 1000)
+			.option('-x, --max-supply-to-purge-in-usd [value]', 'For PurgeableRwa, max supply', 1000)
 			.option('-y, --yes', 'Dont prompt, just reply yes.')
-			.action(replaceTribes),
+			.action(replaceRwas),
 };

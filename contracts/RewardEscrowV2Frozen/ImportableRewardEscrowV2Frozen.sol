@@ -12,7 +12,7 @@ import "./BaseRewardEscrowV2Frozen.sol";
 /// needs to be found at that entry for liq-rewards to function.
 contract ImportableRewardEscrowV2Frozen is BaseRewardEscrowV2Frozen {
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
-    bytes32 private constant CONTRACT_RWAONEETIX_BRIDGE_BASE = "RwaoneBridgeToBase";
+    bytes32 private constant CONTRACT_RWAONE_BRIDGE_BASE = "RwaoneBridgeToBase";
 
     /* ========== CONSTRUCTOR ========== */
 
@@ -23,12 +23,12 @@ contract ImportableRewardEscrowV2Frozen is BaseRewardEscrowV2Frozen {
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = BaseRewardEscrowV2Frozen.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](1);
-        newAddresses[0] = CONTRACT_RWAONEETIX_BRIDGE_BASE;
+        newAddresses[0] = CONTRACT_RWAONE_BRIDGE_BASE;
         return combineArrays(existingAddresses, newAddresses);
     }
 
-    function tribeetixBridgeToBase() internal view returns (address) {
-        return requireAndGetAddress(CONTRACT_RWAONEETIX_BRIDGE_BASE);
+    function rwaoneBridgeToBase() internal view returns (address) {
+        return requireAndGetAddress(CONTRACT_RWAONE_BRIDGE_BASE);
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
@@ -65,7 +65,7 @@ contract ImportableRewardEscrowV2Frozen is BaseRewardEscrowV2Frozen {
     }
 
     modifier onlyRwaoneBridge() {
-        require(msg.sender == tribeetixBridgeToBase(), "Can only be invoked by RwaoneBridgeToBase contract");
+        require(msg.sender == rwaoneBridgeToBase(), "Can only be invoked by RwaoneBridgeToBase contract");
         _;
     }
 }

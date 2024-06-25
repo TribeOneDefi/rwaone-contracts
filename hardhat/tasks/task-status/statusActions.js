@@ -69,12 +69,12 @@ const actions = {
 			deploymentPath,
 		});
 
-		const anyTribeOrRWAXRateIsInvalid = await Rwaone.anyTribeOrRWAXRateIsInvalid(blockOptions);
+		const anyRwaOrRWAXRateIsInvalid = await Rwaone.anyRwaOrRWAXRateIsInvalid(blockOptions);
 		logItem(
-			'Rwaone.anyTribeOrRWAXRateIsInvalid',
-			anyTribeOrRWAXRateIsInvalid,
+			'Rwaone.anyRwaOrRWAXRateIsInvalid',
+			anyRwaOrRWAXRateIsInvalid,
 			1,
-			anyTribeOrRWAXRateIsInvalid ? bgRed : undefined
+			anyRwaOrRWAXRateIsInvalid ? bgRed : undefined
 		);
 
 		logItem('Rwaone.totalSupply', (await Rwaone.totalSupply(blockOptions)).toString() / 1e18);

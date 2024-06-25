@@ -1,7 +1,7 @@
 pragma solidity ^0.5.16;
 
 // Inheritance
-import "./Tribe.sol";
+import "./Rwa.sol";
 
 // Libraries
 import "./SafeDecimalMath.sol";
@@ -9,11 +9,11 @@ import "./SafeDecimalMath.sol";
 // Internal References
 import "./interfaces/IExchangeRates.sol";
 
-// https://docs.rwaone.io/contracts/source/contracts/purgeabletribe
-contract PurgeableTribe is Tribe {
+// https://docs.rwaone.io/contracts/source/contracts/purgeablerwa
+contract PurgeableRwa is Rwa {
     using SafeDecimalMath for uint;
 
-    // The maximum allowed amount of tokenSupply in equivalent rUSD value for this tribe to permit purging
+    // The maximum allowed amount of tokenSupply in equivalent rUSD value for this rwa to permit purging
     uint public maxSupplyToPurgeInUSD = 100000 * SafeDecimalMath.unit(); // 100,000
 
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
@@ -29,11 +29,11 @@ contract PurgeableTribe is Tribe {
         bytes32 _currencyKey,
         uint _totalSupply,
         address _resolver
-    ) public Tribe(_proxy, _tokenState, _tokenName, _tokenSymbol, _owner, _currencyKey, _totalSupply, _resolver) {}
+    ) public Rwa(_proxy, _tokenState, _tokenName, _tokenSymbol, _owner, _currencyKey, _totalSupply, _resolver) {}
 
     /* ========== VIEWS ========== */
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
-        bytes32[] memory existingAddresses = Tribe.resolverAddressesRequired();
+        bytes32[] memory existingAddresses = Rwa.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](1);
         newAddresses[0] = CONTRACT_EXRATES;
         addresses = combineArrays(existingAddresses, newAddresses);

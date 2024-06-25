@@ -20,7 +20,7 @@ const { toBytes32 } = require('../..');
 const { toBN } = require('web3-utils');
 
 contract('Wrapper', async accounts => {
-	const tribes = ['rUSD', 'rETH', 'ETH', 'wRWAX'];
+	const rwas = ['rUSD', 'rETH', 'ETH', 'wRWAX'];
 	const [rETH, rUSD, ETH] = ['rETH', 'rUSD', 'ETH'].map(toBytes32);
 
 	const ONE = toBN('1');
@@ -33,15 +33,15 @@ contract('Wrapper', async accounts => {
 		addressResolver,
 		depot,
 		issuer,
-		rUSDTribe,
-		rETHTribe,
+		rUSDRwa,
+		rETHRwa,
 		wrapperFactory,
 		etherWrapper,
 		weth;
 
 	const calculateETHToUSD = async feesInETH => {
 		// Ask the Depot how many rUSD I will get for this ETH
-		const expectedFeerUSD = await depot.tribesReceivedForEther(feesInETH);
+		const expectedFeerUSD = await depot.rwasReceivedForEther(feesInETH);
 		return expectedFeerUSD;
 	};
 
@@ -66,12 +66,12 @@ contract('Wrapper', async accounts => {
 			Depot: depot,
 			ExchangeRates: exchangeRates,
 			WrapperFactory: wrapperFactory,
-			TriberUSD: rUSDTribe,
-			TriberETH: rETHTribe,
+			RwarUSD: rUSDRwa,
+			RwarETH: rETHRwa,
 			WETH: weth,
 		} = await setupAllContracts({
 			accounts,
-			tribes,
+			rwas,
 			contracts: [
 				'Rwaone',
 				'AddressResolver',
@@ -93,7 +93,7 @@ contract('Wrapper', async accounts => {
 		const etherWrapperCreateTx = await wrapperFactory.createWrapper(
 			weth.address,
 			rETH,
-			toBytes32('TriberETH'),
+			toBytes32('RwarETH'),
 			{ from: owner }
 		);
 
@@ -149,8 +149,8 @@ contract('Wrapper', async accounts => {
 		});
 
 		it('should access its dependencies via the address resolver', async () => {
-			assert.equal(await addressResolver.getAddress(toBytes32('TriberETH')), rETHTribe.address);
-			assert.equal(await addressResolver.getAddress(toBytes32('TriberUSD')), rUSDTribe.address);
+			assert.equal(await addressResolver.getAddress(toBytes32('RwarETH')), rETHRwa.address);
+			assert.equal(await addressResolver.getAddress(toBytes32('RwarUSD')), rUSDRwa.address);
 			assert.equal(
 				await addressResolver.getAddress(toBytes32('ExchangeRates')),
 				exchangeRates.address
@@ -190,15 +190,15 @@ contract('Wrapper', async accounts => {
 			it('burnFeeRate of 50 bps', async () => {
 				assert.bnEqual(await etherWrapper.burnFeeRate(), FIFTY_BIPS);
 			});
-			describe('totalIssuedTribes', async () => {
-				it('tribe = 0', async () => {
-					assert.bnEqual(await etherWrapper.targetTribeIssued(), toBN('0'));
+			describe('totalIssuedRwas', async () => {
+				it('rwa = 0', async () => {
+					assert.bnEqual(await etherWrapper.targetRwaIssued(), toBN('0'));
 				});
 			});
 		});
 	});
 
-	describe('totalIssuedTribes', async () => {
+	describe('totalIssuedRwas', async () => {
 		const mintAmount = toUnit('1.0');
 		let feeAmount;
 
@@ -214,7 +214,7 @@ contract('Wrapper', async accounts => {
 			});
 
 			it('total issued rETH = 1.0', async () => {
-				assert.bnEqual(await etherWrapper.targetTribeIssued(), toUnit('1.0'));
+				assert.bnEqual(await etherWrapper.targetRwaIssued(), toUnit('1.0'));
 			});
 			it('fees escrowed = 0.005', async () => {
 				assert.bnEqual(await wrapperFactory.feesEscrowed(), feeAmount);
@@ -226,13 +226,13 @@ contract('Wrapper', async accounts => {
 				beforeEach(async () => {
 					const { burnFee } = await calculateBurnFees(burnAmount);
 					const amountIn = burnAmount.add(burnFee);
-					await rETHTribe.issue(account1, amountIn);
-					await rETHTribe.approve(etherWrapper.address, amountIn, { from: account1 });
+					await rETHRwa.issue(account1, amountIn);
+					await rETHRwa.approve(etherWrapper.address, amountIn, { from: account1 });
 					await etherWrapper.burn(amountIn, { from: account1 });
 				});
 
 				it('total issued rETH = 0.0', async () => {
-					assert.bnEqual(await etherWrapper.targetTribeIssued(), toUnit('0.0'));
+					assert.bnEqual(await etherWrapper.targetRwaIssued(), toUnit('0.0'));
 				});
 				it('fees escrowed = 0.01', async () => {
 					assert.bnEqual(await wrapperFactory.feesEscrowed(), feeAmount.mul(toBN(2)));
@@ -289,7 +289,7 @@ contract('Wrapper', async accounts => {
 					});
 				});
 				it('mints amount(1-mintFeeRate) rETH into the user’s wallet', async () => {
-					assert.bnEqual(await rETHTribe.balanceOf(account1), amount.sub(mintFee));
+					assert.bnEqual(await rETHRwa.balanceOf(account1), amount.sub(mintFee));
 				});
 				it('escrows `amount * mintFeeRate` worth of rUSD as fees', async () => {
 					assert.bnEqual(await wrapperFactory.feesEscrowed(), feesEscrowed.add(expectedFeerUSD));
@@ -297,9 +297,9 @@ contract('Wrapper', async accounts => {
 				it('has a capacity of (capacity - amount) after', async () => {
 					assert.bnEqual(await etherWrapper.capacity(), initialCapacity.sub(amount));
 				});
-				it('targetTribeIssued = rETH balance', async () => {
+				it('targetRwaIssued = rETH balance', async () => {
 					assert.bnEqual(
-						await etherWrapper.targetTribeIssued(),
+						await etherWrapper.targetRwaIssued(),
 						await weth.balanceOf(etherWrapper.address)
 					);
 				});
@@ -350,7 +350,7 @@ contract('Wrapper', async accounts => {
 					});
 				});
 				it('mints amount(1+mintFeeRate) rETH into the user’s wallet', async () => {
-					assert.bnEqual(await rETHTribe.balanceOf(account1), amount.add(mintFee));
+					assert.bnEqual(await rETHRwa.balanceOf(account1), amount.add(mintFee));
 				});
 			});
 		});
@@ -393,7 +393,7 @@ contract('Wrapper', async accounts => {
 					});
 				});
 				it('mints capacity(1-mintFeeRate) rETH into the user’s wallet', async () => {
-					assert.bnEqual(await rETHTribe.balanceOf(account1), initialCapacity.sub(mintFee));
+					assert.bnEqual(await rETHRwa.balanceOf(account1), initialCapacity.sub(mintFee));
 				});
 				it('escrows `capacity * mintFeeRate` worth of rUSD as fees', async () => {
 					assert.bnEqual(await wrapperFactory.feesEscrowed(), feesEscrowed.add(expectedFeerUSD));
@@ -401,9 +401,9 @@ contract('Wrapper', async accounts => {
 				it('has a capacity of 0 after', async () => {
 					assert.bnEqual(await etherWrapper.capacity(), toBN('0'));
 				});
-				it('targetTribeIssued = rETH balance', async () => {
+				it('targetRwaIssued = rETH balance', async () => {
 					assert.bnEqual(
-						await etherWrapper.targetTribeIssued(),
+						await etherWrapper.targetRwaIssued(),
 						await weth.balanceOf(etherWrapper.address)
 					);
 				});
@@ -443,7 +443,7 @@ contract('Wrapper', async accounts => {
 					});
 				});
 				it('mints capacity(1+mintFeeRate) rETH into the user’s wallet', async () => {
-					assert.bnEqual(await rETHTribe.balanceOf(account1), initialCapacity.add(mintFee));
+					assert.bnEqual(await rETHRwa.balanceOf(account1), initialCapacity.add(mintFee));
 				});
 			});
 		});
@@ -498,8 +498,8 @@ contract('Wrapper', async accounts => {
 
 						({ burnFee, expectedFeerUSD } = await calculateBurnFees(principal));
 						amount = principal.add(burnFee);
-						await rETHTribe.issue(account1, amount);
-						await rETHTribe.approve(etherWrapper.address, amount, { from: account1 });
+						await rETHRwa.issue(account1, amount);
+						await rETHRwa.approve(etherWrapper.address, amount, { from: account1 });
 
 						burnTx = await etherWrapper.burn(amount, { from: account1 });
 					});
@@ -507,12 +507,12 @@ contract('Wrapper', async accounts => {
 					it('burns `amount` of rETH from user', async () => {
 						const logs = await getDecodedLogs({
 							hash: burnTx.tx,
-							contracts: [rETHTribe],
+							contracts: [rETHRwa],
 						});
 
 						decodedEventEqual({
 							event: 'Burned',
-							emittedFrom: rETHTribe.address,
+							emittedFrom: rETHRwa.address,
 							args: [account1, amount],
 							log: logs.filter(l => !!l).find(({ name }) => name === 'Burned'),
 						});
@@ -539,9 +539,9 @@ contract('Wrapper', async accounts => {
 					it('increases capacity by `amount - fees` WETH', async () => {
 						assert.bnEqual(await etherWrapper.capacity(), initialCapacity.add(amount.sub(burnFee)));
 					});
-					it('targetTribeIssued = rETH balance', async () => {
+					it('targetRwaIssued = rETH balance', async () => {
 						assert.bnEqual(
-							await etherWrapper.targetTribeIssued(),
+							await etherWrapper.targetRwaIssued(),
 							await weth.balanceOf(etherWrapper.address)
 						);
 					});
@@ -574,8 +574,8 @@ contract('Wrapper', async accounts => {
 
 						({ burnFee, expectedFeerUSD } = await calculateBurnFees(principal));
 						amount = principal;
-						await rETHTribe.issue(account1, amount);
-						await rETHTribe.approve(etherWrapper.address, amount, { from: account1 });
+						await rETHRwa.issue(account1, amount);
+						await rETHRwa.approve(etherWrapper.address, amount, { from: account1 });
 
 						burnTx = await etherWrapper.burn(amount, { from: account1 });
 					});
@@ -583,12 +583,12 @@ contract('Wrapper', async accounts => {
 					it('burns `amount` of rETH from user', async () => {
 						const logs = await getDecodedLogs({
 							hash: burnTx.tx,
-							contracts: [rETHTribe],
+							contracts: [rETHRwa],
 						});
 
 						decodedEventEqual({
 							event: 'Burned',
-							emittedFrom: rETHTribe.address,
+							emittedFrom: rETHRwa.address,
 							args: [account1, amount],
 							log: logs.filter(l => !!l).find(({ name }) => name === 'Burned'),
 						});
@@ -621,14 +621,14 @@ contract('Wrapper', async accounts => {
 
 				describe('fee is positive', () => {
 					beforeEach(async () => {
-						reserves = await etherWrapper.targetTribeIssued();
+						reserves = await etherWrapper.targetRwaIssued();
 						({ burnFee, expectedFeerUSD } = await calculateBurnFees(reserves));
 
 						amount = reserves.add(burnFee).add(toBN('100000000'));
 						feesEscrowed = await wrapperFactory.feesEscrowed();
 
-						await rETHTribe.issue(account1, amount);
-						await rETHTribe.approve(etherWrapper.address, amount, { from: account1 });
+						await rETHRwa.issue(account1, amount);
+						await rETHRwa.approve(etherWrapper.address, amount, { from: account1 });
 
 						burnTx = await etherWrapper.burn(amount, { from: account1 });
 					});
@@ -636,12 +636,12 @@ contract('Wrapper', async accounts => {
 					it('burns `reserves(1+burnFeeRate)` amount of rETH from user', async () => {
 						const logs = await getDecodedLogs({
 							hash: burnTx.tx,
-							contracts: [rETHTribe],
+							contracts: [rETHRwa],
 						});
 
 						decodedEventEqual({
 							event: 'Burned',
-							emittedFrom: rETHTribe.address,
+							emittedFrom: rETHRwa.address,
 							args: [account1, reserves.add(burnFee)],
 							log: logs.filter(l => !!l).find(({ name }) => name === 'Burned'),
 						});
@@ -668,8 +668,8 @@ contract('Wrapper', async accounts => {
 					it('has a max capacity after', async () => {
 						assert.bnEqual(await etherWrapper.capacity(), await etherWrapper.maxTokenAmount());
 					});
-					it('is left with 0 tribe issued remaining', async () => {
-						assert.equal(await etherWrapper.targetTribeIssued(), '0');
+					it('is left with 0 rwa issued remaining', async () => {
+						assert.equal(await etherWrapper.targetRwaIssued(), '0');
 					});
 				});
 
@@ -679,14 +679,14 @@ contract('Wrapper', async accounts => {
 							from: owner,
 						});
 
-						reserves = await etherWrapper.targetTribeIssued();
+						reserves = await etherWrapper.targetRwaIssued();
 						({ burnFee, expectedFeerUSD } = await calculateBurnFees(reserves));
 
 						amount = reserves.add(burnFee).add(toBN('100000000'));
 						feesEscrowed = await wrapperFactory.feesEscrowed();
 
-						await rETHTribe.issue(account1, amount);
-						await rETHTribe.approve(etherWrapper.address, amount, { from: account1 });
+						await rETHRwa.issue(account1, amount);
+						await rETHRwa.approve(etherWrapper.address, amount, { from: account1 });
 
 						burnTx = await etherWrapper.burn(amount, { from: account1 });
 					});
@@ -694,12 +694,12 @@ contract('Wrapper', async accounts => {
 					it('burns `reserves(1-burnFeeRate)` amount of rETH from user', async () => {
 						const logs = await getDecodedLogs({
 							hash: burnTx.tx,
-							contracts: [rETHTribe],
+							contracts: [rETHRwa],
 						});
 
 						decodedEventEqual({
 							event: 'Burned',
-							emittedFrom: rETHTribe.address,
+							emittedFrom: rETHRwa.address,
 							args: [account1, reserves.sub(burnFee)],
 							log: logs.filter(l => !!l).find(({ name }) => name === 'Burned'),
 						});
@@ -718,19 +718,19 @@ contract('Wrapper', async accounts => {
 					await etherWrapper.mint(amount, { from: account1 });
 
 					burnAmount = toUnit('0.9');
-					await rETHTribe.issue(account1, burnAmount);
-					await rETHTribe.approve(etherWrapper.address, burnAmount, { from: account1 });
+					await rETHRwa.issue(account1, burnAmount);
+					await rETHRwa.approve(etherWrapper.address, burnAmount, { from: account1 });
 					burnTx = await etherWrapper.burn(burnAmount, { from: account1 });
 				});
 				it('emits a Burn event which burns 0.9 rETH', async () => {
 					const logs = await getDecodedLogs({
 						hash: burnTx.tx,
-						contracts: [rETHTribe],
+						contracts: [rETHRwa],
 					});
 
 					decodedEventEqual({
 						event: 'Burned',
-						emittedFrom: rETHTribe.address,
+						emittedFrom: rETHRwa.address,
 						args: [account1, burnAmount],
 						log: logs.filter(l => !!l).find(({ name }) => name === 'Burned'),
 						bnCloseVariance: 0,
@@ -741,7 +741,7 @@ contract('Wrapper', async accounts => {
 	});
 
 	describe('transfer without mint', () => {
-		let preTargetIssuedTribes;
+		let preTargetIssuedRwas;
 
 		const extraTransferred = toUnit('2');
 
@@ -754,7 +754,7 @@ contract('Wrapper', async accounts => {
 			// wipe fees
 			await wrapperFactory.distributeFees();
 
-			preTargetIssuedTribes = await etherWrapper.targetTribeIssued();
+			preTargetIssuedRwas = await etherWrapper.targetRwaIssued();
 
 			await weth.transfer(etherWrapper.address, extraTransferred, { from: account1 });
 		});
@@ -762,8 +762,8 @@ contract('Wrapper', async accounts => {
 		addSnapshotBeforeRestoreAfterEach();
 
 		describe('before mint or burn', () => {
-			it('totalIssuedTribes is unaffected', async () => {
-				assert.bnEqual(await etherWrapper.targetTribeIssued(), preTargetIssuedTribes);
+			it('totalIssuedRwas is unaffected', async () => {
+				assert.bnEqual(await etherWrapper.targetRwaIssued(), preTargetIssuedRwas);
 			});
 
 			it('does not escrow extra', async () => {
@@ -782,9 +782,9 @@ contract('Wrapper', async accounts => {
 			it('issues excess for fee pool', async () => {
 				assert.bnGt(await wrapperFactory.feesEscrowed(), extraTransferred);
 			});
-			it('targetTribeIssued = rETH balance', async () => {
+			it('targetRwaIssued = rETH balance', async () => {
 				assert.bnEqual(
-					await etherWrapper.targetTribeIssued(),
+					await etherWrapper.targetRwaIssued(),
 					await weth.balanceOf(etherWrapper.address)
 				);
 			});
@@ -801,9 +801,9 @@ contract('Wrapper', async accounts => {
 			it('issues excess for fee pool', async () => {
 				assert.bnGt(await wrapperFactory.feesEscrowed(), extraTransferred);
 			});
-			it('targetTribeIssued = rETH balance', async () => {
+			it('targetRwaIssued = rETH balance', async () => {
 				assert.bnEqual(
-					await etherWrapper.targetTribeIssued(),
+					await etherWrapper.targetRwaIssued(),
 					await weth.balanceOf(etherWrapper.address)
 				);
 			});

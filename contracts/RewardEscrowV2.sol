@@ -11,7 +11,7 @@ import "./interfaces/IRewardEscrow.sol";
 contract RewardEscrowV2 is BaseRewardEscrowV2 {
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
-    bytes32 private constant CONTRACT_RWAONEETIX_BRIDGE_OPTIMISM = "RwaoneBridgeToOptimism";
+    bytes32 private constant CONTRACT_RWAONE_BRIDGE_OPTIMISM = "RwaoneBridgeToOptimism";
 
     /* ========== CONSTRUCTOR ========== */
 
@@ -22,12 +22,12 @@ contract RewardEscrowV2 is BaseRewardEscrowV2 {
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = BaseRewardEscrowV2.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](1);
-        newAddresses[0] = CONTRACT_RWAONEETIX_BRIDGE_OPTIMISM;
+        newAddresses[0] = CONTRACT_RWAONE_BRIDGE_OPTIMISM;
         return combineArrays(existingAddresses, newAddresses);
     }
 
-    function tribeetixBridgeToOptimism() internal view returns (address) {
-        return requireAndGetAddress(CONTRACT_RWAONEETIX_BRIDGE_OPTIMISM);
+    function rwaoneBridgeToOptimism() internal view returns (address) {
+        return requireAndGetAddress(CONTRACT_RWAONE_BRIDGE_OPTIMISM);
     }
 
     /* ========== L2 MIGRATION ========== */
@@ -65,7 +65,7 @@ contract RewardEscrowV2 is BaseRewardEscrowV2 {
          */
         if (escrowedAccountBalance > 0) {
             state().updateEscrowAccountBalance(account, -SafeCast.toInt256(escrowedAccountBalance));
-            tribeetixERC20().transfer(tribeetixBridgeToOptimism(), escrowedAccountBalance);
+            rwaoneERC20().transfer(rwaoneBridgeToOptimism(), escrowedAccountBalance);
         }
 
         emit BurnedForMigrationToL2(account, entryIDs, escrowedAccountBalance, block.timestamp);
@@ -76,7 +76,7 @@ contract RewardEscrowV2 is BaseRewardEscrowV2 {
     /* ========== MODIFIERS ========== */
 
     modifier onlyRwaoneBridge() {
-        require(msg.sender == tribeetixBridgeToOptimism(), "Can only be invoked by RwaoneBridgeToOptimism contract");
+        require(msg.sender == rwaoneBridgeToOptimism(), "Can only be invoked by RwaoneBridgeToOptimism contract");
         _;
     }
 

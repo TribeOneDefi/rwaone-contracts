@@ -42,10 +42,10 @@ contract LiquidatorRewards is ILiquidatorRewards, Owned, MixinSystemSettings, Re
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
-    bytes32 private constant CONTRACT_RWAONEETIXDEBTSHARE = "RwaoneDebtShare";
+    bytes32 private constant CONTRACT_RWAONEDEBTSHARE = "RwaoneDebtShare";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_REWARDESCROW_V2 = "RewardEscrowV2";
-    bytes32 private constant CONTRACT_RWAONEETIX = "Rwaone";
+    bytes32 private constant CONTRACT_RWAONE = "Rwaone";
 
     /* ========== CONSTRUCTOR ========== */
 
@@ -56,15 +56,15 @@ contract LiquidatorRewards is ILiquidatorRewards, Owned, MixinSystemSettings, Re
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](4);
-        newAddresses[0] = CONTRACT_RWAONEETIXDEBTSHARE;
+        newAddresses[0] = CONTRACT_RWAONEDEBTSHARE;
         newAddresses[1] = CONTRACT_ISSUER;
         newAddresses[2] = CONTRACT_REWARDESCROW_V2;
-        newAddresses[3] = CONTRACT_RWAONEETIX;
+        newAddresses[3] = CONTRACT_RWAONE;
         return combineArrays(existingAddresses, newAddresses);
     }
 
-    function tribeetixDebtShare() internal view returns (IRwaoneDebtShare) {
-        return IRwaoneDebtShare(requireAndGetAddress(CONTRACT_RWAONEETIXDEBTSHARE));
+    function rwaoneDebtShare() internal view returns (IRwaoneDebtShare) {
+        return IRwaoneDebtShare(requireAndGetAddress(CONTRACT_RWAONEDEBTSHARE));
     }
 
     function issuer() internal view returns (IIssuer) {
@@ -76,13 +76,13 @@ contract LiquidatorRewards is ILiquidatorRewards, Owned, MixinSystemSettings, Re
     }
 
     function rwaone() internal view returns (IERC20) {
-        return IERC20(requireAndGetAddress(CONTRACT_RWAONEETIX));
+        return IERC20(requireAndGetAddress(CONTRACT_RWAONE));
     }
 
     function earned(address account) public view returns (uint256) {
         AccountRewardsEntry memory entry = entries[account];
         return
-            tribeetixDebtShare()
+            rwaoneDebtShare()
                 .balanceOf(account)
                 .multiplyDecimal(accumulatedRewardsPerShare.sub(entry.entryAccumulatedRewards))
                 .add(entry.claimable);
@@ -118,7 +118,7 @@ contract LiquidatorRewards is ILiquidatorRewards, Owned, MixinSystemSettings, Re
 
     /// @notice This is called only after an account is liquidated and the wRWAX rewards are sent to this contract.
     function notifyRewardAmount(uint256 reward) external onlyRwaone {
-        uint sharesSupply = tribeetixDebtShare().totalSupply();
+        uint sharesSupply = rwaoneDebtShare().totalSupply();
 
         if (sharesSupply > 0) {
             accumulatedRewardsPerShare = accumulatedRewardsPerShare.add(reward.divideDecimal(sharesSupply));

@@ -26,10 +26,10 @@ node publish deploy # "--help" for options
 
 ### CLI Options
 
-- `-a, --add-new-tribes` Whether or not any new tribes in the tribes.json file should be deployed if there is no entry in the config file.
+- `-a, --add-new-rwas` Whether or not any new rwas in the rwas.json file should be deployed if there is no entry in the config file.
 - `-b, --build-path [value]` Path for built files to go. (default of `./build` - relative to the root of this repo). The folders `compiled` and `flattened` will be made under this path and the respective files will go in there.
 - `-c, --contract-deployment-gas-limit <value>` Contract deployment gas limit (default: 7000000 (7m))
-- `-d, --deployment-path <value>` Path to a folder that has your input configuration file (`config.json`), the tribes list (`tribes.json`) and where your `deployment.json` file will be written (and read from if it currently exists). The `config.json` should be in the following format ([here's an example](deployed/goerli/config.json)):
+- `-d, --deployment-path <value>` Path to a folder that has your input configuration file (`config.json`), the rwas list (`rwas.json`) and where your `deployment.json` file will be written (and read from if it currently exists). The `config.json` should be in the following format ([here's an example](deployed/goerli/config.json)):
 
   ```javascript
   // config.json
@@ -101,34 +101,34 @@ Helps the owner take ownership of nominated contracts and run any deployment tas
 node publish owner # "--help" for options
 ```
 
-## 6. Remove Tribes
+## 6. Remove Rwas
 
-Will attempt to remove all given tribes from the `Rwaone` contract (as long as they have `totalSupply` of `0`) and update the `config.json` and `tribes.json` for the deployment folder.
+Will attempt to remove all given rwas from the `Rwaone` contract (as long as they have `totalSupply` of `0`) and update the `config.json` and `rwas.json` for the deployment folder.
 
 ```bash
-node publish remove-tribes # "--help" for options
+node publish remove-rwas # "--help" for options
 ```
 
 ### Example
 
 ```bash
-node publish remove-tribes -n goerli -d publish/deployed/goerli -g 3 -s sRUB -s rETH
+node publish remove-rwas -n goerli -d publish/deployed/goerli -g 3 -s sRUB -s rETH
 ```
 
-## 7. Replace Tribes
+## 7. Replace Rwas
 
-Will attempt to replace all given tribes with a new given `subclass`. It does this by disconnecting the existing TokenState for the Tribe and attaching it to the new one.
+Will attempt to replace all given rwas with a new given `subclass`. It does this by disconnecting the existing TokenState for the Rwa and attaching it to the new one.
 
 ```bash
-node publish replace-tribes # "--help" for options
+node publish replace-rwas # "--help" for options
 ```
 
-## 7. Purge Tribes
+## 7. Purge Rwas
 
-Will attempt purge the given tribe with all token holders it can find. Uses the list of holders from mainnet, and as such won't do anything for other networks.
+Will attempt purge the given rwa with all token holders it can find. Uses the list of holders from mainnet, and as such won't do anything for other networks.
 
 ```bash
-node publish purge-tribes # "--help" for options
+node publish purge-rwas # "--help" for options
 ```
 
 ## 8. Release
@@ -183,7 +183,7 @@ Using semantic versioning ([semver](https://semver.org/)): `v[MAJOR].[MINOR].[PA
 ### Examples
 
 - Say `v3.1.8` is a mainnet release
-- `v3.1.9-alpha` is a Goerli deployment of new tribes (no contract changes)
+- `v3.1.9-alpha` is a Goerli deployment of new rwas (no contract changes)
 - `v3.1.9` is the mainnet release with all environments
 
 ### Example
@@ -192,11 +192,11 @@ Using semantic versioning ([semver](https://semver.org/)): `v[MAJOR].[MINOR].[PA
 node publish release --version 2.22.0 --branch master --release Altair
 ```
 
-# When adding new tribes
+# When adding new rwas
 
-1. In the environment folder you are deploying to, add the tribe key to the `tribes.json` file. If you want the tribe to be purgeable, add `subclass: "PurgeableTribe"` to the object.
+1. In the environment folder you are deploying to, add the rwa key to the `rwas.json` file. If you want the rwa to be purgeable, add `subclass: "PurgeableRwa"` to the object.
 2. [Optional] Run `build` if you've changed any source files, if not you can skip this step.
-3. Run `deploy` as usual but add the `--add-new-tribes` flag
+3. Run `deploy` as usual but add the `--add-new-rwas` flag
 4. Run `verify` as usual.
 
 # `releases.json`

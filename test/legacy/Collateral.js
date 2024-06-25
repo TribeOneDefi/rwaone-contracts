@@ -13,16 +13,16 @@ const {
 	onlyGivenAddressCanInvoke,
 } = require('../contracts/helpers');
 
-let collateral, tribes;
+let collateral, rwas;
 
 contract('Collateral', async accounts => {
 	const [, owner] = accounts;
 
 	before(async () => {
-		tribes = ['rUSD', 'rBTC', 'rETH'];
+		rwas = ['rUSD', 'rBTC', 'rETH'];
 		({ Collateral: collateral } = await setupAllContracts({
 			accounts,
-			tribes,
+			rwas,
 			contracts: [
 				'Rwaone',
 				'FeePool',
@@ -47,7 +47,7 @@ contract('Collateral', async accounts => {
 			ignoreParents: ['Owned', 'Pausable', 'MixinResolver', 'Proxy'],
 			expected: [
 				'addRewardsContracts',
-				'addTribes',
+				'addRwas',
 				'setCanOpenLoans',
 				'setIssueFeeRate',
 				'setMinCollateral',

@@ -15,7 +15,7 @@ const { compiled } = loadCompiledFiles({ buildPath });
 
 function itCanWrapETH({ ctx }) {
 	// deploy a test wrapper
-	const wrapperOptions = { Wrapper: null, Tribe: null, Token: null };
+	const wrapperOptions = { Wrapper: null, Rwa: null, Token: null };
 
 	before(async () => {
 		const WrapperFactory = ctx.contracts.WrapperFactory.connect(ctx.users.owner);
@@ -39,7 +39,7 @@ function itCanWrapETH({ ctx }) {
 		await WrapperFactory.createWrapper(
 			ctx.contracts.WETH.address,
 			toBytes32('rETH'),
-			toBytes32('TriberETH')
+			toBytes32('RwarETH')
 		);
 
 		const event = await wrapperCreatedEvent;
@@ -53,20 +53,20 @@ function itCanWrapETH({ ctx }) {
 			ctx.provider
 		);
 		wrapperOptions.Wrapper = ctx.contracts.Wrapper;
-		wrapperOptions.Tribe = ctx.contracts.TriberETH;
+		wrapperOptions.Rwa = ctx.contracts.RwarETH;
 		wrapperOptions.Token = ctx.contracts.WETH;
 	});
 
 	describe('ether wrapping', () => {
 		let user;
-		let balanceToken, balanceTribe;
+		let balanceToken, balanceRwa;
 
-		let Wrapper, Token, Tribe;
+		let Wrapper, Token, Rwa;
 
 		const amountToMint = ethers.utils.parseEther('1');
 
 		before('target contracts and users', async () => {
-			({ Wrapper, Token, Tribe } = wrapperOptions);
+			({ Wrapper, Token, Rwa } = wrapperOptions);
 
 			user = ctx.users.someUser;
 		});
@@ -86,7 +86,7 @@ function itCanWrapETH({ ctx }) {
 			describe('when the user mints rETH', () => {
 				before('record balances', async () => {
 					balanceToken = await Token.balanceOf(user.address);
-					balanceTribe = await Tribe.balanceOf(user.address);
+					balanceRwa = await Rwa.balanceOf(user.address);
 				});
 
 				before('provide allowance', async () => {
@@ -107,27 +107,27 @@ function itCanWrapETH({ ctx }) {
 					assert.bnLt(await Token.balanceOf(user.address), balanceToken);
 				});
 
-				it('increases the users tribe balance', async () => {
-					assert.bnGt(await Tribe.balanceOf(user.address), balanceTribe);
+				it('increases the users rwa balance', async () => {
+					assert.bnGt(await Rwa.balanceOf(user.address), balanceRwa);
 				});
 
 				describe('when the user burns rETH', () => {
 					before('record balances', async () => {
 						balanceToken = await Token.balanceOf(user.address);
-						balanceTribe = await Tribe.balanceOf(user.address);
+						balanceRwa = await Rwa.balanceOf(user.address);
 					});
 
 					before('provide allowance', async () => {
-						Tribe = Tribe.connect(user);
+						Rwa = Rwa.connect(user);
 
-						const tx = await Tribe.approve(Wrapper.address, ethers.constants.MaxUint256);
+						const tx = await Rwa.approve(Wrapper.address, ethers.constants.MaxUint256);
 						await tx.wait();
 					});
 
 					before('burn', async () => {
 						Wrapper = Wrapper.connect(user);
 
-						const tx = await Wrapper.burn(balanceTribe);
+						const tx = await Wrapper.burn(balanceRwa);
 						await tx.wait();
 					});
 
@@ -135,8 +135,8 @@ function itCanWrapETH({ ctx }) {
 						assert.bnGt(await Token.balanceOf(user.address), balanceToken);
 					});
 
-					it('decreases the users tribe balance', async () => {
-						assert.bnEqual(await Tribe.balanceOf(user.address), ethers.constants.Zero);
+					it('decreases the users rwa balance', async () => {
+						assert.bnEqual(await Rwa.balanceOf(user.address), ethers.constants.Zero);
 					});
 				});
 			});

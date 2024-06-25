@@ -14,7 +14,7 @@ contract Migration_Caph is BaseMigration {
     address public constant OWNER = 0xEb3107117FEAd7de89Cd14D463D340A2E6917769;
 
     // ----------------------------
-    // EXISTING RWAONEETIX CONTRACTS
+    // EXISTING RWAONE CONTRACTS
     // ----------------------------
 
     // https://etherscan.io/address/0x823bE81bbF96BEc0e25CA13170F5AaCb5B79ba83

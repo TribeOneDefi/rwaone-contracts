@@ -1,16 +1,16 @@
 pragma solidity ^0.5.16;
 
 // Inheritance
-import "./Tribe.sol";
+import "./Rwa.sol";
 
 // Internal references
 import "./interfaces/ICollateralManager.sol";
 import "./interfaces/IEtherWrapper.sol";
 import "./interfaces/IWrapperFactory.sol";
 
-// https://docs.rwaone.io/contracts/source/contracts/multicollateraltribe
-contract MultiCollateralTribe is Tribe {
-    bytes32 public constant CONTRACT_NAME = "MultiCollateralTribe";
+// https://docs.rwaone.io/contracts/source/contracts/multicollateralrwa
+contract MultiCollateralRwa is Rwa {
+    bytes32 public constant CONTRACT_NAME = "MultiCollateralRwa";
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
@@ -29,7 +29,7 @@ contract MultiCollateralTribe is Tribe {
         bytes32 _currencyKey,
         uint _totalSupply,
         address _resolver
-    ) public Tribe(_proxy, _tokenState, _tokenName, _tokenSymbol, _owner, _currencyKey, _totalSupply, _resolver) {}
+    ) public Rwa(_proxy, _tokenState, _tokenName, _tokenSymbol, _owner, _currencyKey, _totalSupply, _resolver) {}
 
     /* ========== VIEWS ======================= */
 
@@ -46,7 +46,7 @@ contract MultiCollateralTribe is Tribe {
     }
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
-        bytes32[] memory existingAddresses = Tribe.resolverAddressesRequired();
+        bytes32[] memory existingAddresses = Rwa.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](3);
         newAddresses[0] = CONTRACT_COLLATERALMANAGER;
         newAddresses[1] = CONTRACT_ETHER_WRAPPER;
@@ -57,18 +57,18 @@ contract MultiCollateralTribe is Tribe {
     /* ========== MUTATIVE FUNCTIONS ========== */
 
     /**
-     * @notice Function that allows multi Collateral to issue a certain number of tribes from an account.
-     * @param account Account to issue tribes to
-     * @param amount Number of tribes
+     * @notice Function that allows multi Collateral to issue a certain number of rwas from an account.
+     * @param account Account to issue rwas to
+     * @param amount Number of rwas
      */
     function issue(address account, uint amount) external onlyInternalContracts {
         super._internalIssue(account, amount);
     }
 
     /**
-     * @notice Function that allows multi Collateral to burn a certain number of tribes from an account.
-     * @param account Account to burn tribes from
-     * @param amount Number of tribes
+     * @notice Function that allows multi Collateral to burn a certain number of rwas from an account.
+     * @param account Account to burn rwas from
+     * @param amount Number of rwas
      */
     function burn(address account, uint amount) external onlyInternalContracts {
         super._internalBurn(account, amount);

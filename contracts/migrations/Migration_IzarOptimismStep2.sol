@@ -18,7 +18,7 @@ contract Migration_IzarOptimismStep2 is BaseMigration {
     address public constant OWNER = 0x6d4a64C57612841c2C6745dB2a4E4db34F002D20;
 
     // ----------------------------
-    // EXISTING RWAONEETIX CONTRACTS
+    // EXISTING RWAONE CONTRACTS
     // ----------------------------
 
     // https://explorer.optimism.io/address/0x95A6a3f44a70172E7d50a9e28c85Dfd712756B8C

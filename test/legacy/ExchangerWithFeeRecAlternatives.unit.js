@@ -76,8 +76,8 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 				() => {
 					describe('feeRateForAtomicExchange()', () => {
 						// Mimic settings not being configured
-						behaviors.whenMockedWithTribeUintSystemSetting(
-							{ setting: 'exchangeFeeRate', tribe: rETH, value: '0' },
+						behaviors.whenMockedWithRwaUintSystemSetting(
+							{ setting: 'exchangeFeeRate', rwa: rETH, value: '0' },
 							() => {
 								it('is set to 0', async () => {
 									assert.bnEqual(await this.instance.feeRateForAtomicExchange(rUSD, rETH), '0');
@@ -86,8 +86,8 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 						);
 
 						// With configured override value
-						behaviors.whenMockedWithTribeUintSystemSetting(
-							{ setting: 'atomicExchangeFeeRate', tribe: rETH, value: overrideFeeRate },
+						behaviors.whenMockedWithRwaUintSystemSetting(
+							{ setting: 'atomicExchangeFeeRate', rwa: rETH, value: overrideFeeRate },
 							() => {
 								it('is set to the configured atomic override value', async () => {
 									assert.bnEqual(
@@ -99,8 +99,8 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 						);
 
 						// With configured base and override values
-						behaviors.whenMockedWithTribeUintSystemSetting(
-							{ setting: 'exchangeFeeRate', tribe: rETH, value: baseFeeRate },
+						behaviors.whenMockedWithRwaUintSystemSetting(
+							{ setting: 'exchangeFeeRate', rwa: rETH, value: baseFeeRate },
 							() => {
 								it('is set to the configured base value', async () => {
 									assert.bnEqual(
@@ -109,8 +109,8 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 									);
 								});
 
-								behaviors.whenMockedWithTribeUintSystemSetting(
-									{ setting: 'atomicExchangeFeeRate', tribe: rETH, value: overrideFeeRate },
+								behaviors.whenMockedWithRwaUintSystemSetting(
+									{ setting: 'atomicExchangeFeeRate', rwa: rETH, value: overrideFeeRate },
 									() => {
 										it('is set to the configured atomic override value', async () => {
 											assert.bnEqual(
@@ -152,8 +152,8 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 					},
 					() => {
 						// No fees
-						behaviors.whenMockedWithTribeUintSystemSetting(
-							{ setting: 'exchangeFeeRate', tribe: rETH, value: '0' },
+						behaviors.whenMockedWithRwaUintSystemSetting(
+							{ setting: 'exchangeFeeRate', rwa: rETH, value: '0' },
 							() => {
 								it('gives exact amounts when no fees are configured', async () => {
 									await assertAmountsReported({
@@ -167,8 +167,8 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 						);
 
 						// With fees
-						behaviors.whenMockedWithTribeUintSystemSetting(
-							{ setting: 'exchangeFeeRate', tribe: rETH, value: baseFeeRate },
+						behaviors.whenMockedWithRwaUintSystemSetting(
+							{ setting: 'exchangeFeeRate', rwa: rETH, value: baseFeeRate },
 							() => {
 								it('gives amounts with base fee', async () => {
 									await assertAmountsReported({
@@ -179,8 +179,8 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 									});
 								});
 
-								behaviors.whenMockedWithTribeUintSystemSetting(
-									{ setting: 'atomicExchangeFeeRate', tribe: rETH, value: overrideFeeRate },
+								behaviors.whenMockedWithRwaUintSystemSetting(
+									{ setting: 'atomicExchangeFeeRate', rwa: rETH, value: overrideFeeRate },
 									() => {
 										it('gives amounts with atomic override fee', async () => {
 											await assertAmountsReported({
@@ -195,8 +195,8 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 							}
 						);
 
-						behaviors.whenMockedWithTribeUintSystemSetting(
-							{ setting: 'atomicExchangeFeeRate', tribe: rETH, value: overrideFeeRate },
+						behaviors.whenMockedWithRwaUintSystemSetting(
+							{ setting: 'atomicExchangeFeeRate', rwa: rETH, value: overrideFeeRate },
 							() => {
 								it('gives amounts with atomic override fee', async () => {
 									await assertAmountsReported({
@@ -213,7 +213,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 			});
 
 			describe('exchanging', () => {
-				describe('exchange with virtual tribes', () => {
+				describe('exchange with virtual rwas', () => {
 					const sourceCurrency = rUSD;
 					const destinationCurrency = rETH;
 
@@ -233,7 +233,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 							sourceAmount,
 							destinationCurrencyKey,
 							destinationAddress,
-							true, // virtualTribe
+							true, // virtualRwa
 							from, // rewardAddress
 							trackingCode,
 						];
@@ -258,15 +258,15 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 									() => {
 										behaviors.whenMockedEffectiveRateAsEqualAtRound(() => {
 											behaviors.whenMockedLastNRates(() => {
-												behaviors.whenMockedASingleTribeToIssueAndBurn(() => {
+												behaviors.whenMockedASingleRwaToIssueAndBurn(() => {
 													behaviors.whenMockedExchangeStatePersistance(() => {
-														it('it reverts trying to create a virtual tribe with no supply', async () => {
+														it('it reverts trying to create a virtual rwa with no supply', async () => {
 															await assert.revert(
 																this.instance.exchange(...getExchangeArgs({ sourceAmount: '0' })),
 																'Zero amount'
 															);
 														});
-														it('it reverts trying to virtualize into an inverse tribe', async () => {
+														it('it reverts trying to virtualize into an inverse rwa', async () => {
 															await assert.revert(
 																this.instance.exchange(
 																	...getExchangeArgs({
@@ -274,7 +274,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 																		destinationCurrencyKey: iETH,
 																	})
 																),
-																'Cannot virtualize this tribe'
+																'Cannot virtualize this rwa'
 															);
 														});
 													});
@@ -294,52 +294,52 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 								() => {
 									behaviors.whenMockedEffectiveRateAsEqualAtRound(() => {
 										behaviors.whenMockedLastNRates(() => {
-											behaviors.whenMockedASingleTribeToIssueAndBurn(() => {
+											behaviors.whenMockedASingleRwaToIssueAndBurn(() => {
 												behaviors.whenMockedExchangeStatePersistance(() => {
 													describe('when invoked', () => {
 														let txn;
 														beforeEach(async () => {
 															txn = await this.instance.exchange(...getExchangeArgs());
 														});
-														it('emits a VirtualTribeCreated event with the correct underlying tribe and amount', async () => {
-															assert.eventEqual(txn, 'VirtualTribeCreated', {
-																tribe: this.mocks.tribe.proxy.will.returnValue,
+														it('emits a VirtualRwaCreated event with the correct underlying rwa and amount', async () => {
+															assert.eventEqual(txn, 'VirtualRwaCreated', {
+																rwa: this.mocks.rwa.proxy.will.returnValue,
 																currencyKey: rETH,
 																amount: amountIn,
 																recipient: owner,
 															});
 														});
-														describe('when interrogating the Virtual Tribes', () => {
-															let vTribe;
+														describe('when interrogating the Virtual Rwas', () => {
+															let vRwa;
 															beforeEach(async () => {
-																const VirtualTribe = artifacts.require('VirtualTribe');
-																vTribe = await VirtualTribe.at(
-																	getEventByName({ tx: txn, name: 'VirtualTribeCreated' }).args
-																		.vTribe
+																const VirtualRwa = artifacts.require('VirtualRwa');
+																vRwa = await VirtualRwa.at(
+																	getEventByName({ tx: txn, name: 'VirtualRwaCreated' }).args
+																		.vRwa
 																);
 															});
-															it('the vTribe has the correct tribe', async () => {
+															it('the vRwa has the correct rwa', async () => {
 																assert.equal(
-																	await vTribe.tribe(),
-																	this.mocks.tribe.proxy.will.returnValue
+																	await vRwa.rwa(),
+																	this.mocks.rwa.proxy.will.returnValue
 																);
 															});
-															it('the vTribe has the correct resolver', async () => {
-																assert.equal(await vTribe.resolver(), this.resolver.address);
+															it('the vRwa has the correct resolver', async () => {
+																assert.equal(await vRwa.resolver(), this.resolver.address);
 															});
-															it('the vTribe has minted the correct amount to the user', async () => {
-																assert.bnEqual(await vTribe.totalSupply(), amountIn);
-																assert.bnEqual(await vTribe.balanceOf(owner), amountIn);
+															it('the vRwa has minted the correct amount to the user', async () => {
+																assert.bnEqual(await vRwa.totalSupply(), amountIn);
+																assert.bnEqual(await vRwa.balanceOf(owner), amountIn);
 															});
-															it('and the tribe has been issued to the vTribe', async () => {
-																assert.equal(this.mocks.tribe.issue.calls[0][0], vTribe.address);
-																assert.bnEqual(this.mocks.tribe.issue.calls[0][1], amountIn);
+															it('and the rwa has been issued to the vRwa', async () => {
+																assert.equal(this.mocks.rwa.issue.calls[0][0], vRwa.address);
+																assert.bnEqual(this.mocks.rwa.issue.calls[0][1], amountIn);
 															});
-															it('the vTribe is an ERC-1167 minimal proxy instead of a full Virtual Tribe', async () => {
-																const vTribeCode = await web3.eth.getCode(vTribe.address);
+															it('the vRwa is an ERC-1167 minimal proxy instead of a full Virtual Rwa', async () => {
+																const vRwaCode = await web3.eth.getCode(vRwa.address);
 																assert.equal(
-																	vTribeCode,
-																	buildMinimalProxyCode(this.mocks.VirtualTribeMastercopy.address)
+																	vRwaCode,
+																	buildMinimalProxyCode(this.mocks.VirtualRwaMastercopy.address)
 																);
 															});
 														});
@@ -388,7 +388,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 									fnc: this.instance.exchangeAtomically,
 									args: getExchangeArgs({ asRwaone: false }),
 									accounts: accounts.filter(a => a !== this.mocks.Rwaone.address),
-									reason: 'Exchanger: Only rwaone or a tribe contract can perform this action',
+									reason: 'Exchanger: Only rwaone or a rwa contract can perform this action',
 									// address: this.mocks.Rwaone.address (doesnt work as this reverts due to lack of mocking setup)
 								});
 							});
@@ -401,7 +401,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 								sourceCurrencyKey: rUSD,
 								destinationCurrencyKey: rUSD,
 							});
-							await assert.revert(this.instance.exchangeAtomically(...args), "Can't be same tribe");
+							await assert.revert(this.instance.exchangeAtomically(...args), "Can't be same rwa");
 						});
 
 						it('reverts when input amount is zero', async () => {
@@ -430,8 +430,8 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 										systemDestinationRate: lastRate,
 									},
 									() => {
-										behaviors.whenMockedWithVolatileTribe({ tribe: rETH, volatile: true }, () => {
-											describe('when tribe pricing is deemed volatile', () => {
+										behaviors.whenMockedWithVolatileRwa({ rwa: rETH, volatile: true }, () => {
+											describe('when rwa pricing is deemed volatile', () => {
 												it('reverts due to src volatility', async () => {
 													const args = getExchangeArgs({
 														sourceCurrencyKey: rETH,
@@ -439,7 +439,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 													});
 													await assert.revert(
 														this.instance.exchangeAtomically(...args),
-														'Src tribe too volatile'
+														'Src rwa too volatile'
 													);
 												});
 												it('reverts due to dest volatility', async () => {
@@ -449,7 +449,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 													});
 													await assert.revert(
 														this.instance.exchangeAtomically(...args),
-														'Dest tribe too volatile'
+														'Dest rwa too volatile'
 													);
 												});
 											});
@@ -490,8 +490,8 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 						behaviors.whenMockedSusdAndSethSeparatelyToIssueAndBurn(() => {
 							behaviors.whenMockedWithExchangeRatesValidity({ valid: true }, () => {
 								behaviors.whenMockedWithNoPriorExchangesToSettle(() => {
-									behaviors.whenMockedWithTribeUintSystemSetting(
-										{ setting: 'exchangeFeeRate', tribe: rETH, value: '0' },
+									behaviors.whenMockedWithRwaUintSystemSetting(
+										{ setting: 'exchangeFeeRate', rwa: rETH, value: '0' },
 										() => {
 											const lastRate = toUnit('10');
 											const badRate = lastRate.mul(toBN(10)); // should hit deviation factor of 5x
@@ -521,7 +521,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 																	})
 																);
 															});
-															it('did not issue or burn tribes', async () => {
+															it('did not issue or burn rwas', async () => {
 																assert.equal(this.mocks.rUSD.issue.calls.length, 0);
 																assert.equal(this.mocks.rETH.issue.calls.length, 0);
 																assert.equal(this.mocks.rUSD.burn.calls.length, 0);
@@ -557,7 +557,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 																	})
 																);
 															});
-															it('did not issue or burn tribes', async () => {
+															it('did not issue or burn rwas', async () => {
 																assert.equal(this.mocks.rUSD.issue.calls.length, 0);
 																assert.equal(this.mocks.rETH.issue.calls.length, 0);
 																assert.equal(this.mocks.rUSD.burn.calls.length, 0);
@@ -635,12 +635,12 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 																			value: !!tradingRewardsEnabled,
 																		},
 																		() => {
-																			behaviors.whenMockedWithTribeUintSystemSetting(
+																			behaviors.whenMockedWithRwaUintSystemSetting(
 																				{
 																					setting: setAsOverrideRate
 																						? 'atomicExchangeFeeRate'
 																						: 'exchangeFeeRate',
-																					tribe: rETH,
+																					rwa: rETH,
 																					value: exchangeFeeRate,
 																				},
 																				() => {
@@ -684,7 +684,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 																					});
 																					it('updated debt cache', () => {
 																						const debtCacheUpdateCall = this.mocks.DebtCache
-																							.updateCachedTribeDebtsWithRates;
+																							.updateCachedRwaDebtsWithRates;
 																						assert.deepEqual(debtCacheUpdateCall.calls[0][0], [
 																							rUSD,
 																							rETH,
@@ -695,58 +695,58 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 																						]);
 																					});
 																					it('asked Rwaone to emit an exchange event', () => {
-																						const tribeetixEmitExchangeCall = this.mocks.Rwaone
-																							.emitTribeExchange;
+																						const rwaoneEmitExchangeCall = this.mocks.Rwaone
+																							.emitRwaExchange;
 																						assert.equal(
-																							tribeetixEmitExchangeCall.calls[0][0],
+																							rwaoneEmitExchangeCall.calls[0][0],
 																							owner
 																						);
 																						assert.equal(
-																							tribeetixEmitExchangeCall.calls[0][1],
+																							rwaoneEmitExchangeCall.calls[0][1],
 																							rUSD
 																						);
 																						assert.bnEqual(
-																							tribeetixEmitExchangeCall.calls[0][2],
+																							rwaoneEmitExchangeCall.calls[0][2],
 																							amountIn
 																						);
 																						assert.equal(
-																							tribeetixEmitExchangeCall.calls[0][3],
+																							rwaoneEmitExchangeCall.calls[0][3],
 																							rETH
 																						);
 																						assert.bnEqual(
-																							tribeetixEmitExchangeCall.calls[0][4],
+																							rwaoneEmitExchangeCall.calls[0][4],
 																							expectedAmountReceived
 																						);
 																						assert.equal(
-																							tribeetixEmitExchangeCall.calls[0][5],
+																							rwaoneEmitExchangeCall.calls[0][5],
 																							owner
 																						);
 																					});
 																					it('asked Rwaone to emit an atomic exchange event', () => {
-																						const tribeetixEmitAtomicExchangeCall = this.mocks
-																							.Rwaone.emitAtomicTribeExchange;
+																						const rwaoneEmitAtomicExchangeCall = this.mocks
+																							.Rwaone.emitAtomicRwaExchange;
 																						assert.equal(
-																							tribeetixEmitAtomicExchangeCall.calls[0][0],
+																							rwaoneEmitAtomicExchangeCall.calls[0][0],
 																							owner
 																						);
 																						assert.equal(
-																							tribeetixEmitAtomicExchangeCall.calls[0][1],
+																							rwaoneEmitAtomicExchangeCall.calls[0][1],
 																							rUSD
 																						);
 																						assert.bnEqual(
-																							tribeetixEmitAtomicExchangeCall.calls[0][2],
+																							rwaoneEmitAtomicExchangeCall.calls[0][2],
 																							amountIn
 																						);
 																						assert.equal(
-																							tribeetixEmitAtomicExchangeCall.calls[0][3],
+																							rwaoneEmitAtomicExchangeCall.calls[0][3],
 																							rETH
 																						);
 																						assert.bnEqual(
-																							tribeetixEmitAtomicExchangeCall.calls[0][4],
+																							rwaoneEmitAtomicExchangeCall.calls[0][4],
 																							expectedAmountReceived
 																						);
 																						assert.equal(
-																							tribeetixEmitAtomicExchangeCall.calls[0][5],
+																							rwaoneEmitAtomicExchangeCall.calls[0][5],
 																							owner
 																						);
 																					});
@@ -809,10 +809,10 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 																						});
 																					} else {
 																						it('asked Rwaone to emit tracking event', () => {
-																							const tribeetixEmitTrackingCall = this.mocks.Rwaone
+																							const rwaoneEmitTrackingCall = this.mocks.Rwaone
 																								.emitExchangeTracking;
 																							assert.equal(
-																								tribeetixEmitTrackingCall.calls[0][0],
+																								rwaoneEmitTrackingCall.calls[0][0],
 																								trackingCode
 																							);
 																						});

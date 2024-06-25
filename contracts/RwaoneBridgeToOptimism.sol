@@ -18,8 +18,8 @@ contract RwaoneBridgeToOptimism is BaseRwaoneBridge, IRwaoneBridgeToOptimism, iO
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_REWARDSDISTRIBUTION = "RewardsDistribution";
-    bytes32 private constant CONTRACT_OVM_RWAONEETIXBRIDGETOBASE = "ovm:RwaoneBridgeToBase";
-    bytes32 private constant CONTRACT_RWAONEETIXBRIDGEESCROW = "RwaoneBridgeEscrow";
+    bytes32 private constant CONTRACT_OVM_RWAONEBRIDGETOBASE = "ovm:RwaoneBridgeToBase";
+    bytes32 private constant CONTRACT_RWAONEBRIDGEESCROW = "RwaoneBridgeEscrow";
 
     uint8 private constant MAX_ENTRIES_MIGRATED_PER_MESSAGE = 26;
 
@@ -33,8 +33,8 @@ contract RwaoneBridgeToOptimism is BaseRwaoneBridge, IRwaoneBridgeToOptimism, iO
 
     // ========== INTERNALS ============
 
-    function tribeetixERC20() internal view returns (IERC20) {
-        return IERC20(requireAndGetAddress(CONTRACT_RWAONEETIX));
+    function rwaoneERC20() internal view returns (IERC20) {
+        return IERC20(requireAndGetAddress(CONTRACT_RWAONE));
     }
 
     function issuer() internal view returns (IIssuer) {
@@ -45,12 +45,12 @@ contract RwaoneBridgeToOptimism is BaseRwaoneBridge, IRwaoneBridgeToOptimism, iO
         return requireAndGetAddress(CONTRACT_REWARDSDISTRIBUTION);
     }
 
-    function tribeetixBridgeToBase() internal view returns (address) {
-        return requireAndGetAddress(CONTRACT_OVM_RWAONEETIXBRIDGETOBASE);
+    function rwaoneBridgeToBase() internal view returns (address) {
+        return requireAndGetAddress(CONTRACT_OVM_RWAONEBRIDGETOBASE);
     }
 
-    function tribeetixBridgeEscrow() internal view returns (address) {
-        return requireAndGetAddress(CONTRACT_RWAONEETIXBRIDGEESCROW);
+    function rwaoneBridgeEscrow() internal view returns (address) {
+        return requireAndGetAddress(CONTRACT_RWAONEBRIDGEESCROW);
     }
 
     function hasZeroDebt() internal view {
@@ -58,7 +58,7 @@ contract RwaoneBridgeToOptimism is BaseRwaoneBridge, IRwaoneBridgeToOptimism, iO
     }
 
     function counterpart() internal view returns (address) {
-        return tribeetixBridgeToBase();
+        return rwaoneBridgeToBase();
     }
 
     /* ========== VIEWS ========== */
@@ -68,8 +68,8 @@ contract RwaoneBridgeToOptimism is BaseRwaoneBridge, IRwaoneBridgeToOptimism, iO
         bytes32[] memory newAddresses = new bytes32[](4);
         newAddresses[0] = CONTRACT_ISSUER;
         newAddresses[1] = CONTRACT_REWARDSDISTRIBUTION;
-        newAddresses[2] = CONTRACT_OVM_RWAONEETIXBRIDGETOBASE;
-        newAddresses[3] = CONTRACT_RWAONEETIXBRIDGEESCROW;
+        newAddresses[2] = CONTRACT_OVM_RWAONEBRIDGETOBASE;
+        newAddresses[3] = CONTRACT_RWAONEBRIDGEESCROW;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -97,7 +97,7 @@ contract RwaoneBridgeToOptimism is BaseRwaoneBridge, IRwaoneBridgeToOptimism, iO
     // invoked by a generous user on L1
     function depositReward(uint amount) external requireInitiationActive {
         // move the wRWAX into the deposit escrow
-        tribeetixERC20().transferFrom(msg.sender, tribeetixBridgeEscrow(), amount);
+        rwaoneERC20().transferFrom(msg.sender, rwaoneBridgeEscrow(), amount);
 
         _depositReward(msg.sender, amount);
     }
@@ -105,7 +105,7 @@ contract RwaoneBridgeToOptimism is BaseRwaoneBridge, IRwaoneBridgeToOptimism, iO
     // forward any accidental tokens sent here to the escrow
     function forwardTokensToEscrow(address token) external {
         IERC20 erc20 = IERC20(token);
-        erc20.safeTransfer(tribeetixBridgeEscrow(), erc20.balanceOf(address(this)));
+        erc20.safeTransfer(rwaoneBridgeEscrow(), erc20.balanceOf(address(this)));
     }
 
     // ========= RESTRICTED FUNCTIONS ==============
@@ -122,7 +122,7 @@ contract RwaoneBridgeToOptimism is BaseRwaoneBridge, IRwaoneBridgeToOptimism, iO
 
         // relay the message to this contract on L2 via L1 Messenger
         messenger().sendMessage(
-            tribeetixBridgeToBase(),
+            rwaoneBridgeToBase(),
             messageData,
             uint32(getCrossDomainMessageGasLimit(CrossDomainMessageGasLimits.CloseFeePeriod))
         );
@@ -133,7 +133,7 @@ contract RwaoneBridgeToOptimism is BaseRwaoneBridge, IRwaoneBridgeToOptimism, iO
     // invoked by Messenger on L1 after L2 waiting period elapses
     function finalizeWithdrawal(address to, uint256 amount) external onlyCounterpart {
         // transfer amount back to user
-        tribeetixERC20().transferFrom(tribeetixBridgeEscrow(), to, amount);
+        rwaoneERC20().transferFrom(rwaoneBridgeEscrow(), to, amount);
 
         // no escrow actions - escrow remains on L2
         emit iOVM_L1TokenGateway.WithdrawalFinalized(to, amount);
@@ -143,8 +143,8 @@ contract RwaoneBridgeToOptimism is BaseRwaoneBridge, IRwaoneBridgeToOptimism, iO
     function notifyRewardAmount(uint256 amount) external {
         require(msg.sender == address(rewardsDistribution()), "Caller is not RewardsDistribution contract");
 
-        // NOTE: transfer wRWAX to tribeetixBridgeEscrow because RewardsDistribution transfers them initially to this contract.
-        tribeetixERC20().transfer(tribeetixBridgeEscrow(), amount);
+        // NOTE: transfer wRWAX to rwaoneBridgeEscrow because RewardsDistribution transfers them initially to this contract.
+        rwaoneERC20().transfer(rwaoneBridgeEscrow(), amount);
 
         // to be here means I've been given an amount of wRWAX to distribute onto L2
         _depositReward(msg.sender, amount);
@@ -172,7 +172,7 @@ contract RwaoneBridgeToOptimism is BaseRwaoneBridge, IRwaoneBridgeToOptimism, iO
 
         // relay the message to this contract on L2 via L1 Messenger
         messenger().sendMessage(
-            tribeetixBridgeToBase(),
+            rwaoneBridgeToBase(),
             messageData,
             uint32(getCrossDomainMessageGasLimit(CrossDomainMessageGasLimits.Reward))
         );
@@ -183,14 +183,14 @@ contract RwaoneBridgeToOptimism is BaseRwaoneBridge, IRwaoneBridgeToOptimism, iO
     function _initiateDeposit(address _to, uint256 _depositAmount) private {
         // Transfer wRWAX to L2
         // First, move the wRWAX into the deposit escrow
-        tribeetixERC20().transferFrom(msg.sender, tribeetixBridgeEscrow(), _depositAmount);
+        rwaoneERC20().transferFrom(msg.sender, rwaoneBridgeEscrow(), _depositAmount);
         // create message payload for L2
         iOVM_L2DepositedToken bridgeToBase;
         bytes memory messageData = abi.encodeWithSelector(bridgeToBase.finalizeDeposit.selector, _to, _depositAmount);
 
         // relay the message to this contract on L2 via L1 Messenger
         messenger().sendMessage(
-            tribeetixBridgeToBase(),
+            rwaoneBridgeToBase(),
             messageData,
             uint32(getCrossDomainMessageGasLimit(CrossDomainMessageGasLimits.Deposit))
         );
@@ -211,8 +211,8 @@ contract RwaoneBridgeToOptimism is BaseRwaoneBridge, IRwaoneBridgeToOptimism, iO
 
             // if there is an escrow amount to be migrated
             if (escrowedAccountBalance > 0) {
-                // NOTE: transfer wRWAX to tribeetixBridgeEscrow because burnForMigration() transfers them to this contract.
-                tribeetixERC20().transfer(tribeetixBridgeEscrow(), escrowedAccountBalance);
+                // NOTE: transfer wRWAX to rwaoneBridgeEscrow because burnForMigration() transfers them to this contract.
+                rwaoneERC20().transfer(rwaoneBridgeEscrow(), escrowedAccountBalance);
                 // create message payload for L2
                 IRwaoneBridgeToBase bridgeToBase;
                 bytes memory messageData = abi.encodeWithSelector(
@@ -223,7 +223,7 @@ contract RwaoneBridgeToOptimism is BaseRwaoneBridge, IRwaoneBridgeToOptimism, iO
                 );
                 // relay the message to this contract on L2 via L1 Messenger
                 messenger().sendMessage(
-                    tribeetixBridgeToBase(),
+                    rwaoneBridgeToBase(),
                     messageData,
                     uint32(getCrossDomainMessageGasLimit(CrossDomainMessageGasLimits.Escrow))
                 );

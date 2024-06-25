@@ -56,7 +56,7 @@ async function _isCacheInvalid({ ctx }) {
 async function _areRatesInvalid({ ctx }) {
 	const { Rwaone } = ctx.contracts;
 
-	return Rwaone.anyTribeOrRWAXRateIsInvalid();
+	return Rwaone.anyRwaOrRWAXRateIsInvalid();
 }
 
 async function _printCacheInfo({ ctx }) {
@@ -106,12 +106,12 @@ async function _getAvailableCurrencyKeys({ ctx }) {
 async function _setMissingRates({ ctx }) {
 	let currencyKeys;
 	if (ctx.fork) {
-		// this adds a rate for only e.g. sREDEEMER in fork mode (which is not an existing tribe
+		// this adds a rate for only e.g. sREDEEMER in fork mode (which is not an existing rwa
 		// but is added to test the redeeming functionality)
-		// All other tribes should have feeds in fork mode
-		currencyKeys = (ctx.addedTribes || []).map(o => toBytes32(o.name));
+		// All other rwas should have feeds in fork mode
+		currencyKeys = (ctx.addedRwas || []).map(o => toBytes32(o.name));
 	} else {
-		// set missing rates for all tribes, since not in fork mode we don't have existing feeds
+		// set missing rates for all rwas, since not in fork mode we don't have existing feeds
 		currencyKeys = await _getAvailableCurrencyKeys({ ctx });
 	}
 

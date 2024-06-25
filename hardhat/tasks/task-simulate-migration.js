@@ -54,7 +54,7 @@ task(
 			});
 
 			await deployInstance({
-				addNewTribes: true,
+				addNewRwas: true,
 				freshDeploy: false,
 				generateSolidity: true,
 				providerPort: '8545',

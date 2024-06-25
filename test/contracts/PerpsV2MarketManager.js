@@ -79,7 +79,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 			PerpsV2MarketSettings: perpsV2MarketSettings,
 			ExchangeRates: exchangeRates,
 			CircuitBreaker: circuitBreaker,
-			TriberUSD: rUSD,
+			RwarUSD: rUSD,
 			DebtCache: debtCache,
 			FeePool: feePool,
 			Rwaone: rwaone,
@@ -87,7 +87,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD'],
+			rwas: ['rUSD'],
 			feeds: ['BTC', 'ETH', 'LINK'],
 			contracts: [
 				'FuturesMarketManager',
@@ -115,7 +115,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 	describe('Basic parameters', () => {
 		it('Requires rUSD contract', async () => {
 			const required = await futuresMarketManager.resolverAddressesRequired();
-			assert.deepEqual(required, ['TriberUSD', 'FeePool', 'Exchanger'].map(toBytes32));
+			assert.deepEqual(required, ['RwarUSD', 'FeePool', 'Exchanger'].map(toBytes32));
 		});
 
 		it('only expected functions are mutable', () => {

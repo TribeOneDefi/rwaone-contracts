@@ -18,7 +18,7 @@ contract('DebtMigratorOnOptimism', accounts => {
 		messenger,
 		resolver,
 		rwaone,
-		tribeetixDebtShare,
+		rwaoneDebtShare,
 		rewardEscrowV2;
 
 	const getDataOfEncodedFncCall = ({ c, fnc, args = [] }) =>
@@ -33,7 +33,7 @@ contract('DebtMigratorOnOptimism', accounts => {
 			DebtMigratorOnOptimism: debtMigratorOnOptimism,
 			FlexibleStorage: flexibleStorage,
 			Rwaone: rwaone,
-			RwaoneDebtShare: tribeetixDebtShare,
+			RwaoneDebtShare: rwaoneDebtShare,
 			RewardEscrowV2: rewardEscrowV2,
 		} = await setupAllContracts({
 			accounts,
@@ -150,7 +150,7 @@ contract('DebtMigratorOnOptimism', accounts => {
 		before('record balances', async () => {
 			liquidRWAXBalanceBefore = await rwaone.balanceOf(user);
 			escrowedRWAXBalanceBefore = await rewardEscrowV2.balanceOf(user);
-			debtShareBalanceBefore = await tribeetixDebtShare.balanceOf(user);
+			debtShareBalanceBefore = await rwaoneDebtShare.balanceOf(user);
 		});
 
 		it('succeeds', async () => {
@@ -183,7 +183,7 @@ contract('DebtMigratorOnOptimism', accounts => {
 			// updates balances
 			const liquidRWAXBalanceAfter = await rwaone.balanceOf(user);
 			const escrowedRWAXBalanceAfter = await rewardEscrowV2.balanceOf(user);
-			const debtShareBalanceAfter = await tribeetixDebtShare.balanceOf(user);
+			const debtShareBalanceAfter = await rwaoneDebtShare.balanceOf(user);
 			assert.bnEqual(liquidRWAXBalanceAfter, liquidRWAXBalanceBefore.add(liquidRWAXAmount));
 			assert.bnEqual(debtShareBalanceAfter, debtShareBalanceBefore.add(debtShareAmount));
 			assert.bnEqual(escrowedRWAXBalanceAfter, escrowedRWAXBalanceBefore.add(escrowAmount));

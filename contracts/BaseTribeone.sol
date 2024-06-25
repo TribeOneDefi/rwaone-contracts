@@ -8,7 +8,7 @@ import "./MixinResolver.sol";
 import "./interfaces/IRwaone.sol";
 
 // Internal references
-import "./interfaces/ITribe.sol";
+import "./interfaces/IRwa.sol";
 import "./TokenState.sol";
 import "./interfaces/ISystemStatus.sol";
 import "./interfaces/IExchanger.sol";
@@ -16,13 +16,13 @@ import "./interfaces/IIssuer.sol";
 import "./interfaces/IRewardsDistribution.sol";
 import "./interfaces/ILiquidator.sol";
 import "./interfaces/ILiquidatorRewards.sol";
-import "./interfaces/IVirtualTribe.sol";
+import "./interfaces/IVirtualRwa.sol";
 import "./interfaces/IRewardEscrowV2.sol";
 
 contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
     // ========== STATE VARIABLES ==========
 
-    // Available Tribes which can be used with the system
+    // Available Rwas which can be used with the system
     string public constant TOKEN_NAME = "Rwaone Network Wrap Token";
     string public constant TOKEN_SYMBOL = "wRWAX";
     uint8 public constant DECIMALS = 18;
@@ -99,50 +99,50 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
         return issuer().debtBalanceOf(account, currencyKey);
     }
 
-    function totalIssuedTribes(bytes32 currencyKey) external view returns (uint) {
-        return issuer().totalIssuedTribes(currencyKey, false);
+    function totalIssuedRwas(bytes32 currencyKey) external view returns (uint) {
+        return issuer().totalIssuedRwas(currencyKey, false);
     }
 
-    function totalIssuedTribesExcludeOtherCollateral(bytes32 currencyKey) external view returns (uint) {
-        return issuer().totalIssuedTribes(currencyKey, true);
+    function totalIssuedRwasExcludeOtherCollateral(bytes32 currencyKey) external view returns (uint) {
+        return issuer().totalIssuedRwas(currencyKey, true);
     }
 
     function availableCurrencyKeys() external view returns (bytes32[] memory) {
         return issuer().availableCurrencyKeys();
     }
 
-    function availableTribeCount() external view returns (uint) {
-        return issuer().availableTribeCount();
+    function availableRwaCount() external view returns (uint) {
+        return issuer().availableRwaCount();
     }
 
-    function availableTribes(uint index) external view returns (ITribe) {
-        return issuer().availableTribes(index);
+    function availableRwas(uint index) external view returns (IRwa) {
+        return issuer().availableRwas(index);
     }
 
-    function tribes(bytes32 currencyKey) external view returns (ITribe) {
-        return issuer().tribes(currencyKey);
+    function rwas(bytes32 currencyKey) external view returns (IRwa) {
+        return issuer().rwas(currencyKey);
     }
 
-    function tribesByAddress(address tribeAddress) external view returns (bytes32) {
-        return issuer().tribesByAddress(tribeAddress);
+    function rwasByAddress(address rwaAddress) external view returns (bytes32) {
+        return issuer().rwasByAddress(rwaAddress);
     }
 
     function isWaitingPeriod(bytes32 currencyKey) external view returns (bool) {
         return exchanger().maxSecsLeftInWaitingPeriod(messageSender, currencyKey) > 0;
     }
 
-    function anyTribeOrRWAXRateIsInvalid() external view returns (bool anyRateInvalid) {
-        return issuer().anyTribeOrRWAXRateIsInvalid();
+    function anyRwaOrRWAXRateIsInvalid() external view returns (bool anyRateInvalid) {
+        return issuer().anyRwaOrRWAXRateIsInvalid();
     }
 
-    function maxIssuableTribes(address account) external view returns (uint maxIssuable) {
-        return issuer().maxIssuableTribes(account);
+    function maxIssuableRwas(address account) external view returns (uint maxIssuable) {
+        return issuer().maxIssuableRwas(account);
     }
 
-    function remainingIssuableTribes(
+    function remainingIssuableRwas(
         address account
     ) external view returns (uint maxIssuable, uint alreadyIssued, uint totalSystemDebt) {
-        return issuer().remainingIssuableTribes(account);
+        return issuer().remainingIssuableRwas(account);
     }
 
     function collateralisationRatio(address _issuer) external view returns (uint) {
@@ -188,7 +188,7 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
                 tokenState.balanceOf(account)
             );
             require(value <= transferable, "Cannot transfer staked or escrowed wRWAX");
-            require(!anyRateIsInvalid, "A tribe or wRWAX rate is invalid");
+            require(!anyRateIsInvalid, "A rwa or wRWAX rate is invalid");
         }
 
         return true;
@@ -314,36 +314,36 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
         }
     }
 
-    function issueTribes(uint amount) external issuanceActive optionalProxy {
-        return issuer().issueTribes(messageSender, amount);
+    function issueRwas(uint amount) external issuanceActive optionalProxy {
+        return issuer().issueRwas(messageSender, amount);
     }
 
-    function issueTribesOnBehalf(address issueForAddress, uint amount) external issuanceActive optionalProxy {
-        return issuer().issueTribesOnBehalf(issueForAddress, messageSender, amount);
+    function issueRwasOnBehalf(address issueForAddress, uint amount) external issuanceActive optionalProxy {
+        return issuer().issueRwasOnBehalf(issueForAddress, messageSender, amount);
     }
 
-    function issueMaxTribes() external issuanceActive optionalProxy {
-        return issuer().issueMaxTribes(messageSender);
+    function issueMaxRwas() external issuanceActive optionalProxy {
+        return issuer().issueMaxRwas(messageSender);
     }
 
-    function issueMaxTribesOnBehalf(address issueForAddress) external issuanceActive optionalProxy {
-        return issuer().issueMaxTribesOnBehalf(issueForAddress, messageSender);
+    function issueMaxRwasOnBehalf(address issueForAddress) external issuanceActive optionalProxy {
+        return issuer().issueMaxRwasOnBehalf(issueForAddress, messageSender);
     }
 
-    function burnTribes(uint amount) external issuanceActive optionalProxy {
-        return issuer().burnTribes(messageSender, amount);
+    function burnRwas(uint amount) external issuanceActive optionalProxy {
+        return issuer().burnRwas(messageSender, amount);
     }
 
-    function burnTribesOnBehalf(address burnForAddress, uint amount) external issuanceActive optionalProxy {
-        return issuer().burnTribesOnBehalf(burnForAddress, messageSender, amount);
+    function burnRwasOnBehalf(address burnForAddress, uint amount) external issuanceActive optionalProxy {
+        return issuer().burnRwasOnBehalf(burnForAddress, messageSender, amount);
     }
 
-    function burnTribesToTarget() external issuanceActive optionalProxy {
-        return issuer().burnTribesToTarget(messageSender);
+    function burnRwasToTarget() external issuanceActive optionalProxy {
+        return issuer().burnRwasToTarget(messageSender);
     }
 
-    function burnTribesToTargetOnBehalf(address burnForAddress) external issuanceActive optionalProxy {
-        return issuer().burnTribesToTargetOnBehalf(burnForAddress, messageSender);
+    function burnRwasToTargetOnBehalf(address burnForAddress) external issuanceActive optionalProxy {
+        return issuer().burnRwasToTargetOnBehalf(burnForAddress, messageSender);
     }
 
     /// @notice Force liquidate a delinquent account and distribute the redeemed wRWAX rewards amongst the appropriate recipients.
@@ -466,7 +466,7 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
         _notImplemented();
     }
 
-    function exchangeWithVirtual(bytes32, uint, bytes32, bytes32) external returns (uint, IVirtualTribe) {
+    function exchangeWithVirtual(bytes32, uint, bytes32, bytes32) external returns (uint, IVirtualRwa) {
         _notImplemented();
     }
 
@@ -520,7 +520,7 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
     }
 
     function _exchangeActive(bytes32 src, bytes32 dest) private view {
-        systemStatus().requireExchangeBetweenTribesAllowed(src, dest);
+        systemStatus().requireExchangeBetweenRwasAllowed(src, dest);
     }
 
     modifier onlyExchanger() {
@@ -585,7 +585,7 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
         );
     }
 
-    event TribeExchange(
+    event RwaExchange(
         address indexed account,
         bytes32 fromCurrencyKey,
         uint256 fromAmount,
@@ -594,9 +594,9 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
         address toAddress
     );
     bytes32 internal constant RWAONE_EXCHANGE_SIG =
-        keccak256("TribeExchange(address,bytes32,uint256,bytes32,uint256,address)");
+        keccak256("RwaExchange(address,bytes32,uint256,bytes32,uint256,address)");
 
-    function emitTribeExchange(
+    function emitRwaExchange(
         address account,
         bytes32 fromCurrencyKey,
         uint256 fromAmount,

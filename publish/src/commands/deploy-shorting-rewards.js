@@ -202,7 +202,7 @@ const deployShortingRewards = async ({
 				}
 
 				// Otherwise it's an internal dependency and likely
-				// to be a Tribe, and it'll get the existing contract
+				// to be a Rwa, and it'll get the existing contract
 				if (deployment.targets[token]) {
 					return deployment.targets[token].address;
 				}

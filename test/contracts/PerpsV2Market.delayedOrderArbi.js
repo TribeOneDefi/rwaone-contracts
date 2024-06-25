@@ -75,12 +75,12 @@ contract('PerpsV2Market PerpsV2MarketDelayedOrders', accounts => {
 			TestablePerpsV2MarketBTC: perpsV2MarketHelper,
 			ExchangeRates: exchangeRates,
 			CircuitBreaker: circuitBreaker,
-			TriberUSD: rUSD,
+			RwarUSD: rUSD,
 			SystemSettings: systemSettings,
 			SystemStatus: systemStatus,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'rBTC', 'rETH'],
+			rwas: ['rUSD', 'rBTC', 'rETH'],
 			contracts: [
 				'PerpsV2MarketSettings',
 				{ contract: 'PerpsV2MarketStateBTC', properties: { perpSuffix: marketKeySuffix } },

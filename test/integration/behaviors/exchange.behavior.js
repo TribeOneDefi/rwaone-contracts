@@ -12,10 +12,10 @@ function itCanExchange({ ctx }) {
 
 		let owner;
 		let balancerETH, originialPendingSettlements;
-		let Rwaone, Exchanger, TriberETH;
+		let Rwaone, Exchanger, RwarETH;
 
 		before('target contracts and users', () => {
-			({ Rwaone, Exchanger, TriberETH } = ctx.contracts);
+			({ Rwaone, Exchanger, RwarETH } = ctx.contracts);
 
 			owner = ctx.users.owner;
 		});
@@ -26,7 +26,7 @@ function itCanExchange({ ctx }) {
 
 		describe('when the owner exchanges rUSD to rETH', () => {
 			before('record balances', async () => {
-				balancerETH = await TriberETH.balanceOf(owner.address);
+				balancerETH = await RwarETH.balanceOf(owner.address);
 			});
 
 			before('record pending settlements', async () => {
@@ -52,7 +52,7 @@ function itCanExchange({ ctx }) {
 					toBytes32('rETH')
 				);
 
-				assert.bnEqual(await TriberETH.balanceOf(owner.address), balancerETH.add(expectedAmount));
+				assert.bnEqual(await RwarETH.balanceOf(owner.address), balancerETH.add(expectedAmount));
 			});
 
 			before('skip if waiting period is zero', async function () {

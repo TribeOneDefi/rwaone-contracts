@@ -4,12 +4,12 @@ interface ICollateralManager {
     // Manager information
     function hasCollateral(address collateral) external view returns (bool);
 
-    function isTribeManaged(bytes32 currencyKey) external view returns (bool);
+    function isRwaManaged(bytes32 currencyKey) external view returns (bool);
 
     // State information
-    function long(bytes32 tribe) external view returns (uint amount);
+    function long(bytes32 rwa) external view returns (uint amount);
 
-    function short(bytes32 tribe) external view returns (uint amount);
+    function short(bytes32 rwa) external view returns (uint amount);
 
     function totalLong() external view returns (uint rusdValue, bool anyRateIsInvalid);
 
@@ -17,7 +17,7 @@ interface ICollateralManager {
 
     function getBorrowRate() external view returns (uint borrowRate, bool anyRateIsInvalid);
 
-    function getShortRate(bytes32 tribe) external view returns (uint shortRate, bool rateIsInvalid);
+    function getShortRate(bytes32 rwa) external view returns (uint shortRate, bool rateIsInvalid);
 
     function getRatesAndTime(
         uint index
@@ -30,14 +30,14 @@ interface ICollateralManager {
 
     function exceedsDebtLimit(uint amount, bytes32 currency) external view returns (bool canIssue, bool anyRateIsInvalid);
 
-    function areTribesAndCurrenciesSet(
-        bytes32[] calldata requiredTribeNamesInResolver,
-        bytes32[] calldata tribeKeys
+    function areRwasAndCurrenciesSet(
+        bytes32[] calldata requiredRwaNamesInResolver,
+        bytes32[] calldata rwaKeys
     ) external view returns (bool);
 
-    function areShortableTribesSet(
-        bytes32[] calldata requiredTribeNamesInResolver,
-        bytes32[] calldata tribeKeys
+    function areShortableRwasSet(
+        bytes32[] calldata requiredRwaNamesInResolver,
+        bytes32[] calldata rwaKeys
     ) external view returns (bool);
 
     // Loans
@@ -48,23 +48,23 @@ interface ICollateralManager {
 
     function removeCollaterals(address[] calldata collaterals) external;
 
-    function addTribes(bytes32[] calldata tribeNamesInResolver, bytes32[] calldata tribeKeys) external;
+    function addRwas(bytes32[] calldata rwaNamesInResolver, bytes32[] calldata rwaKeys) external;
 
-    function removeTribes(bytes32[] calldata tribes, bytes32[] calldata tribeKeys) external;
+    function removeRwas(bytes32[] calldata rwas, bytes32[] calldata rwaKeys) external;
 
-    function addShortableTribes(bytes32[] calldata requiredTribeNamesInResolver, bytes32[] calldata tribeKeys) external;
+    function addShortableRwas(bytes32[] calldata requiredRwaNamesInResolver, bytes32[] calldata rwaKeys) external;
 
-    function removeShortableTribes(bytes32[] calldata tribes) external;
+    function removeShortableRwas(bytes32[] calldata rwas) external;
 
     // State mutative
 
-    function incrementLongs(bytes32 tribe, uint amount) external;
+    function incrementLongs(bytes32 rwa, uint amount) external;
 
-    function decrementLongs(bytes32 tribe, uint amount) external;
+    function decrementLongs(bytes32 rwa, uint amount) external;
 
-    function incrementShorts(bytes32 tribe, uint amount) external;
+    function incrementShorts(bytes32 rwa, uint amount) external;
 
-    function decrementShorts(bytes32 tribe, uint amount) external;
+    function decrementShorts(bytes32 rwa, uint amount) external;
 
     function accrueInterest(
         uint interestIndex,

@@ -92,11 +92,11 @@ function itCanLiquidate({ ctx }) {
 		});
 
 		before('liquidatedUser stakes their wRWAX', async () => {
-			await Rwaone.connect(liquidatedUser).issueMaxTribes();
+			await Rwaone.connect(liquidatedUser).issueMaxRwas();
 		});
 
 		before('someUser stakes their wRWAX', async () => {
-			await Rwaone.connect(someUser).issueMaxTribes();
+			await Rwaone.connect(someUser).issueMaxRwas();
 		});
 
 		it('cannot be liquidated at this point', async () => {
@@ -248,7 +248,7 @@ function itCanLiquidate({ ctx }) {
 			});
 
 			before('user7 stakes their wRWAX', async () => {
-				await Rwaone.connect(user7).issueMaxTribes();
+				await Rwaone.connect(user7).issueMaxRwas();
 			});
 
 			before('exchange rate changes to allow liquidation', async () => {
@@ -426,7 +426,7 @@ function itCanLiquidate({ ctx }) {
 			});
 
 			before('user8 stakes their wRWAX', async () => {
-				await Rwaone.connect(user8).issueMaxTribes();
+				await Rwaone.connect(user8).issueMaxRwas();
 			});
 
 			before('exchange rate changes to allow liquidation', async () => {

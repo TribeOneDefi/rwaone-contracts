@@ -26,7 +26,7 @@ contract BaseRwaoneBridge is Owned, MixinSystemSettings, IBaseRwaoneBridge {
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
     bytes32 private constant CONTRACT_EXT_MESSENGER = "ext:Messenger";
-    bytes32 internal constant CONTRACT_RWAONEETIX = "Rwaone";
+    bytes32 internal constant CONTRACT_RWAONE = "Rwaone";
     bytes32 private constant CONTRACT_REWARDESCROW = "RewardEscrowV2";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_FEEPOOL = "FeePool";
@@ -39,7 +39,7 @@ contract BaseRwaoneBridge is Owned, MixinSystemSettings, IBaseRwaoneBridge {
 
     bool public initiationActive;
 
-    bytes32 private constant RWAONE_TRANSFER_NAMESPACE = "TribeTransfer";
+    bytes32 private constant RWAONE_TRANSFER_NAMESPACE = "RwaTransfer";
     bytes32 private constant RWAONE_TRANSFER_SENT = "Sent";
     bytes32 private constant RWAONE_TRANSFER_RECV = "Recv";
 
@@ -56,7 +56,7 @@ contract BaseRwaoneBridge is Owned, MixinSystemSettings, IBaseRwaoneBridge {
     }
 
     function rwaone() internal view returns (IRwaone) {
-        return IRwaone(requireAndGetAddress(CONTRACT_RWAONEETIX));
+        return IRwaone(requireAndGetAddress(CONTRACT_RWAONE));
     }
 
     function rewardEscrowV2() internal view returns (IRewardEscrowV2) {
@@ -102,7 +102,7 @@ contract BaseRwaoneBridge is Owned, MixinSystemSettings, IBaseRwaoneBridge {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](8);
         newAddresses[0] = CONTRACT_EXT_MESSENGER;
-        newAddresses[1] = CONTRACT_RWAONEETIX;
+        newAddresses[1] = CONTRACT_RWAONE;
         newAddresses[2] = CONTRACT_REWARDESCROW;
         newAddresses[3] = CONTRACT_ISSUER;
         newAddresses[4] = CONTRACT_FEEPOOL;
@@ -112,11 +112,11 @@ contract BaseRwaoneBridge is Owned, MixinSystemSettings, IBaseRwaoneBridge {
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
-    function tribeTransferSent() external view returns (uint) {
+    function rwaTransferSent() external view returns (uint) {
         return _sumTransferAmounts(RWAONE_TRANSFER_SENT);
     }
 
-    function tribeTransferReceived() external view returns (uint) {
+    function rwaTransferReceived() external view returns (uint) {
         return _sumTransferAmounts(RWAONE_TRANSFER_RECV);
     }
 
@@ -146,19 +146,19 @@ contract BaseRwaoneBridge is Owned, MixinSystemSettings, IBaseRwaoneBridge {
         emit InitiationResumed();
     }
 
-    function initiateTribeTransfer(bytes32 currencyKey, address destination, uint amount) external requireInitiationActive {
+    function initiateRwaTransfer(bytes32 currencyKey, address destination, uint amount) external requireInitiationActive {
         require(destination != address(0), "Cannot send to zero address");
-        require(getCrossChainTribeTransferEnabled(currencyKey) > 0, "Tribe not enabled for cross chain transfer");
-        systemStatus().requireTribeActive(currencyKey);
+        require(getCrossChainRwaTransferEnabled(currencyKey) > 0, "Rwa not enabled for cross chain transfer");
+        systemStatus().requireRwaActive(currencyKey);
 
-        _incrementTribesTransferCounter(RWAONE_TRANSFER_SENT, currencyKey, amount);
+        _incrementRwasTransferCounter(RWAONE_TRANSFER_SENT, currencyKey, amount);
 
-        bool rateInvalid = issuer().burnTribesWithoutDebt(currencyKey, msg.sender, amount);
-        require(!rateInvalid, "Cannot initiate if tribe rate is invalid");
+        bool rateInvalid = issuer().burnRwasWithoutDebt(currencyKey, msg.sender, amount);
+        require(!rateInvalid, "Cannot initiate if rwa rate is invalid");
 
         // create message payload
         bytes memory messageData = abi.encodeWithSelector(
-            this.finalizeTribeTransfer.selector,
+            this.finalizeRwaTransfer.selector,
             currencyKey,
             destination,
             amount
@@ -171,32 +171,32 @@ contract BaseRwaoneBridge is Owned, MixinSystemSettings, IBaseRwaoneBridge {
             uint32(getCrossDomainMessageGasLimit(CrossDomainMessageGasLimits.Withdrawal))
         );
 
-        emit InitiateTribeTransfer(currencyKey, destination, amount);
+        emit InitiateRwaTransfer(currencyKey, destination, amount);
     }
 
-    function finalizeTribeTransfer(bytes32 currencyKey, address destination, uint amount) external onlyCounterpart {
-        _incrementTribesTransferCounter(RWAONE_TRANSFER_RECV, currencyKey, amount);
+    function finalizeRwaTransfer(bytes32 currencyKey, address destination, uint amount) external onlyCounterpart {
+        _incrementRwasTransferCounter(RWAONE_TRANSFER_RECV, currencyKey, amount);
 
-        issuer().issueTribesWithoutDebt(currencyKey, destination, amount);
+        issuer().issueRwasWithoutDebt(currencyKey, destination, amount);
 
-        emit FinalizeTribeTransfer(currencyKey, destination, amount);
+        emit FinalizeRwaTransfer(currencyKey, destination, amount);
     }
 
     // ==== INTERNAL FUNCTIONS ====
 
-    function _incrementTribesTransferCounter(bytes32 group, bytes32 currencyKey, uint amount) internal {
+    function _incrementRwasTransferCounter(bytes32 group, bytes32 currencyKey, uint amount) internal {
         bytes32 key = keccak256(abi.encodePacked(RWAONE_TRANSFER_NAMESPACE, group, currencyKey));
 
-        uint currentTribes = flexibleStorage().getUIntValue(CONTRACT_NAME(), key);
+        uint currentRwas = flexibleStorage().getUIntValue(CONTRACT_NAME(), key);
 
-        flexibleStorage().setUIntValue(CONTRACT_NAME(), key, currentTribes.add(amount));
+        flexibleStorage().setUIntValue(CONTRACT_NAME(), key, currentRwas.add(amount));
     }
 
     function _sumTransferAmounts(bytes32 group) internal view returns (uint sum) {
-        // get list of tribes from issuer
+        // get list of rwas from issuer
         bytes32[] memory currencyKeys = issuer().availableCurrencyKeys();
 
-        // get all tribe rates
+        // get all rwa rates
         (uint[] memory rates, bool isInvalid) = exchangeRates().ratesAndInvalidForCurrencies(currencyKeys);
 
         require(!isInvalid, "Rates are invalid");
@@ -220,6 +220,6 @@ contract BaseRwaoneBridge is Owned, MixinSystemSettings, IBaseRwaoneBridge {
 
     event InitiationResumed();
 
-    event InitiateTribeTransfer(bytes32 indexed currencyKey, address indexed destination, uint256 amount);
-    event FinalizeTribeTransfer(bytes32 indexed currencyKey, address indexed destination, uint256 amount);
+    event InitiateRwaTransfer(bytes32 indexed currencyKey, address indexed destination, uint256 amount);
+    event FinalizeRwaTransfer(bytes32 indexed currencyKey, address indexed destination, uint256 amount);
 }

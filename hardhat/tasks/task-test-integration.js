@@ -12,7 +12,7 @@ const {
 	connectInstances,
 } = require('../../test/integration/utils/deploy');
 
-const tribesToAdd = [{ name: 'sREDEEMER', asset: 'USD' }];
+const rwasToAdd = [{ name: 'sREDEEMER', asset: 'USD' }];
 
 task('test:integration:l1', 'run isolated layer 1 production tests')
 	.addFlag('compile', 'Compile an l1 instance before running the tests')
@@ -50,12 +50,12 @@ task('test:integration:l1', 'run isolated layer 1 production tests')
 			if (taskArguments.useFork) {
 				await prepareDeploy({
 					network: 'mainnet',
-					tribesToAdd,
+					rwasToAdd,
 					useOvm,
 					useSips: taskArguments.useSips,
 				});
 				await deployInstance({
-					addNewTribes: true,
+					addNewRwas: true,
 					buildPath,
 					freshDeploy: false,
 					network: 'mainnet',
@@ -74,7 +74,7 @@ task('test:integration:l1', 'run isolated layer 1 production tests')
 				});
 			}
 
-			hre.config.addedTribes = tribesToAdd;
+			hre.config.addedRwas = rwasToAdd;
 		}
 
 		await hre.run('test', taskArguments);
@@ -119,12 +119,12 @@ task('test:integration:l2', 'run isolated layer 2 production tests')
 			if (taskArguments.useFork) {
 				await prepareDeploy({
 					network: 'mainnet',
-					tribesToAdd,
+					rwasToAdd,
 					useOvm,
 					useSips: taskArguments.useSips,
 				});
 				await deployInstance({
-					addNewTribes: true,
+					addNewRwas: true,
 					buildPath,
 					freshDeploy: false,
 					network: 'mainnet',
@@ -142,7 +142,7 @@ task('test:integration:l2', 'run isolated layer 2 production tests')
 					buildPath: buildPath,
 				});
 			}
-			hre.config.addedTribes = tribesToAdd;
+			hre.config.addedRwas = rwasToAdd;
 		}
 
 		await hre.run('test', taskArguments);

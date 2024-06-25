@@ -48,8 +48,8 @@ contract('RwaoneEscrow', async accounts => {
 
 	describe('Constructor & Settings ', async () => {
 		it('should set rwaone on contructor', async () => {
-			const tribeetixAddress = await escrow.rwaone();
-			assert.equal(tribeetixAddress, rwaone.address);
+			const rwaoneAddress = await escrow.rwaone();
+			assert.equal(rwaoneAddress, rwaone.address);
 		});
 
 		it('should set owner on contructor', async () => {
@@ -59,8 +59,8 @@ contract('RwaoneEscrow', async accounts => {
 
 		it('should allow owner to set rwaone', async () => {
 			await escrow.setRwaone(ZERO_ADDRESS, { from: owner });
-			const tribeetixAddress = await escrow.rwaone();
-			assert.equal(tribeetixAddress, ZERO_ADDRESS);
+			const rwaoneAddress = await escrow.rwaone();
+			assert.equal(rwaoneAddress, ZERO_ADDRESS);
 		});
 	});
 

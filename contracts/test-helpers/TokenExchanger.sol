@@ -20,19 +20,19 @@ contract TokenExchanger is Owned {
         integrationProxy = _integrationProxy;
     }
 
-    function setRwaone(address _tribeetix) external onlyOwner {
-        rwaone = _tribeetix;
+    function setRwaone(address _rwaone) external onlyOwner {
+        rwaone = _rwaone;
     }
 
-    function checkBalance(address account) public view tribeetixProxyIsSet returns (uint) {
+    function checkBalance(address account) public view rwaoneProxyIsSet returns (uint) {
         return IERC20(integrationProxy).balanceOf(account);
     }
 
-    function checkAllowance(address tokenOwner, address spender) public view tribeetixProxyIsSet returns (uint) {
+    function checkAllowance(address tokenOwner, address spender) public view rwaoneProxyIsSet returns (uint) {
         return IERC20(integrationProxy).allowance(tokenOwner, spender);
     }
 
-    function checkBalanceRWAXDirect(address account) public view tribeetixProxyIsSet returns (uint) {
+    function checkBalanceRWAXDirect(address account) public view rwaoneProxyIsSet returns (uint) {
         return IERC20(rwaone).balanceOf(account);
     }
 
@@ -40,7 +40,7 @@ contract TokenExchanger is Owned {
         return IERC20(tokenAddress).decimals();
     }
 
-    function doTokenSpend(address fromAccount, address toAccount, uint amount) public tribeetixProxyIsSet returns (bool) {
+    function doTokenSpend(address fromAccount, address toAccount, uint amount) public rwaoneProxyIsSet returns (bool) {
         // Call Immutable static call #1
         require(checkBalance(fromAccount) >= amount, "fromAccount does not have the required balance to spend");
 
@@ -54,7 +54,7 @@ contract TokenExchanger is Owned {
         return IERC20(integrationProxy).transferFrom(fromAccount, toAccount, amount);
     }
 
-    modifier tribeetixProxyIsSet() {
+    modifier rwaoneProxyIsSet() {
         require(integrationProxy != address(0), "Rwaone Integration proxy address not set");
         _;
     }

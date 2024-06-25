@@ -125,7 +125,7 @@ contract('ExchangeState', accounts => {
 				};
 				await addExchangeEntry(expectedFirstEntryAdded);
 			});
-			it('then the length is 1 for that user and tribe', async () => {
+			it('then the length is 1 for that user and rwa', async () => {
 				assert.equal((await exchangeState.getLengthOfEntries(account1, rBTC)).toString(), '1');
 			});
 			it('and the length is 0 for other conditions', async () => {
@@ -145,7 +145,7 @@ contract('ExchangeState', accounts => {
 						});
 				});
 			});
-			describe('when another entry is added for the same user and tribe', () => {
+			describe('when another entry is added for the same user and rwa', () => {
 				let expectedSecondEntryAdded;
 				beforeEach(async () => {
 					expectedSecondEntryAdded = {
@@ -160,7 +160,7 @@ contract('ExchangeState', accounts => {
 					};
 					await addExchangeEntry(expectedSecondEntryAdded);
 				});
-				it('then the length is 2 for that user and tribe', async () => {
+				it('then the length is 2 for that user and rwa', async () => {
 					assert.equal((await exchangeState.getLengthOfEntries(account1, rBTC)).toString(), '2');
 				});
 				describe('when the entry is fetch by index 0 again', () => {
@@ -189,13 +189,13 @@ contract('ExchangeState', accounts => {
 							});
 					});
 				});
-				describe('when all entries are removed for that user and tribe', () => {
+				describe('when all entries are removed for that user and rwa', () => {
 					beforeEach(async () => {
 						await exchangeState.removeEntries(account1, rBTC, {
 							from: simulatedAssociatedContract,
 						});
 					});
-					it('then the length is 0 for that user and tribe', async () => {
+					it('then the length is 0 for that user and rwa', async () => {
 						assert.equal((await exchangeState.getLengthOfEntries(account1, rBTC)).toString(), '0');
 					});
 				});

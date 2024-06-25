@@ -28,7 +28,7 @@ contract('Rwaone', async accounts => {
 	const [, owner, account1, account2, account3] = accounts;
 
 	let rwaone,
-		tribeetixProxy,
+		rwaoneProxy,
 		exchangeRates,
 		debtCache,
 		supplySchedule,
@@ -42,7 +42,7 @@ contract('Rwaone', async accounts => {
 	before(async () => {
 		({
 			Rwaone: rwaone,
-			ProxyERC20Rwaone: tribeetixProxy,
+			ProxyERC20Rwaone: rwaoneProxy,
 			AddressResolver: addressResolver,
 			ExchangeRates: exchangeRates,
 			DebtCache: debtCache,
@@ -50,11 +50,11 @@ contract('Rwaone', async accounts => {
 			RewardEscrow: rewardEscrow,
 			RewardEscrowV2: rewardEscrowV2,
 			SupplySchedule: supplySchedule,
-			TriberUSD: rUSDContract,
-			TriberETH: rETHContract,
+			RwarUSD: rUSDContract,
+			RwarETH: rETHContract,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'rETH', 'sEUR', 'sAUD'],
+			rwas: ['rUSD', 'rETH', 'sEUR', 'sAUD'],
 			contracts: [
 				'Rwaone',
 				'SupplySchedule',
@@ -73,7 +73,7 @@ contract('Rwaone', async accounts => {
 		}));
 
 		// use implementation ABI on the proxy address to simplify calling
-		tribeetixProxy = await artifacts.require('Rwaone').at(tribeetixProxy.address);
+		rwaoneProxy = await artifacts.require('Rwaone').at(rwaoneProxy.address);
 
 		await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, rETH]);
 	});
@@ -84,24 +84,24 @@ contract('Rwaone', async accounts => {
 		ensureOnlyExpectedMutativeFunctions({
 			abi: rwaone.abi,
 			ignoreParents: ['BaseRwaone'],
-			expected: ['emitAtomicTribeExchange', 'migrateEscrowBalanceToRewardEscrowV2'],
+			expected: ['emitAtomicRwaExchange', 'migrateEscrowBalanceToRewardEscrowV2'],
 		});
 	});
 
 	describe('constructor', () => {
 		it('should set constructor params on deployment', async () => {
-			const RWAONEETIX_TOTAL_SUPPLY = web3.utils.toWei('100000000');
+			const RWAONE_TOTAL_SUPPLY = web3.utils.toWei('100000000');
 			const instance = await setupContract({
 				contract: 'Rwaone',
 				accounts,
 				skipPostDeploy: true,
-				args: [account1, account2, owner, RWAONEETIX_TOTAL_SUPPLY, addressResolver.address],
+				args: [account1, account2, owner, RWAONE_TOTAL_SUPPLY, addressResolver.address],
 			});
 
 			assert.equal(await instance.proxy(), account1);
 			assert.equal(await instance.tokenState(), account2);
 			assert.equal(await instance.owner(), owner);
-			assert.equal(await instance.totalSupply(), RWAONEETIX_TOTAL_SUPPLY);
+			assert.equal(await instance.totalSupply(), RWAONE_TOTAL_SUPPLY);
 			assert.equal(await instance.resolver(), addressResolver.address);
 		});
 	});
@@ -263,7 +263,7 @@ contract('Rwaone', async accounts => {
 		let rewardEscrowBalanceBefore;
 		beforeEach(async () => {
 			// transfer wRWAX to rewardEscrow
-			await tribeetixProxy.transfer(rewardEscrow.address, toUnit('100'), { from: owner });
+			await rwaoneProxy.transfer(rewardEscrow.address, toUnit('100'), { from: owner });
 
 			rewardEscrowBalanceBefore = await rwaone.balanceOf(rewardEscrow.address);
 		});
@@ -286,7 +286,7 @@ contract('Rwaone', async accounts => {
 	});
 
 	describe('Using a contract to invoke exchangeWithTrackingForInitiator', () => {
-		describe('when a third party contract is setup to exchange tribes', () => {
+		describe('when a third party contract is setup to exchange rwas', () => {
 			let contractExample;
 			let amountOfrUSD;
 			beforeEach(async () => {
@@ -301,7 +301,7 @@ contract('Rwaone', async accounts => {
 				await updateRatesWithDefaults({ exchangeRates, owner, debtCache });
 
 				// issue rUSD from the owner
-				await rwaone.issueTribes(amountOfrUSD, { from: owner });
+				await rwaone.issueRwas(amountOfrUSD, { from: owner });
 
 				// transfer the rUSD to the contract
 				await rUSDContract.transfer(contractExample.address, toUnit('100'), { from: owner });
@@ -315,7 +315,7 @@ contract('Rwaone', async accounts => {
 
 					txn = await contractExample.exchange(rUSD, amountOfrUSD, rETH, { from: account3 });
 				});
-				it('then Barrie has the tribes in her account', async () => {
+				it('then Barrie has the rwas in her account', async () => {
 					assert.bnGt(await rETHContract.balanceOf(account3), toUnit('0.01'));
 				});
 				it('and the contract has none', async () => {
@@ -324,8 +324,8 @@ contract('Rwaone', async accounts => {
 				it('and the event emitted indicates that Barrie was the destinationAddress', async () => {
 					const logs = artifacts.require('Rwaone').decodeLogs(txn.receipt.rawLogs);
 					assert.eventEqual(
-						logs.find(log => log.event === 'TribeExchange'),
-						'TribeExchange',
+						logs.find(log => log.event === 'RwaExchange'),
+						'RwaExchange',
 						{
 							account: contractExample.address,
 							fromCurrencyKey: rUSD,

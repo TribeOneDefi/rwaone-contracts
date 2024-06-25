@@ -25,7 +25,7 @@ contract RewardsDistribution is Owned, IRewardsDistribution {
     /**
      * @notice Address of the Rwaone ProxyERC20
      */
-    address public tribeetixProxy;
+    address public rwaoneProxy;
 
     /**
      * @notice Address of the RewardEscrow contract
@@ -49,20 +49,20 @@ contract RewardsDistribution is Owned, IRewardsDistribution {
     constructor(
         address _owner,
         address _authority,
-        address _tribeetixProxy,
+        address _rwaoneProxy,
         address _rewardEscrow,
         address _feePoolProxy
     ) public Owned(_owner) {
         authority = _authority;
-        tribeetixProxy = _tribeetixProxy;
+        rwaoneProxy = _rwaoneProxy;
         rewardEscrow = _rewardEscrow;
         feePoolProxy = _feePoolProxy;
     }
 
     // ========== EXTERNAL SETTERS ==========
 
-    function setRwaoneProxy(address _tribeetixProxy) external onlyOwner {
-        tribeetixProxy = _tribeetixProxy;
+    function setRwaoneProxy(address _rwaoneProxy) external onlyOwner {
+        rwaoneProxy = _rwaoneProxy;
     }
 
     function setRewardEscrow(address _rewardEscrow) external onlyOwner {
@@ -141,10 +141,10 @@ contract RewardsDistribution is Owned, IRewardsDistribution {
         require(amount > 0, "Nothing to distribute");
         require(msg.sender == authority, "Caller is not authorised");
         require(rewardEscrow != address(0), "RewardEscrow is not set");
-        require(tribeetixProxy != address(0), "RwaoneProxy is not set");
+        require(rwaoneProxy != address(0), "RwaoneProxy is not set");
         require(feePoolProxy != address(0), "FeePoolProxy is not set");
         require(
-            IERC20(tribeetixProxy).balanceOf(address(this)) >= amount,
+            IERC20(rwaoneProxy).balanceOf(address(this)) >= amount,
             "RewardsDistribution contract does not have enough tokens to distribute"
         );
 
@@ -156,7 +156,7 @@ contract RewardsDistribution is Owned, IRewardsDistribution {
                 remainder = remainder.sub(distributions[i].amount);
 
                 // Transfer the wRWAX
-                IERC20(tribeetixProxy).transfer(distributions[i].destination, distributions[i].amount);
+                IERC20(rwaoneProxy).transfer(distributions[i].destination, distributions[i].amount);
 
                 // If the contract implements RewardsDistributionRecipient.sol, inform it how many wRWAX its received.
                 bytes memory payload = abi.encodeWithSignature("notifyRewardAmount(uint256)", distributions[i].amount);
@@ -171,7 +171,7 @@ contract RewardsDistribution is Owned, IRewardsDistribution {
         }
 
         // After all ditributions have been sent, send the remainder to the RewardsEscrow contract
-        IERC20(tribeetixProxy).transfer(rewardEscrow, remainder);
+        IERC20(rwaoneProxy).transfer(rewardEscrow, remainder);
 
         // Tell the FeePool how much it has to distribute to the stakers
         IFeePool(feePoolProxy).setRewardsToDistribute(remainder);

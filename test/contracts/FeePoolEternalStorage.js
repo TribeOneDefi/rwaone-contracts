@@ -18,7 +18,7 @@ contract('FeePoolEternalStorage', accounts => {
 	before(async () => {
 		({ FeePool: feePool, FeePoolEternalStorage: feePoolEternalStorage } = await setupAllContracts({
 			accounts,
-			tribes: [],
+			rwas: [],
 			contracts: ['FeePool', 'FeePoolEternalStorage'],
 		}));
 	});

@@ -5,7 +5,7 @@ pragma solidity ^0.5.16;
 import "./Owned.sol";
 import "./interfaces/IAddressResolver.sol";
 import "./interfaces/IEtherWrapper.sol";
-import "./interfaces/ITribe.sol";
+import "./interfaces/IRwa.sol";
 import "./interfaces/IWETH.sol";
 import "./interfaces/IERC20.sol";
 
@@ -16,7 +16,7 @@ import "./interfaces/IEtherWrapper.sol";
 // https://docs.rwaone.io/contracts/source/contracts/nativeetherwrapper
 contract NativeEtherWrapper is Owned, MixinResolver {
     bytes32 private constant CONTRACT_ETHER_WRAPPER = "EtherWrapper";
-    bytes32 private constant CONTRACT_RWAONEHETH = "TriberETH";
+    bytes32 private constant CONTRACT_RWAONEHETH = "RwarETH";
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinResolver(_resolver) {}
 
@@ -38,7 +38,7 @@ contract NativeEtherWrapper is Owned, MixinResolver {
         return etherWrapper().weth();
     }
 
-    function triberETH() internal view returns (IERC20) {
+    function rwarETH() internal view returns (IERC20) {
         return IERC20(requireAndGetAddress(CONTRACT_RWAONEHETH));
     }
 
@@ -58,7 +58,7 @@ contract NativeEtherWrapper is Owned, MixinResolver {
         etherWrapper().mint(amount);
 
         // Transfer the rETH to msg.sender.
-        triberETH().transfer(msg.sender, triberETH().balanceOf(address(this)));
+        rwarETH().transfer(msg.sender, rwarETH().balanceOf(address(this)));
 
         emit Minted(msg.sender, amount);
     }
@@ -68,10 +68,10 @@ contract NativeEtherWrapper is Owned, MixinResolver {
         IWETH weth = weth();
 
         // Transfer rETH from the msg.sender.
-        triberETH().transferFrom(msg.sender, address(this), amount);
+        rwarETH().transferFrom(msg.sender, address(this), amount);
 
         // Approve for the EtherWrapper.
-        triberETH().approve(address(etherWrapper()), amount);
+        rwarETH().approve(address(etherWrapper()), amount);
 
         // Now call burn.
         etherWrapper().burn(amount);

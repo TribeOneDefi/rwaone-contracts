@@ -7,18 +7,18 @@ const { gray, yellow, red, cyan } = require('chalk');
 const { loadConnections } = require('../../util');
 const { toBytes32 } = require('../../../..');
 
-module.exports = async ({ network, useOvm, providerUrl, tribes, oldExrates, feeds }) => {
+module.exports = async ({ network, useOvm, providerUrl, rwas, oldExrates, feeds }) => {
 	const output = [];
 	const { etherscanUrl } = loadConnections({ network });
 
 	const provider = new ethers.providers.JsonRpcProvider(providerUrl);
 
-	const allFeeds = Object.values(feeds).concat(tribes);
+	const allFeeds = Object.values(feeds).concat(rwas);
 
 	let abi;
 
 	for (const { name, asset, feed } of allFeeds) {
-		const currencyKey = name || asset; // either name of tribe or asset for standalone
+		const currencyKey = name || asset; // either name of rwa or asset for standalone
 		if (feed) {
 			if (!ethers.utils.isAddress(feed)) {
 				throw Error(
@@ -62,8 +62,7 @@ module.exports = async ({ network, useOvm, providerUrl, tribes, oldExrates, feed
 			if (answer === existing) {
 				output.push(
 					gray(
-						`- ${
-							name ? 'Tribe ' : ''
+						`- ${name ? 'Rwa ' : ''
 						}${currencyKey} aggregated price: ${answer} (same as currently on-chain)`
 					)
 				);
@@ -73,8 +72,7 @@ module.exports = async ({ network, useOvm, providerUrl, tribes, oldExrates, feed
 				const colorize = diff > 5 ? red : diff > 1 ? yellow : cyan;
 				output.push(
 					colorize(
-						`- ${
-							name ? 'Tribe ' : ''
+						`- ${name ? 'Rwa ' : ''
 						}${currencyKey} aggregated price: ${answer} vs ${existing} (${diff} %)`
 					)
 				);

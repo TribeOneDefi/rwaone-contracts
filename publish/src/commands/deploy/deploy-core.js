@@ -59,7 +59,7 @@ module.exports = async ({
 	console.log(gray(`\n------ DEPLOY SELF ORACLES ------\n`));
 
 	await deployer.deployContract({
-		name: 'OneNetAggregatorIssuedTribes',
+		name: 'OneNetAggregatorIssuedRwas',
 		args: [addressOf(readProxyForResolver)],
 	});
 
@@ -146,7 +146,7 @@ module.exports = async ({
 		deps: ['AddressResolver'],
 	});
 
-	const tribeetixEscrow = await deployer.deployContract({
+	const rwaoneEscrow = await deployer.deployContract({
 		name: 'RwaoneEscrow',
 		args: [account, ZERO_ADDRESS],
 	});
@@ -248,7 +248,7 @@ module.exports = async ({
 	});
 
 	await deployer.deployContract({
-		name: 'VirtualTribeMastercopy',
+		name: 'VirtualRwaMastercopy',
 	});
 
 	await deployer.deployContract({
@@ -274,11 +274,11 @@ module.exports = async ({
 		args: [account, currentLastMintEvent, currentWeekOfInflation],
 	});
 
-	if (tribeetixEscrow) {
+	if (rwaoneEscrow) {
 		await deployer.deployContract({
 			name: 'EscrowChecker',
 			deps: ['RwaoneEscrow'],
-			args: [addressOf(tribeetixEscrow)],
+			args: [addressOf(rwaoneEscrow)],
 		});
 	}
 
@@ -325,7 +325,7 @@ module.exports = async ({
 	});
 
 	await deployer.deployContract({
-		name: 'TribeRedeemer',
+		name: 'RwaRedeemer',
 		deps: ['AddressResolver'],
 		args: [addressOf(readProxyForResolver)],
 	});

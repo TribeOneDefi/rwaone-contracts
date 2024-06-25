@@ -56,10 +56,10 @@ contract AddressResolver is Owned, IAddressResolver {
         return _foundAddress;
     }
 
-    function getTribe(bytes32 key) external view returns (address) {
+    function getRwa(bytes32 key) external view returns (address) {
         IIssuer issuer = IIssuer(repository["Issuer"]);
         require(address(issuer) != address(0), "Cannot find Issuer address");
-        return address(issuer.tribes(key));
+        return address(issuer.rwas(key));
     }
 
     /* ========== EVENTS ========== */

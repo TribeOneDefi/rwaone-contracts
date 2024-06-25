@@ -17,8 +17,8 @@ contract DebtMigratorOnEthereum is BaseDebtMigrator {
     bytes32 private constant CONTRACT_OVM_DEBT_MIGRATOR_ON_OPTIMISM = "ovm:DebtMigratorOnOptimism";
     bytes32 private constant CONTRACT_LIQUIDATOR = "Liquidator";
     bytes32 private constant CONTRACT_LIQUIDATOR_REWARDS = "LiquidatorRewards";
-    bytes32 private constant CONTRACT_RWAONEETIX_BRIDGE_TO_OPTIMISM = "RwaoneBridgeToOptimism";
-    bytes32 private constant CONTRACT_RWAONEETIX_DEBT_SHARE = "RwaoneDebtShare";
+    bytes32 private constant CONTRACT_RWAONE_BRIDGE_TO_OPTIMISM = "RwaoneBridgeToOptimism";
+    bytes32 private constant CONTRACT_RWAONE_DEBT_SHARE = "RwaoneDebtShare";
 
     function CONTRACT_NAME() public pure returns (bytes32) {
         return "DebtMigratorOnEthereum";
@@ -44,12 +44,12 @@ contract DebtMigratorOnEthereum is BaseDebtMigrator {
         return ILiquidatorRewards(requireAndGetAddress(CONTRACT_LIQUIDATOR_REWARDS));
     }
 
-    function _tribeetixBridgeToOptimism() internal view returns (IRwaoneBridgeToOptimism) {
-        return IRwaoneBridgeToOptimism(requireAndGetAddress(CONTRACT_RWAONEETIX_BRIDGE_TO_OPTIMISM));
+    function _rwaoneBridgeToOptimism() internal view returns (IRwaoneBridgeToOptimism) {
+        return IRwaoneBridgeToOptimism(requireAndGetAddress(CONTRACT_RWAONE_BRIDGE_TO_OPTIMISM));
     }
 
-    function _tribeetixDebtShare() internal view returns (IRwaoneDebtShare) {
-        return IRwaoneDebtShare(requireAndGetAddress(CONTRACT_RWAONEETIX_DEBT_SHARE));
+    function _rwaoneDebtShare() internal view returns (IRwaoneDebtShare) {
+        return IRwaoneDebtShare(requireAndGetAddress(CONTRACT_RWAONE_DEBT_SHARE));
     }
 
     function _initiatingActive() internal view {
@@ -71,8 +71,8 @@ contract DebtMigratorOnEthereum is BaseDebtMigrator {
         newAddresses[0] = CONTRACT_OVM_DEBT_MIGRATOR_ON_OPTIMISM;
         newAddresses[1] = CONTRACT_LIQUIDATOR;
         newAddresses[2] = CONTRACT_LIQUIDATOR_REWARDS;
-        newAddresses[3] = CONTRACT_RWAONEETIX_BRIDGE_TO_OPTIMISM;
-        newAddresses[4] = CONTRACT_RWAONEETIX_DEBT_SHARE;
+        newAddresses[3] = CONTRACT_RWAONE_BRIDGE_TO_OPTIMISM;
+        newAddresses[4] = CONTRACT_RWAONE_DEBT_SHARE;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -92,7 +92,7 @@ contract DebtMigratorOnEthereum is BaseDebtMigrator {
         _liquidatorRewards().getReward(_account);
 
         // First, remove all debt shares on L1
-        IRwaoneDebtShare sds = _tribeetixDebtShare();
+        IRwaoneDebtShare sds = _rwaoneDebtShare();
         uint totalDebtShares = sds.balanceOf(_account);
         require(totalDebtShares > 0, "No debt to migrate");
 
@@ -101,7 +101,7 @@ contract DebtMigratorOnEthereum is BaseDebtMigrator {
         _issuer().modifyDebtSharesForMigration(_account, totalDebtShares);
 
         // Deposit all of the liquid & revoked escrowed wRWAX to the migrator on L2
-        (uint totalEscrowRevoked, uint totalLiquidBalance) = IRwaone(requireAndGetAddress(CONTRACT_RWAONEETIX))
+        (uint totalEscrowRevoked, uint totalLiquidBalance) = IRwaone(requireAndGetAddress(CONTRACT_RWAONE))
             .migrateAccountBalances(_account);
         uint totalAmountToDeposit = totalLiquidBalance.add(totalEscrowRevoked);
 
@@ -111,12 +111,12 @@ contract DebtMigratorOnEthereum is BaseDebtMigrator {
             "Debt Migrator On Optimism not set"
         );
 
-        _tribeetixERC20().approve(address(_tribeetixBridgeToOptimism()), totalAmountToDeposit);
-        _tribeetixBridgeToOptimism().depositTo(_debtMigratorOnOptimism(), totalAmountToDeposit);
+        _rwaoneERC20().approve(address(_rwaoneBridgeToOptimism()), totalAmountToDeposit);
+        _rwaoneBridgeToOptimism().depositTo(_debtMigratorOnOptimism(), totalAmountToDeposit);
 
         // Require all zeroed balances
-        require(_tribeetixDebtShare().balanceOf(_account) == 0, "Debt share balance is not zero");
-        require(_tribeetixERC20().balanceOf(_account) == 0, "wRWAX balance is not zero");
+        require(_rwaoneDebtShare().balanceOf(_account) == 0, "Debt share balance is not zero");
+        require(_rwaoneERC20().balanceOf(_account) == 0, "wRWAX balance is not zero");
         require(_rewardEscrowV2().balanceOf(_account) == 0, "Escrow balanace is not zero");
         require(_liquidatorRewards().earned(_account) == 0, "Earned balance is not zero");
 

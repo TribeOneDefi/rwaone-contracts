@@ -11,7 +11,7 @@ import "openzeppelin-solidity-2.3.0/contracts/math/SafeMath.sol";
 import "./AddressSetLib.sol";
 
 // Internal references
-import "./interfaces/ITribe.sol";
+import "./interfaces/IRwa.sol";
 import "./interfaces/IFeePool.sol";
 import "./interfaces/IExchanger.sol";
 import "./interfaces/IERC20.sol";
@@ -63,7 +63,7 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
     bytes32 public constant CONTRACT_NAME = "FuturesMarketManager";
 
     bytes32 internal constant RUSD = "rUSD";
-    bytes32 internal constant CONTRACT_RWAONERUSD = "TriberUSD";
+    bytes32 internal constant CONTRACT_RWAONERUSD = "RwarUSD";
     bytes32 internal constant CONTRACT_FEEPOOL = "FeePool";
     bytes32 internal constant CONTRACT_EXCHANGER = "Exchanger";
 
@@ -80,8 +80,8 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
         addresses[2] = CONTRACT_EXCHANGER;
     }
 
-    function _rUSD() internal view returns (ITribe) {
-        return ITribe(requireAndGetAddress(CONTRACT_RWAONERUSD));
+    function _rUSD() internal view returns (IRwa) {
+        return IRwa(requireAndGetAddress(CONTRACT_RWAONERUSD));
     }
 
     function _feePool() internal view returns (IFeePool) {
@@ -372,7 +372,7 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
      * it reverts if not called by a known market.
      */
     function issueRUSD(address account, uint amount) external onlyMarketImplementations {
-        // No settlement is required to issue tribes into the target account.
+        // No settlement is required to issue rwas into the target account.
         _rUSD().issue(account, amount);
     }
 
@@ -386,8 +386,8 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
         // If the settlement reduces the user's balance below the requested amount,
         // the settled remainder will be the resulting deposit.
 
-        // Exchanger.settle ensures tribe is active
-        ITribe rUSD = _rUSD();
+        // Exchanger.settle ensures rwa is active
+        IRwa rUSD = _rUSD();
         (uint reclaimed, , ) = _exchanger().settle(account, RUSD);
 
         uint balanceAfter = amount;

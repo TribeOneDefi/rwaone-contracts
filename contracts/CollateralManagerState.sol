@@ -26,8 +26,8 @@ contract CollateralManagerState is Owned, State {
     mapping(bytes32 => uint[]) public shortRates;
     mapping(bytes32 => uint) public shortRatesLastUpdated;
 
-    // The total amount of long and short for a tribe,
-    mapping(bytes32 => Balance) public totalIssuedTribes;
+    // The total amount of long and short for a rwa,
+    mapping(bytes32 => Balance) public totalIssuedRwas;
 
     constructor(address _owner, address _associatedContract) public Owned(_owner) State(_associatedContract) {
         borrowRates.push(0);
@@ -39,28 +39,28 @@ contract CollateralManagerState is Owned, State {
         return totalLoans;
     }
 
-    function long(bytes32 tribe) external view onlyAssociatedContract returns (uint) {
-        return totalIssuedTribes[tribe].long;
+    function long(bytes32 rwa) external view onlyAssociatedContract returns (uint) {
+        return totalIssuedRwas[rwa].long;
     }
 
-    function short(bytes32 tribe) external view onlyAssociatedContract returns (uint) {
-        return totalIssuedTribes[tribe].short;
+    function short(bytes32 rwa) external view onlyAssociatedContract returns (uint) {
+        return totalIssuedRwas[rwa].short;
     }
 
-    function incrementLongs(bytes32 tribe, uint256 amount) external onlyAssociatedContract {
-        totalIssuedTribes[tribe].long = totalIssuedTribes[tribe].long.add(amount);
+    function incrementLongs(bytes32 rwa, uint256 amount) external onlyAssociatedContract {
+        totalIssuedRwas[rwa].long = totalIssuedRwas[rwa].long.add(amount);
     }
 
-    function decrementLongs(bytes32 tribe, uint256 amount) external onlyAssociatedContract {
-        totalIssuedTribes[tribe].long = totalIssuedTribes[tribe].long.sub(amount);
+    function decrementLongs(bytes32 rwa, uint256 amount) external onlyAssociatedContract {
+        totalIssuedRwas[rwa].long = totalIssuedRwas[rwa].long.sub(amount);
     }
 
-    function incrementShorts(bytes32 tribe, uint256 amount) external onlyAssociatedContract {
-        totalIssuedTribes[tribe].short = totalIssuedTribes[tribe].short.add(amount);
+    function incrementShorts(bytes32 rwa, uint256 amount) external onlyAssociatedContract {
+        totalIssuedRwas[rwa].short = totalIssuedRwas[rwa].short.add(amount);
     }
 
-    function decrementShorts(bytes32 tribe, uint256 amount) external onlyAssociatedContract {
-        totalIssuedTribes[tribe].short = totalIssuedTribes[tribe].short.sub(amount);
+    function decrementShorts(bytes32 rwa, uint256 amount) external onlyAssociatedContract {
+        totalIssuedRwas[rwa].short = totalIssuedRwas[rwa].short.sub(amount);
     }
 
     // Borrow rates, one array here for all currencies.
@@ -82,16 +82,9 @@ contract CollateralManagerState is Owned, State {
         return borrowRatesLastUpdated;
     }
 
-    function getRatesAndTime(uint index)
-        external
-        view
-        returns (
-            uint entryRate,
-            uint lastRate,
-            uint lastUpdated,
-            uint newIndex
-        )
-    {
+    function getRatesAndTime(
+        uint index
+    ) external view returns (uint entryRate, uint lastRate, uint lastUpdated, uint newIndex) {
         newIndex = getRatesLength();
         entryRate = getRateAt(index);
         lastRate = getRateAt(newIndex - 1);
@@ -128,16 +121,10 @@ contract CollateralManagerState is Owned, State {
         return shortRatesLastUpdated[currency];
     }
 
-    function getShortRatesAndTime(bytes32 currency, uint index)
-        external
-        view
-        returns (
-            uint entryRate,
-            uint lastRate,
-            uint lastUpdated,
-            uint newIndex
-        )
-    {
+    function getShortRatesAndTime(
+        bytes32 currency,
+        uint index
+    ) external view returns (uint entryRate, uint lastRate, uint lastUpdated, uint newIndex) {
         newIndex = getShortRatesLength(currency);
         entryRate = getShortRateAt(currency, index);
         lastRate = getShortRateAt(currency, newIndex - 1);

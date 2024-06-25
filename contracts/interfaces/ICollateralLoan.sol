@@ -10,9 +10,9 @@ interface ICollateralLoan {
         address payable account;
         //  Amount of collateral deposited
         uint collateral;
-        // The tribe that was borowed
+        // The rwa that was borowed
         bytes32 currency;
-        //  Amount of tribes borrowed
+        //  Amount of rwas borrowed
         uint amount;
         // Indicates if the position was short sold
         bool short;

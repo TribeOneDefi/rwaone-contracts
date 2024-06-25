@@ -18,7 +18,7 @@ contract Migration_DschubbaOptimismStep2 is BaseMigration {
     address public constant OWNER = 0x6d4a64C57612841c2C6745dB2a4E4db34F002D20;
 
     // ----------------------------
-    // EXISTING RWAONEETIX CONTRACTS
+    // EXISTING RWAONE CONTRACTS
     // ----------------------------
 
     // https://explorer.optimism.io/address/0xf5826f24805c162c696b79ba31ebC6FB8003d475

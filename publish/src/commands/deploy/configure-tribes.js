@@ -14,90 +14,90 @@ module.exports = async ({
 	generateSolidity,
 	network,
 	runStep,
-	tribes,
+	rwas,
 }) => {
-	// now configure tribes
-	console.log(gray(`\n------ CONFIGURE TRIBES ------\n`));
+	// now configure rwas
+	console.log(gray(`\n------ CONFIGURE RWAS ------\n`));
 
 	const { ExchangeRates } = deployer.deployedContracts;
 
-	for (const { name: currencyKey, asset } of tribes) {
-		console.log(gray(`\n   --- TRIBE ${currencyKey} ---\n`));
+	for (const { name: currencyKey, asset } of rwas) {
+		console.log(gray(`\n   --- RWA ${currencyKey} ---\n`));
 
 		const currencyKeyInBytes = toBytes32(currencyKey);
 
-		const tribe = deployer.deployedContracts[`Tribe${currencyKey}`];
-		const tokenStateForTribe = deployer.deployedContracts[`TokenState${currencyKey}`];
-		const proxyForTribe = deployer.deployedContracts[`Proxy${currencyKey}`];
+		const rwa = deployer.deployedContracts[`Rwa${currencyKey}`];
+		const tokenStateForRwa = deployer.deployedContracts[`TokenState${currencyKey}`];
+		const proxyForRwa = deployer.deployedContracts[`Proxy${currencyKey}`];
 
-		let ExistingTribe;
+		let ExistingRwa;
 		try {
-			ExistingTribe = deployer.getExistingContract({ contract: `Tribe${currencyKey}` });
+			ExistingRwa = deployer.getExistingContract({ contract: `Rwa${currencyKey}` });
 		} catch (err) {
-			// ignore error as there is no existing tribe to copy from
+			// ignore error as there is no existing rwa to copy from
 		}
-		// when generating solidity only, ensure that this is run to copy across tribe supply
-		if (tribe && generateSolidity && ExistingTribe && ExistingTribe.address !== tribe.address) {
+		// when generating solidity only, ensure that this is run to copy across rwa supply
+		if (rwa && generateSolidity && ExistingRwa && ExistingRwa.address !== rwa.address) {
 			const generateExplorerComment = ({ address }) =>
 				`// ${explorerLinkPrefix}/address/${address}`;
 
 			await runStep({
-				contract: `Tribe${currencyKey}`,
-				target: tribe,
+				contract: `Rwa${currencyKey}`,
+				target: rwa,
 				write: 'setTotalSupply',
-				writeArg: addressOf(tribe),
-				comment: `Ensure the new tribe has the totalSupply from the previous one`,
+				writeArg: addressOf(rwa),
+				comment: `Ensure the new rwa has the totalSupply from the previous one`,
 				customSolidity: {
 					name: `copyTotalSupplyFrom_${currencyKey}`,
 					instructions: [
-						generateExplorerComment({ address: ExistingTribe.address }),
-						`Tribe existingTribe = Tribe(${ExistingTribe.address})`,
-						generateExplorerComment({ address: tribe.address }),
-						`Tribe newTribe = Tribe(${tribe.address})`,
-						`newTribe.setTotalSupply(existingTribe.totalSupply())`,
+						generateExplorerComment({ address: ExistingRwa.address }),
+						`Rwa existingRwa = Rwa(${ExistingRwa.address})`,
+						generateExplorerComment({ address: rwa.address }),
+						`Rwa newRwa = Rwa(${rwa.address})`,
+						`newRwa.setTotalSupply(existingRwa.totalSupply())`,
 					],
 				},
 			});
 		}
 
-		if (tokenStateForTribe && tribe) {
+		if (tokenStateForRwa && rwa) {
 			await runStep({
 				contract: `TokenState${currencyKey}`,
-				target: tokenStateForTribe,
+				target: tokenStateForRwa,
 				read: 'associatedContract',
-				expected: input => input === addressOf(tribe),
+				expected: input => input === addressOf(rwa),
 				write: 'setAssociatedContract',
-				writeArg: addressOf(tribe),
-				comment: `Ensure the ${currencyKey} tribe can write to its TokenState`,
+				writeArg: addressOf(rwa),
+				comment: `Ensure the ${currencyKey} rwa can write to its TokenState`,
 			});
 		}
 
-		// Setup proxy for tribe
-		if (proxyForTribe && tribe) {
+		// Setup proxy for rwa
+		if (proxyForRwa && rwa) {
 			await runStep({
 				contract: `Proxy${currencyKey}`,
-				target: proxyForTribe,
+				target: proxyForRwa,
 				read: 'target',
-				expected: input => input === addressOf(tribe),
+				expected: input => input === addressOf(rwa),
 				write: 'setTarget',
-				writeArg: addressOf(tribe),
-				comment: `Ensure the ${currencyKey} tribe Proxy is correctly connected to the Tribe`,
+				writeArg: addressOf(rwa),
+				comment: `Ensure the ${currencyKey} rwa Proxy is correctly connected to the Rwa`,
 			});
 
 			await runStep({
-				contract: `Tribe${currencyKey}`,
-				target: tribe,
+				contract: `Rwa${currencyKey}`,
+				target: rwa,
 				read: 'proxy',
-				expected: input => input === addressOf(proxyForTribe),
+				expected: input => input === addressOf(proxyForRwa),
 				write: 'setProxy',
-				writeArg: addressOf(proxyForTribe),
-				comment: `Ensure the ${currencyKey} tribe is connected to its Proxy`,
+				writeArg: addressOf(proxyForRwa),
+				comment: `Ensure the ${currencyKey} rwa is connected to its Proxy`,
 			});
 		}
 
 		const { feed } = feeds[asset] || {};
 
-		// now setup price aggregator if any for the tribe
+		// now setup price aggregator if any for the rwa
 		if (isAddress(feed) && ExchangeRates) {
 			await runStep({
 				contract: `ExchangeRates`,

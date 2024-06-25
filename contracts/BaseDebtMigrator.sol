@@ -30,7 +30,7 @@ contract BaseDebtMigrator is Owned, MixinSystemSettings {
 
     bytes32 private constant CONTRACT_EXT_MESSENGER = "ext:Messenger";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
-    bytes32 internal constant CONTRACT_RWAONEETIX = "Rwaone";
+    bytes32 internal constant CONTRACT_RWAONE = "Rwaone";
     bytes32 private constant CONTRACT_REWARDESCROW = "RewardEscrowV2";
 
     bytes32 private constant DEBT_TRANSFER_NAMESPACE = "DebtTransfer";
@@ -58,8 +58,8 @@ contract BaseDebtMigrator is Owned, MixinSystemSettings {
         return IRewardEscrowV2(requireAndGetAddress(CONTRACT_REWARDESCROW));
     }
 
-    function _tribeetixERC20() internal view returns (IERC20) {
-        return IERC20(requireAndGetAddress(CONTRACT_RWAONEETIX));
+    function _rwaoneERC20() internal view returns (IERC20) {
+        return IERC20(requireAndGetAddress(CONTRACT_RWAONE));
     }
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
@@ -68,7 +68,7 @@ contract BaseDebtMigrator is Owned, MixinSystemSettings {
         newAddresses[0] = CONTRACT_EXT_MESSENGER;
         newAddresses[1] = CONTRACT_REWARDESCROW;
         newAddresses[2] = CONTRACT_ISSUER;
-        newAddresses[3] = CONTRACT_RWAONEETIX;
+        newAddresses[3] = CONTRACT_RWAONE;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 

@@ -19,7 +19,7 @@ contract Migration_CaphOptimismStep6 is BaseMigration {
     address public constant OWNER = 0x6d4a64C57612841c2C6745dB2a4E4db34F002D20;
 
     // ----------------------------
-    // EXISTING RWAONEETIX CONTRACTS
+    // EXISTING RWAONE CONTRACTS
     // ----------------------------
 
     // https://explorer.optimism.io/address/0xE8c41bE1A167314ABAF2423b72Bf8da826943FFD

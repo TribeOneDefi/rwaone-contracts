@@ -8,7 +8,7 @@ module.exports = async ({ account, addressOf, deployer }) => {
 	const { ReadProxyAddressResolver } = deployer.deployedContracts;
 
 	await deployer.deployContract({
-		name: 'TribeUtil',
+		name: 'RwaUtil',
 		deps: ['ReadProxyAddressResolver'],
 		args: [addressOf(ReadProxyAddressResolver)],
 	});

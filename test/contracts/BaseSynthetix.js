@@ -58,7 +58,7 @@ contract('BaseRwaone', async accounts => {
 			'ext:AggregatorDebtRatio': aggregatorDebtRatio,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'rETH', 'sEUR', 'sAUD'],
+			rwas: ['rUSD', 'rETH', 'sEUR', 'sAUD'],
 			contracts: [
 				'BaseRwaone',
 				'SupplySchedule',
@@ -97,11 +97,11 @@ contract('BaseRwaone', async accounts => {
 			ignoreParents: ['ExternStateToken', 'MixinResolver'],
 			expected: [
 				'burnSecondary',
-				'burnTribes',
-				'burnTribesOnBehalf',
-				'burnTribesToTarget',
-				'burnTribesToTargetOnBehalf',
-				'emitTribeExchange',
+				'burnRwas',
+				'burnRwasOnBehalf',
+				'burnRwasToTarget',
+				'burnRwasToTargetOnBehalf',
+				'emitRwaExchange',
 				'emitExchangeRebate',
 				'emitExchangeReclaim',
 				'emitExchangeTracking',
@@ -112,10 +112,10 @@ contract('BaseRwaone', async accounts => {
 				'exchangeWithTracking',
 				'exchangeWithTrackingForInitiator',
 				'exchangeWithVirtual',
-				'issueMaxTribes',
-				'issueMaxTribesOnBehalf',
-				'issueTribes',
-				'issueTribesOnBehalf',
+				'issueMaxRwas',
+				'issueMaxRwasOnBehalf',
+				'issueRwas',
+				'issueRwasOnBehalf',
 				'mint',
 				'mintSecondary',
 				'mintSecondaryRewards',
@@ -134,34 +134,34 @@ contract('BaseRwaone', async accounts => {
 
 	describe('constructor', () => {
 		it('should set constructor params on deployment', async () => {
-			const RWAONEETIX_TOTAL_SUPPLY = web3.utils.toWei('100000000');
+			const RWAONE_TOTAL_SUPPLY = web3.utils.toWei('100000000');
 			const instance = await setupContract({
 				contract: 'BaseRwaone',
 				accounts,
 				skipPostDeploy: true,
-				args: [account1, account2, owner, RWAONEETIX_TOTAL_SUPPLY, addressResolver.address],
+				args: [account1, account2, owner, RWAONE_TOTAL_SUPPLY, addressResolver.address],
 			});
 
 			assert.equal(await instance.proxy(), account1);
 			assert.equal(await instance.tokenState(), account2);
 			assert.equal(await instance.owner(), owner);
-			assert.equal(await instance.totalSupply(), RWAONEETIX_TOTAL_SUPPLY);
+			assert.equal(await instance.totalSupply(), RWAONE_TOTAL_SUPPLY);
 			assert.equal(await instance.resolver(), addressResolver.address);
 		});
 
 		it('should set constructor params on upgrade to new totalSupply', async () => {
-			const YEAR_2_RWAONEETIX_TOTAL_SUPPLY = web3.utils.toWei('175000000');
+			const YEAR_2_RWAONE_TOTAL_SUPPLY = web3.utils.toWei('175000000');
 			const instance = await setupContract({
 				contract: 'BaseRwaone',
 				accounts,
 				skipPostDeploy: true,
-				args: [account1, account2, owner, YEAR_2_RWAONEETIX_TOTAL_SUPPLY, addressResolver.address],
+				args: [account1, account2, owner, YEAR_2_RWAONE_TOTAL_SUPPLY, addressResolver.address],
 			});
 
 			assert.equal(await instance.proxy(), account1);
 			assert.equal(await instance.tokenState(), account2);
 			assert.equal(await instance.owner(), owner);
-			assert.equal(await instance.totalSupply(), YEAR_2_RWAONEETIX_TOTAL_SUPPLY);
+			assert.equal(await instance.totalSupply(), YEAR_2_RWAONE_TOTAL_SUPPLY);
 			assert.equal(await instance.resolver(), addressResolver.address);
 		});
 	});
@@ -261,9 +261,9 @@ contract('BaseRwaone', async accounts => {
 				reason: 'Only Exchanger can invoke this',
 			});
 		});
-		it('emitTribeExchange() cannot be invoked directly by any account', async () => {
+		it('emitRwaExchange() cannot be invoked directly by any account', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: baseRwaoneImpl.emitTribeExchange,
+				fnc: baseRwaoneImpl.emitRwaExchange,
 				accounts,
 				args: [account1, currencyKey1, amount1, currencyKey2, amount2, account2],
 				reason: 'Only Exchanger can invoke this',
@@ -286,7 +286,7 @@ contract('BaseRwaone', async accounts => {
 				tx2 = await baseRwaoneImpl.emitExchangeReclaim(account1, currencyKey1, amount1, {
 					from: exchanger,
 				});
-				tx3 = await baseRwaoneImpl.emitTribeExchange(
+				tx3 = await baseRwaoneImpl.emitRwaExchange(
 					account1,
 					currencyKey1,
 					amount1,
@@ -316,7 +316,7 @@ contract('BaseRwaone', async accounts => {
 						currencyKey: currencyKey1,
 						amount: amount1,
 					});
-					assert.eventEqual(tx3, 'TribeExchange', {
+					assert.eventEqual(tx3, 'RwaExchange', {
 						account: account1,
 						fromCurrencyKey: currencyKey1,
 						fromAmount: amount1,
@@ -429,7 +429,7 @@ contract('BaseRwaone', async accounts => {
 			beforeEach(async () => {
 				await updateRatesWithDefaults({ exchangeRates, owner, debtCache });
 
-				await baseRwaoneImpl.issueTribes(toUnit('100'), { from: owner });
+				await baseRwaoneImpl.issueRwas(toUnit('100'), { from: owner });
 				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), rETH, { from: owner });
 			});
 			it('then waiting period is true', async () => {
@@ -446,11 +446,11 @@ contract('BaseRwaone', async accounts => {
 		});
 	});
 
-	describe('anyTribeOrRWAXRateIsInvalid()', () => {
+	describe('anyRwaOrRWAXRateIsInvalid()', () => {
 		it('should have stale rates initially', async () => {
-			assert.equal(await baseRwaoneImpl.anyTribeOrRWAXRateIsInvalid(), true);
+			assert.equal(await baseRwaoneImpl.anyRwaOrRWAXRateIsInvalid(), true);
 		});
-		describe('when tribe rates set', () => {
+		describe('when rwa rates set', () => {
 			beforeEach(async () => {
 				// fast forward to get past initial wRWAX setting
 				await fastForward((await exchangeRates.rateStalePeriod()).add(web3.utils.toBN('300')));
@@ -464,17 +464,17 @@ contract('BaseRwaone', async accounts => {
 				await debtCache.takeDebtSnapshot();
 			});
 			it('should still have stale rates', async () => {
-				assert.equal(await baseRwaoneImpl.anyTribeOrRWAXRateIsInvalid(), true);
+				assert.equal(await baseRwaoneImpl.anyRwaOrRWAXRateIsInvalid(), true);
 			});
 			describe('when wRWAX is also set', () => {
 				beforeEach(async () => {
 					await updateAggregatorRates(exchangeRates, circuitBreaker, [wRWAX], ['1'].map(toUnit));
 				});
 				it('then no stale rates', async () => {
-					assert.equal(await baseRwaoneImpl.anyTribeOrRWAXRateIsInvalid(), false);
+					assert.equal(await baseRwaoneImpl.anyRwaOrRWAXRateIsInvalid(), false);
 				});
 
-				describe('when only some tribes are updated', () => {
+				describe('when only some rwas are updated', () => {
 					beforeEach(async () => {
 						await fastForward((await exchangeRates.rateStalePeriod()).add(web3.utils.toBN('300')));
 
@@ -486,8 +486,8 @@ contract('BaseRwaone', async accounts => {
 						);
 					});
 
-					it('then anyTribeOrRWAXRateIsInvalid() returns true', async () => {
-						assert.equal(await baseRwaoneImpl.anyTribeOrRWAXRateIsInvalid(), true);
+					it('then anyRwaOrRWAXRateIsInvalid() returns true', async () => {
+						assert.equal(await baseRwaoneImpl.anyRwaOrRWAXRateIsInvalid(), true);
 					});
 				});
 			});
@@ -539,7 +539,7 @@ contract('BaseRwaone', async accounts => {
 		});
 
 		beforeEach(async () => {
-			// Ensure all tribes have rates to allow issuance
+			// Ensure all rwas have rates to allow issuance
 			await updateRatesWithDefaults({ exchangeRates, owner, debtCache });
 		});
 
@@ -703,8 +703,8 @@ contract('BaseRwaone', async accounts => {
 				await baseRwaoneImpl.balanceOf(owner)
 			);
 
-			// Issue max tribes.
-			await baseRwaoneImpl.issueMaxTribes({ from: owner });
+			// Issue max rwas.
+			await baseRwaoneImpl.issueMaxRwas({ from: owner });
 
 			// Try to transfer 0.000000000000000001 wRWAX
 			await assert.revert(
@@ -769,8 +769,8 @@ contract('BaseRwaone', async accounts => {
 				value: toUnit('10'),
 			});
 
-			// Issue max tribes
-			await baseRwaoneImpl.issueMaxTribes({ from: owner });
+			// Issue max rwas
+			await baseRwaoneImpl.issueMaxRwas({ from: owner });
 
 			// Assert that transferFrom fails even for the smallest amount of wRWAX.
 			await assert.revert(
@@ -781,9 +781,9 @@ contract('BaseRwaone', async accounts => {
 			);
 		});
 
-		describe('when the user has issued some rUSD and exchanged for other tribes', () => {
+		describe('when the user has issued some rUSD and exchanged for other rwas', () => {
 			beforeEach(async () => {
-				await baseRwaoneImpl.issueTribes(toUnit('100'), { from: owner });
+				await baseRwaoneImpl.issueRwas(toUnit('100'), { from: owner });
 				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), rETH, { from: owner });
 				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), sAUD, { from: owner });
 				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), sEUR, { from: owner });
@@ -826,13 +826,13 @@ contract('BaseRwaone', async accounts => {
 			const ensureTransferReverts = async () => {
 				await assert.revert(
 					baseRwaoneProxy.transfer(account2, value, { from: account1 }),
-					'A tribe or wRWAX rate is invalid'
+					'A rwa or wRWAX rate is invalid'
 				);
 				await assert.revert(
 					baseRwaoneProxy.transferFrom(account2, account1, value, {
 						from: account3,
 					}),
-					'A tribe or wRWAX rate is invalid'
+					'A rwa or wRWAX rate is invalid'
 				);
 			};
 
@@ -859,8 +859,8 @@ contract('BaseRwaone', async accounts => {
 				beforeEach(async () => {
 					// ensure the accounts have a debt position
 					await Promise.all([
-						baseRwaoneImpl.issueTribes(toUnit('1'), { from: account1 }),
-						baseRwaoneImpl.issueTribes(toUnit('1'), { from: account2 }),
+						baseRwaoneImpl.issueRwas(toUnit('1'), { from: account1 }),
+						baseRwaoneImpl.issueRwas(toUnit('1'), { from: account2 }),
 					]);
 
 					// make aggregator debt info rate stale
@@ -872,7 +872,7 @@ contract('BaseRwaone', async accounts => {
 				it('should not allow transfer if the exchange rate for wRWAX is stale', async () => {
 					await ensureTransferReverts();
 
-					// now give some tribe rates
+					// now give some rwa rates
 					await aggregatorDebtRatio.setOverrideTimestamp(0);
 
 					await updateAggregatorRates(
@@ -885,7 +885,7 @@ contract('BaseRwaone', async accounts => {
 
 					await ensureTransferReverts();
 
-					// the remainder of the tribes have prices
+					// the remainder of the rwas have prices
 					await updateAggregatorRates(exchangeRates, circuitBreaker, [rETH], ['100'].map(toUnit));
 					await debtCache.takeDebtSnapshot();
 
@@ -930,7 +930,7 @@ contract('BaseRwaone', async accounts => {
 					});
 				});
 
-				it('should allow transfer if the exchange rate for any tribe is stale', async () => {
+				it('should allow transfer if the exchange rate for any rwa is stale', async () => {
 					// now wRWAX transfer should work
 					await baseRwaoneProxy.transfer(account2, value, { from: account1 });
 					await baseRwaoneProxy.transferFrom(account2, account1, value, {
@@ -962,7 +962,7 @@ contract('BaseRwaone', async accounts => {
 
 				describe('when the user has a debt position (i.e. has issued)', () => {
 					beforeEach(async () => {
-						await baseRwaoneImpl.issueTribes(toUnit('10'), { from: account1 });
+						await baseRwaoneImpl.issueRwas(toUnit('10'), { from: account1 });
 					});
 
 					it('should not allow transfer of rwaone in escrow', async () => {
@@ -984,7 +984,7 @@ contract('BaseRwaone', async accounts => {
 
 			// Issue
 			const amountIssued = toUnit('2000');
-			await baseRwaoneImpl.issueTribes(amountIssued, { from: account1 });
+			await baseRwaoneImpl.issueRwas(amountIssued, { from: account1 });
 
 			await assert.revert(
 				baseRwaoneProxy.transfer(account2, toUnit(issuedRwaones), {
@@ -1010,13 +1010,13 @@ contract('BaseRwaone', async accounts => {
 				from: owner,
 			});
 
-			const maxIssuableTribes = await baseRwaoneImpl.maxIssuableTribes(account1);
+			const maxIssuableRwas = await baseRwaoneImpl.maxIssuableRwas(account1);
 
 			// Issue
-			await baseRwaoneImpl.issueTribes(maxIssuableTribes, { from: account1 });
+			await baseRwaoneImpl.issueRwas(maxIssuableRwas, { from: account1 });
 
 			// Exchange into sEUR
-			await baseRwaoneImpl.exchange(rUSD, maxIssuableTribes, sEUR, { from: account1 });
+			await baseRwaoneImpl.exchange(rUSD, maxIssuableRwas, sEUR, { from: account1 });
 
 			// Ensure that we can transfer in and out of the account successfully
 			await baseRwaoneProxy.transfer(account1, toUnit('10000'), {
@@ -1058,9 +1058,9 @@ contract('BaseRwaone', async accounts => {
 			});
 
 			// Issue
-			const issuedTribes = await baseRwaoneImpl.maxIssuableTribes(account1);
-			await baseRwaoneImpl.issueTribes(issuedTribes, { from: account1 });
-			const remainingIssuable = (await baseRwaoneImpl.remainingIssuableTribes(account1))[0];
+			const issuedRwas = await baseRwaoneImpl.maxIssuableRwas(account1);
+			await baseRwaoneImpl.issueRwas(issuedRwas, { from: account1 });
+			const remainingIssuable = (await baseRwaoneImpl.remainingIssuableRwas(account1))[0];
 
 			assert.bnClose(remainingIssuable, '0');
 
@@ -1068,7 +1068,7 @@ contract('BaseRwaone', async accounts => {
 			assert.bnEqual(transferable1, '0');
 
 			// Exchange into sAUD
-			await baseRwaoneImpl.exchange(rUSD, issuedTribes, sAUD, { from: account1 });
+			await baseRwaoneImpl.exchange(rUSD, issuedRwas, sAUD, { from: account1 });
 
 			// Increase the value of sAUD relative to rwaone
 			const newAUDExchangeRate = toUnit('1');
@@ -1079,9 +1079,9 @@ contract('BaseRwaone', async accounts => {
 			assert.equal(transferable2.gt(toUnit('1000')), true);
 		});
 
-		describe('when the user has issued some rUSD and exchanged for other tribes', () => {
+		describe('when the user has issued some rUSD and exchanged for other rwas', () => {
 			beforeEach(async () => {
-				await baseRwaoneImpl.issueTribes(toUnit('100'), { from: owner });
+				await baseRwaoneImpl.issueRwas(toUnit('100'), { from: owner });
 				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), rETH, { from: owner });
 				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), sAUD, { from: owner });
 				await baseRwaoneImpl.exchange(rUSD, toUnit('10'), sEUR, { from: owner });

@@ -12,54 +12,54 @@ const {
 module.exports = async ({
 	account,
 	addressOf,
-	addNewTribes,
+	addNewRwas,
 	config,
 	deployer,
 	freshDeploy,
 	generateSolidity,
 	network,
-	tribes,
+	rwas,
 	systemSuspended,
 	useFork,
 	yes,
 }) => {
 	// ----------------
-	// Tribes
+	// Rwas
 	// ----------------
-	console.log(gray(`\n------ DEPLOY TRIBES ------\n`));
+	console.log(gray(`\n------ DEPLOY RWAS ------\n`));
 
 	const { Issuer, ReadProxyAddressResolver } = deployer.deployedContracts;
 
-	// The list of tribe to be added to the Issuer once dependencies have been set up
-	const tribesToAdd = [];
+	// The list of rwa to be added to the Issuer once dependencies have been set up
+	const rwasToAdd = [];
 
-	for (const { name: currencyKey, subclass } of tribes) {
-		console.log(gray(`\n   --- TRIBE ${currencyKey} ---\n`));
+	for (const { name: currencyKey, subclass } of rwas) {
+		console.log(gray(`\n   --- RWA ${currencyKey} ---\n`));
 
-		const tokenStateForTribe = await deployer.deployContract({
+		const tokenStateForRwa = await deployer.deployContract({
 			name: `TokenState${currencyKey}`,
 			source: 'TokenState',
 			args: [account, ZERO_ADDRESS],
-			force: addNewTribes,
+			force: addNewRwas,
 		});
 
-		const proxyForTribe = await deployer.deployContract({
+		const proxyForRwa = await deployer.deployContract({
 			name: `Proxy${currencyKey}`,
 			source: 'ProxyERC20',
 			args: [account],
-			force: addNewTribes,
+			force: addNewRwas,
 		});
 
 		const currencyKeyInBytes = toBytes32(currencyKey);
 
-		const tribeConfig = config[`Tribe${currencyKey}`] || {};
+		const rwaConfig = config[`Rwa${currencyKey}`] || {};
 
-		// track the original supply if we're deploying a new tribe contract for an existing tribe
+		// track the original supply if we're deploying a new rwa contract for an existing rwa
 		let originalTotalSupply = 0;
-		if (tribeConfig.deploy) {
+		if (rwaConfig.deploy) {
 			try {
-				const oldTribe = deployer.getExistingContract({ contract: `Tribe${currencyKey}` });
-				originalTotalSupply = await oldTribe.totalSupply();
+				const oldRwa = deployer.getExistingContract({ contract: `Rwa${currencyKey}` });
+				originalTotalSupply = await oldRwa.totalSupply();
 			} catch (err) {
 				if (!freshDeploy) {
 					// only throw if not local - allows local environments to handle both new
@@ -69,16 +69,16 @@ module.exports = async ({
 			}
 		}
 
-		// user confirm totalSupply is correct for oldTribe before deploy new Tribe
-		if (tribeConfig.deploy && originalTotalSupply > 0) {
+		// user confirm totalSupply is correct for oldRwa before deploy new Rwa
+		if (rwaConfig.deploy && originalTotalSupply > 0) {
 			if (!systemSuspended && !generateSolidity && !useFork) {
 				console.log(
 					yellow(
-						'⚠⚠⚠ WARNING: The system is not suspended! Adding a tribe here without using a migration contract is potentially problematic.'
+						'⚠⚠⚠ WARNING: The system is not suspended! Adding a rwa here without using a migration contract is potentially problematic.'
 					) +
 					yellow(
 						`⚠⚠⚠ Please confirm - ${network}:\n` +
-						`Tribe${currencyKey} totalSupply is ${originalTotalSupply} \n` +
+						`Rwa${currencyKey} totalSupply is ${originalTotalSupply} \n` +
 						'NOTE: Deploying with this amount is dangerous when the system is not already suspended'
 					),
 					gray('-'.repeat(50)) + '\n'
@@ -95,34 +95,34 @@ module.exports = async ({
 			}
 		}
 
-		const sourceContract = subclass || 'Tribe';
-		const tribe = await deployer.deployContract({
-			name: `Tribe${currencyKey}`,
+		const sourceContract = subclass || 'Rwa';
+		const rwa = await deployer.deployContract({
+			name: `Rwa${currencyKey}`,
 			source: sourceContract,
 			deps: [`TokenState${currencyKey}`, `Proxy${currencyKey}`, 'Rwaone', 'FeePool'],
 			args: [
-				addressOf(proxyForTribe),
-				addressOf(tokenStateForTribe),
-				`Tribe ${currencyKey}`,
+				addressOf(proxyForRwa),
+				addressOf(tokenStateForRwa),
+				`Rwa ${currencyKey}`,
 				currencyKey,
 				account,
 				currencyKeyInBytes,
 				originalTotalSupply,
 				addressOf(ReadProxyAddressResolver),
 			],
-			force: addNewTribes,
+			force: addNewRwas,
 		});
 
-		// Save the tribe to be added once the AddressResolver has been synced.
-		if (tribe && Issuer) {
-			tribesToAdd.push({
-				tribe,
+		// Save the rwa to be added once the AddressResolver has been synced.
+		if (rwa && Issuer) {
+			rwasToAdd.push({
+				rwa,
 				currencyKeyInBytes,
 			});
 		}
 	}
 
 	return {
-		tribesToAdd,
+		rwasToAdd,
 	};
 };

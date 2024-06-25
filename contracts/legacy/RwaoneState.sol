@@ -8,7 +8,7 @@ import "../interfaces/IRwaoneState.sol";
 // Libraries
 import "../SafeDecimalMath.sol";
 
-// https://docs.rwaone.io/contracts/source/contracts/tribeetixstate
+// https://docs.rwaone.io/contracts/source/contracts/rwaonestate
 contract RwaoneState is Owned, State, IRwaoneState {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -27,10 +27,10 @@ contract RwaoneState is Owned, State, IRwaoneState {
         uint debtEntryIndex;
     }
 
-    // Issued tribe balances for individual fee entitlements and exit price calculations
+    // Issued rwa balances for individual fee entitlements and exit price calculations
     mapping(address => IssuanceData) public issuanceData;
 
-    // The total count of people that have outstanding issued tribes in any flavour
+    // The total count of people that have outstanding issued rwas in any flavour
     uint public totalIssuerCount;
 
     // Global debt pool tracking

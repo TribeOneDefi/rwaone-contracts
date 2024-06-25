@@ -111,13 +111,13 @@ contract('PerpsV2Market PerpsV2MarketOffchainOrders', accounts => {
 			PerpsV2ExchangeRate: perpsV2ExchangeRate,
 			ExchangeRates: exchangeRates,
 			CircuitBreaker: circuitBreaker,
-			TriberUSD: rUSD,
+			RwarUSD: rUSD,
 			SystemSettings: systemSettings,
 			SystemStatus: systemStatus,
 			DebtCache: debtCache,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'rBTC', 'rETH'],
+			rwas: ['rUSD', 'rBTC', 'rETH'],
 			contracts: [
 				'FuturesMarketManager',
 				'PerpsV2MarketSettings',

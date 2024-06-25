@@ -59,7 +59,7 @@ contract BaseRewardEscrowV2Frozen is Owned, IRewardEscrowV2Frozen, LimitedSetup(
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
-    bytes32 private constant CONTRACT_RWAONEETIX = "Rwaone";
+    bytes32 private constant CONTRACT_RWAONE = "Rwaone";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_FEEPOOL = "FeePool";
 
@@ -76,7 +76,7 @@ contract BaseRewardEscrowV2Frozen is Owned, IRewardEscrowV2Frozen, LimitedSetup(
     }
 
     function rwaone() internal view returns (IRwaone) {
-        return IRwaone(requireAndGetAddress(CONTRACT_RWAONEETIX));
+        return IRwaone(requireAndGetAddress(CONTRACT_RWAONE));
     }
 
     function issuer() internal view returns (IIssuer) {
@@ -92,7 +92,7 @@ contract BaseRewardEscrowV2Frozen is Owned, IRewardEscrowV2Frozen, LimitedSetup(
     // Note: use public visibility so that it can be invoked in a subclass
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         addresses = new bytes32[](3);
-        addresses[0] = CONTRACT_RWAONEETIX;
+        addresses[0] = CONTRACT_RWAONE;
         addresses[1] = CONTRACT_FEEPOOL;
         addresses[2] = CONTRACT_ISSUER;
     }

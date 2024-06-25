@@ -110,7 +110,7 @@ contract('FuturesMarket', accounts => {
 			Exchanger: exchanger,
 			CircuitBreaker: circuitBreaker,
 			AddressResolver: addressResolver,
-			TriberUSD: rUSD,
+			RwarUSD: rUSD,
 			Rwaone: rwaone,
 			FeePool: feePool,
 			DebtCache: debtCache,
@@ -118,7 +118,7 @@ contract('FuturesMarket', accounts => {
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'rBTC', 'rETH'],
+			rwas: ['rUSD', 'rBTC', 'rETH'],
 			contracts: [
 				'FuturesMarketManager',
 				'FuturesMarketSettings',
@@ -151,9 +151,9 @@ contract('FuturesMarket', accounts => {
 			await rUSD.issue(t, traderInitialBalance);
 		}
 
-		// allow ownder to suspend system or tribes
+		// allow ownder to suspend system or rwas
 		await systemStatus.updateAccessControls(
-			[toBytes32('System'), toBytes32('Tribe')],
+			[toBytes32('System'), toBytes32('Rwa')],
 			[owner, owner],
 			[true, true],
 			[true, true],
@@ -798,19 +798,19 @@ contract('FuturesMarket', accounts => {
 			assert.bnClose((await futuresMarket.accessibleMargin(trader))[0], toBN('0'), toUnit('0.1'));
 		});
 
-		it('Reverts if the tribe is suspended', async () => {
+		it('Reverts if the rwa is suspended', async () => {
 			await futuresMarket.transferMargin(toUnit('1000'), { from: trader });
 
 			// suspend
-			await systemStatus.suspendTribe(baseAsset, 65, { from: owner });
+			await systemStatus.suspendRwa(baseAsset, 65, { from: owner });
 			// should revert
 			await assert.revert(
 				futuresMarket.transferMargin(toUnit('-1000'), { from: trader }),
-				'Tribe is suspended'
+				'Rwa is suspended'
 			);
 
 			// resume
-			await systemStatus.resumeTribe(baseAsset, { from: owner });
+			await systemStatus.resumeRwa(baseAsset, { from: owner });
 			// should work now
 			await futuresMarket.transferMargin(toUnit('-1000'), { from: trader });
 			assert.bnClose((await futuresMarket.accessibleMargin(trader))[0], toBN('0'), toUnit('0.1'));
@@ -985,7 +985,7 @@ contract('FuturesMarket', accounts => {
 			assert.bnEqual(position.lastPrice, price);
 		});
 
-		it('Cannot modify a position if the tribe is suspended', async () => {
+		it('Cannot modify a position if the rwa is suspended', async () => {
 			const margin = toUnit('1000');
 			await futuresMarket.transferMargin(margin, { from: trader });
 			const size = toUnit('10');
@@ -993,15 +993,15 @@ contract('FuturesMarket', accounts => {
 			await setPrice(baseAsset, price);
 
 			// suspend
-			await systemStatus.suspendTribe(baseAsset, 65, { from: owner });
+			await systemStatus.suspendRwa(baseAsset, 65, { from: owner });
 			// should revert modifying position
 			await assert.revert(
 				futuresMarket.modifyPosition(size, { from: trader }),
-				'Tribe is suspended'
+				'Rwa is suspended'
 			);
 
 			// resume
-			await systemStatus.resumeTribe(baseAsset, { from: owner });
+			await systemStatus.resumeRwa(baseAsset, { from: owner });
 			// should work now
 			await futuresMarket.modifyPosition(size, { from: trader });
 			const position = await futuresMarket.positions(trader);
@@ -2139,19 +2139,19 @@ contract('FuturesMarket', accounts => {
 					);
 				});
 
-				it('Reverts if the tribe is suspended', async () => {
+				it('Reverts if the rwa is suspended', async () => {
 					await futuresMarket.transferMargin(toUnit('1000'), { from: trader });
 
 					// suspend
-					await systemStatus.suspendTribe(baseAsset, 65, { from: owner });
+					await systemStatus.suspendRwa(baseAsset, 65, { from: owner });
 					// should revert
 					await assert.revert(
 						futuresMarket.withdrawAllMargin({ from: trader }),
-						'Tribe is suspended'
+						'Rwa is suspended'
 					);
 
 					// resume
-					await systemStatus.resumeTribe(baseAsset, { from: owner });
+					await systemStatus.resumeRwa(baseAsset, { from: owner });
 					// should work now
 					await futuresMarket.withdrawAllMargin({ from: trader });
 					assert.bnClose(
@@ -3122,7 +3122,7 @@ contract('FuturesMarket', accounts => {
 				assert.isTrue(await futuresMarket.canLiquidate(trader));
 			});
 
-			it('No liquidations while the tribe is suspended', async () => {
+			it('No liquidations while the rwa is suspended', async () => {
 				await setPrice(baseAsset, toUnit('250'));
 				await futuresMarket.transferMargin(toUnit('1000'), { from: trader });
 				await futuresMarket.modifyPosition(toUnit('20'), { from: trader });
@@ -3130,11 +3130,11 @@ contract('FuturesMarket', accounts => {
 				assert.isTrue(await futuresMarket.canLiquidate(trader));
 
 				// suspend
-				await systemStatus.suspendTribe(baseAsset, 65, { from: owner });
+				await systemStatus.suspendRwa(baseAsset, 65, { from: owner });
 				assert.isFalse(await futuresMarket.canLiquidate(trader));
 
 				// resume
-				await systemStatus.resumeTribe(baseAsset, { from: owner });
+				await systemStatus.resumeRwa(baseAsset, { from: owner });
 				// should work now
 				assert.isTrue(await futuresMarket.canLiquidate(trader));
 			});

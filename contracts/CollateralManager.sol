@@ -16,7 +16,7 @@ import "./CollateralManagerState.sol";
 import "./interfaces/IIssuer.sol";
 import "./interfaces/IExchangeRates.sol";
 import "./interfaces/IERC20.sol";
-import "./interfaces/ITribe.sol";
+import "./interfaces/IRwa.sol";
 
 contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver {
     /* ========== LIBRARIES ========== */
@@ -33,7 +33,7 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
 
     // Flexible storage names
     bytes32 public constant CONTRACT_NAME = "CollateralManager";
-    bytes32 internal constant COLLATERAL_RWAONES = "collateralTribe";
+    bytes32 internal constant COLLATERAL_RWAONES = "collateralRwa";
 
     /* ========== STATE VARIABLES ========== */
 
@@ -46,16 +46,16 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
     // The set of all available currency keys.
     Bytes32SetLib.Bytes32Set internal _currencyKeys;
 
-    // The set of all tribes issuable by the various collateral contracts
-    Bytes32SetLib.Bytes32Set internal _tribes;
+    // The set of all rwas issuable by the various collateral contracts
+    Bytes32SetLib.Bytes32Set internal _rwas;
 
-    // Map from currency key to tribe contract name.
-    mapping(bytes32 => bytes32) public tribesByKey;
+    // Map from currency key to rwa contract name.
+    mapping(bytes32 => bytes32) public rwasByKey;
 
-    // The set of all tribes that are shortable.
-    Bytes32SetLib.Bytes32Set internal _shortableTribes;
+    // The set of all rwas that are shortable.
+    Bytes32SetLib.Bytes32Set internal _shortableRwas;
 
-    mapping(bytes32 => bytes32) public shortableTribesByKey;
+    mapping(bytes32 => bytes32) public shortableRwasByKey;
 
     // The factor that will scale the utilisation ratio.
     uint public utilisationMultiplier = 1e18;
@@ -108,28 +108,28 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         staticAddresses[1] = CONTRACT_EXRATES;
 
         bytes32[] memory shortAddresses;
-        uint length = _shortableTribes.elements.length;
+        uint length = _shortableRwas.elements.length;
 
         if (length > 0) {
             shortAddresses = new bytes32[](length);
 
             for (uint i = 0; i < length; i++) {
-                shortAddresses[i] = _shortableTribes.elements[i];
+                shortAddresses[i] = _shortableRwas.elements[i];
             }
         }
 
-        bytes32[] memory tribeAddresses = combineArrays(shortAddresses, _tribes.elements);
+        bytes32[] memory rwaAddresses = combineArrays(shortAddresses, _rwas.elements);
 
-        if (tribeAddresses.length > 0) {
-            addresses = combineArrays(tribeAddresses, staticAddresses);
+        if (rwaAddresses.length > 0) {
+            addresses = combineArrays(rwaAddresses, staticAddresses);
         } else {
             addresses = staticAddresses;
         }
     }
 
-    // helper function to check whether tribe "by key" is a collateral issued by multi-collateral
-    function isTribeManaged(bytes32 currencyKey) external view returns (bool) {
-        return tribesByKey[currencyKey] != bytes32(0);
+    // helper function to check whether rwa "by key" is a collateral issued by multi-collateral
+    function isRwaManaged(bytes32 currencyKey) external view returns (bool) {
+        return rwasByKey[currencyKey] != bytes32(0);
     }
 
     /* ---------- Related Contracts ---------- */
@@ -142,8 +142,8 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         return IExchangeRates(requireAndGetAddress(CONTRACT_EXRATES));
     }
 
-    function _tribe(bytes32 tribeName) internal view returns (ITribe) {
-        return ITribe(requireAndGetAddress(tribeName));
+    function _rwa(bytes32 rwaName) internal view returns (IRwa) {
+        return IRwa(requireAndGetAddress(rwaName));
     }
 
     /* ---------- Manager Information ---------- */
@@ -163,25 +163,25 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
 
     /* ---------- State Information ---------- */
 
-    function long(bytes32 tribe) external view returns (uint amount) {
-        return state.long(tribe);
+    function long(bytes32 rwa) external view returns (uint amount) {
+        return state.long(rwa);
     }
 
-    function short(bytes32 tribe) external view returns (uint amount) {
-        return state.short(tribe);
+    function short(bytes32 rwa) external view returns (uint amount) {
+        return state.short(rwa);
     }
 
     function totalLong() public view returns (uint rusdValue, bool anyRateIsInvalid) {
-        bytes32[] memory tribes = _currencyKeys.elements;
+        bytes32[] memory rwas = _currencyKeys.elements;
 
-        if (tribes.length > 0) {
-            for (uint i = 0; i < tribes.length; i++) {
-                bytes32 tribe = tribes[i];
-                if (tribe == rUSD) {
-                    rusdValue = rusdValue.add(state.long(tribe));
+        if (rwas.length > 0) {
+            for (uint i = 0; i < rwas.length; i++) {
+                bytes32 rwa = rwas[i];
+                if (rwa == rUSD) {
+                    rusdValue = rusdValue.add(state.long(rwa));
                 } else {
-                    (uint rate, bool invalid) = _exchangeRates().rateAndInvalid(tribe);
-                    uint amount = state.long(tribe).multiplyDecimal(rate);
+                    (uint rate, bool invalid) = _exchangeRates().rateAndInvalid(rwa);
+                    uint amount = state.long(rwa).multiplyDecimal(rate);
                     rusdValue = rusdValue.add(amount);
                     if (invalid) {
                         anyRateIsInvalid = true;
@@ -192,13 +192,13 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
     }
 
     function totalShort() public view returns (uint rusdValue, bool anyRateIsInvalid) {
-        bytes32[] memory tribes = _shortableTribes.elements;
+        bytes32[] memory rwas = _shortableRwas.elements;
 
-        if (tribes.length > 0) {
-            for (uint i = 0; i < tribes.length; i++) {
-                bytes32 tribe = _tribe(tribes[i]).currencyKey();
-                (uint rate, bool invalid) = _exchangeRates().rateAndInvalid(tribe);
-                uint amount = state.short(tribe).multiplyDecimal(rate);
+        if (rwas.length > 0) {
+            for (uint i = 0; i < rwas.length; i++) {
+                bytes32 rwa = _rwa(rwas[i]).currencyKey();
+                (uint rate, bool invalid) = _exchangeRates().rateAndInvalid(rwa);
+                uint amount = state.short(rwa).multiplyDecimal(rate);
                 rusdValue = rusdValue.add(amount);
                 if (invalid) {
                     anyRateIsInvalid = true;
@@ -225,7 +225,7 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
 
     function getBorrowRate() public view returns (uint borrowRate, bool anyRateIsInvalid) {
         // get the snx backed debt.
-        uint snxDebt = _issuer().totalIssuedTribes(rUSD, true);
+        uint snxDebt = _issuer().totalIssuedRwas(rUSD, true);
 
         // now get the non snx backed debt.
         (uint nonSnxDebt, bool ratesInvalid) = totalLong();
@@ -245,12 +245,12 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         anyRateIsInvalid = ratesInvalid;
     }
 
-    function getShortRate(bytes32 tribeKey) public view returns (uint shortRate, bool rateIsInvalid) {
-        rateIsInvalid = _exchangeRates().rateIsInvalid(tribeKey);
+    function getShortRate(bytes32 rwaKey) public view returns (uint shortRate, bool rateIsInvalid) {
+        rateIsInvalid = _exchangeRates().rateIsInvalid(rwaKey);
 
         // Get the long and short supply.
-        uint longSupply = IERC20(address(_tribe(shortableTribesByKey[tribeKey]))).totalSupply();
-        uint shortSupply = state.short(tribeKey);
+        uint longSupply = IERC20(address(_rwa(shortableRwasByKey[rwaKey]))).totalSupply();
+        uint shortSupply = state.short(rwaKey);
 
         // In this case, the market is skewed long so its free to short.
         if (longSupply > shortSupply) {
@@ -348,35 +348,35 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         }
     }
 
-    function addTribes(bytes32[] calldata tribeNamesInResolver, bytes32[] calldata tribeKeys) external onlyOwner {
-        require(tribeNamesInResolver.length == tribeKeys.length, "Input array length mismatch");
+    function addRwas(bytes32[] calldata rwaNamesInResolver, bytes32[] calldata rwaKeys) external onlyOwner {
+        require(rwaNamesInResolver.length == rwaKeys.length, "Input array length mismatch");
 
-        for (uint i = 0; i < tribeNamesInResolver.length; i++) {
-            if (!_tribes.contains(tribeNamesInResolver[i])) {
-                bytes32 tribeName = tribeNamesInResolver[i];
-                _tribes.add(tribeName);
-                _currencyKeys.add(tribeKeys[i]);
-                tribesByKey[tribeKeys[i]] = tribeName;
-                emit TribeAdded(tribeName);
+        for (uint i = 0; i < rwaNamesInResolver.length; i++) {
+            if (!_rwas.contains(rwaNamesInResolver[i])) {
+                bytes32 rwaName = rwaNamesInResolver[i];
+                _rwas.add(rwaName);
+                _currencyKeys.add(rwaKeys[i]);
+                rwasByKey[rwaKeys[i]] = rwaName;
+                emit RwaAdded(rwaName);
             }
         }
 
         rebuildCache();
     }
 
-    function areTribesAndCurrenciesSet(
-        bytes32[] calldata requiredTribeNamesInResolver,
-        bytes32[] calldata tribeKeys
+    function areRwasAndCurrenciesSet(
+        bytes32[] calldata requiredRwaNamesInResolver,
+        bytes32[] calldata rwaKeys
     ) external view returns (bool) {
-        if (_tribes.elements.length != requiredTribeNamesInResolver.length) {
+        if (_rwas.elements.length != requiredRwaNamesInResolver.length) {
             return false;
         }
 
-        for (uint i = 0; i < requiredTribeNamesInResolver.length; i++) {
-            if (!_tribes.contains(requiredTribeNamesInResolver[i])) {
+        for (uint i = 0; i < requiredRwaNamesInResolver.length; i++) {
+            if (!_rwas.contains(requiredRwaNamesInResolver[i])) {
                 return false;
             }
-            if (tribesByKey[tribeKeys[i]] != requiredTribeNamesInResolver[i]) {
+            if (rwasByKey[rwaKeys[i]] != requiredRwaNamesInResolver[i]) {
                 return false;
             }
         }
@@ -384,59 +384,56 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         return true;
     }
 
-    function removeTribes(bytes32[] calldata tribeNamesInResolver, bytes32[] calldata tribeKeys) external onlyOwner {
-        require(tribeNamesInResolver.length == tribeKeys.length, "Input array length mismatch");
+    function removeRwas(bytes32[] calldata rwaNamesInResolver, bytes32[] calldata rwaKeys) external onlyOwner {
+        require(rwaNamesInResolver.length == rwaKeys.length, "Input array length mismatch");
 
-        for (uint i = 0; i < tribeNamesInResolver.length; i++) {
-            if (_tribes.contains(tribeNamesInResolver[i])) {
+        for (uint i = 0; i < rwaNamesInResolver.length; i++) {
+            if (_rwas.contains(rwaNamesInResolver[i])) {
                 // Remove it from the the address set lib.
-                _tribes.remove(tribeNamesInResolver[i]);
-                _currencyKeys.remove(tribeKeys[i]);
-                delete tribesByKey[tribeKeys[i]];
+                _rwas.remove(rwaNamesInResolver[i]);
+                _currencyKeys.remove(rwaKeys[i]);
+                delete rwasByKey[rwaKeys[i]];
 
-                emit TribeRemoved(tribeNamesInResolver[i]);
+                emit RwaRemoved(rwaNamesInResolver[i]);
             }
         }
     }
 
-    function addShortableTribes(
-        bytes32[] calldata requiredTribeNamesInResolver,
-        bytes32[] calldata tribeKeys
-    ) external onlyOwner {
-        require(requiredTribeNamesInResolver.length == tribeKeys.length, "Input array length mismatch");
+    function addShortableRwas(bytes32[] calldata requiredRwaNamesInResolver, bytes32[] calldata rwaKeys) external onlyOwner {
+        require(requiredRwaNamesInResolver.length == rwaKeys.length, "Input array length mismatch");
 
-        for (uint i = 0; i < requiredTribeNamesInResolver.length; i++) {
-            bytes32 tribe = requiredTribeNamesInResolver[i];
+        for (uint i = 0; i < requiredRwaNamesInResolver.length; i++) {
+            bytes32 rwa = requiredRwaNamesInResolver[i];
 
-            if (!_shortableTribes.contains(tribe)) {
+            if (!_shortableRwas.contains(rwa)) {
                 // Add it to the address set lib.
-                _shortableTribes.add(tribe);
+                _shortableRwas.add(rwa);
 
-                shortableTribesByKey[tribeKeys[i]] = tribe;
+                shortableRwasByKey[rwaKeys[i]] = rwa;
 
-                emit ShortableTribeAdded(tribe);
+                emit ShortableRwaAdded(rwa);
 
-                // now the associated tribe key to the CollateralManagerState
-                state.addShortCurrency(tribeKeys[i]);
+                // now the associated rwa key to the CollateralManagerState
+                state.addShortCurrency(rwaKeys[i]);
             }
         }
 
         rebuildCache();
     }
 
-    function areShortableTribesSet(
-        bytes32[] calldata requiredTribeNamesInResolver,
-        bytes32[] calldata tribeKeys
+    function areShortableRwasSet(
+        bytes32[] calldata requiredRwaNamesInResolver,
+        bytes32[] calldata rwaKeys
     ) external view returns (bool) {
-        require(requiredTribeNamesInResolver.length == tribeKeys.length, "Input array length mismatch");
+        require(requiredRwaNamesInResolver.length == rwaKeys.length, "Input array length mismatch");
 
-        if (_shortableTribes.elements.length != requiredTribeNamesInResolver.length) {
+        if (_shortableRwas.elements.length != requiredRwaNamesInResolver.length) {
             return false;
         }
 
         // now check everything added to external state contract
-        for (uint i = 0; i < tribeKeys.length; i++) {
-            if (state.getShortRatesLength(tribeKeys[i]) == 0) {
+        for (uint i = 0; i < rwaKeys.length; i++) {
+            if (state.getShortRatesLength(rwaKeys[i]) == 0) {
                 return false;
             }
         }
@@ -444,19 +441,19 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         return true;
     }
 
-    function removeShortableTribes(bytes32[] calldata tribes) external onlyOwner {
-        for (uint i = 0; i < tribes.length; i++) {
-            if (_shortableTribes.contains(tribes[i])) {
+    function removeShortableRwas(bytes32[] calldata rwas) external onlyOwner {
+        for (uint i = 0; i < rwas.length; i++) {
+            if (_shortableRwas.contains(rwas[i])) {
                 // Remove it from the the address set lib.
-                _shortableTribes.remove(tribes[i]);
+                _shortableRwas.remove(rwas[i]);
 
-                bytes32 tribeKey = _tribe(tribes[i]).currencyKey();
+                bytes32 rwaKey = _rwa(rwas[i]).currencyKey();
 
-                delete shortableTribesByKey[tribeKey];
+                delete shortableRwasByKey[rwaKey];
 
-                state.removeShortCurrency(tribeKey);
+                state.removeShortCurrency(rwaKey);
 
-                emit ShortableTribeRemoved(tribes[i]);
+                emit ShortableRwaRemoved(rwas[i]);
             }
         }
     }
@@ -479,20 +476,20 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         state.updateShortRates(currency, rate);
     }
 
-    function incrementLongs(bytes32 tribe, uint amount) external onlyCollateral {
-        state.incrementLongs(tribe, amount);
+    function incrementLongs(bytes32 rwa, uint amount) external onlyCollateral {
+        state.incrementLongs(rwa, amount);
     }
 
-    function decrementLongs(bytes32 tribe, uint amount) external onlyCollateral {
-        state.decrementLongs(tribe, amount);
+    function decrementLongs(bytes32 rwa, uint amount) external onlyCollateral {
+        state.decrementLongs(rwa, amount);
     }
 
-    function incrementShorts(bytes32 tribe, uint amount) external onlyCollateral {
-        state.incrementShorts(tribe, amount);
+    function incrementShorts(bytes32 rwa, uint amount) external onlyCollateral {
+        state.incrementShorts(rwa, amount);
     }
 
-    function decrementShorts(bytes32 tribe, uint amount) external onlyCollateral {
-        state.decrementShorts(tribe, amount);
+    function decrementShorts(bytes32 rwa, uint amount) external onlyCollateral {
+        state.decrementShorts(rwa, amount);
     }
 
     function accrueInterest(
@@ -545,9 +542,9 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
     event CollateralAdded(address collateral);
     event CollateralRemoved(address collateral);
 
-    event TribeAdded(bytes32 tribe);
-    event TribeRemoved(bytes32 tribe);
+    event RwaAdded(bytes32 rwa);
+    event RwaRemoved(bytes32 rwa);
 
-    event ShortableTribeAdded(bytes32 tribe);
-    event ShortableTribeRemoved(bytes32 tribe);
+    event ShortableRwaAdded(bytes32 rwa);
+    event ShortableRwaRemoved(bytes32 rwa);
 }

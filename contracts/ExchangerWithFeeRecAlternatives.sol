@@ -9,9 +9,9 @@ import "./interfaces/IAddressResolver.sol";
 import "./interfaces/IDirectIntegrationManager.sol";
 import "./interfaces/IERC20.sol";
 
-interface IVirtualTribeInternal {
+interface IVirtualRwaInternal {
     function initialize(
-        IERC20 _tribe,
+        IERC20 _rwa,
         IAddressResolver _resolver,
         address _recipient,
         uint _amount,
@@ -36,7 +36,7 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
-    bytes32 private constant CONTRACT_VIRTUALRWAONE_MASTERCOPY = "VirtualTribeMastercopy";
+    bytes32 private constant CONTRACT_VIRTUALRWAONE_MASTERCOPY = "VirtualRwaMastercopy";
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = Exchanger.resolverAddressesRequired();
@@ -99,7 +99,7 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
         address destinationAddress,
         bytes32 trackingCode,
         uint minAmount
-    ) external onlyRwaoneorTribe returns (uint amountReceived) {
+    ) external onlyRwaoneorRwa returns (uint amountReceived) {
         uint fee;
         (amountReceived, fee) = _exchangeAtomically(
             from,
@@ -120,26 +120,26 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
 
     /* ========== INTERNAL FUNCTIONS ========== */
 
-    function _virtualTribeMastercopy() internal view returns (address) {
+    function _virtualRwaMastercopy() internal view returns (address) {
         return requireAndGetAddress(CONTRACT_VIRTUALRWAONE_MASTERCOPY);
     }
 
-    function _createVirtualTribe(
-        IERC20 tribe,
+    function _createVirtualRwa(
+        IERC20 rwa,
         address recipient,
         uint amount,
         bytes32 currencyKey
-    ) internal returns (IVirtualTribe) {
-        // prevent inverse tribes from being allowed due to purgeability
-        require(currencyKey[0] != 0x69, "Cannot virtualize this tribe");
+    ) internal returns (IVirtualRwa) {
+        // prevent inverse rwas from being allowed due to purgeability
+        require(currencyKey[0] != 0x69, "Cannot virtualize this rwa");
 
-        IVirtualTribeInternal vTribe = IVirtualTribeInternal(
-            _cloneAsMinimalProxy(_virtualTribeMastercopy(), "Could not create new vTribe")
+        IVirtualRwaInternal vRwa = IVirtualRwaInternal(
+            _cloneAsMinimalProxy(_virtualRwaMastercopy(), "Could not create new vRwa")
         );
-        vTribe.initialize(tribe, resolver, recipient, amount, currencyKey);
-        emit VirtualTribeCreated(address(tribe), recipient, address(vTribe), currencyKey, amount);
+        vRwa.initialize(rwa, resolver, recipient, amount, currencyKey);
+        emit VirtualRwaCreated(address(rwa), recipient, address(vRwa), currencyKey, amount);
 
-        return IVirtualTribe(address(vTribe));
+        return IVirtualRwa(address(vRwa));
     }
 
     function _exchangeAtomically(
@@ -167,8 +167,8 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
             if (!_ensureCanExchange(sourceCurrencyKey, destinationCurrencyKey, sourceAmount)) {
                 return (0, 0);
             }
-            require(!exchangeRates().tribeTooVolatileForAtomicExchange(sourceSettings), "Src tribe too volatile");
-            require(!exchangeRates().tribeTooVolatileForAtomicExchange(destinationSettings), "Dest tribe too volatile");
+            require(!exchangeRates().rwaTooVolatileForAtomicExchange(sourceSettings), "Src rwa too volatile");
+            require(!exchangeRates().rwaTooVolatileForAtomicExchange(destinationSettings), "Dest rwa too volatile");
 
             sourceAmountAfterSettlement = _settleAndCalcSourceAmountRemaining(sourceAmount, from, sourceCurrencyKey);
 
@@ -183,7 +183,7 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
 
             uint systemConvertedAmount;
 
-            // Note: also ensures the given tribes are allowed to be atomically exchanged
+            // Note: also ensures the given rwas are allowed to be atomically exchanged
             (
                 amountReceived, // output amount with fee taken out (denominated in dest currency)
                 fee, // fee amount (denominated in dest currency)
@@ -210,7 +210,7 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
                 // Use after-settled amount as this is amount converted (not sourceAmount)
                 sourceSusdValue = sourceAmountAfterSettlement;
             } else if (destinationCurrencyKey == rUSD) {
-                // In this case the systemConvertedAmount would be the fee-free rUSD value of the source tribe
+                // In this case the systemConvertedAmount would be the fee-free rUSD value of the source rwa
                 sourceSusdValue = systemConvertedAmount;
             } else {
                 // Otherwise, convert source to rUSD value
@@ -237,7 +237,7 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
             destinationCurrencyKey,
             amountReceived,
             destinationAddress,
-            false // no vtribes
+            false // no vrwas
         );
 
         // Remit the fee if required
@@ -247,7 +247,7 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
             fee = exchangeRates().effectiveValue(destinationCurrencyKey, fee, rUSD);
 
             // Remit the fee in rUSDs
-            issuer().tribes(rUSD).issue(feePool().FEE_ADDRESS(), fee);
+            issuer().rwas(rUSD).issue(feePool().FEE_ADDRESS(), fee);
 
             // Tell the fee pool about this
             feePool().recordFeePaid(fee);
@@ -257,7 +257,7 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
 
         // Note: this update of the debt snapshot will not be accurate because the atomic exchange
         // was executed with a different rate than the system rate. To be perfect, issuance data,
-        // priced in system rates, should have been adjusted on the src and dest tribe.
+        // priced in system rates, should have been adjusted on the src and dest rwa.
         // The debt pool is expected to be deprecated soon, and so we don't bother with being
         // perfect here. For now, an inaccuracy will slowly accrue over time with increasing atomic
         // exchange volume.
@@ -266,8 +266,8 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
             [systemSourceRate, systemDestinationRate]
         );
 
-        // Let the DApps know there was a Tribe exchange
-        IRwaoneInternal(address(rwaone())).emitTribeExchange(
+        // Let the DApps know there was a Rwa exchange
+        IRwaoneInternal(address(rwaone())).emitRwaExchange(
             from,
             sourceCurrencyKey,
             sourceAmountAfterSettlement,
@@ -277,7 +277,7 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
         );
 
         // Emit separate event to track atomic exchanges
-        IRwaoneInternal(address(rwaone())).emitAtomicTribeExchange(
+        IRwaoneInternal(address(rwaone())).emitAtomicRwaExchange(
             from,
             sourceCurrencyKey,
             sourceAmountAfterSettlement,
@@ -341,11 +341,5 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
         fee = destinationAmount.sub(amountReceived);
     }
 
-    event VirtualTribeCreated(
-        address indexed tribe,
-        address indexed recipient,
-        address vTribe,
-        bytes32 currencyKey,
-        uint amount
-    );
+    event VirtualRwaCreated(address indexed rwa, address indexed recipient, address vRwa, bytes32 currencyKey, uint amount);
 }

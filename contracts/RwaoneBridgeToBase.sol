@@ -11,7 +11,7 @@ import "@eth-optimism/contracts/iOVM/bridge/tokens/iOVM_L1TokenGateway.sol";
 
 contract RwaoneBridgeToBase is BaseRwaoneBridge, IRwaoneBridgeToBase, iOVM_L2DepositedToken {
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
-    bytes32 private constant CONTRACT_BASE_RWAONEETIXBRIDGETOOPTIMISM = "base:RwaoneBridgeToOptimism";
+    bytes32 private constant CONTRACT_BASE_RWAONEBRIDGETOOPTIMISM = "base:RwaoneBridgeToOptimism";
 
     function CONTRACT_NAME() public pure returns (bytes32) {
         return "RwaoneBridgeToBase";
@@ -23,12 +23,12 @@ contract RwaoneBridgeToBase is BaseRwaoneBridge, IRwaoneBridgeToBase, iOVM_L2Dep
 
     // ========== INTERNALS ============
 
-    function tribeetixBridgeToOptimism() internal view returns (address) {
-        return requireAndGetAddress(CONTRACT_BASE_RWAONEETIXBRIDGETOOPTIMISM);
+    function rwaoneBridgeToOptimism() internal view returns (address) {
+        return requireAndGetAddress(CONTRACT_BASE_RWAONEBRIDGETOOPTIMISM);
     }
 
     function counterpart() internal view returns (address) {
-        return tribeetixBridgeToOptimism();
+        return rwaoneBridgeToOptimism();
     }
 
     // ========== VIEWS ==========
@@ -36,7 +36,7 @@ contract RwaoneBridgeToBase is BaseRwaoneBridge, IRwaoneBridgeToBase, iOVM_L2Dep
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = BaseRwaoneBridge.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](1);
-        newAddresses[0] = CONTRACT_BASE_RWAONEETIXBRIDGETOOPTIMISM;
+        newAddresses[0] = CONTRACT_BASE_RWAONEBRIDGETOOPTIMISM;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -63,7 +63,7 @@ contract RwaoneBridgeToBase is BaseRwaoneBridge, IRwaoneBridgeToBase, iOVM_L2Dep
 
         // relay the message to Bridge on L1 via L2 Messenger
         messenger().sendMessage(
-            tribeetixBridgeToOptimism(),
+            rwaoneBridgeToOptimism(),
             messageData,
             uint32(getCrossDomainMessageGasLimit(CrossDomainMessageGasLimits.Withdrawal))
         );

@@ -14,13 +14,13 @@ const {
 contract('RwaoneBridgeToBase (spec tests) @ovm-skip', accounts => {
 	const [, owner, user, randomAddress] = accounts;
 
-	let mintableRwaone, tribeetixBridgeToBase, systemSettings;
+	let mintableRwaone, rwaoneBridgeToBase, systemSettings;
 
 	describe('when deploying the system', () => {
 		before('deploy all contracts', async () => {
 			({
 				Rwaone: mintableRwaone, // we request Rwaone instead of MintableRwaone because it is renamed in setup.js
-				RwaoneBridgeToBase: tribeetixBridgeToBase,
+				RwaoneBridgeToBase: rwaoneBridgeToBase,
 				SystemSettings: systemSettings,
 			} = await setupAllContracts({
 				accounts,
@@ -31,14 +31,14 @@ contract('RwaoneBridgeToBase (spec tests) @ovm-skip', accounts => {
 		describe('when a user does not have the required balance', () => {
 			it('withdraw() should fail', async () => {
 				await assert.revert(
-					tribeetixBridgeToBase.withdraw('1', { from: user }),
+					rwaoneBridgeToBase.withdraw('1', { from: user }),
 					'Not enough transferable wRWAX'
 				);
 			});
 
 			it('withdrawTo() should fail', async () => {
 				await assert.revert(
-					tribeetixBridgeToBase.withdrawTo(randomAddress, '1', { from: user }),
+					rwaoneBridgeToBase.withdrawTo(randomAddress, '1', { from: user }),
 					'Not enough transferable wRWAX'
 				);
 			});
@@ -75,7 +75,7 @@ contract('RwaoneBridgeToBase (spec tests) @ovm-skip', accounts => {
 				});
 
 				before('initiate a withdrawal', async () => {
-					await tribeetixBridgeToBase.withdraw(amountToWithdraw, {
+					await rwaoneBridgeToBase.withdraw(amountToWithdraw, {
 						from: owner,
 					});
 				});
@@ -98,7 +98,7 @@ contract('RwaoneBridgeToBase (spec tests) @ovm-skip', accounts => {
 				});
 
 				before('initiate a withdrawal', async () => {
-					await tribeetixBridgeToBase.withdrawTo(randomAddress, amountToWithdraw, {
+					await rwaoneBridgeToBase.withdrawTo(randomAddress, amountToWithdraw, {
 						from: owner,
 					});
 				});

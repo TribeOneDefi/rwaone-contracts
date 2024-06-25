@@ -7,7 +7,7 @@ contract EmptyEtherWrapper {
 
     /* ========== VIEWS ========== */
 
-    function totalIssuedTribes() public view returns (uint) {
+    function totalIssuedRwas() public view returns (uint) {
         return 0;
     }
 

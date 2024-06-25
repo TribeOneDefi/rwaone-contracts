@@ -1,18 +1,18 @@
 pragma solidity >=0.4.24;
 
-import "./ITribe.sol";
-import "./IVirtualTribe.sol";
+import "./IRwa.sol";
+import "./IVirtualRwa.sol";
 
-// https://docs.rwaone.io/contracts/source/interfaces/itribeetix
+// https://docs.rwaone.io/contracts/source/interfaces/irwaone
 interface IRwaone {
     // Views
-    function anyTribeOrRWAXRateIsInvalid() external view returns (bool anyRateInvalid);
+    function anyRwaOrRWAXRateIsInvalid() external view returns (bool anyRateInvalid);
 
     function availableCurrencyKeys() external view returns (bytes32[] memory);
 
-    function availableTribeCount() external view returns (uint);
+    function availableRwaCount() external view returns (uint);
 
-    function availableTribes(uint index) external view returns (ITribe);
+    function availableRwas(uint index) external view returns (IRwa);
 
     function collateral(address account) external view returns (uint);
 
@@ -22,32 +22,32 @@ interface IRwaone {
 
     function isWaitingPeriod(bytes32 currencyKey) external view returns (bool);
 
-    function maxIssuableTribes(address issuer) external view returns (uint maxIssuable);
+    function maxIssuableRwas(address issuer) external view returns (uint maxIssuable);
 
-    function remainingIssuableTribes(
+    function remainingIssuableRwas(
         address issuer
     ) external view returns (uint maxIssuable, uint alreadyIssued, uint totalSystemDebt);
 
-    function tribes(bytes32 currencyKey) external view returns (ITribe);
+    function rwas(bytes32 currencyKey) external view returns (IRwa);
 
-    function tribesByAddress(address tribeAddress) external view returns (bytes32);
+    function rwasByAddress(address rwaAddress) external view returns (bytes32);
 
-    function totalIssuedTribes(bytes32 currencyKey) external view returns (uint);
+    function totalIssuedRwas(bytes32 currencyKey) external view returns (uint);
 
-    function totalIssuedTribesExcludeOtherCollateral(bytes32 currencyKey) external view returns (uint);
+    function totalIssuedRwasExcludeOtherCollateral(bytes32 currencyKey) external view returns (uint);
 
     function transferableRwaone(address account) external view returns (uint transferable);
 
     function getFirstNonZeroEscrowIndex(address account) external view returns (uint);
 
     // Mutative Functions
-    function burnTribes(uint amount) external;
+    function burnRwas(uint amount) external;
 
-    function burnTribesOnBehalf(address burnForAddress, uint amount) external;
+    function burnRwasOnBehalf(address burnForAddress, uint amount) external;
 
-    function burnTribesToTarget() external;
+    function burnRwasToTarget() external;
 
-    function burnTribesToTargetOnBehalf(address burnForAddress) external;
+    function burnRwasToTargetOnBehalf(address burnForAddress) external;
 
     function exchange(
         bytes32 sourceCurrencyKey,
@@ -92,7 +92,7 @@ interface IRwaone {
         uint sourceAmount,
         bytes32 destinationCurrencyKey,
         bytes32 trackingCode
-    ) external returns (uint amountReceived, IVirtualTribe vTribe);
+    ) external returns (uint amountReceived, IVirtualRwa vRwa);
 
     function exchangeAtomically(
         bytes32 sourceCurrencyKey,
@@ -102,13 +102,13 @@ interface IRwaone {
         uint minAmount
     ) external returns (uint amountReceived);
 
-    function issueMaxTribes() external;
+    function issueMaxRwas() external;
 
-    function issueMaxTribesOnBehalf(address issueForAddress) external;
+    function issueMaxRwasOnBehalf(address issueForAddress) external;
 
-    function issueTribes(uint amount) external;
+    function issueRwas(uint amount) external;
 
-    function issueTribesOnBehalf(address issueForAddress, uint amount) external;
+    function issueRwasOnBehalf(address issueForAddress, uint amount) external;
 
     function mint() external returns (bool);
 

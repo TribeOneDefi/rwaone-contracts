@@ -70,7 +70,7 @@
 					"FeePool",
 					"Issuer",
 					"DebtCache",
-					"Tribe(s|i).+",
+					"Rwa(s|i).+",
 					"SignedSafeDecimalMath",
 					"SystemStatus",
 					"FuturesMarketManager"
@@ -82,7 +82,7 @@
 					"FeePool",
 					"Issuer",
 					"DebtCache",
-					"Tribe(s|i).+",
+					"Rwa(s|i).+",
 					"SignedSafeDecimalMath",
 					"SystemStatus",
 					"FuturesMarket.+",
@@ -103,7 +103,7 @@
 			"sip": 85,
 			"layer": "base",
 			"released": "base",
-			"sources": ["EtherCollateralrUSD", "FeePool", "Issuer", "TriberUSD"]
+			"sources": ["EtherCollateralrUSD", "FeePool", "Issuer", "RwarUSD"]
 		},
 		{
 			"sip": 86,
@@ -155,9 +155,9 @@
 				"DebtCache",
 				"FeePool",
 				"Issuer",
-				"TriberBTC",
-				"TriberETH",
-				"TriberUSD"
+				"RwarBTC",
+				"RwarETH",
+				"RwarUSD"
 			]
 		},
 		{
@@ -184,7 +184,7 @@
 				"SystemSettings",
 				"Rwaone",
 				"TradingRewards",
-				"Tribe(s|i).+"
+				"Rwa(s|i).+"
 			]
 		},
 		{
@@ -223,8 +223,8 @@
 					"RwaoneBridgeToBase",
 					"RwaoneEscrow",
 					"RwaoneState",
-					"TriberUSD",
-					"TribeUtil",
+					"RwarUSD",
+					"RwaUtil",
 					"SystemSettings",
 					"SystemStatus",
 					"TokenStaterUSD",
@@ -237,7 +237,7 @@
 			"sip": 103,
 			"layer": "base",
 			"released": "base",
-			"sources": ["CollateralStateShort", "CollateralShort", "TriberUSD"]
+			"sources": ["CollateralStateShort", "CollateralShort", "RwarUSD"]
 		},
 		{
 			"sip": 105,
@@ -273,8 +273,8 @@
 				"EtherWrapper",
 				"FeePool",
 				"NativeEtherWrapper",
-				"TriberETH",
-				"TriberUSD",
+				"RwarETH",
+				"RwarUSD",
 				"SystemSettings"
 			]
 		},
@@ -326,7 +326,7 @@
 			"sip": 127,
 			"layer": "base",
 			"released": "base",
-			"sources": ["Exchanger", "VirtualTribeMastercopy"]
+			"sources": ["Exchanger", "VirtualRwaMastercopy"]
 		},
 		{
 			"sip": 128,
@@ -341,10 +341,10 @@
 				"CollateralManagerState",
 				"CollateralShort",
 				"CollateralUtil",
-				"TriberBTC",
-				"TriberETH",
-				"TribesLINK",
-				"TriberUSD",
+				"RwarBTC",
+				"RwarETH",
+				"RwasLINK",
+				"RwarUSD",
 				"SystemSettings"
 			],
 			"released": "ovm"
@@ -382,9 +382,9 @@
 				"FeePool",
 				"Issuer",
 				"Rwaone",
-				"TriberETH",
-				"TriberUSD",
-				"TriberBTC"
+				"RwarETH",
+				"RwarUSD",
+				"RwarBTC"
 			]
 		},
 		{
@@ -427,7 +427,7 @@
 				"base": [
 					"FeePool",
 					"Issuer",
-					"OneNetAggregatorIssuedTribes",
+					"OneNetAggregatorIssuedRwas",
 					"OneNetAggregatorDebtRatio",
 					"RwaoneBridgeToOptimism",
 					"SystemSettings"
@@ -435,7 +435,7 @@
 				"ovm": [
 					"FeePool",
 					"Issuer",
-					"OneNetAggregatorIssuedTribes",
+					"OneNetAggregatorIssuedRwas",
 					"OneNetAggregatorDebtRatio",
 					"RwaoneBridgeToBase",
 					"SystemSettings"
@@ -457,7 +457,7 @@
 			"sip": 174,
 			"layer": "both",
 			"released": "both",
-			"sources": ["Exchanger", "Issuer", "TribeRedeemer"]
+			"sources": ["Exchanger", "Issuer", "RwaRedeemer"]
 		},
 		{
 			"sip": 182,
@@ -466,7 +466,7 @@
 				"DebtCache",
 				"FeePool",
 				"Issuer",
-				"Tribes.*",
+				"Rwas.*",
 				"SystemSettings",
 				"WrapperFactory"
 			],
@@ -664,7 +664,7 @@
 		{
 			"sip": 238,
 			"layer": "both",
-			"sources": ["Rwaone", "Tribes.*", "Issuer"],
+			"sources": ["Rwaone", "Rwas.*", "Issuer"],
 			"released": "both"
 		},
 		{

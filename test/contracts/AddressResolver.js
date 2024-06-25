@@ -140,7 +140,7 @@ contract('AddressResolver', accounts => {
 		});
 	});
 
-	describe('getTribe()', () => {
+	describe('getRwa()', () => {
 		describe('when a mock for Issuer is added', () => {
 			let mock;
 			beforeEach(async () => {
@@ -150,36 +150,36 @@ contract('AddressResolver', accounts => {
 				// add it to the resolver
 				await resolver.importAddresses([toBytes32('Issuer')], [mock.address], { from: owner });
 
-				// now instruct the mock Issuer that tribes(any) must return "account4"
+				// now instruct the mock Issuer that rwas(any) must return "account4"
 				await mockGenericContractFnc({
 					instance: mock,
 					mock: 'Issuer',
-					fncName: 'tribes',
+					fncName: 'rwas',
 					returns: [account4],
 				});
 			});
 
-			it('when getTribe() is invoked', async () => {
-				const tribe = await resolver.getTribe(toBytes32('rUSD'));
-				assert.equal(tribe, account4);
+			it('when getRwa() is invoked', async () => {
+				const rwa = await resolver.getRwa(toBytes32('rUSD'));
+				assert.equal(rwa, account4);
 			});
 		});
-		describe('when a Rwaone is created with a few added tribes', () => {
+		describe('when a Rwaone is created with a few added rwas', () => {
 			let rETHContract;
 			let rUSDContract;
 			beforeEach(async () => {
-				({ TriberETH: rETHContract, TriberUSD: rUSDContract } = await setupAllContracts({
+				({ RwarETH: rETHContract, RwarUSD: rUSDContract } = await setupAllContracts({
 					accounts,
 					existing: {
 						AddressResolver: resolver,
 					},
-					tribes: ['rUSD', 'rETH', 'sEUR', 'sAUD'],
+					rwas: ['rUSD', 'rETH', 'sEUR', 'sAUD'],
 					contracts: ['Rwaone'],
 				}));
 			});
-			it('when getTribe() is invoked with these tribe keys, they are returned correctly', async () => {
-				assert.equal(await resolver.getTribe(toBytes32('rUSD')), rUSDContract.address);
-				assert.equal(await resolver.getTribe(toBytes32('rETH')), rETHContract.address);
+			it('when getRwa() is invoked with these rwa keys, they are returned correctly', async () => {
+				assert.equal(await resolver.getRwa(toBytes32('rUSD')), rUSDContract.address);
+				assert.equal(await resolver.getRwa(toBytes32('rETH')), rETHContract.address);
 			});
 		});
 	});

@@ -30,14 +30,14 @@ async function _getAmount({ ctx, symbol, user, amount }) {
 	} else if (symbol === 'rUSD') {
 		await _getrUSD({ ctx, user, amount });
 	} else if (symbol === 'rETHBTC') {
-		await _getTribe({ ctx, symbol, user, amount });
+		await _getRwa({ ctx, symbol, user, amount });
 	} else if (symbol === 'rETH') {
-		await _getTribe({ ctx, symbol, user, amount });
+		await _getRwa({ ctx, symbol, user, amount });
 	} else if (symbol === 'ETH') {
 		await _getETHFromOtherUsers({ ctx, user, amount });
 	} else {
 		throw new Error(
-			`Symbol ${symbol} not yet supported. TODO: Support via exchanging rUSD to other Tribes.`
+			`Symbol ${symbol} not yet supported. TODO: Support via exchanging rUSD to other Rwas.`
 		);
 	}
 
@@ -149,11 +149,11 @@ async function _getRWAXForOwnerOnL2ByHackMinting({ ctx, amount }) {
 
 async function _getrUSD({ ctx, user, amount }) {
 	const { ProxyRwaone, ProxyrUSD } = ctx.contracts;
-	let { Rwaone, TriberUSD } = ctx.contracts;
+	let { Rwaone, RwarUSD } = ctx.contracts;
 
 	// connect via proxy
 	Rwaone = new ethers.Contract(ProxyRwaone.address, Rwaone.interface, ctx.provider);
-	TriberUSD = new ethers.Contract(ProxyrUSD.address, TriberUSD.interface, ctx.provider);
+	RwarUSD = new ethers.Contract(ProxyrUSD.address, RwarUSD.interface, ctx.provider);
 
 	let tx;
 
@@ -179,14 +179,14 @@ async function _getrUSD({ ctx, user, amount }) {
 	tx = await Rwaone.transfer(tmpWallet.address, requiredRWAX.mul(2));
 	await tx.wait();
 
-	tx = await Rwaone.connect(tmpWallet).issueTribes(amount);
+	tx = await Rwaone.connect(tmpWallet).issueRwas(amount);
 	await tx.wait();
 
-	tx = await TriberUSD.connect(tmpWallet).transfer(user.address, amount);
+	tx = await RwarUSD.connect(tmpWallet).transfer(user.address, amount);
 	await tx.wait();
 }
 
-async function _getTribe({ ctx, user, symbol, amount }) {
+async function _getRwa({ ctx, user, symbol, amount }) {
 	let spent = ethers.utils.parseEther('0');
 	let partialAmount = ethers.utils.parseEther('1000'); // choose a "reasonable" amount to start with
 
@@ -195,10 +195,10 @@ async function _getTribe({ ctx, user, symbol, amount }) {
 	const token = _getTokenFromSymbol({ ctx, symbol });
 
 	// requiring from within function to prevent circular dependency
-	const { exchangeTribes } = require('./exchanging');
+	const { exchangeRwas } = require('./exchanging');
 
 	while (remaining.gt(0)) {
-		await exchangeTribes({
+		await exchangeRwas({
 			ctx,
 			dest: symbol,
 			src: 'rUSD',
@@ -210,7 +210,7 @@ async function _getTribe({ ctx, user, symbol, amount }) {
 		const newBalance = await token.balanceOf(user.address);
 
 		if (newBalance.eq(0)) {
-			throw new Error('received no tribes from exchange, did breaker trip? is rate set?');
+			throw new Error('received no rwas from exchange, did breaker trip? is rate set?');
 		}
 
 		remaining = amount.sub(newBalance);
@@ -247,7 +247,7 @@ function _getTokenFromSymbol({ ctx, symbol }) {
 	} else if (symbol === 'WETH') {
 		return ctx.contracts.WETH;
 	} else {
-		return ctx.contracts[`Tribe${symbol}`];
+		return ctx.contracts[`Rwa${symbol}`];
 	}
 }
 

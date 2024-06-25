@@ -394,11 +394,11 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         return false;
     }
 
-    function tribeTooVolatileForAtomicExchange(bytes32) public view returns (bool) {
+    function rwaTooVolatileForAtomicExchange(bytes32) public view returns (bool) {
         _notImplemented();
     }
 
-    function tribeTooVolatileForAtomicExchange(
+    function rwaTooVolatileForAtomicExchange(
         IDirectIntegrationManager.ParameterIntegrationSettings memory
     ) public view returns (bool) {
         _notImplemented();

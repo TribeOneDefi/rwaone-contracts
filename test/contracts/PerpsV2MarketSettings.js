@@ -69,7 +69,7 @@ contract('PerpsV2MarketSettings', accounts => {
 			FuturesMarketManager: futuresMarketManager,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD'],
+			rwas: ['rUSD'],
 			contracts: [
 				'PerpsV2MarketSettings',
 				'FuturesMarketManager',

@@ -64,7 +64,7 @@ contract('Exchanger (spec tests)', async accounts => {
 
 	const trackingCode = toBytes32('1INCH');
 
-	const tribeKeys = [rUSD, sAUD, sEUR, rBTC, iBTC, rETH, iETH];
+	const rwaKeys = [rUSD, sAUD, sEUR, rBTC, iBTC, rETH, iETH];
 
 	const [, owner, account1, account2, account3] = accounts;
 
@@ -93,16 +93,16 @@ contract('Exchanger (spec tests)', async accounts => {
 	async function changeOneDISetting(
 		index,
 		value,
-		tribes = [rUSD, sAUD, sEUR, wRWAX, rBTC, iBTC, rETH, iETH]
+		rwas = [rUSD, sAUD, sEUR, wRWAX, rBTC, iBTC, rETH, iETH]
 	) {
-		for (const tribe of tribes) {
+		for (const rwa of rwas) {
 			for (const account of [owner, account1, account2]) {
 				const existingParameters = Array.from(
-					await directIntegration.getExchangeParameters(account, tribe)
+					await directIntegration.getExchangeParameters(account, rwa)
 				);
 				// the parameter for `exchangeFeeRates` is currently in the 8th position (and probably will be until the end of v2x)
 				existingParameters[index] = value;
-				await directIntegration.setExchangeParameters(account, [tribe], existingParameters, {
+				await directIntegration.setExchangeParameters(account, [rwa], existingParameters, {
 					from: owner,
 				});
 			}
@@ -167,18 +167,18 @@ contract('Exchanger (spec tests)', async accounts => {
 		}
 	}
 
-	async function setExchangeFeeRateForTribes({
+	async function setExchangeFeeRateForRwas({
 		owner,
 		systemSettings,
-		tribeKeys,
+		rwaKeys,
 		exchangeFeeRates,
 	}) {
 		if (directIntegration) {
-			for (const i in tribeKeys) {
-				await changeOneDISetting(8, exchangeFeeRates[i], [tribeKeys[i]]);
+			for (const i in rwaKeys) {
+				await changeOneDISetting(8, exchangeFeeRates[i], [rwaKeys[i]]);
 			}
 		} else {
-			await systemSettings.setExchangeFeeRateForTribes(tribeKeys, exchangeFeeRates, {
+			await systemSettings.setExchangeFeeRateForRwas(rwaKeys, exchangeFeeRates, {
 				from: owner,
 			});
 		}
@@ -437,7 +437,7 @@ contract('Exchanger (spec tests)', async accounts => {
 					});
 				});
 				it('no exchange took place', async () => {
-					assert.ok(!logs.some(({ name } = {}) => name === 'TribeExchange'));
+					assert.ok(!logs.some(({ name } = {}) => name === 'RwaExchange'));
 				});
 			});
 			describe('when a user exchanges into rETH under the default threshold factor', () => {
@@ -456,7 +456,7 @@ contract('Exchanger (spec tests)', async accounts => {
 					});
 				});
 				it('no exchange took place', async () => {
-					assert.ok(!logs.some(({ name } = {}) => name === 'TribeExchange'));
+					assert.ok(!logs.some(({ name } = {}) => name === 'RwaExchange'));
 				});
 			});
 			describe('changing the factor works', () => {
@@ -471,8 +471,8 @@ contract('Exchanger (spec tests)', async accounts => {
 							await updateRates([rETH], [toUnit('300')]);
 							await rwaone.exchange(rUSD, toUnit('1'), rETH, { from: account1 });
 						});
-						it('then the tribe is not suspended', async () => {
-							const { suspended, reason } = await systemStatus.tribeSuspension(rETH);
+						it('then the rwa is not suspended', async () => {
+							const { suspended, reason } = await systemStatus.rwaSuspension(rETH);
 							assert.ok(!suspended);
 							assert.equal(reason, '0');
 						});
@@ -484,8 +484,8 @@ contract('Exchanger (spec tests)', async accounts => {
 							await updateRates([rETH], [toUnit('33')]);
 							await rwaone.exchange(rUSD, toUnit('1'), rETH, { from: account1 });
 						});
-						it('then the tribe is not suspended', async () => {
-							const { suspended, reason } = await systemStatus.tribeSuspension(rETH);
+						it('then the rwa is not suspended', async () => {
+							const { suspended, reason } = await systemStatus.rwaSuspension(rETH);
 							assert.ok(!suspended);
 							assert.equal(reason, '0');
 						});
@@ -520,34 +520,34 @@ contract('Exchanger (spec tests)', async accounts => {
 						const maxSecs = await exchanger.maxSecsLeftInWaitingPeriod(account1, sEUR);
 						timeIsClose({ actual: maxSecs, expected: 60, variance: 2 });
 					});
-					it('and fetching maxSecs for that user into the source tribe returns 0', async () => {
+					it('and fetching maxSecs for that user into the source rwa returns 0', async () => {
 						const maxSecs = await exchanger.maxSecsLeftInWaitingPeriod(account1, rUSD);
-						assert.equal(maxSecs, '0', 'No waiting period for src tribe');
+						assert.equal(maxSecs, '0', 'No waiting period for src rwa');
 					});
-					it('and fetching maxSecs for that user into other tribes returns 0', async () => {
+					it('and fetching maxSecs for that user into other rwas returns 0', async () => {
 						let maxSecs = await exchanger.maxSecsLeftInWaitingPeriod(account1, rBTC);
-						assert.equal(maxSecs, '0', 'No waiting period for other tribe rBTC');
+						assert.equal(maxSecs, '0', 'No waiting period for other rwa rBTC');
 						maxSecs = await exchanger.maxSecsLeftInWaitingPeriod(account1, iBTC);
-						assert.equal(maxSecs, '0', 'No waiting period for other tribe iBTC');
+						assert.equal(maxSecs, '0', 'No waiting period for other rwa iBTC');
 					});
-					it('and fetching maxSec for other users into that tribe are unaffected', async () => {
+					it('and fetching maxSec for other users into that rwa are unaffected', async () => {
 						let maxSecs = await exchanger.maxSecsLeftInWaitingPeriod(account2, sEUR);
 						assert.equal(
 							maxSecs,
 							'0',
-							'Other user: account2 has no waiting period on dest tribe of account 1'
+							'Other user: account2 has no waiting period on dest rwa of account 1'
 						);
 						maxSecs = await exchanger.maxSecsLeftInWaitingPeriod(account2, rUSD);
 						assert.equal(
 							maxSecs,
 							'0',
-							'Other user: account2 has no waiting period on src tribe of account 1'
+							'Other user: account2 has no waiting period on src rwa of account 1'
 						);
 						maxSecs = await exchanger.maxSecsLeftInWaitingPeriod(account3, sEUR);
 						assert.equal(
 							maxSecs,
 							'0',
-							'Other user: account3 has no waiting period on dest tribe of acccount 1'
+							'Other user: account3 has no waiting period on dest rwa of acccount 1'
 						);
 					});
 
@@ -590,7 +590,7 @@ contract('Exchanger (spec tests)', async accounts => {
 								});
 							});
 						});
-						describe('when the same user exchanges into the new tribe', () => {
+						describe('when the same user exchanges into the new rwa', () => {
 							beforeEach(async () => {
 								await rwaone.exchange(rUSD, toUnit('100'), sEUR, { from: account1 });
 							});
@@ -607,7 +607,7 @@ contract('Exchanger (spec tests)', async accounts => {
 
 	const itCalculatesFeeRateForExchange = () => {
 		describe('Given exchangeFeeRates are configured and when calling feeRateForExchange()', () => {
-			it('for two long tribes, returns double the regular exchange fee', async () => {
+			it('for two long rwas, returns double the regular exchange fee', async () => {
 				const actualFeeRate = await exchanger.feeRateForExchange(sEUR, rBTC, { from: owner });
 				assert.bnEqual(
 					actualFeeRate,
@@ -625,15 +625,15 @@ contract('Exchanger (spec tests)', async accounts => {
 			const bipsCrypto = toUnit('0.02');
 			const bipsInverse = toUnit('0.03');
 			beforeEach(async () => {
-				await setExchangeFeeRateForTribes({
+				await setExchangeFeeRateForRwas({
 					owner,
 					systemSettings,
-					tribeKeys: [rUSD, sAUD, sEUR, rETH, rBTC, iBTC],
+					rwaKeys: [rUSD, sAUD, sEUR, rETH, rBTC, iBTC],
 					exchangeFeeRates: [biprUSD, bipsFX, bipsFX, bipsCrypto, bipsCrypto, bipsInverse],
 				});
 			});
 			describe('when calling getAmountsForExchange', () => {
-				describe('and the destination is a crypto tribe', () => {
+				describe('and the destination is a crypto rwa', () => {
 					let received;
 					let destinationFee;
 					let feeRate;
@@ -664,7 +664,7 @@ contract('Exchanger (spec tests)', async accounts => {
 					});
 				});
 
-				describe('and the destination is a fiat tribe', () => {
+				describe('and the destination is a fiat rwa', () => {
 					let received;
 					let destinationFee;
 					let feeRate;
@@ -699,25 +699,25 @@ contract('Exchanger (spec tests)', async accounts => {
 					const amount = toUnit('1000');
 
 					it('updates exchange fee amounts appropriately', async () => {
-						await setExchangeFeeRateForTribes({
+						await setExchangeFeeRateForRwas({
 							owner,
 							systemSettings,
-							tribeKeys: [rUSD],
+							rwaKeys: [rUSD],
 							exchangeFeeRates: [toUnit(0)],
 						});
 
-						await setExchangeFeeRateForTribes({
+						await setExchangeFeeRateForRwas({
 							owner,
 							systemSettings,
-							tribeKeys: [sAUD],
+							rwaKeys: [sAUD],
 							exchangeFeeRates: [toUnit(0)],
 						});
 
 						// need to also set it here because rates are 0
-						await setExchangeFeeRateForTribes({
+						await setExchangeFeeRateForRwas({
 							owner,
 							systemSettings,
-							tribeKeys: [rUSD, sAUD],
+							rwaKeys: [rUSD, sAUD],
 							exchangeFeeRates: [toUnit(0), toUnit(0)],
 						});
 
@@ -726,10 +726,10 @@ contract('Exchanger (spec tests)', async accounts => {
 						} = await exchanger.getAmountsForExchange(amount, rUSD, sAUD, { from: account1 });
 						assert.bnEqual(exchangeFeeRate1, 0);
 
-						await setExchangeFeeRateForTribes({
+						await setExchangeFeeRateForRwas({
 							owner,
 							systemSettings,
-							tribeKeys: [rUSD],
+							rwaKeys: [rUSD],
 							exchangeFeeRates: [toUnit(0.1)],
 						});
 						const {
@@ -737,10 +737,10 @@ contract('Exchanger (spec tests)', async accounts => {
 						} = await exchanger.getAmountsForExchange(amount, rUSD, sAUD, { from: account1 });
 						assert.bnEqual(exchangeFeeRate2, toUnit(0.1));
 
-						await setExchangeFeeRateForTribes({
+						await setExchangeFeeRateForRwas({
 							owner,
 							systemSettings,
-							tribeKeys: [sAUD],
+							rwaKeys: [sAUD],
 							exchangeFeeRates: [toUnit(0.01)],
 						});
 						const {
@@ -766,10 +766,10 @@ contract('Exchanger (spec tests)', async accounts => {
 						orgininalFee = fee;
 						orginalFeeRate = exchangeFeeRate;
 
-						await setExchangeFeeRateForTribes({
+						await setExchangeFeeRateForRwas({
 							owner,
 							systemSettings,
-							tribeKeys: [sAUD],
+							rwaKeys: [sAUD],
 							exchangeFeeRates: [multiplyDecimal(bipsFX, factor)],
 						});
 					});
@@ -1040,7 +1040,7 @@ contract('Exchanger (spec tests)', async accounts => {
 								contracts: [rwaone, exchanger, systemStatus],
 							});
 							// some exchange took place (this is just to control for correct assertion)
-							return logs.some(({ name } = {}) => name === 'TribeExchange');
+							return logs.some(({ name } = {}) => name === 'RwaExchange');
 						}
 
 						// should work for no change
@@ -1128,7 +1128,7 @@ contract('Exchanger (spec tests)', async accounts => {
 	};
 
 	const amountAfterExchangeFee = ({ amount }) => {
-		// exchange fee is applied twice, because we assume it is the same one used for both tribes in the exchange
+		// exchange fee is applied twice, because we assume it is the same one used for both rwas in the exchange
 		return multiplyDecimal(
 			amount,
 			toUnit('1')
@@ -1150,11 +1150,11 @@ contract('Exchanger (spec tests)', async accounts => {
 	/**
 	 * Ensure a settle() transaction emits the expected events
 	 */
-	const ensureTxnEmitsSettlementEvents = async ({ hash, tribe, expected }) => {
+	const ensureTxnEmitsSettlementEvents = async ({ hash, rwa, expected }) => {
 		// Get receipt to collect all transaction events
 		const logs = await getDecodedLogs({ hash, contracts: [rwaone, exchanger, rUSDContract] });
 
-		const currencyKey = await tribe.currencyKey();
+		const currencyKey = await rwa.currencyKey();
 		// Can only either be reclaim or rebate - not both
 		const isReclaim = !expected.reclaimAmount.isZero();
 		const expectedAmount = isReclaim ? expected.reclaimAmount : expected.rebateAmount;
@@ -1175,11 +1175,11 @@ contract('Exchanger (spec tests)', async accounts => {
 	const itSettles = () => {
 		describe('settlement', () => {
 			describe('suspension conditions', () => {
-				const tribe = rETH;
-				['System', 'Tribe'].forEach(section => {
+				const rwa = rETH;
+				['System', 'Rwa'].forEach(section => {
 					describe(`when ${section} is suspended`, () => {
 						beforeEach(async () => {
-							await setStatus({ owner, systemStatus, section, suspend: true, tribe });
+							await setStatus({ owner, systemStatus, section, suspend: true, rwa });
 							// Disable Dynamic Fee here as settlement is L1 and Dynamic fee is on L2
 							await setExchangeDynamicFeeRounds('1');
 						});
@@ -1191,7 +1191,7 @@ contract('Exchanger (spec tests)', async accounts => {
 						});
 						describe(`when ${section} is resumed`, () => {
 							beforeEach(async () => {
-								await setStatus({ owner, systemStatus, section, suspend: false, tribe });
+								await setStatus({ owner, systemStatus, section, suspend: false, rwa });
 							});
 							it('then calling exchange() succeeds', async () => {
 								await rwaone.settle(rETH, { from: account1 });
@@ -1199,23 +1199,23 @@ contract('Exchanger (spec tests)', async accounts => {
 						});
 					});
 				});
-				describe('when Tribe(rBTC) is suspended', () => {
+				describe('when Rwa(rBTC) is suspended', () => {
 					beforeEach(async () => {
-						await setStatus({ owner, systemStatus, section: 'Tribe', suspend: true, tribe: rBTC });
+						await setStatus({ owner, systemStatus, section: 'Rwa', suspend: true, rwa: rBTC });
 					});
-					it('then settling other tribes still works', async () => {
+					it('then settling other rwas still works', async () => {
 						await rwaone.settle(rETH, { from: account1 });
 						await rwaone.settle(sAUD, { from: account2 });
 					});
 				});
-				describe('when Tribe(rBTC) is suspended for exchanging', () => {
+				describe('when Rwa(rBTC) is suspended for exchanging', () => {
 					beforeEach(async () => {
 						await setStatus({
 							owner,
 							systemStatus,
-							section: 'TribeExchange',
+							section: 'RwaExchange',
 							suspend: true,
-							tribe: rBTC,
+							rwa: rBTC,
 						});
 					});
 					it('then settling it still works', async () => {
@@ -1234,11 +1234,11 @@ contract('Exchanger (spec tests)', async accounts => {
 					beforeEach(async () => {
 						// Warning: this is mutating the global exchangeFeeRate for this test block and will be reset when out of scope
 						exchangeFeeRate = toUnit('0.01');
-						await setExchangeFeeRateForTribes({
+						await setExchangeFeeRateForRwas({
 							owner,
 							systemSettings,
-							tribeKeys,
-							exchangeFeeRates: tribeKeys.map(() => exchangeFeeRate),
+							rwaKeys,
+							exchangeFeeRates: rwaKeys.map(() => exchangeFeeRate),
 						});
 					});
 					describe('and the waitingPeriodSecs is set to 60', () => {
@@ -1376,7 +1376,7 @@ contract('Exchanger (spec tests)', async accounts => {
 													});
 												});
 												it('and the debt cache sync is not called', async () => {
-													expect(debtCacheSpy.updateCachedTribeDebts).to.have.length(0);
+													expect(debtCacheSpy.updateCachedRwaDebts).to.have.length(0);
 												});
 											});
 										});
@@ -1387,7 +1387,7 @@ contract('Exchanger (spec tests)', async accounts => {
 											);
 										});
 
-										describe('when settle() is invoked on the src tribe - rUSD', () => {
+										describe('when settle() is invoked on the src rwa - rUSD', () => {
 											it('then it completes with no reclaim or rebate', async () => {
 												const txn = await rwaone.settle(rUSD, {
 													from: account1,
@@ -1493,7 +1493,7 @@ contract('Exchanger (spec tests)', async accounts => {
 													it('then it settles with a reclaim', async () => {
 														await ensureTxnEmitsSettlementEvents({
 															hash: transaction.tx,
-															tribe: sEURContract,
+															rwa: sEURContract,
 															expected: expectedSettlement,
 														});
 													});
@@ -1522,16 +1522,16 @@ contract('Exchanger (spec tests)', async accounts => {
 														});
 													});
 													it('and the debt cache is called', async () => {
-														expect(debtCacheSpy.updateCachedTribeDebts).to.have.length(0);
-														debtCacheSpy.updateCachedTribeDebts.returnsAtCall(0, sEUR);
+														expect(debtCacheSpy.updateCachedRwaDebts).to.have.length(0);
+														debtCacheSpy.updateCachedRwaDebts.returnsAtCall(0, sEUR);
 													});
 												});
 												describe('when settle() is invoked and the exchange fee rate has changed', () => {
 													beforeEach(async () => {
-														await setExchangeFeeRateForTribes({
+														await setExchangeFeeRateForRwas({
 															owner,
 															systemSettings,
-															tribeKeys: [rBTC],
+															rwaKeys: [rBTC],
 															exchangeFeeRates: [toUnit('0.1')],
 														});
 													});
@@ -1541,7 +1541,7 @@ contract('Exchanger (spec tests)', async accounts => {
 														});
 														await ensureTxnEmitsSettlementEvents({
 															hash,
-															tribe: sEURContract,
+															rwa: sEURContract,
 															expected: expectedSettlement,
 														});
 													});
@@ -1566,13 +1566,13 @@ contract('Exchanger (spec tests)', async accounts => {
 
 															const decodedLogs = await ensureTxnEmitsSettlementEvents({
 																hash: txn.tx,
-																tribe: sEURContract,
+																rwa: sEURContract,
 																expected: expectedSettlement,
 															});
 
 															decodedEventEqual({
-																log: decodedLogs.find(({ name }) => name === 'TribeExchange'),
-																event: 'TribeExchange',
+																log: decodedLogs.find(({ name }) => name === 'RwaExchange'),
+																event: 'RwaExchange',
 																emittedFrom: await rwaone.proxy(),
 																args: [
 																	account1,
@@ -1594,10 +1594,10 @@ contract('Exchanger (spec tests)', async accounts => {
 															txn = await rwaone.exchange(sEUR, toUnit('50'), rBTC, {
 																from: account1,
 															});
-															await setExchangeFeeRateForTribes({
+															await setExchangeFeeRateForRwas({
 																owner,
 																systemSettings,
-																tribeKeys: [rBTC],
+																rwaKeys: [rBTC],
 																exchangeFeeRates: [toUnit('0.1')],
 															});
 														});
@@ -1609,13 +1609,13 @@ contract('Exchanger (spec tests)', async accounts => {
 
 															const decodedLogs = await ensureTxnEmitsSettlementEvents({
 																hash: txn.tx,
-																tribe: sEURContract,
+																rwa: sEURContract,
 																expected: expectedSettlement,
 															});
 
 															decodedEventEqual({
-																log: decodedLogs.find(({ name }) => name === 'TribeExchange'),
-																event: 'TribeExchange',
+																log: decodedLogs.find(({ name }) => name === 'RwaExchange'),
+																event: 'RwaExchange',
 																emittedFrom: await rwaone.proxy(),
 																args: [
 																	account1,
@@ -1649,13 +1649,13 @@ contract('Exchanger (spec tests)', async accounts => {
 
 														const decodedLogs = await ensureTxnEmitsSettlementEvents({
 															hash: txn.tx,
-															tribe: sEURContract,
+															rwa: sEURContract,
 															expected: expectedSettlement,
 														});
 
 														decodedEventEqual({
-															log: decodedLogs.find(({ name }) => name === 'TribeExchange'),
-															event: 'TribeExchange',
+															log: decodedLogs.find(({ name }) => name === 'RwaExchange'),
+															event: 'RwaExchange',
 															emittedFrom: await rwaone.proxy(),
 															args: [account1, sEUR, newAmountToExchange, rBTC], // amount to exchange must be the reclaim amount
 														});
@@ -1852,7 +1852,7 @@ contract('Exchanger (spec tests)', async accounts => {
 														it('then it settles with a rebate', async () => {
 															await ensureTxnEmitsSettlementEvents({
 																hash: transaction.tx,
-																tribe: sEURContract,
+																rwa: sEURContract,
 																expected: expectedSettlement,
 															});
 														});
@@ -1898,13 +1898,13 @@ contract('Exchanger (spec tests)', async accounts => {
 
 															const decodedLogs = await ensureTxnEmitsSettlementEvents({
 																hash: txn.tx,
-																tribe: sEURContract,
+																rwa: sEURContract,
 																expected: expectedSettlement,
 															});
 
 															decodedEventEqual({
-																log: decodedLogs.find(({ name }) => name === 'TribeExchange'),
-																event: 'TribeExchange',
+																log: decodedLogs.find(({ name }) => name === 'RwaExchange'),
+																event: 'RwaExchange',
 																emittedFrom: await rwaone.proxy(),
 																args: [
 																	account1,
@@ -1926,13 +1926,13 @@ contract('Exchanger (spec tests)', async accounts => {
 														it('then it succeeds, exchanging the amount plus the rebate', async () => {
 															const decodedLogs = await ensureTxnEmitsSettlementEvents({
 																hash: txn.tx,
-																tribe: sEURContract,
+																rwa: sEURContract,
 																expected: expectedSettlement,
 															});
 
 															decodedEventEqual({
-																log: decodedLogs.find(({ name }) => name === 'TribeExchange'),
-																event: 'TribeExchange',
+																log: decodedLogs.find(({ name }) => name === 'RwaExchange'),
+																event: 'RwaExchange',
 																emittedFrom: await rwaone.proxy(),
 																args: [
 																	account1,
@@ -2142,7 +2142,7 @@ contract('Exchanger (spec tests)', async accounts => {
 
 																		await ensureTxnEmitsSettlementEvents({
 																			hash: txn.tx,
-																			tribe: rBTCContract,
+																			rwa: rBTCContract,
 																			expected: {
 																				reclaimAmount: new web3.utils.BN(0),
 																				rebateAmount: expectedFromFirst.rebateAmount.add(
@@ -2156,10 +2156,10 @@ contract('Exchanger (spec tests)', async accounts => {
 															describe('when another minute passes and the exchange fee rate has increased', () => {
 																beforeEach(async () => {
 																	await fastForward(60);
-																	await setExchangeFeeRateForTribes({
+																	await setExchangeFeeRateForRwas({
 																		owner,
 																		systemSettings,
-																		tribeKeys: [rBTC],
+																		rwaKeys: [rBTC],
 																		exchangeFeeRates: [toUnit('0.1')],
 																	});
 																});
@@ -2171,7 +2171,7 @@ contract('Exchanger (spec tests)', async accounts => {
 
 																		await ensureTxnEmitsSettlementEvents({
 																			hash,
-																			tribe: rBTCContract,
+																			rwa: rBTCContract,
 																			expected: {
 																				reclaimAmount: new web3.utils.BN(0),
 																				rebateAmount: expectedFromFirst.rebateAmount.add(
@@ -2214,11 +2214,11 @@ contract('Exchanger (spec tests)', async accounts => {
 													beforeEach(async () => {
 														await fastForward(70);
 													});
-													describe('and the user invokes settle() on the dest tribe', () => {
+													describe('and the user invokes settle() on the dest rwa', () => {
 														beforeEach(async () => {
 															await rwaone.settle(rBTC, { from: account1 });
 														});
-														it('then when the user performs 5 more exchanges into the same tribe, it succeeds', async () => {
+														it('then when the user performs 5 more exchanges into the same rwa, it succeeds', async () => {
 															for (let i = 0; i < 5; i++) {
 																await rwaone.exchange(sEUR, toUnit('100'), rBTC, {
 																	from: account1,
@@ -2322,16 +2322,16 @@ contract('Exchanger (spec tests)', async accounts => {
 						account1,
 						toBytes32(''),
 					],
-					reason: 'Only rwaone or a tribe contract can perform this action',
+					reason: 'Only rwaone or a rwa contract can perform this action',
 				});
 			});
 
 			describe('suspension conditions on Rwaone.exchange()', () => {
-				const tribe = rETH;
-				['System', 'Exchange', 'TribeExchange', 'Tribe'].forEach(section => {
+				const rwa = rETH;
+				['System', 'Exchange', 'RwaExchange', 'Rwa'].forEach(section => {
 					describe(`when ${section} is suspended`, () => {
 						beforeEach(async () => {
-							await setStatus({ owner, systemStatus, section, suspend: true, tribe });
+							await setStatus({ owner, systemStatus, section, suspend: true, rwa });
 						});
 						it('then calling exchange() reverts', async () => {
 							await assert.revert(
@@ -2341,7 +2341,7 @@ contract('Exchanger (spec tests)', async accounts => {
 						});
 						describe(`when ${section} is resumed`, () => {
 							beforeEach(async () => {
-								await setStatus({ owner, systemStatus, section, suspend: false, tribe });
+								await setStatus({ owner, systemStatus, section, suspend: false, rwa });
 							});
 							it('then calling exchange() succeeds', async () => {
 								await rwaone.exchange(rUSD, toUnit('1'), rETH, { from: account1 });
@@ -2349,14 +2349,14 @@ contract('Exchanger (spec tests)', async accounts => {
 						});
 					});
 				});
-				describe('when Tribe(rBTC) is suspended', () => {
+				describe('when Rwa(rBTC) is suspended', () => {
 					beforeEach(async () => {
 						// issue sAUD to test non-rUSD exchanges
 						await sAUDContract.issue(account2, toUnit('100'));
 
-						await setStatus({ owner, systemStatus, section: 'Tribe', suspend: true, tribe: rBTC });
+						await setStatus({ owner, systemStatus, section: 'Rwa', suspend: true, rwa: rBTC });
 					});
-					it('then exchanging other tribes still works', async () => {
+					it('then exchanging other rwas still works', async () => {
 						await rwaone.exchange(rUSD, toUnit('1'), rETH, { from: account1 });
 						await rwaone.exchange(sAUD, toUnit('1'), rETH, { from: account2 });
 					});
@@ -2367,7 +2367,7 @@ contract('Exchanger (spec tests)', async accounts => {
 				describe('when a user has 1000 rUSD', () => {
 					// already issued in the top-level beforeEach
 
-					it('should allow a user to exchange the tribes they hold in one flavour for another', async () => {
+					it('should allow a user to exchange the rwas they hold in one flavour for another', async () => {
 						// Exchange rUSD to sAUD
 						await rwaone.exchange(rUSD, amountIssued, sAUD, { from: account1 });
 
@@ -2393,7 +2393,7 @@ contract('Exchanger (spec tests)', async accounts => {
 						assert.bnEqual(feeRate, exchangeFeeRate.add(exchangeFeeRate));
 					});
 
-					it('should emit a TribeExchange event @gasprofile', async () => {
+					it('should emit a RwaExchange event @gasprofile', async () => {
 						// Exchange rUSD to sAUD
 						const txn = await rwaone.exchange(rUSD, amountIssued, sAUD, {
 							from: account1,
@@ -2401,8 +2401,8 @@ contract('Exchanger (spec tests)', async accounts => {
 
 						const sAUDBalance = await sAUDContract.balanceOf(account1);
 
-						const tribeExchangeEvent = txn.logs.find(log => log.event === 'TribeExchange');
-						assert.eventEqual(tribeExchangeEvent, 'TribeExchange', {
+						const rwaExchangeEvent = txn.logs.find(log => log.event === 'RwaExchange');
+						assert.eventEqual(rwaExchangeEvent, 'RwaExchange', {
 							account: account1,
 							fromCurrencyKey: toBytes32('rUSD'),
 							fromAmount: amountIssued,
@@ -2432,8 +2432,8 @@ contract('Exchanger (spec tests)', async accounts => {
 
 						const sAUDBalance = await sAUDContract.balanceOf(account1);
 
-						const tribeExchangeEvent = txn.logs.find(log => log.event === 'TribeExchange');
-						assert.eventEqual(tribeExchangeEvent, 'TribeExchange', {
+						const rwaExchangeEvent = txn.logs.find(log => log.event === 'RwaExchange');
+						assert.eventEqual(rwaExchangeEvent, 'RwaExchange', {
 							account: account1,
 							fromCurrencyKey: toBytes32('rUSD'),
 							fromAmount: amountIssued,
@@ -2500,7 +2500,7 @@ contract('Exchanger (spec tests)', async accounts => {
 							beforeEach(async () => {
 								await delegateApprovals.approveExchangeOnBehalf(account2, { from: account1 });
 							});
-							describe('when rates have gone stale for all tribes', () => {
+							describe('when rates have gone stale for all rwas', () => {
 								beforeEach(async () => {
 									await fastForward(
 										(await exchangeRates.rateStalePeriod()).add(web3.utils.toBN('300'))
@@ -2520,15 +2520,15 @@ contract('Exchanger (spec tests)', async accounts => {
 								it('settling still works ', async () => {
 									await rwaone.settle(sAUD, { from: account1 });
 								});
-								describe('when that tribe has a fresh rate', () => {
+								describe('when that rwa has a fresh rate', () => {
 									beforeEach(async () => {
 										await updateRates([sAUD], ['0.75'].map(toUnit));
 									});
-									describe(`when the user ${type} into that tribe`, () => {
+									describe(`when the user ${type} into that rwa`, () => {
 										beforeEach(async () => {
 											await exchange({ from: rUSD, amount: amountIssued, to: sAUD });
 										});
-										describe('after the waiting period expires and the tribe has gone stale', () => {
+										describe('after the waiting period expires and the rwa has gone stale', () => {
 											beforeEach(async () => {
 												await fastForward(
 													(await exchangeRates.rateStalePeriod()).add(web3.utils.toBN('300'))
@@ -2566,11 +2566,11 @@ contract('Exchanger (spec tests)', async accounts => {
 								await delegateApprovals.approveExchangeOnBehalf(delegate, { from: authoriser });
 							});
 							describe('suspension conditions on Rwaone.exchangeOnBehalf()', () => {
-								const tribe = sAUD;
-								['System', 'Exchange', 'TribeExchange', 'Tribe'].forEach(section => {
+								const rwa = sAUD;
+								['System', 'Exchange', 'RwaExchange', 'Rwa'].forEach(section => {
 									describe(`when ${section} is suspended`, () => {
 										beforeEach(async () => {
-											await setStatus({ owner, systemStatus, section, suspend: true, tribe });
+											await setStatus({ owner, systemStatus, section, suspend: true, rwa });
 										});
 										it('then calling exchange() reverts', async () => {
 											await assert.revert(
@@ -2582,7 +2582,7 @@ contract('Exchanger (spec tests)', async accounts => {
 										});
 										describe(`when ${section} is resumed`, () => {
 											beforeEach(async () => {
-												await setStatus({ owner, systemStatus, section, suspend: false, tribe });
+												await setStatus({ owner, systemStatus, section, suspend: false, rwa });
 											});
 											it('then calling exchange() succeeds', async () => {
 												await rwaone.exchangeOnBehalf(authoriser, rUSD, amountIssued, sAUD, {
@@ -2592,17 +2592,17 @@ contract('Exchanger (spec tests)', async accounts => {
 										});
 									});
 								});
-								describe('when Tribe(rBTC) is suspended', () => {
+								describe('when Rwa(rBTC) is suspended', () => {
 									beforeEach(async () => {
 										await setStatus({
 											owner,
 											systemStatus,
-											section: 'Tribe',
+											section: 'Rwa',
 											suspend: true,
-											tribe: rBTC,
+											rwa: rBTC,
 										});
 									});
-									it('then exchanging other tribes on behalf still works', async () => {
+									it('then exchanging other rwas on behalf still works', async () => {
 										await rwaone.exchangeOnBehalf(authoriser, rUSD, amountIssued, sAUD, {
 											from: delegate,
 										});
@@ -2621,7 +2621,7 @@ contract('Exchanger (spec tests)', async accounts => {
 									reason: 'Not approved to act on behalf',
 								});
 							});
-							it('should exchangeOnBehalf and authoriser recieves the destTribe', async () => {
+							it('should exchangeOnBehalf and authoriser recieves the destRwa', async () => {
 								// Exchange rUSD to sAUD
 								await rwaone.exchangeOnBehalf(authoriser, rUSD, amountIssued, sAUD, {
 									from: delegate,
@@ -2672,11 +2672,11 @@ contract('Exchanger (spec tests)', async accounts => {
 								await delegateApprovals.approveExchangeOnBehalf(delegate, { from: authoriser });
 							});
 							describe('suspension conditions on Rwaone.exchangeOnBehalfWithTracking()', () => {
-								const tribe = sAUD;
-								['System', 'Exchange', 'TribeExchange', 'Tribe'].forEach(section => {
+								const rwa = sAUD;
+								['System', 'Exchange', 'RwaExchange', 'Rwa'].forEach(section => {
 									describe(`when ${section} is suspended`, () => {
 										beforeEach(async () => {
-											await setStatus({ owner, systemStatus, section, suspend: true, tribe });
+											await setStatus({ owner, systemStatus, section, suspend: true, rwa });
 										});
 										it('then calling exchange() reverts', async () => {
 											await assert.revert(
@@ -2696,7 +2696,7 @@ contract('Exchanger (spec tests)', async accounts => {
 										});
 										describe(`when ${section} is resumed`, () => {
 											beforeEach(async () => {
-												await setStatus({ owner, systemStatus, section, suspend: false, tribe });
+												await setStatus({ owner, systemStatus, section, suspend: false, rwa });
 											});
 											it('then calling exchange() succeeds', async () => {
 												await rwaone.exchangeOnBehalfWithTracking(
@@ -2714,17 +2714,17 @@ contract('Exchanger (spec tests)', async accounts => {
 										});
 									});
 								});
-								describe('when Tribe(rBTC) is suspended', () => {
+								describe('when Rwa(rBTC) is suspended', () => {
 									beforeEach(async () => {
 										await setStatus({
 											owner,
 											systemStatus,
-											section: 'Tribe',
+											section: 'Rwa',
 											suspend: true,
-											tribe: rBTC,
+											rwa: rBTC,
 										});
 									});
-									it('then exchanging other tribes on behalf still works', async () => {
+									it('then exchanging other rwas on behalf still works', async () => {
 										await rwaone.exchangeOnBehalfWithTracking(
 											authoriser,
 											rUSD,
@@ -2751,7 +2751,7 @@ contract('Exchanger (spec tests)', async accounts => {
 									reason: 'Not approved to act on behalf',
 								});
 							});
-							it('should exchangeOnBehalf and authoriser recieves the destTribe', async () => {
+							it('should exchangeOnBehalf and authoriser recieves the destRwa', async () => {
 								// Exchange rUSD to sAUD
 								const txn = await rwaone.exchangeOnBehalfWithTracking(
 									authoriser,
@@ -2806,11 +2806,11 @@ contract('Exchanger (spec tests)', async accounts => {
 						await aggregator.setLatestAnswer('0', await currentTime());
 					});
 
-					describe('when exchanging into that tribe', () => {
+					describe('when exchanging into that rwa', () => {
 						it('getAmountsForExchange reverts due to invalid rate', async () => {
 							await assert.revert(
 								exchanger.getAmountsForExchange(toUnit('1'), rUSD, rETH),
-								'tribe rate invalid'
+								'rwa rate invalid'
 							);
 						});
 
@@ -2826,7 +2826,7 @@ contract('Exchanger (spec tests)', async accounts => {
 
 							// assert no exchange
 							console.log(logs);
-							assert.ok(!logs.some(({ name } = {}) => name === 'TribeExchange'));
+							assert.ok(!logs.some(({ name } = {}) => name === 'RwaExchange'));
 
 							// check view reverts since breaker has tripped
 							await assert.revert(
@@ -2835,7 +2835,7 @@ contract('Exchanger (spec tests)', async accounts => {
 							);
 						});
 					});
-					describe('when exchanging out of that tribe', () => {
+					describe('when exchanging out of that rwa', () => {
 						beforeEach(async () => {
 							// give the user some rETH
 							await rETHContract.issue(account1, toUnit('1'));
@@ -2843,7 +2843,7 @@ contract('Exchanger (spec tests)', async accounts => {
 						it('getAmountsForExchange reverts due to invalid rate', async () => {
 							await assert.revert(
 								exchanger.getAmountsForExchange(toUnit('1'), rETH, rUSD),
-								'tribe rate invalid'
+								'rwa rate invalid'
 							);
 						});
 						it('then it causes a breaker trip from price deviation', async () => {
@@ -2858,7 +2858,7 @@ contract('Exchanger (spec tests)', async accounts => {
 							});
 
 							// assert no exchange
-							assert.ok(!logs.some(({ name } = {}) => name === 'TribeExchange'));
+							assert.ok(!logs.some(({ name } = {}) => name === 'RwaExchange'));
 
 							// check view reverts since breaker has tripped
 							await assert.revert(
@@ -2879,12 +2879,12 @@ contract('Exchanger (spec tests)', async accounts => {
 					beforeEach(async () => {
 						await systemSettings.setWaitingPeriodSecs('60', { from: owner });
 					});
-					describe('when a user exchanges into sAUD using virtual tribes with a tracking code', () => {
+					describe('when a user exchanges into sAUD using virtual rwas with a tracking code', () => {
 						let logs;
 						let amountReceived;
 						let exchangeFeeRate;
 						let findNamedEventValue;
-						let vTribeAddress;
+						let vRwaAddress;
 
 						beforeEach(async () => {
 							const txn = await rwaone.exchangeWithVirtual(
@@ -2906,20 +2906,20 @@ contract('Exchanger (spec tests)', async accounts => {
 								hash: txn.tx,
 								contracts: [rwaone, exchanger, rUSDContract, issuer, flexibleStorage, debtCache],
 							});
-							const vTribeCreatedEvent = logs.find(({ name }) => name === 'VirtualTribeCreated');
-							assert.ok(vTribeCreatedEvent, 'Found VirtualTribeCreated event');
+							const vRwaCreatedEvent = logs.find(({ name }) => name === 'VirtualRwaCreated');
+							assert.ok(vRwaCreatedEvent, 'Found VirtualRwaCreated event');
 							findNamedEventValue = param =>
-								vTribeCreatedEvent.events.find(({ name }) => name === param);
-							vTribeAddress = findNamedEventValue('vTribe').value;
+								vRwaCreatedEvent.events.find(({ name }) => name === param);
+							vRwaAddress = findNamedEventValue('vRwa').value;
 						});
 
-						it('then it emits an ExchangeEntryAppended for the new Virtual Tribe', async () => {
+						it('then it emits an ExchangeEntryAppended for the new Virtual Rwa', async () => {
 							decodedEventEqual({
 								log: logs.find(({ name }) => name === 'ExchangeEntryAppended'),
 								event: 'ExchangeEntryAppended',
 								emittedFrom: exchanger.address,
 								args: [
-									vTribeAddress,
+									vRwaAddress,
 									rUSD,
 									amountIssued,
 									sAUD,
@@ -2932,12 +2932,12 @@ contract('Exchanger (spec tests)', async accounts => {
 							});
 						});
 
-						it('then it emits an TribeExchange into the new Virtual Tribe', async () => {
+						it('then it emits an RwaExchange into the new Virtual Rwa', async () => {
 							decodedEventEqual({
-								log: logs.find(({ name }) => name === 'TribeExchange'),
-								event: 'TribeExchange',
+								log: logs.find(({ name }) => name === 'RwaExchange'),
+								event: 'RwaExchange',
 								emittedFrom: await rwaone.proxy(),
-								args: [account1, rUSD, amountIssued, sAUD, amountReceived, vTribeAddress],
+								args: [account1, rUSD, amountIssued, sAUD, amountReceived, vRwaAddress],
 								bnCloseVariance: '0',
 							});
 						});
@@ -2950,9 +2950,9 @@ contract('Exchanger (spec tests)', async accounts => {
 							);
 						});
 
-						it('and it emits the VirtualTribeCreated event', async () => {
+						it('and it emits the VirtualRwaCreated event', async () => {
 							assert.equal(
-								findNamedEventValue('tribe').value,
+								findNamedEventValue('rwa').value,
 								(await sAUDContract.proxy()).toLowerCase()
 							);
 							assert.equal(findNamedEventValue('currencyKey').value, sAUD);
@@ -2972,25 +2972,25 @@ contract('Exchanger (spec tests)', async accounts => {
 							assert.equal(numEntries, '0');
 						});
 
-						describe('with the new virtual tribe', () => {
-							let vTribe;
+						describe('with the new virtual rwa', () => {
+							let vRwa;
 							beforeEach(async () => {
-								vTribe = await artifacts.require('VirtualTribe').at(vTribeAddress);
+								vRwa = await artifacts.require('VirtualRwa').at(vRwaAddress);
 							});
-							it('and the balance of the vTribe is the whole amount', async () => {
-								assert.bnEqual(await sAUDContract.balanceOf(vTribe.address), amountReceived);
+							it('and the balance of the vRwa is the whole amount', async () => {
+								assert.bnEqual(await sAUDContract.balanceOf(vRwa.address), amountReceived);
 							});
 							it('then it is created with the correct parameters', async () => {
-								assert.equal(await vTribe.resolver(), resolver.address);
-								assert.equal(await vTribe.tribe(), await sAUDContract.proxy());
-								assert.equal(await vTribe.currencyKey(), sAUD);
-								assert.bnEqual(await vTribe.totalSupply(), amountReceived);
-								assert.bnEqual(await vTribe.balanceOf(account1), amountReceived);
-								assert.notOk(await vTribe.settled());
+								assert.equal(await vRwa.resolver(), resolver.address);
+								assert.equal(await vRwa.rwa(), await sAUDContract.proxy());
+								assert.equal(await vRwa.currencyKey(), sAUD);
+								assert.bnEqual(await vRwa.totalSupply(), amountReceived);
+								assert.bnEqual(await vRwa.balanceOf(account1), amountReceived);
+								assert.notOk(await vRwa.settled());
 							});
-							it('and the vTribe has 1 fee reclamation entries', async () => {
+							it('and the vRwa has 1 fee reclamation entries', async () => {
 								const { reclaimAmount, rebateAmount, numEntries } = await exchanger.settlementOwing(
-									vTribe.address,
+									vRwa.address,
 									sAUD
 								);
 								assert.equal(reclaimAmount, '0');
@@ -2998,7 +2998,7 @@ contract('Exchanger (spec tests)', async accounts => {
 								assert.equal(numEntries, '1');
 							});
 							it('and the secsLeftInWaitingPeriod() returns the waitingPeriodSecs', async () => {
-								const maxSecs = await vTribe.secsLeftInWaitingPeriod();
+								const maxSecs = await vRwa.secsLeftInWaitingPeriod();
 								timeIsClose({ actual: maxSecs, expected: 60, variance: 2 });
 							});
 
@@ -3009,18 +3009,18 @@ contract('Exchanger (spec tests)', async accounts => {
 								});
 
 								it('and the secsLeftInWaitingPeriod() returns 0', async () => {
-									assert.equal(await vTribe.secsLeftInWaitingPeriod(), '0');
+									assert.equal(await vRwa.secsLeftInWaitingPeriod(), '0');
 								});
 
 								it('and readyToSettle() is true', async () => {
-									assert.equal(await vTribe.readyToSettle(), true);
+									assert.equal(await vRwa.readyToSettle(), true);
 								});
 
-								describe('when the vTribe is settled for the holder', () => {
+								describe('when the vRwa is settled for the holder', () => {
 									let txn;
 									let logs;
 									beforeEach(async () => {
-										txn = await vTribe.settle(account1);
+										txn = await vRwa.settle(account1);
 
 										logs = await getDecodedLogs({
 											hash: txn.tx,
@@ -3035,12 +3035,12 @@ contract('Exchanger (spec tests)', async accounts => {
 										});
 									});
 
-									it('then the user has all the tribes', async () => {
+									it('then the user has all the rwas', async () => {
 										assert.bnEqual(await sAUDContract.balanceOf(account1), amountReceived);
 									});
 
-									it('and the vTribe is settled', async () => {
-										assert.equal(await vTribe.settled(), true);
+									it('and the vRwa is settled', async () => {
+										assert.equal(await vRwa.settled(), true);
 									});
 
 									it('and ExchangeEntrySettled is emitted', async () => {
@@ -3048,15 +3048,15 @@ contract('Exchanger (spec tests)', async accounts => {
 
 										const findEvt = param => evt.events.find(({ name }) => name === param);
 
-										assert.equal(findEvt('from').value, vTribe.address.toLowerCase());
+										assert.equal(findEvt('from').value, vRwa.address.toLowerCase());
 									});
 
-									it('and the entry is settled for the vTribe', async () => {
+									it('and the entry is settled for the vRwa', async () => {
 										const {
 											reclaimAmount,
 											rebateAmount,
 											numEntries,
-										} = await exchanger.settlementOwing(vTribe.address, sAUD);
+										} = await exchanger.settlementOwing(vRwa.address, sAUD);
 										assert.equal(reclaimAmount, '0');
 										assert.equal(rebateAmount, '0');
 										assert.equal(numEntries, '0');
@@ -3073,8 +3073,8 @@ contract('Exchanger (spec tests)', async accounts => {
 										assert.equal(numEntries, '0');
 									});
 
-									it('and no more supply exists in the vTribe', async () => {
-										assert.equal(await vTribe.totalSupply(), '0');
+									it('and no more supply exists in the vRwa', async () => {
+										assert.equal(await vRwa.totalSupply(), '0');
 									});
 								});
 							});
@@ -3157,7 +3157,7 @@ contract('Exchanger (spec tests)', async accounts => {
 							await aggregator.setLatestAnswer(ethOnCL, (await currentTime()) - i * 5 * 60);
 						}
 
-						// Tribe equivalents (needs ability to read into decimals)
+						// Rwa equivalents (needs ability to read into decimals)
 						const rusdDexEquivalentToken = await MockToken.new('erUSD equivalent', 'erUSD', '18');
 						const hethDexEquivalentToken = await MockToken.new('erETH equivalent', 'erETH', '18');
 						await setAtomicEquivalentForDexPricing(rUSD, rusdDexEquivalentToken.address);
@@ -3271,20 +3271,20 @@ contract('Exchanger (spec tests)', async accounts => {
 							);
 						});
 
-						it('emits an TribeExchange directly to the user', async () => {
+						it('emits an RwaExchange directly to the user', async () => {
 							decodedEventEqual({
-								log: logs.find(({ name }) => name === 'TribeExchange'),
-								event: 'TribeExchange',
+								log: logs.find(({ name }) => name === 'RwaExchange'),
+								event: 'RwaExchange',
 								emittedFrom: await rwaone.proxy(),
 								args: [account1, rUSD, amountIn, rETH, amountReceived, account1],
 								bnCloseVariance: '0',
 							});
 						});
 
-						it('emits an AtomicTribeExchange directly to the user', async () => {
+						it('emits an AtomicRwaExchange directly to the user', async () => {
 							decodedEventEqual({
-								log: logs.find(({ name }) => name === 'AtomicTribeExchange'),
-								event: 'AtomicTribeExchange',
+								log: logs.find(({ name }) => name === 'AtomicRwaExchange'),
+								event: 'AtomicRwaExchange',
 								emittedFrom: await rwaone.proxy(),
 								args: [account1, rUSD, amountIn, rETH, amountReceived, account1],
 								bnCloseVariance: '0',
@@ -3392,7 +3392,7 @@ contract('Exchanger (spec tests)', async accounts => {
 					await exchangeRates.addAggregator(rBTC, rbtcAggregator.address, { from: owner });
 					await rbtcAggregator.setLatestAnswer(rbtcChainlinkPrice, await currentTime());
 
-					// Add Tribe Equivalents to System Settings
+					// Add Rwa Equivalents to System Settings
 					const rusdDexEquivalentToken = await MockToken.new('rUSD equivalent', 'erUSD', '6');
 					const rbtcDexEquivalentToken = await MockToken.new('rBTC equivalent', 'erBTC', '9');
 					const seurDexEquivalentToken = await MockToken.new('sEUR equivalent', 'esEUR', '18');
@@ -3694,25 +3694,25 @@ contract('Exchanger (spec tests)', async accounts => {
 						);
 					});
 
-					describe('the isTribeRateInvalid() view correctly returns status', () => {
-						it('when called with a tribe with only a single rate, returns false', async () => {
-							assert.equal(await exchanger.isTribeRateInvalid(rETH), false);
+					describe('the isRwaRateInvalid() view correctly returns status', () => {
+						it('when called with a rwa with only a single rate, returns false', async () => {
+							assert.equal(await exchanger.isRwaRateInvalid(rETH), false);
 						});
-						it('when called with a tribe with no rate (i.e. 0), returns true', async () => {
-							assert.equal(await exchanger.isTribeRateInvalid(toBytes32('XYZ')), true);
+						it('when called with a rwa with no rate (i.e. 0), returns true', async () => {
+							assert.equal(await exchanger.isRwaRateInvalid(toBytes32('XYZ')), true);
 						});
-						describe('when a tribe rate changes outside of the range', () => {
+						describe('when a rwa rate changes outside of the range', () => {
 							updateRate({ target: rETH, rate: baseRate * 5 });
 
-							it('when called with that tribe, returns true', async () => {
-								assert.equal(await exchanger.isTribeRateInvalid(rETH), true);
+							it('when called with that rwa, returns true', async () => {
+								assert.equal(await exchanger.isRwaRateInvalid(rETH), true);
 							});
 
-							describe('when the tribe rate changes back into the range', () => {
+							describe('when the rwa rate changes back into the range', () => {
 								updateRate({ target: rETH, rate: baseRate });
 
 								it('then when called with the target, rate is valid again', async () => {
-									assert.equal(await exchanger.isTribeRateInvalid(rETH), false);
+									assert.equal(await exchanger.isRwaRateInvalid(rETH), false);
 								});
 							});
 						});
@@ -3747,11 +3747,11 @@ contract('Exchanger (spec tests)', async accounts => {
 										});
 										if (Math.abs(factor) >= baseFactor || spikeExpected) {
 											it('no exchange took place', async () => {
-												assert.ok(!logs.some(({ name } = {}) => name === 'TribeExchange'));
+												assert.ok(!logs.some(({ name } = {}) => name === 'RwaExchange'));
 											});
 										} else {
 											it('an exchange took place', async () => {
-												assert.ok(logs.some(({ name } = {}) => name === 'TribeExchange'));
+												assert.ok(logs.some(({ name } = {}) => name === 'RwaExchange'));
 											});
 										}
 									});
@@ -4127,13 +4127,13 @@ contract('Exchanger (spec tests)', async accounts => {
 		});
 	};
 
-	const itSetsExchangeFeeRateForTribes = () => {
-		describe('Given tribe exchange fee rates to set', async () => {
+	const itSetsExchangeFeeRateForRwas = () => {
+		describe('Given rwa exchange fee rates to set', async () => {
 			const fxBIPS = toUnit('0.01');
 			const cryptoBIPS = toUnit('0.03');
 			const empty = toBytes32('');
 
-			describe('Given tribe exchange fee rates to update', async () => {
+			describe('Given rwa exchange fee rates to update', async () => {
 				const newFxBIPS = toUnit('0.02');
 				const newCryptoBIPS = toUnit('0.04');
 
@@ -4142,19 +4142,19 @@ contract('Exchanger (spec tests)', async accounts => {
 					await setExchangeDynamicFeeRounds('1');
 
 					// Store multiple rates
-					await setExchangeFeeRateForTribes({
+					await setExchangeFeeRateForRwas({
 						owner,
 						systemSettings,
-						tribeKeys: [rUSD, sAUD, rBTC, rETH],
+						rwaKeys: [rUSD, sAUD, rBTC, rETH],
 						exchangeFeeRates: [fxBIPS, fxBIPS, cryptoBIPS, cryptoBIPS],
 					});
 				});
 
 				it('when 1 exchange rate to update then overwrite existing rate', async () => {
-					await setExchangeFeeRateForTribes({
+					await setExchangeFeeRateForRwas({
 						owner,
 						systemSettings,
-						tribeKeys: [rUSD],
+						rwaKeys: [rUSD],
 						exchangeFeeRates: [newFxBIPS],
 					});
 					const rUSDRate = await exchanger.feeRateForExchange(empty, rUSD, { from: owner });
@@ -4163,10 +4163,10 @@ contract('Exchanger (spec tests)', async accounts => {
 
 				it('when multiple exchange rates then store them to be readable', async () => {
 					// Update multiple rates
-					await setExchangeFeeRateForTribes({
+					await setExchangeFeeRateForRwas({
 						owner,
 						systemSettings,
-						tribeKeys: [rUSD, sAUD, rBTC, rETH],
+						rwaKeys: [rUSD, sAUD, rBTC, rETH],
 						exchangeFeeRates: [newFxBIPS, newFxBIPS, newCryptoBIPS, newCryptoBIPS],
 					});
 					// Read all rates
@@ -4189,8 +4189,8 @@ contract('Exchanger (spec tests)', async accounts => {
 
 	describe('With L1 configuration (Rwaone, ExchangerWithFeeRecAlternatives, ExchangeRatesWithDexPricing)', () => {
 		before(async () => {
-			const VirtualTribeMastercopy = artifacts.require('VirtualTribeMastercopy');
-			const tribes = ['rUSD', 'rETH', 'sEUR', 'sAUD', 'rBTC', 'iBTC', 'sTRX'];
+			const VirtualRwaMastercopy = artifacts.require('VirtualRwaMastercopy');
+			const rwas = ['rUSD', 'rETH', 'sEUR', 'sAUD', 'rBTC', 'iBTC', 'sTRX'];
 
 			({
 				Exchanger: exchanger,
@@ -4199,11 +4199,11 @@ contract('Exchanger (spec tests)', async accounts => {
 				ExchangeState: exchangeState,
 				FeePool: feePool,
 				SystemStatus: systemStatus,
-				TriberUSD: rUSDContract,
-				TriberBTC: rBTCContract,
-				TribesEUR: sEURContract,
-				TribesAUD: sAUDContract,
-				TriberETH: rETHContract,
+				RwarUSD: rUSDContract,
+				RwarBTC: rBTCContract,
+				RwasEUR: sEURContract,
+				RwasAUD: sAUDContract,
+				RwarETH: rETHContract,
 				SystemSettings: systemSettings,
 				DelegateApprovals: delegateApprovals,
 				AddressResolver: resolver,
@@ -4213,7 +4213,7 @@ contract('Exchanger (spec tests)', async accounts => {
 				FlexibleStorage: flexibleStorage,
 			} = await setupAllContracts({
 				accounts,
-				tribes: tribes,
+				rwas: rwas,
 				contracts: [
 					// L1 specific
 					'Rwaone',
@@ -4233,12 +4233,12 @@ contract('Exchanger (spec tests)', async accounts => {
 					'CollateralManager',
 				],
 				mocks: {
-					// Use a real VirtualTribeMastercopy so the spec tests can interrogate deployed vTribes
-					VirtualTribeMastercopy: await VirtualTribeMastercopy.new(),
+					// Use a real VirtualRwaMastercopy so the spec tests can interrogate deployed vRwas
+					VirtualRwaMastercopy: await VirtualRwaMastercopy.new(),
 				},
 			}));
 
-			await setupPriceAggregators(exchangeRates, owner, tribes.map(toBytes32));
+			await setupPriceAggregators(exchangeRates, owner, rwas.map(toBytes32));
 
 			amountIssued = toUnit('1000');
 
@@ -4256,11 +4256,11 @@ contract('Exchanger (spec tests)', async accounts => {
 			await updateRates(keys, rates);
 
 			exchangeFeeRate = toUnit('0.005');
-			await setExchangeFeeRateForTribes({
+			await setExchangeFeeRateForRwas({
 				owner,
 				systemSettings,
-				tribeKeys,
-				exchangeFeeRates: tribeKeys.map(() => exchangeFeeRate),
+				rwaKeys,
+				exchangeFeeRates: rwaKeys.map(() => exchangeFeeRate),
 			});
 		});
 
@@ -4288,12 +4288,12 @@ contract('Exchanger (spec tests)', async accounts => {
 
 		itPricesSpikeDeviation();
 
-		itSetsExchangeFeeRateForTribes();
+		itSetsExchangeFeeRateForRwas();
 	});
 
 	describe('With L2 configuration (MintableRwaone, Exchanger, ExchangeRates)', () => {
 		before(async () => {
-			const tribes = ['rUSD', 'rETH', 'sEUR', 'sAUD', 'rBTC', 'iBTC', 'sTRX'];
+			const rwas = ['rUSD', 'rETH', 'sEUR', 'sAUD', 'rBTC', 'iBTC', 'sTRX'];
 			({
 				Exchanger: exchanger,
 				Rwaone: rwaone,
@@ -4301,11 +4301,11 @@ contract('Exchanger (spec tests)', async accounts => {
 				ExchangeState: exchangeState,
 				FeePool: feePool,
 				SystemStatus: systemStatus,
-				TriberUSD: rUSDContract,
-				TriberBTC: rBTCContract,
-				TribesEUR: sEURContract,
-				TribesAUD: sAUDContract,
-				TriberETH: rETHContract,
+				RwarUSD: rUSDContract,
+				RwarBTC: rBTCContract,
+				RwasEUR: sEURContract,
+				RwasAUD: sAUDContract,
+				RwarETH: rETHContract,
 				SystemSettings: systemSettings,
 				DelegateApprovals: delegateApprovals,
 				AddressResolver: resolver,
@@ -4315,7 +4315,7 @@ contract('Exchanger (spec tests)', async accounts => {
 				FlexibleStorage: flexibleStorage,
 			} = await setupAllContracts({
 				accounts,
-				tribes: tribes,
+				rwas: rwas,
 				contracts: [
 					// L2 specific
 					'MintableRwaone',
@@ -4336,7 +4336,7 @@ contract('Exchanger (spec tests)', async accounts => {
 				],
 			}));
 
-			await setupPriceAggregators(exchangeRates, owner, tribes.map(toBytes32));
+			await setupPriceAggregators(exchangeRates, owner, rwas.map(toBytes32));
 
 			amountIssued = toUnit('1000');
 
@@ -4355,11 +4355,11 @@ contract('Exchanger (spec tests)', async accounts => {
 
 			// set a 0.5% exchange fee rate (1/200)
 			exchangeFeeRate = toUnit('0.005');
-			await setExchangeFeeRateForTribes({
+			await setExchangeFeeRateForRwas({
 				owner,
 				systemSettings,
-				tribeKeys,
-				exchangeFeeRates: tribeKeys.map(() => exchangeFeeRate),
+				rwaKeys,
+				exchangeFeeRates: rwaKeys.map(() => exchangeFeeRate),
 			});
 		});
 
@@ -4387,7 +4387,7 @@ contract('Exchanger (spec tests)', async accounts => {
 
 		itPricesSpikeDeviation();
 
-		itSetsExchangeFeeRateForTribes();
+		itSetsExchangeFeeRateForRwas();
 	});
 
 	/**
@@ -4395,8 +4395,8 @@ contract('Exchanger (spec tests)', async accounts => {
 	 */
 	describe('With Direct Integration overrides configuration (Rwaone, ExchangerWithFeeRecAlternatives, ExchangeRatesWithDexPricing)', () => {
 		before(async () => {
-			const VirtualTribeMastercopy = artifacts.require('VirtualTribeMastercopy');
-			const tribes = ['rUSD', 'rETH', 'sEUR', 'sAUD', 'rBTC', 'iBTC', 'sTRX'];
+			const VirtualRwaMastercopy = artifacts.require('VirtualRwaMastercopy');
+			const rwas = ['rUSD', 'rETH', 'sEUR', 'sAUD', 'rBTC', 'iBTC', 'sTRX'];
 
 			({
 				Exchanger: exchanger,
@@ -4406,11 +4406,11 @@ contract('Exchanger (spec tests)', async accounts => {
 				ExchangeState: exchangeState,
 				FeePool: feePool,
 				SystemStatus: systemStatus,
-				TriberUSD: rUSDContract,
-				TriberBTC: rBTCContract,
-				TribesEUR: sEURContract,
-				TribesAUD: sAUDContract,
-				TriberETH: rETHContract,
+				RwarUSD: rUSDContract,
+				RwarBTC: rBTCContract,
+				RwasEUR: sEURContract,
+				RwasAUD: sAUDContract,
+				RwarETH: rETHContract,
 				SystemSettings: systemSettings,
 				DelegateApprovals: delegateApprovals,
 				AddressResolver: resolver,
@@ -4420,7 +4420,7 @@ contract('Exchanger (spec tests)', async accounts => {
 				FlexibleStorage: flexibleStorage,
 			} = await setupAllContracts({
 				accounts,
-				tribes: tribes,
+				rwas: rwas,
 				contracts: [
 					// L1 specific
 					'Rwaone',
@@ -4441,12 +4441,12 @@ contract('Exchanger (spec tests)', async accounts => {
 					'CollateralManager',
 				],
 				mocks: {
-					// Use a real VirtualTribeMastercopy so the spec tests can interrogate deployed vTribes
-					VirtualTribeMastercopy: await VirtualTribeMastercopy.new(),
+					// Use a real VirtualRwaMastercopy so the spec tests can interrogate deployed vRwas
+					VirtualRwaMastercopy: await VirtualRwaMastercopy.new(),
 				},
 			}));
 
-			await setupPriceAggregators(exchangeRates, owner, tribes.map(toBytes32));
+			await setupPriceAggregators(exchangeRates, owner, rwas.map(toBytes32));
 
 			amountIssued = toUnit('1000');
 
@@ -4494,7 +4494,7 @@ contract('Exchanger (spec tests)', async accounts => {
 
 				overrideParams.push(await systemSettings.exchangeFeeRate(token));
 				if (!overrideParams[overrideParams.length - 1].isZero()) {
-					await systemSettings.setExchangeFeeRateForTribes([token], [800], { from: owner });
+					await systemSettings.setExchangeFeeRateForRwas([token], [800], { from: owner });
 				}
 
 				overrideParams.push(realExchangeMaxDynamicFee);
@@ -4528,11 +4528,11 @@ contract('Exchanger (spec tests)', async accounts => {
 			await updateRates(keys, rates);
 
 			exchangeFeeRate = toUnit('0.005');
-			await setExchangeFeeRateForTribes({
+			await setExchangeFeeRateForRwas({
 				owner,
 				systemSettings,
-				tribeKeys,
-				exchangeFeeRates: tribeKeys.map(() => exchangeFeeRate),
+				rwaKeys,
+				exchangeFeeRates: rwaKeys.map(() => exchangeFeeRate),
 			});
 		});
 
@@ -4560,6 +4560,6 @@ contract('Exchanger (spec tests)', async accounts => {
 
 		itPricesSpikeDeviation();
 
-		itSetsExchangeFeeRateForTribes();
+		itSetsExchangeFeeRateForRwas();
 	});
 });

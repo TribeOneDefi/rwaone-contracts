@@ -8,7 +8,7 @@ const { assert } = require('../../contracts/common');
 const { toBytes32 } = require('../../../index');
 const { getLoan, getShortInteractionDelay, setShortInteractionDelay } = require('../utils/loans');
 const { ensureBalance } = require('../utils/balances');
-const { exchangeTribes } = require('../utils/exchanging');
+const { exchangeRwas } = require('../utils/exchanging');
 const { updateCache } = require('../utils/rates');
 const { skipWaitingPeriod } = require('../utils/skip');
 
@@ -19,13 +19,13 @@ function itCanOpenAndCloseShort({ ctx }) {
 		const amountToBorrow = parseEther('0.00000000001'); // rETH
 		const amountToExchange = parseEther('100'); // rUSD
 
-		const shortableTribe = toBytes32('rETH');
+		const shortableRwa = toBytes32('rETH');
 
 		let user, owner;
-		let CollateralShort, CollateralManager, Rwaone, TriberUSD, interactionDelay;
+		let CollateralShort, CollateralManager, Rwaone, RwarUSD, interactionDelay;
 
 		before('target contracts and users', () => {
-			({ CollateralShort, CollateralManager, Rwaone, TriberUSD } = ctx.contracts);
+			({ CollateralShort, CollateralManager, Rwaone, RwarUSD } = ctx.contracts);
 
 			user = ctx.users.someUser;
 			owner = ctx.users.owner;
@@ -51,7 +51,7 @@ function itCanOpenAndCloseShort({ ctx }) {
 
 			before('ensure rETH supply exists', async () => {
 				// CollateralManager.getShortRate requires existing rETH else div by zero
-				await exchangeTribes({
+				await exchangeRwas({
 					ctx,
 					src: 'rUSD',
 					dest: 'rETH',
@@ -77,7 +77,7 @@ function itCanOpenAndCloseShort({ ctx }) {
 					before('skip if max borrowing power reached', async function () {
 						const maxBorrowingPower = await CollateralShort.maxLoan(
 							amountToDeposit,
-							shortableTribe
+							shortableRwa
 						);
 						const maxBorrowingPowerReached = maxBorrowingPower <= amountToBorrow;
 
@@ -91,20 +91,20 @@ function itCanOpenAndCloseShort({ ctx }) {
 						}
 					});
 
-					before('add the shortable tribes if needed', async () => {
-						await CollateralShort.connect(owner).addTribes(
-							[toBytes32(`TriberETH`)],
-							[shortableTribe]
+					before('add the shortable rwas if needed', async () => {
+						await CollateralShort.connect(owner).addRwas(
+							[toBytes32(`RwarETH`)],
+							[shortableRwa]
 						);
 
-						await CollateralManager.addTribes([toBytes32(`TriberETH`)], [shortableTribe]);
+						await CollateralManager.addRwas([toBytes32(`RwarETH`)], [shortableRwa]);
 
-						await CollateralManager.addShortableTribes([toBytes32(`TriberETH`)], [shortableTribe]);
+						await CollateralManager.addShortableRwas([toBytes32(`RwarETH`)], [shortableRwa]);
 					});
 
-					before('approve the tribes for collateral short', async () => {
+					before('approve the rwas for collateral short', async () => {
 						await approveIfNeeded({
-							token: TriberUSD,
+							token: RwarUSD,
 							owner: user,
 							beneficiary: CollateralShort,
 							amount: amountOfrUSDRequired,
@@ -112,7 +112,7 @@ function itCanOpenAndCloseShort({ ctx }) {
 					});
 
 					before('open the loan', async () => {
-						tx = await CollateralShort.open(amountToDeposit, amountToBorrow, shortableTribe);
+						tx = await CollateralShort.open(amountToDeposit, amountToBorrow, shortableRwa);
 
 						const { events } = await tx.wait();
 
@@ -166,10 +166,10 @@ function itCanOpenAndCloseShort({ ctx }) {
 					});
 
 					describe('closing a loan', () => {
-						before('exchange tribes', async () => {
+						before('exchange rwas', async () => {
 							await updateCache({ ctx });
 
-							await exchangeTribes({
+							await exchangeRwas({
 								ctx,
 								src: 'rUSD',
 								dest: 'rETH',
@@ -184,7 +184,7 @@ function itCanOpenAndCloseShort({ ctx }) {
 						});
 
 						before('settle', async () => {
-							const tx = await Rwaone.settle(shortableTribe);
+							const tx = await Rwaone.settle(shortableRwa);
 							await tx.wait();
 						});
 

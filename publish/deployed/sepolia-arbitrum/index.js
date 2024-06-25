@@ -1,7 +1,7 @@
 module.exports = {
 	deployment: require('./deployment.json'),
 	versions: require('./versions.json'),
-	tribes: require('./tribes.json'),
+	rwas: require('./rwas.json'),
 	rewards: require('./rewards.json'),
 	feeds: require('./feeds.json'),
 	offchainFeeds: require('./offchain-feeds.json'),

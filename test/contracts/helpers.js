@@ -219,16 +219,16 @@ module.exports = {
 		}
 	},
 
-	// Helper function that can issue tribes directly to a user without having to have them exchange anything
-	async issueTribesToUser({ owner, issuer, addressResolver, tribeContract, user, amount }) {
+	// Helper function that can issue rwas directly to a user without having to have them exchange anything
+	async issueRwasToUser({ owner, issuer, addressResolver, rwaContract, user, amount }) {
 		// First override the resolver to make it seem the owner is the Rwaone contract
 		await addressResolver.importAddresses(['Issuer'].map(toBytes32), [owner], {
 			from: owner,
 		});
-		// now have the tribe resync its cache
-		await tribeContract.rebuildCache();
+		// now have the rwa resync its cache
+		await rwaContract.rebuildCache();
 
-		await tribeContract.issue(user, amount, {
+		await rwaContract.issue(user, amount, {
 			from: owner,
 		});
 
@@ -236,15 +236,15 @@ module.exports = {
 		await addressResolver.importAddresses(['Issuer'].map(toBytes32), [issuer.address], {
 			from: owner,
 		});
-		await tribeContract.rebuildCache();
+		await rwaContract.rebuildCache();
 	},
 
 	async setExchangeWaitingPeriod({ owner, systemSettings, secs }) {
 		await systemSettings.setWaitingPeriodSecs(secs.toString(), { from: owner });
 	},
 
-	async setExchangeFeeRateForTribes({ owner, systemSettings, tribeKeys, exchangeFeeRates }) {
-		await systemSettings.setExchangeFeeRateForTribes(tribeKeys, exchangeFeeRates, {
+	async setExchangeFeeRateForRwas({ owner, systemSettings, rwaKeys, exchangeFeeRates }) {
+		await systemSettings.setExchangeFeeRateForRwas(rwaKeys, exchangeFeeRates, {
 			from: owner,
 		});
 	},
@@ -315,7 +315,7 @@ module.exports = {
 		owner,
 		systemStatus,
 		section,
-		tribe = undefined,
+		rwa = undefined,
 		suspend = false,
 		reason = '0',
 	}) {
@@ -337,17 +337,17 @@ module.exports = {
 			} else {
 				await systemStatus.resumeExchange({ from: owner });
 			}
-		} else if (section === 'TribeExchange') {
+		} else if (section === 'RwaExchange') {
 			if (suspend) {
-				await systemStatus.suspendTribeExchange(tribe, reason, { from: owner });
+				await systemStatus.suspendRwaExchange(rwa, reason, { from: owner });
 			} else {
-				await systemStatus.resumeTribeExchange(tribe, { from: owner });
+				await systemStatus.resumeRwaExchange(rwa, { from: owner });
 			}
-		} else if (section === 'Tribe') {
+		} else if (section === 'Rwa') {
 			if (suspend) {
-				await systemStatus.suspendTribe(tribe, reason, { from: owner });
+				await systemStatus.suspendRwa(rwa, reason, { from: owner });
 			} else {
-				await systemStatus.resumeTribe(tribe, { from: owner });
+				await systemStatus.resumeRwa(rwa, { from: owner });
 			}
 		} else {
 			throw Error(`Section: ${section} unsupported`);

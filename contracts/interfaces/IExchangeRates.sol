@@ -94,9 +94,9 @@ interface IExchangeRates {
 
     function ratesForCurrencies(bytes32[] calldata currencyKeys) external view returns (uint[] memory);
 
-    function tribeTooVolatileForAtomicExchange(bytes32 currencyKey) external view returns (bool);
+    function rwaTooVolatileForAtomicExchange(bytes32 currencyKey) external view returns (bool);
 
-    function tribeTooVolatileForAtomicExchange(
+    function rwaTooVolatileForAtomicExchange(
         IDirectIntegrationManager.ParameterIntegrationSettings calldata settings
     ) external view returns (bool);
 

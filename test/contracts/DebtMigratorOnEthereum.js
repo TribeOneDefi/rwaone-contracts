@@ -10,19 +10,19 @@ contract('DebtMigratorOnEthereum', accounts => {
 	const owner = accounts[1];
 	const user = accounts[2];
 
-	let debtMigratorOnEthereum, resolver, rewardEscrowV2, tribes, rwaone, tribeetixDebtShare;
+	let debtMigratorOnEthereum, resolver, rewardEscrowV2, rwas, rwaone, rwaoneDebtShare;
 
 	before(async () => {
-		tribes = ['rUSD', 'rETH'];
+		rwas = ['rUSD', 'rETH'];
 		({
 			AddressResolver: resolver,
 			DebtMigratorOnEthereum: debtMigratorOnEthereum,
 			RewardEscrowV2: rewardEscrowV2,
 			Rwaone: rwaone,
-			RwaoneDebtShare: tribeetixDebtShare,
+			RwaoneDebtShare: rwaoneDebtShare,
 		} = await setupAllContracts({
 			accounts,
-			tribes,
+			rwas,
 			contracts: [
 				'AddressResolver',
 				'DebtMigratorOnEthereum',
@@ -160,13 +160,13 @@ contract('DebtMigratorOnEthereum', accounts => {
 		});
 
 		before('issue some debt', async () => {
-			await rwaone.issueTribes(amountToIssue, { from: owner });
+			await rwaone.issueRwas(amountToIssue, { from: owner });
 		});
 
 		before('record balances', async () => {
 			liquidRWAXBalance = await rwaone.balanceOf(owner);
 			escrowedRWAXBalance = await rewardEscrowV2.balanceOf(owner);
-			debtShareBalance = await tribeetixDebtShare.balanceOf(owner);
+			debtShareBalance = await rwaoneDebtShare.balanceOf(owner);
 			debtTransferSentBefore = await debtMigratorOnEthereum.debtTransferSent();
 		});
 
@@ -200,7 +200,7 @@ contract('DebtMigratorOnEthereum', accounts => {
 				assert.bnEqual(await rwaone.balanceOf(owner), 0);
 				assert.bnEqual(await rwaone.debtBalanceOf(owner, rUSD), 0);
 				assert.bnEqual(await rewardEscrowV2.balanceOf(owner), 0);
-				assert.bnEqual(await tribeetixDebtShare.balanceOf(owner), 0);
+				assert.bnEqual(await rwaoneDebtShare.balanceOf(owner), 0);
 			});
 
 			it('emits a MigrationInitiated event', async () => {

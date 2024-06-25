@@ -38,7 +38,7 @@ contract SupplySchedule is Owned, ISupplySchedule {
     uint public maxInflationAmount = 3e6 * 1e18; // max inflation amount 3,000,000
 
     // Address of the RwaoneProxy for the onlyRwaone modifier
-    address payable public tribeetixProxy;
+    address payable public rwaoneProxy;
 
     // Max wRWAX rewards for minter
     uint public constant MAX_MINTER_REWARD = 200 * 1e18;
@@ -136,10 +136,10 @@ contract SupplySchedule is Owned, ISupplySchedule {
      * SupplySchedule requires Rwaone address as it has the authority
      * to record mint event.
      * */
-    function setRwaoneProxy(IRwaone _tribeetixProxy) external onlyOwner {
-        require(address(_tribeetixProxy) != address(0), "Address cannot be 0");
-        tribeetixProxy = address(uint160(address(_tribeetixProxy)));
-        emit RwaoneProxyUpdated(tribeetixProxy);
+    function setRwaoneProxy(IRwaone _rwaoneProxy) external onlyOwner {
+        require(address(_rwaoneProxy) != address(0), "Address cannot be 0");
+        rwaoneProxy = address(uint160(address(_rwaoneProxy)));
+        emit RwaoneProxyUpdated(rwaoneProxy);
     }
 
     /**
@@ -165,7 +165,7 @@ contract SupplySchedule is Owned, ISupplySchedule {
      * */
     modifier onlyRwaone() {
         require(
-            msg.sender == address(Proxy(address(tribeetixProxy)).target()),
+            msg.sender == address(Proxy(address(rwaoneProxy)).target()),
             "Only the rwaone contract can perform this action"
         );
         _;

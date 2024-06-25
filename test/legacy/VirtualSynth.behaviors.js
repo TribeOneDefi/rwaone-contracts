@@ -6,39 +6,39 @@ const { toBytes32 } = require('../..');
 
 const { prepareSmocks } = require('../contracts/helpers');
 
-const VirtualTribe = artifacts.require('VirtualTribe');
+const VirtualRwa = artifacts.require('VirtualRwa');
 
 // note: cannot use fat-arrow here otherwise this function will be bound to this outer context
 module.exports = function ({ accounts }) {
 	beforeEach(async () => {
 		({ mocks: this.mocks, resolver: this.resolver } = await prepareSmocks({
 			owner: accounts[1],
-			contracts: ['Tribe', 'Exchanger'],
+			contracts: ['Rwa', 'Exchanger'],
 			accounts: accounts.slice(10), // mock using accounts after the first few
 		}));
 	});
 
 	return {
 		// note: use fat-arrow to persist context rather
-		whenInstantiated: ({ amount, user, tribe = 'rETH' }, cb) => {
+		whenInstantiated: ({ amount, user, rwa = 'rETH' }, cb) => {
 			describe(`when instantiated for user ${user.slice(0, 7)}`, () => {
 				beforeEach(async () => {
-					this.instance = await VirtualTribe.new();
+					this.instance = await VirtualRwa.new();
 					await this.instance.initialize(
-						this.mocks.Tribe.address,
+						this.mocks.Rwa.address,
 						this.resolver.address,
 						user,
 						amount,
-						toBytes32(tribe)
+						toBytes32(rwa)
 					);
 				});
 				cb();
 			});
 		},
-		whenMockedTribeBalance: ({ balanceOf }, cb) => {
-			describe(`when the tribe has been mocked to show balance for the vTribe as ${balanceOf}`, () => {
+		whenMockedRwaBalance: ({ balanceOf }, cb) => {
+			describe(`when the rwa has been mocked to show balance for the vRwa as ${balanceOf}`, () => {
 				beforeEach(async () => {
-					this.mocks.Tribe.balanceOf.returns(acc =>
+					this.mocks.Rwa.balanceOf.returns(acc =>
 						acc === this.instance.address ? balanceOf : '0'
 					);
 				});
@@ -46,7 +46,7 @@ module.exports = function ({ accounts }) {
 			});
 		},
 		whenUserTransfersAwayTokens: ({ amount, from, to }, cb) => {
-			describe(`when the user transfers away ${amount} of their vTribes`, () => {
+			describe(`when the user transfers away ${amount} of their vRwas`, () => {
 				beforeEach(async () => {
 					await this.instance.transfer(to || this.instance.address, amount.toString(), {
 						from,
@@ -72,11 +72,11 @@ module.exports = function ({ accounts }) {
 					const [reclaim, rebate, numEntries] = this.mocks.Exchanger.settlementOwing.returns
 						.returnValue || [0, 0, 1];
 
-					// now show the balanceOf the vTribe shows the amount after settlement
-					let balanceOf = +this.mocks.Tribe.balanceOf.returns(this.instance.address);
+					// now show the balanceOf the vRwa shows the amount after settlement
+					let balanceOf = +this.mocks.Rwa.balanceOf.returns(this.instance.address);
 
 					this.mocks.Exchanger.settle.returns(() => {
-						// update the balanceOf the underlying tribe due to settlement
+						// update the balanceOf the underlying rwa due to settlement
 						balanceOf = reclaim > 0 ? balanceOf - reclaim : balanceOf + rebate;
 						// ensure settlementOwing now shows nothing
 						this.mocks.Exchanger.settlementOwing.returns([0, 0, 0]);
@@ -84,14 +84,14 @@ module.exports = function ({ accounts }) {
 						return [reclaim, rebate, numEntries];
 					});
 
-					this.mocks.Tribe.transfer.returns((to, amount) => {
-						// ensure the vTribes settlement reduces how much balance
+					this.mocks.Rwa.transfer.returns((to, amount) => {
+						// ensure the vRwas settlement reduces how much balance
 						balanceOf = balanceOf - amount;
 						return true;
 					});
 
 					// use a closure to ensure the balance returned at time of request is the updated one
-					this.mocks.Tribe.balanceOf.returns(() => balanceOf);
+					this.mocks.Rwa.balanceOf.returns(() => balanceOf);
 
 					this.txn = await this.instance.settle(user);
 				});

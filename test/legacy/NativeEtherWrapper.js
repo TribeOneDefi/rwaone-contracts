@@ -21,7 +21,7 @@ const { toBytes32 } = require('../..');
 const { toBN } = require('web3-utils');
 
 contract('NativeEtherWrapper', async accounts => {
-	const tribes = ['rUSD', 'rETH', 'ETH', 'wRWAX'];
+	const rwas = ['rUSD', 'rETH', 'ETH', 'wRWAX'];
 	const [rETH, ETH] = ['rETH', 'ETH'].map(toBytes32);
 
 	const [, owner, , , account1] = accounts;
@@ -29,7 +29,7 @@ contract('NativeEtherWrapper', async accounts => {
 	let systemSettings,
 		exchangeRates,
 		addressResolver,
-		rETHTribe,
+		rETHRwa,
 		etherWrapper,
 		nativeEtherWrapper,
 		weth;
@@ -41,11 +41,11 @@ contract('NativeEtherWrapper', async accounts => {
 			ExchangeRates: exchangeRates,
 			EtherWrapper: etherWrapper,
 			NativeEtherWrapper: nativeEtherWrapper,
-			TriberETH: rETHTribe,
+			RwarETH: rETHRwa,
 			WETH: weth,
 		} = await setupAllContracts({
 			accounts,
-			tribes,
+			rwas,
 			contracts: [
 				'Rwaone',
 				'AddressResolver',
@@ -92,7 +92,7 @@ contract('NativeEtherWrapper', async accounts => {
 		});
 
 		it('should access its dependencies via the address resolver', async () => {
-			assert.equal(await addressResolver.getAddress(toBytes32('TriberETH')), rETHTribe.address);
+			assert.equal(await addressResolver.getAddress(toBytes32('RwarETH')), rETHRwa.address);
 			assert.equal(
 				await addressResolver.getAddress(toBytes32('EtherWrapper')),
 				etherWrapper.address
@@ -153,7 +153,7 @@ contract('NativeEtherWrapper', async accounts => {
 				});
 			});
 			it('transfers rETH to msg.sender', async () => {
-				assert.bnEqual(await rETHTribe.balanceOf(account1), amount);
+				assert.bnEqual(await rETHRwa.balanceOf(account1), amount);
 			});
 		});
 	});
@@ -188,11 +188,11 @@ contract('NativeEtherWrapper', async accounts => {
 			beforeEach(async () => {
 				// Mint some rETH.
 				await nativeEtherWrapper.mint({ value: toUnit('1'), from: account1 });
-				hethBalanceBefore = await rETHTribe.balanceOf(account1);
+				hethBalanceBefore = await rETHRwa.balanceOf(account1);
 				amount = hethBalanceBefore;
 
 				// Approve rETH.
-				await rETHTribe.approve(nativeEtherWrapper.address, amount, { from: account1 });
+				await rETHRwa.approve(nativeEtherWrapper.address, amount, { from: account1 });
 
 				// Burn.
 				ethBalanceBefore = await web3.eth.getBalance(account1);
@@ -201,7 +201,7 @@ contract('NativeEtherWrapper', async accounts => {
 			});
 
 			it('transfers rETH from msg.sender to contract', async () => {
-				assert.bnEqual(await rETHTribe.balanceOf(account1), hethBalanceBefore.sub(amount));
+				assert.bnEqual(await rETHRwa.balanceOf(account1), hethBalanceBefore.sub(amount));
 			});
 			it('calls EtherWrapper.burn(amount)', async () => {
 				const logs = await getDecodedLogs({

@@ -182,14 +182,14 @@ contract ExchangeRatesWithDexPricing is ExchangeRates {
         return (twapValueInEquivalent.mul(SafeDecimalMath.unit())).div(10 ** uint(destEquivalent.decimals()));
     }
 
-    function tribeTooVolatileForAtomicExchange(bytes32 currencyKey) public view returns (bool) {
+    function rwaTooVolatileForAtomicExchange(bytes32 currencyKey) public view returns (bool) {
         IDirectIntegrationManager.ParameterIntegrationSettings memory settings = directIntegrationManager()
             .getExchangeParameters(msg.sender, currencyKey);
 
-        return tribeTooVolatileForAtomicExchange(settings);
+        return rwaTooVolatileForAtomicExchange(settings);
     }
 
-    function tribeTooVolatileForAtomicExchange(
+    function rwaTooVolatileForAtomicExchange(
         IDirectIntegrationManager.ParameterIntegrationSettings memory settings
     ) public view returns (bool) {
         // rUSD is a special case and is never volatile

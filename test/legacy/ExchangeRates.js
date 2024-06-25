@@ -296,7 +296,7 @@ contract('Exchange Rates', async accounts => {
 							from: owner,
 						});
 					});
-					describe('when aggregated tribe has rates', () => {
+					describe('when aggregated rwa has rates', () => {
 						beforeEach(async () => {
 							const timestamp = await currentTime();
 							await aggregatorJPY.setLatestAnswer(convertToDecimals(100, 8), timestamp);
@@ -1706,31 +1706,31 @@ contract('Exchange Rates', async accounts => {
 	};
 
 	const itReportsRateTooVolatileForAtomicExchanges = () => {
-		describe('tribeTooVolatileForAtomicExchange', async () => {
+		describe('rwaTooVolatileForAtomicExchange', async () => {
 			const minute = 60;
-			const tribe = rETH;
+			const rwa = rETH;
 			let aggregator;
 
 			beforeEach('set up eth aggregator mock', async () => {
 				aggregator = await MockAggregator.new({ from: owner });
 				await aggregator.setDecimals('8');
-				await instance.addAggregator(tribe, aggregator.address, {
+				await instance.addAggregator(rwa, aggregator.address, {
 					from: owner,
 				});
 			});
 
 			describe('when consideration window is not set', () => {
-				it('does not consider tribe to be volatile', async () => {
+				it('does not consider rwa to be volatile', async () => {
 					assert.isFalse(
-						await instance.methods['tribeTooVolatileForAtomicExchange(bytes32)'](tribe)
+						await instance.methods['rwaTooVolatileForAtomicExchange(bytes32)'](rwa)
 					);
 				});
 			});
 
 			describe('when update threshold is not set', () => {
-				it('does not consider tribe to be volatile', async () => {
+				it('does not consider rwa to be volatile', async () => {
 					assert.isFalse(
-						await instance.methods['tribeTooVolatileForAtomicExchange(bytes32)'](tribe)
+						await instance.methods['rwaTooVolatileForAtomicExchange(bytes32)'](rwa)
 					);
 				});
 			});
@@ -1740,10 +1740,10 @@ contract('Exchange Rates', async accounts => {
 
 				beforeEach('set system settings', async () => {
 					// Window of 10min and threshold of 2 (i.e. max two updates allowed)
-					await systemSettings.setAtomicVolatilityConsiderationWindow(tribe, considerationWindow, {
+					await systemSettings.setAtomicVolatilityConsiderationWindow(rwa, considerationWindow, {
 						from: owner,
 					});
-					await systemSettings.setAtomicVolatilityUpdateThreshold(tribe, 2, {
+					await systemSettings.setAtomicVolatilityUpdateThreshold(rwa, 2, {
 						from: owner,
 					});
 				});
@@ -1756,15 +1756,15 @@ contract('Exchange Rates', async accounts => {
 						);
 					});
 
-					it('does not consider tribe to be volatile', async () => {
+					it('does not consider rwa to be volatile', async () => {
 						assert.isFalse(
-							await instance.methods['tribeTooVolatileForAtomicExchange(bytes32)'](tribe)
+							await instance.methods['rwaTooVolatileForAtomicExchange(bytes32)'](rwa)
 						);
 					});
 				});
 
 				describe('when last aggregator update is inside consideration window', () => {
-					function itReportsTheTribesVolatilityBasedOnOracleUpdates({
+					function itReportsTheRwasVolatilityBasedOnOracleUpdates({
 						oracleUpdateTimesFromNow = [],
 						volatile,
 					}) {
@@ -1777,16 +1777,16 @@ contract('Exchange Rates', async accounts => {
 							}
 						});
 
-						it(`${volatile ? 'considers' : 'does not consider'} tribe to be volatile`, async () => {
+						it(`${volatile ? 'considers' : 'does not consider'} rwa to be volatile`, async () => {
 							assert.equal(
-								await instance.methods['tribeTooVolatileForAtomicExchange(bytes32)'](tribe),
+								await instance.methods['rwaTooVolatileForAtomicExchange(bytes32)'](rwa),
 								volatile
 							);
 						});
 					}
 
 					describe('when the allowed update threshold is not reached', () => {
-						itReportsTheTribesVolatilityBasedOnOracleUpdates({
+						itReportsTheRwasVolatilityBasedOnOracleUpdates({
 							oracleUpdateTimesFromNow: [
 								considerationWindow + 10 * minute,
 								considerationWindow + 5 * minute,
@@ -1797,7 +1797,7 @@ contract('Exchange Rates', async accounts => {
 					});
 
 					describe('when the allowed update threshold is reached', () => {
-						itReportsTheTribesVolatilityBasedOnOracleUpdates({
+						itReportsTheRwasVolatilityBasedOnOracleUpdates({
 							oracleUpdateTimesFromNow: [
 								considerationWindow + 10 * minute,
 								considerationWindow - 5 * minute,
@@ -1809,7 +1809,7 @@ contract('Exchange Rates', async accounts => {
 
 					describe('when the allowed update threshold is reached with updates at the edge of the consideration window', () => {
 						// The consideration window is inclusive on both sides (i.e. [])
-						itReportsTheTribesVolatilityBasedOnOracleUpdates({
+						itReportsTheRwasVolatilityBasedOnOracleUpdates({
 							oracleUpdateTimesFromNow: [
 								considerationWindow + 10 * minute,
 								considerationWindow - 5, // small 5s fudge for block times and querying speed
@@ -1820,7 +1820,7 @@ contract('Exchange Rates', async accounts => {
 					});
 
 					describe('when there is not enough oracle history to assess', () => {
-						itReportsTheTribesVolatilityBasedOnOracleUpdates({
+						itReportsTheRwasVolatilityBasedOnOracleUpdates({
 							oracleUpdateTimesFromNow: [considerationWindow - 5 * minute],
 							volatile: true,
 						});
@@ -1828,7 +1828,7 @@ contract('Exchange Rates', async accounts => {
 
 					describe('when there is just enough oracle history to assess', () => {
 						describe('when all updates are inside consideration window', () => {
-							itReportsTheTribesVolatilityBasedOnOracleUpdates({
+							itReportsTheRwasVolatilityBasedOnOracleUpdates({
 								oracleUpdateTimesFromNow: [
 									considerationWindow - 5 * minute,
 									considerationWindow - 7 * minute,
@@ -1838,7 +1838,7 @@ contract('Exchange Rates', async accounts => {
 						});
 
 						describe('when not all updates are inside consideration window', () => {
-							itReportsTheTribesVolatilityBasedOnOracleUpdates({
+							itReportsTheRwasVolatilityBasedOnOracleUpdates({
 								oracleUpdateTimesFromNow: [
 									considerationWindow + 5 * minute,
 									considerationWindow - 5 * minute,
@@ -1858,9 +1858,9 @@ contract('Exchange Rates', async accounts => {
 							);
 						});
 
-						it('does not consider tribe to be volatile', async () => {
+						it('does not consider rwa to be volatile', async () => {
 							assert.isFalse(
-								await instance.methods['tribeTooVolatileForAtomicExchange(bytes32)'](tribe)
+								await instance.methods['rwaTooVolatileForAtomicExchange(bytes32)'](rwa)
 							);
 						});
 					});
@@ -1873,9 +1873,9 @@ contract('Exchange Rates', async accounts => {
 							);
 						});
 
-						it('considers tribe to be volatile', async () => {
+						it('considers rwa to be volatile', async () => {
 							assert.isTrue(
-								await instance.methods['tribeTooVolatileForAtomicExchange(bytes32)'](tribe)
+								await instance.methods['rwaTooVolatileForAtomicExchange(bytes32)'](rwa)
 							);
 						});
 					});
@@ -1885,9 +1885,9 @@ contract('Exchange Rates', async accounts => {
 							await aggregator.setAllRoundDataShouldRevert(true);
 						});
 
-						it('considers tribe to be volatile', async () => {
+						it('considers rwa to be volatile', async () => {
 							assert.isTrue(
-								await instance.methods['tribeTooVolatileForAtomicExchange(bytes32)'](tribe)
+								await instance.methods['rwaTooVolatileForAtomicExchange(bytes32)'](rwa)
 							);
 						});
 					});
@@ -1900,7 +1900,7 @@ contract('Exchange Rates', async accounts => {
 		describe('Atomic exchange volatility control', () => {
 			it('errors with not implemented when attempting to assess volatility for atomic exchanges', async () => {
 				await assert.revert(
-					instance.methods['tribeTooVolatileForAtomicExchange(bytes32)'](rETH),
+					instance.methods['rwaTooVolatileForAtomicExchange(bytes32)'](rETH),
 					'Cannot be run on this layer'
 				);
 			});

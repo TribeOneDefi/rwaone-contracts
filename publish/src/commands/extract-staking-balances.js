@@ -25,7 +25,7 @@ async function extractStakingBalances({
 	network = DEFAULTS.network,
 	deploymentPath,
 	useOvm,
-	tribe,
+	rwa,
 }) {
 	ensureNetwork(network);
 	deploymentPath = deploymentPath || getDeploymentPathForNetwork({ network });
@@ -51,25 +51,25 @@ async function extractStakingBalances({
 	// The filename the results will be saved to.
 	const owedFile = 'owedBalances.csv';
 
-	// The address of the inverse tribe that is about to be purged.
+	// The address of the inverse rwa that is about to be purged.
 	// Note that this must be the PROXY address, where Transfer events are emitted from.
-	const iTribeContract = getTarget({ contract: `Proxy${tribe === 'rUSD' ? 'ERC20rUSD' : tribe}` });
+	const iRwaContract = getTarget({ contract: `Proxy${rwa === 'rUSD' ? 'ERC20rUSD' : rwa}` });
 
-	if (!iTribeContract) {
-		throw new Error(`Cannot find tribe contract for tribe: "${tribe}"`);
+	if (!iRwaContract) {
+		throw new Error(`Cannot find rwa contract for rwa: "${rwa}"`);
 	}
 
-	const iTribeAddress = iTribeContract.address;
-	console.log(gray(`Using Proxy${tribe} address of`), yellow(iTribeAddress));
+	const iRwaAddress = iRwaContract.address;
+	console.log(gray(`Using Proxy${rwa} address of`), yellow(iRwaAddress));
 
 	// Address of the staking contract, which we will retrieve staked balances from.
 	// Note: this only works before it is released
 	const lastStakingVersionThatsCurrent = getVersions({ byContract: true })[
-		`StakingRewards${tribe}`
+		`StakingRewards${rwa}`
 	].find(({ status }) => status === 'current');
 
 	const stakingAddress = lastStakingVersionThatsCurrent.address;
-	console.log(gray(`Using StakingRewards${tribe} address of`), yellow(stakingAddress));
+	console.log(gray(`Using StakingRewards${rwa} address of`), yellow(stakingAddress));
 
 	const result = await axios.get(etherscanUrl, {
 		params: {
@@ -83,10 +83,10 @@ async function extractStakingBalances({
 	// The block that the staking contract was deployed, for filtering transfers into it.
 	const deploymentBlock = +result.data.result[0].blockNumber;
 
-	console.log(`Loading rewards for tribe ${tribe} on network ${network}`);
+	console.log(`Loading rewards for rwa ${rwa} on network ${network}`);
 
 	console.log(
-		gray(`Staking rewards StakingRewards${tribe} deployed at block`),
+		gray(`Staking rewards StakingRewards${rwa} deployed at block`),
 		yellow(deploymentBlock)
 	);
 
@@ -98,15 +98,15 @@ async function extractStakingBalances({
 		provider
 	);
 
-	// The price at which the inverse tribe was frozen, to compute how much users are owed after purging
-	const frozenPrice = await ExchangeRates.rateForCurrency(toBytes32(tribe));
+	// The price at which the inverse rwa was frozen, to compute how much users are owed after purging
+	const frozenPrice = await ExchangeRates.rateForCurrency(toBytes32(rwa));
 
-	console.log(`${tribe} current price is `, yellow(ethers.utils.formatEther(frozenPrice)));
+	console.log(`${rwa} current price is `, yellow(ethers.utils.formatEther(frozenPrice)));
 
-	const isFrozen = await ExchangeRates.rateIsFrozen(toBytes32(tribe));
+	const isFrozen = await ExchangeRates.rateIsFrozen(toBytes32(rwa));
 
 	if (!isFrozen) {
-		throw new Error(`Error: ${tribe} not frozen`);
+		throw new Error(`Error: ${rwa} not frozen`);
 	}
 
 	const SystemSettings = new ethers.Contract(
@@ -159,7 +159,7 @@ async function extractStakingBalances({
 
 	// Looks for all transfers into the staking contract
 	async function fetchStakedBalances() {
-		const iTribe = new ethers.Contract(iTribeAddress, snxABI, provider);
+		const iRwa = new ethers.Contract(iRwaAddress, snxABI, provider);
 		const stakingContract = new ethers.Contract(stakingAddress, snxABI, provider);
 
 		const currentBlock = await provider.getBlockNumber();
@@ -167,13 +167,13 @@ async function extractStakingBalances({
 
 		console.log(`Querying all transfers into the staking contract to find candidate stakers.\n`);
 		console.log(`    Staking Contract: ${stakingAddress}`);
-		console.log(`    Tribe: ${iTribeAddress}`);
+		console.log(`    Rwa: ${iRwaAddress}`);
 		console.log(
 			`    Starting Block: ${deploymentBlock} (${currentBlock -
 			deploymentBlock} blocks ago at ${formatDate(deploymentBlockDetails.timestamp * 1000)})\n`
 		);
 
-		const transferEvents = await iTribe.queryFilter(
+		const transferEvents = await iRwa.queryFilter(
 			{
 				topics: [
 					ethers.utils.id('Transfer(address,address,uint256)'),
@@ -275,10 +275,10 @@ module.exports = {
 			)
 			.option(
 				'-d, --deployment-path <value>',
-				`Path to a folder that has your input configuration file ${CONFIG_FILENAME}, the tribe list ${RWAONES_FILENAME} and where your ${DEPLOYMENT_FILENAME} files will go`
+				`Path to a folder that has your input configuration file ${CONFIG_FILENAME}, the rwa list ${RWAONES_FILENAME} and where your ${DEPLOYMENT_FILENAME} files will go`
 			)
 			.option('-z, --use-ovm', 'Target deployment for the OVM (Optimism).')
-			.option('-s, --tribe <value>', 'The tribe to extract from')
+			.option('-s, --rwa <value>', 'The rwa to extract from')
 			.description('Extracts staking reward balances')
 			.action(async (...args) => {
 				try {

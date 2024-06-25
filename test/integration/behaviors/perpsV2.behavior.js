@@ -81,7 +81,7 @@ function itCanTrade({ ctx }) {
 			FuturesMarketBTC,
 			ExchangeRates,
 			AddressResolver,
-			TriberUSD;
+			RwarUSD;
 
 		before('target contracts and users', async () => {
 			({
@@ -100,7 +100,7 @@ function itCanTrade({ ctx }) {
 				FuturesMarketBTC,
 				ExchangeRates,
 				AddressResolver,
-				TriberUSD,
+				RwarUSD,
 			} = ctx.contracts);
 
 			owner = ctx.users.owner;
@@ -167,14 +167,14 @@ function itCanTrade({ ctx }) {
 				// Cleanup any outstanding margin (flaky)
 				await (await market.withdrawAllMargin()).wait();
 
-				const balance = await TriberUSD.balanceOf(someUser.address);
+				const balance = await RwarUSD.balanceOf(someUser.address);
 				// transfer
 				await market.transferMargin(margin);
-				assert.bnEqual(await TriberUSD.balanceOf(someUser.address), balance.sub(margin));
+				assert.bnEqual(await RwarUSD.balanceOf(someUser.address), balance.sub(margin));
 
 				// withdraw
 				await (await market.withdrawAllMargin()).wait();
-				const withdrawBalance = await TriberUSD.balanceOf(someUser.address);
+				const withdrawBalance = await RwarUSD.balanceOf(someUser.address);
 				assert.bnEqual(withdrawBalance, balance);
 			});
 

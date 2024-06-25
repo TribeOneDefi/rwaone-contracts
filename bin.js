@@ -12,7 +12,7 @@ const {
 	decode,
 	getAST,
 	getSource,
-	getTribes,
+	getRwas,
 	getFeeds,
 	getOffchainFeeds,
 	getPerpsV2ProxiedMarkets,
@@ -69,10 +69,10 @@ program
 	.action(async (key, { skipCheck }) => {
 		if (
 			!skipCheck &&
-			getTribes({ network: 'mainnet' }).filter(({ name }) => name === key).length < 1
+			getRwas({ network: 'mainnet' }).filter(({ name }) => name === key).length < 1
 		) {
 			throw Error(
-				`Given key of "${key}" does not exist as a tribe in mainnet (case-sensitive). Use --skip-check to skip this check.`
+				`Given key of "${key}" does not exist as a rwa in mainnet (case-sensitive). Use --skip-check to skip this check.`
 			);
 		}
 		console.log(toBytes32(key));
@@ -344,16 +344,16 @@ program
 	});
 
 program
-	.command('tribes')
-	.description('Get the list of tribes')
+	.command('rwas')
+	.description('Get the list of rwas')
 	.option('-n, --network <value>', 'The network to run off.', x => x.toLowerCase(), 'mainnet')
 	.option('-k, --key [value]', 'A specific key wanted')
 	.option('-z, --use-ovm', 'Target deployment for the OVM (Optimism).')
 	.action(async ({ network, useOvm, key }) => {
-		const tribeList = getTribes({ network, useOvm });
+		const rwaList = getRwas({ network, useOvm });
 		console.log(
 			JSON.stringify(
-				tribeList.map(entry => {
+				rwaList.map(entry => {
 					return key in entry ? entry[key] : entry;
 				}),
 				null,

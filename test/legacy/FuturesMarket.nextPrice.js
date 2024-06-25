@@ -50,13 +50,13 @@ contract('FuturesMarket MixinFuturesNextPriceOrders', accounts => {
 			FuturesMarketBTC: futuresMarket,
 			ExchangeRates: exchangeRates,
 			CircuitBreaker: circuitBreaker,
-			TriberUSD: rUSD,
+			RwarUSD: rUSD,
 			FeePool: feePool,
 			SystemSettings: systemSettings,
 			SystemStatus: systemStatus,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'rBTC', 'rETH'],
+			rwas: ['rUSD', 'rBTC', 'rETH'],
 			contracts: [
 				'FuturesMarketManager',
 				'FuturesMarketSettings',

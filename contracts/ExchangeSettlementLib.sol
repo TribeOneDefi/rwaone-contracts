@@ -53,12 +53,12 @@ library ExchangeSettlementLib {
             _refund(resolvedAddresses, from, currencyKey, refunded);
         }
 
-        // by checking a reclaim or refund we also check that the currency key is still a valid tribe,
-        // as the deviation check will return 0 if the tribe has been removed.
+        // by checking a reclaim or refund we also check that the currency key is still a valid rwa,
+        // as the deviation check will return 0 if the rwa has been removed.
         if (updateCache && (reclaimed > 0 || refunded > 0)) {
             bytes32[] memory key = new bytes32[](1);
             key[0] = currencyKey;
-            resolvedAddresses.debtCache.updateCachedTribeDebts(key);
+            resolvedAddresses.debtCache.updateCachedRwaDebts(key);
         }
 
         // emit settlement event for each settled exchange entry
@@ -101,13 +101,13 @@ library ExchangeSettlementLib {
 
     function _reclaim(ResolvedAddresses memory resolvedAddresses, address from, bytes32 currencyKey, uint amount) internal {
         // burn amount from user
-        resolvedAddresses.issuer.tribes(currencyKey).burn(from, amount);
+        resolvedAddresses.issuer.rwas(currencyKey).burn(from, amount);
         IRwaoneInternal(address(resolvedAddresses.rwaone)).emitExchangeReclaim(from, currencyKey, amount);
     }
 
     function _refund(ResolvedAddresses memory resolvedAddresses, address from, bytes32 currencyKey, uint amount) internal {
         // issue amount to user
-        resolvedAddresses.issuer.tribes(currencyKey).issue(from, amount);
+        resolvedAddresses.issuer.rwas(currencyKey).issue(from, amount);
         IRwaoneInternal(address(resolvedAddresses.rwaone)).emitExchangeRebate(from, currencyKey, amount);
     }
 
@@ -139,7 +139,7 @@ library ExchangeSettlementLib {
         return _settlementOwing(resolvedAddresses, account, currencyKey, waitingPeriod);
     }
 
-    // Internal function to aggregate each individual rebate and reclaim entry for a tribe
+    // Internal function to aggregate each individual rebate and reclaim entry for a rwa
     function _settlementOwing(
         ResolvedAddresses memory resolvedAddresses,
         address account,

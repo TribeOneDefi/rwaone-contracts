@@ -9,7 +9,7 @@ const { fastForward, toUnit } = require('../utils')();
 const { setupAllContracts } = require('../contracts/setup');
 
 const {
-	setExchangeFeeRateForTribes,
+	setExchangeFeeRateForRwas,
 	setupPriceAggregators,
 	updateAggregatorRates,
 } = require('../contracts/helpers');
@@ -28,7 +28,7 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 		'iETH',
 	].map(toBytes32);
 
-	const tribeKeys = [rUSD, sAUD, sEUR, rBTC, iBTC, rETH, iETH];
+	const rwaKeys = [rUSD, sAUD, sEUR, rBTC, iBTC, rETH, iETH];
 
 	const [, owner, account1, account2] = accounts;
 
@@ -93,20 +93,20 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 						updateRate({ target: rETH, rate: baseRate, resetCircuitBreaker: true });
 
 						let res;
-						it('when called with a tribe with only a single rate, returns false', async () => {
+						it('when called with a rwa with only a single rate, returns false', async () => {
 							res = await exchangeCircuitBreaker.rateWithInvalid(rETH);
 							assert.bnEqual(res[0], toUnit(baseRate));
 							assert.equal(res[1], false);
 						});
-						it('when called with a tribe with no rate (i.e. 0), returns true', async () => {
+						it('when called with a rwa with no rate (i.e. 0), returns true', async () => {
 							res = await exchangeCircuitBreaker.rateWithInvalid(toBytes32('XYZ'));
 							assert.bnEqual(res[0], 0);
 							assert.equal(res[1], true);
 						});
-						describe('when a tribe rate changes outside of the range', () => {
+						describe('when a rwa rate changes outside of the range', () => {
 							updateRate({ target: rETH, rate: baseRate * 3, resetCircuitBreaker: false });
 
-							it('when called with that tribe, returns true', async () => {
+							it('when called with that rwa, returns true', async () => {
 								res = await exchangeCircuitBreaker.rateWithInvalid(rETH);
 								assert.bnEqual(res[0], toUnit(baseRate * 3));
 								assert.equal(res[1], true);
@@ -120,18 +120,18 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 
 	describe('When using Rwaone', () => {
 		before(async () => {
-			const VirtualTribeMastercopy = artifacts.require('VirtualTribeMastercopy');
+			const VirtualRwaMastercopy = artifacts.require('VirtualRwaMastercopy');
 
 			({
 				ExchangeCircuitBreaker: exchangeCircuitBreaker,
 				CircuitBreaker: circuitBreaker,
 				Rwaone: rwaone,
 				ExchangeRates: exchangeRates,
-				TriberUSD: rUSDContract,
+				RwarUSD: rUSDContract,
 				SystemSettings: systemSettings,
 			} = await setupAllContracts({
 				accounts,
-				tribes: ['rUSD', 'rETH', 'sEUR', 'sAUD', 'rBTC', 'iBTC', 'sTRX'],
+				rwas: ['rUSD', 'rETH', 'sEUR', 'sAUD', 'rBTC', 'iBTC', 'sTRX'],
 				contracts: [
 					'Exchanger',
 					'ExchangeCircuitBreaker',
@@ -150,8 +150,8 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 					'CollateralManager',
 				],
 				mocks: {
-					// Use a real VirtualTribeMastercopy so the spec tests can interrogate deployed vTribes
-					VirtualTribeMastercopy: await VirtualTribeMastercopy.new(),
+					// Use a real VirtualRwaMastercopy so the spec tests can interrogate deployed vRwas
+					VirtualRwaMastercopy: await VirtualRwaMastercopy.new(),
 				},
 			}));
 
@@ -173,11 +173,11 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 
 			// set a 0.5% exchange fee rate (1/200)
 			exchangeFeeRate = toUnit('0.005');
-			await setExchangeFeeRateForTribes({
+			await setExchangeFeeRateForRwas({
 				owner,
 				systemSettings,
-				tribeKeys,
-				exchangeFeeRates: tribeKeys.map(() => exchangeFeeRate),
+				rwaKeys,
+				exchangeFeeRates: rwaKeys.map(() => exchangeFeeRate),
 			});
 		});
 

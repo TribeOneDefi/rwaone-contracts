@@ -7,21 +7,21 @@ import "openzeppelin-solidity-2.3.0/contracts/token/ERC20/ERC20.sol";
 import "./SafeDecimalMath.sol";
 
 // Internal references
-import "./interfaces/ITribe.sol";
+import "./interfaces/IRwa.sol";
 import "./interfaces/IAddressResolver.sol";
-import "./interfaces/IVirtualTribe.sol";
+import "./interfaces/IVirtualRwa.sol";
 import "./interfaces/IExchanger.sol";
 
-// https://docs.rwaone.io/contracts/source/contracts/virtualtribe
+// https://docs.rwaone.io/contracts/source/contracts/virtualrwa
 // Note: this contract should be treated as an abstract contract and should not be directly deployed.
 //       On higher versions of solidity, it would be marked with the `abstract` keyword.
 //       This contracts implements logic that is only intended to be accessed behind a proxy.
-//       For the deployed "mastercopy" version, see VirtualTribeMastercopy.
-contract VirtualTribe is ERC20, IVirtualTribe {
+//       For the deployed "mastercopy" version, see VirtualRwaMastercopy.
+contract VirtualRwa is ERC20, IVirtualRwa {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
 
-    IERC20 public tribe;
+    IERC20 public rwa;
     IAddressResolver public resolver;
 
     bool public settled = false;
@@ -31,7 +31,7 @@ contract VirtualTribe is ERC20, IVirtualTribe {
     // track initial supply so we can calculate the rate even after all supply is burned
     uint public initialSupply;
 
-    // track final settled amount of the tribe so we can calculate the rate after settlement
+    // track final settled amount of the rwa so we can calculate the rate after settlement
     uint public settledAmount;
 
     bytes32 public currencyKey;
@@ -39,20 +39,20 @@ contract VirtualTribe is ERC20, IVirtualTribe {
     bool public initialized = false;
 
     function initialize(
-        IERC20 _tribe,
+        IERC20 _rwa,
         IAddressResolver _resolver,
         address _recipient,
         uint _amount,
         bytes32 _currencyKey
     ) external {
-        require(!initialized, "vTribe already initialized");
+        require(!initialized, "vRwa already initialized");
         initialized = true;
 
-        tribe = _tribe;
+        rwa = _rwa;
         resolver = _resolver;
         currencyKey = _currencyKey;
 
-        // Assumption: the tribe will be issued to us within the same transaction,
+        // Assumption: the rwa will be issued to us within the same transaction,
         // and this supply matches that
         _mint(_recipient, _amount);
 
@@ -77,22 +77,22 @@ contract VirtualTribe is ERC20, IVirtualTribe {
             return 0;
         }
 
-        uint tribeBalance;
+        uint rwaBalance;
 
         if (!settled) {
-            tribeBalance = IERC20(address(tribe)).balanceOf(address(this));
+            rwaBalance = IERC20(address(rwa)).balanceOf(address(this));
             (uint reclaim, uint rebate, ) = exchanger().settlementOwing(address(this), currencyKey);
 
             if (reclaim > 0) {
-                tribeBalance = tribeBalance.sub(reclaim);
+                rwaBalance = rwaBalance.sub(reclaim);
             } else if (rebate > 0) {
-                tribeBalance = tribeBalance.add(rebate);
+                rwaBalance = rwaBalance.add(rebate);
             }
         } else {
-            tribeBalance = settledAmount;
+            rwaBalance = settledAmount;
         }
 
-        return tribeBalance.divideDecimalRound(initialSupply);
+        return rwaBalance.divideDecimalRound(initialSupply);
     }
 
     function balanceUnderlying(address account) internal view returns (uint) {
@@ -101,7 +101,7 @@ contract VirtualTribe is ERC20, IVirtualTribe {
         return vBalanceOfAccount.multiplyDecimalRound(calcRate());
     }
 
-    function settleTribe() internal {
+    function settleRwa() internal {
         if (settled) {
             return;
         }
@@ -109,7 +109,7 @@ contract VirtualTribe is ERC20, IVirtualTribe {
 
         exchanger().settle(address(this), currencyKey);
 
-        settledAmount = IERC20(address(tribe)).balanceOf(address(this));
+        settledAmount = IERC20(address(rwa)).balanceOf(address(this));
 
         emit Settled(totalSupply(), settledAmount);
     }
@@ -117,19 +117,19 @@ contract VirtualTribe is ERC20, IVirtualTribe {
     // VIEWS
 
     function name() external view returns (string memory) {
-        return string(abi.encodePacked("Virtual Tribe ", currencyKey));
+        return string(abi.encodePacked("Virtual Rwa ", currencyKey));
     }
 
     function symbol() external view returns (string memory) {
         return string(abi.encodePacked("v", currencyKey));
     }
 
-    // get the rate of the vTribe to the tribe.
+    // get the rate of the vRwa to the rwa.
     function rate() external view returns (uint) {
         return calcRate();
     }
 
-    // show the balance of the underlying tribe that the given address has, given
+    // show the balance of the underlying rwa that the given address has, given
     // their proportion of totalSupply
     function balanceOfUnderlying(address account) external view returns (uint) {
         return balanceUnderlying(account);
@@ -146,11 +146,11 @@ contract VirtualTribe is ERC20, IVirtualTribe {
     // PUBLIC FUNCTIONS
 
     // Perform settlement of the underlying exchange if required,
-    // then burn the accounts vTribes and transfer them their owed balanceOfUnderlying
+    // then burn the accounts vRwas and transfer them their owed balanceOfUnderlying
     function settle(address account) external {
-        settleTribe();
+        settleRwa();
 
-        IERC20(address(tribe)).transfer(account, balanceUnderlying(account));
+        IERC20(address(rwa)).transfer(account, balanceUnderlying(account));
 
         _burn(account, balanceOf(account));
     }

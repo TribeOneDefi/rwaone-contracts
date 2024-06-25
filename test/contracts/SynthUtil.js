@@ -5,25 +5,25 @@ const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 const { toBytes32 } = require('../..');
 const { toUnit } = require('../utils')();
 const {
-	setExchangeFeeRateForTribes,
+	setExchangeFeeRateForRwas,
 	setupPriceAggregators,
 	updateAggregatorRates,
 } = require('./helpers');
 
 const { setupAllContracts } = require('./setup');
 
-contract('TribeUtil', accounts => {
+contract('RwaUtil', accounts => {
 	const [, ownerAccount, , account2] = accounts;
-	let tribeUtil, rUSDContract, rwaone, exchangeRates, systemSettings, debtCache, circuitBreaker;
+	let rwaUtil, rUSDContract, rwaone, exchangeRates, systemSettings, debtCache, circuitBreaker;
 
 	const [rUSD, rBTC, iBTC, wRWAX] = ['rUSD', 'rBTC', 'iBTC', 'wRWAX'].map(toBytes32);
-	const tribeKeys = [rUSD, rBTC, iBTC];
-	const tribePrices = [toUnit('1'), toUnit('5000'), toUnit('5000')];
+	const rwaKeys = [rUSD, rBTC, iBTC];
+	const rwaPrices = [toUnit('1'), toUnit('5000'), toUnit('5000')];
 
 	before(async () => {
 		({
-			TribeUtil: tribeUtil,
-			TriberUSD: rUSDContract,
+			RwaUtil: rwaUtil,
+			RwarUSD: rUSDContract,
 			Rwaone: rwaone,
 			ExchangeRates: exchangeRates,
 			SystemSettings: systemSettings,
@@ -31,9 +31,9 @@ contract('TribeUtil', accounts => {
 			DebtCache: debtCache,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'rBTC', 'iBTC'],
+			rwas: ['rUSD', 'rBTC', 'iBTC'],
 			contracts: [
-				'TribeUtil',
+				'RwaUtil',
 				'Rwaone',
 				'Exchanger',
 				'ExchangeRates',
@@ -65,11 +65,11 @@ contract('TribeUtil', accounts => {
 
 		// set a 0% default exchange fee rate for test purpose
 		const exchangeFeeRate = toUnit('0');
-		await setExchangeFeeRateForTribes({
+		await setExchangeFeeRateForRwas({
 			owner: ownerAccount,
 			systemSettings,
-			tribeKeys,
-			exchangeFeeRates: tribeKeys.map(() => exchangeFeeRate),
+			rwaKeys,
+			exchangeFeeRates: rwaKeys.map(() => exchangeFeeRate),
 		});
 	});
 
@@ -78,37 +78,37 @@ contract('TribeUtil', accounts => {
 		const amountToExchange = toUnit('50');
 		const rUSDAmount = toUnit('100');
 		beforeEach(async () => {
-			await rwaone.issueTribes(rUSDMinted, {
+			await rwaone.issueRwas(rUSDMinted, {
 				from: ownerAccount,
 			});
 			await rUSDContract.transfer(account2, rUSDAmount, { from: ownerAccount });
 			await rwaone.exchange(rUSD, amountToExchange, rBTC, { from: account2 });
 		});
-		describe('totalTribesInKey', () => {
-			it('should return the total balance of tribes into the specified currency key', async () => {
-				assert.bnEqual(await tribeUtil.totalTribesInKey(account2, rUSD), rUSDAmount);
+		describe('totalRwasInKey', () => {
+			it('should return the total balance of rwas into the specified currency key', async () => {
+				assert.bnEqual(await rwaUtil.totalRwasInKey(account2, rUSD), rUSDAmount);
 			});
 		});
-		describe('tribesBalances', () => {
-			it('should return the balance and its value in rUSD for every tribe in the wallet', async () => {
+		describe('rwasBalances', () => {
+			it('should return the balance and its value in rUSD for every rwa in the wallet', async () => {
 				const effectiveValue = await exchangeRates.effectiveValue(rUSD, amountToExchange, rBTC);
-				assert.deepEqual(await tribeUtil.tribesBalances(account2), [
+				assert.deepEqual(await rwaUtil.rwasBalances(account2), [
 					[rUSD, rBTC, iBTC],
 					[toUnit('50'), effectiveValue, 0],
 					[toUnit('50'), toUnit('50'), 0],
 				]);
 			});
 		});
-		describe('tribesRates', () => {
-			it('should return the correct tribe rates', async () => {
-				assert.deepEqual(await tribeUtil.tribesRates(), [tribeKeys, tribePrices]);
+		describe('rwasRates', () => {
+			it('should return the correct rwa rates', async () => {
+				assert.deepEqual(await rwaUtil.rwasRates(), [rwaKeys, rwaPrices]);
 			});
 		});
-		describe('tribesTotalSupplies', () => {
-			it('should return the correct tribe total supplies', async () => {
+		describe('rwasTotalSupplies', () => {
+			it('should return the correct rwa total supplies', async () => {
 				const effectiveValue = await exchangeRates.effectiveValue(rUSD, amountToExchange, rBTC);
-				assert.deepEqual(await tribeUtil.tribesTotalSupplies(), [
-					tribeKeys,
+				assert.deepEqual(await rwaUtil.rwasTotalSupplies(), [
+					rwaKeys,
 					[rUSDMinted.sub(amountToExchange), effectiveValue, 0],
 					[rUSDMinted.sub(amountToExchange), amountToExchange, 0],
 				]);

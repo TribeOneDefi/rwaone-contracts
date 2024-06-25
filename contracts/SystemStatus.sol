@@ -14,8 +14,8 @@ contract SystemStatus is Owned, ISystemStatus {
     bytes32 public constant SECTION_ISSUANCE = "Issuance";
     bytes32 public constant SECTION_EXCHANGE = "Exchange";
     bytes32 public constant SECTION_FUTURES = "Futures";
-    bytes32 public constant SECTION_RWAONE_EXCHANGE = "TribeExchange";
-    bytes32 public constant SECTION_RWAONE = "Tribe";
+    bytes32 public constant SECTION_RWAONE_EXCHANGE = "RwaExchange";
+    bytes32 public constant SECTION_RWAONE = "Rwa";
 
     bytes32 public constant CONTRACT_NAME = "SystemStatus";
 
@@ -27,9 +27,9 @@ contract SystemStatus is Owned, ISystemStatus {
 
     Suspension public futuresSuspension;
 
-    mapping(bytes32 => Suspension) public tribeExchangeSuspension;
+    mapping(bytes32 => Suspension) public rwaExchangeSuspension;
 
-    mapping(bytes32 => Suspension) public tribeSuspension;
+    mapping(bytes32 => Suspension) public rwaSuspension;
 
     mapping(bytes32 => Suspension) public futuresMarketSuspension;
 
@@ -60,10 +60,10 @@ contract SystemStatus is Owned, ISystemStatus {
         _internalRequireExchangeActive();
     }
 
-    function requireTribeExchangeActive(bytes32 currencyKey) external view {
-        // Tribe exchange and transfer requires the system be active
+    function requireRwaExchangeActive(bytes32 currencyKey) external view {
+        // Rwa exchange and transfer requires the system be active
         _internalRequireSystemActive();
-        _internalRequireTribeExchangeActive(currencyKey);
+        _internalRequireRwaExchangeActive(currencyKey);
     }
 
     function requireFuturesActive() external view {
@@ -80,64 +80,64 @@ contract SystemStatus is Owned, ISystemStatus {
         _internalRequireFuturesMarketActive(marketKey); // specific futures market flag
     }
 
-    function tribeSuspended(bytes32 currencyKey) external view returns (bool) {
-        return systemSuspension.suspended || tribeSuspension[currencyKey].suspended;
+    function rwaSuspended(bytes32 currencyKey) external view returns (bool) {
+        return systemSuspension.suspended || rwaSuspension[currencyKey].suspended;
     }
 
-    function requireTribeActive(bytes32 currencyKey) external view {
-        // Tribe exchange and transfer requires the system be active
+    function requireRwaActive(bytes32 currencyKey) external view {
+        // Rwa exchange and transfer requires the system be active
         _internalRequireSystemActive();
-        _internalRequireTribeActive(currencyKey);
+        _internalRequireRwaActive(currencyKey);
     }
 
-    function requireTribesActive(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey) external view {
-        // Tribe exchange and transfer requires the system be active
+    function requireRwasActive(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey) external view {
+        // Rwa exchange and transfer requires the system be active
         _internalRequireSystemActive();
-        _internalRequireTribeActive(sourceCurrencyKey);
-        _internalRequireTribeActive(destinationCurrencyKey);
+        _internalRequireRwaActive(sourceCurrencyKey);
+        _internalRequireRwaActive(destinationCurrencyKey);
     }
 
-    function requireExchangeBetweenTribesAllowed(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey) external view {
-        // Tribe exchange and transfer requires the system be active
+    function requireExchangeBetweenRwasAllowed(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey) external view {
+        // Rwa exchange and transfer requires the system be active
         _internalRequireSystemActive();
 
         // and exchanging must be active
         _internalRequireExchangeActive();
 
-        // and the tribe exchanging between the tribes must be active
-        _internalRequireTribeExchangeActive(sourceCurrencyKey);
-        _internalRequireTribeExchangeActive(destinationCurrencyKey);
+        // and the rwa exchanging between the rwas must be active
+        _internalRequireRwaExchangeActive(sourceCurrencyKey);
+        _internalRequireRwaExchangeActive(destinationCurrencyKey);
 
-        // and finally, the tribes cannot be suspended
-        _internalRequireTribeActive(sourceCurrencyKey);
-        _internalRequireTribeActive(destinationCurrencyKey);
+        // and finally, the rwas cannot be suspended
+        _internalRequireRwaActive(sourceCurrencyKey);
+        _internalRequireRwaActive(destinationCurrencyKey);
     }
 
     function isSystemUpgrading() external view returns (bool) {
         return systemSuspension.suspended && systemSuspension.reason == SUSPENSION_REASON_UPGRADE;
     }
 
-    function getTribeExchangeSuspensions(
-        bytes32[] calldata tribes
+    function getRwaExchangeSuspensions(
+        bytes32[] calldata rwas
     ) external view returns (bool[] memory exchangeSuspensions, uint256[] memory reasons) {
-        exchangeSuspensions = new bool[](tribes.length);
-        reasons = new uint256[](tribes.length);
+        exchangeSuspensions = new bool[](rwas.length);
+        reasons = new uint256[](rwas.length);
 
-        for (uint i = 0; i < tribes.length; i++) {
-            exchangeSuspensions[i] = tribeExchangeSuspension[tribes[i]].suspended;
-            reasons[i] = tribeExchangeSuspension[tribes[i]].reason;
+        for (uint i = 0; i < rwas.length; i++) {
+            exchangeSuspensions[i] = rwaExchangeSuspension[rwas[i]].suspended;
+            reasons[i] = rwaExchangeSuspension[rwas[i]].reason;
         }
     }
 
-    function getTribeSuspensions(
-        bytes32[] calldata tribes
+    function getRwaSuspensions(
+        bytes32[] calldata rwas
     ) external view returns (bool[] memory suspensions, uint256[] memory reasons) {
-        suspensions = new bool[](tribes.length);
-        reasons = new uint256[](tribes.length);
+        suspensions = new bool[](rwas.length);
+        reasons = new uint256[](rwas.length);
 
-        for (uint i = 0; i < tribes.length; i++) {
-            suspensions[i] = tribeSuspension[tribes[i]].suspended;
-            reasons[i] = tribeSuspension[tribes[i]].reason;
+        for (uint i = 0; i < rwas.length; i++) {
+            suspensions[i] = rwaSuspension[rwas[i]].suspended;
+            reasons[i] = rwaSuspension[rwas[i]].reason;
         }
     }
 
@@ -256,44 +256,44 @@ contract SystemStatus is Owned, ISystemStatus {
         _internalResumeFuturesMarkets(marketKeys);
     }
 
-    function suspendTribeExchange(bytes32 currencyKey, uint256 reason) external {
+    function suspendRwaExchange(bytes32 currencyKey, uint256 reason) external {
         bytes32[] memory currencyKeys = new bytes32[](1);
         currencyKeys[0] = currencyKey;
-        _internalSuspendTribeExchange(currencyKeys, reason);
+        _internalSuspendRwaExchange(currencyKeys, reason);
     }
 
-    function suspendTribesExchange(bytes32[] calldata currencyKeys, uint256 reason) external {
-        _internalSuspendTribeExchange(currencyKeys, reason);
+    function suspendRwasExchange(bytes32[] calldata currencyKeys, uint256 reason) external {
+        _internalSuspendRwaExchange(currencyKeys, reason);
     }
 
-    function resumeTribeExchange(bytes32 currencyKey) external {
+    function resumeRwaExchange(bytes32 currencyKey) external {
         bytes32[] memory currencyKeys = new bytes32[](1);
         currencyKeys[0] = currencyKey;
-        _internalResumeTribesExchange(currencyKeys);
+        _internalResumeRwasExchange(currencyKeys);
     }
 
-    function resumeTribesExchange(bytes32[] calldata currencyKeys) external {
-        _internalResumeTribesExchange(currencyKeys);
+    function resumeRwasExchange(bytes32[] calldata currencyKeys) external {
+        _internalResumeRwasExchange(currencyKeys);
     }
 
-    function suspendTribe(bytes32 currencyKey, uint256 reason) external {
+    function suspendRwa(bytes32 currencyKey, uint256 reason) external {
         bytes32[] memory currencyKeys = new bytes32[](1);
         currencyKeys[0] = currencyKey;
-        _internalSuspendTribes(currencyKeys, reason);
+        _internalSuspendRwas(currencyKeys, reason);
     }
 
-    function suspendTribes(bytes32[] calldata currencyKeys, uint256 reason) external {
-        _internalSuspendTribes(currencyKeys, reason);
+    function suspendRwas(bytes32[] calldata currencyKeys, uint256 reason) external {
+        _internalSuspendRwas(currencyKeys, reason);
     }
 
-    function resumeTribe(bytes32 currencyKey) external {
+    function resumeRwa(bytes32 currencyKey) external {
         bytes32[] memory currencyKeys = new bytes32[](1);
         currencyKeys[0] = currencyKey;
-        _internalResumeTribes(currencyKeys);
+        _internalResumeRwas(currencyKeys);
     }
 
-    function resumeTribes(bytes32[] calldata currencyKeys) external {
-        _internalResumeTribes(currencyKeys);
+    function resumeRwas(bytes32[] calldata currencyKeys) external {
+        _internalResumeRwas(currencyKeys);
     }
 
     /* ========== INTERNAL FUNCTIONS ========== */
@@ -327,53 +327,53 @@ contract SystemStatus is Owned, ISystemStatus {
         require(!futuresSuspension.suspended, "Futures markets are suspended. Operation prohibited");
     }
 
-    function _internalRequireTribeExchangeActive(bytes32 currencyKey) internal view {
-        require(!tribeExchangeSuspension[currencyKey].suspended, "Tribe exchange suspended. Operation prohibited");
+    function _internalRequireRwaExchangeActive(bytes32 currencyKey) internal view {
+        require(!rwaExchangeSuspension[currencyKey].suspended, "Rwa exchange suspended. Operation prohibited");
     }
 
-    function _internalRequireTribeActive(bytes32 currencyKey) internal view {
-        require(!tribeSuspension[currencyKey].suspended, "Tribe is suspended. Operation prohibited");
+    function _internalRequireRwaActive(bytes32 currencyKey) internal view {
+        require(!rwaSuspension[currencyKey].suspended, "Rwa is suspended. Operation prohibited");
     }
 
     function _internalRequireFuturesMarketActive(bytes32 marketKey) internal view {
         require(!futuresMarketSuspension[marketKey].suspended, "Market suspended");
     }
 
-    function _internalSuspendTribes(bytes32[] memory currencyKeys, uint256 reason) internal {
+    function _internalSuspendRwas(bytes32[] memory currencyKeys, uint256 reason) internal {
         _requireAccessToSuspend(SECTION_RWAONE);
         for (uint i = 0; i < currencyKeys.length; i++) {
             bytes32 currencyKey = currencyKeys[i];
-            tribeSuspension[currencyKey].suspended = true;
-            tribeSuspension[currencyKey].reason = uint248(reason);
-            emit TribeSuspended(currencyKey, reason);
+            rwaSuspension[currencyKey].suspended = true;
+            rwaSuspension[currencyKey].reason = uint248(reason);
+            emit RwaSuspended(currencyKey, reason);
         }
     }
 
-    function _internalResumeTribes(bytes32[] memory currencyKeys) internal {
+    function _internalResumeRwas(bytes32[] memory currencyKeys) internal {
         _requireAccessToResume(SECTION_RWAONE);
         for (uint i = 0; i < currencyKeys.length; i++) {
             bytes32 currencyKey = currencyKeys[i];
-            emit TribeResumed(currencyKey, uint256(tribeSuspension[currencyKey].reason));
-            delete tribeSuspension[currencyKey];
+            emit RwaResumed(currencyKey, uint256(rwaSuspension[currencyKey].reason));
+            delete rwaSuspension[currencyKey];
         }
     }
 
-    function _internalSuspendTribeExchange(bytes32[] memory currencyKeys, uint256 reason) internal {
+    function _internalSuspendRwaExchange(bytes32[] memory currencyKeys, uint256 reason) internal {
         _requireAccessToSuspend(SECTION_RWAONE_EXCHANGE);
         for (uint i = 0; i < currencyKeys.length; i++) {
             bytes32 currencyKey = currencyKeys[i];
-            tribeExchangeSuspension[currencyKey].suspended = true;
-            tribeExchangeSuspension[currencyKey].reason = uint248(reason);
-            emit TribeExchangeSuspended(currencyKey, reason);
+            rwaExchangeSuspension[currencyKey].suspended = true;
+            rwaExchangeSuspension[currencyKey].reason = uint248(reason);
+            emit RwaExchangeSuspended(currencyKey, reason);
         }
     }
 
-    function _internalResumeTribesExchange(bytes32[] memory currencyKeys) internal {
+    function _internalResumeRwasExchange(bytes32[] memory currencyKeys) internal {
         _requireAccessToResume(SECTION_RWAONE_EXCHANGE);
         for (uint i = 0; i < currencyKeys.length; i++) {
             bytes32 currencyKey = currencyKeys[i];
-            emit TribeExchangeResumed(currencyKey, uint256(tribeExchangeSuspension[currencyKey].reason));
-            delete tribeExchangeSuspension[currencyKey];
+            emit RwaExchangeResumed(currencyKey, uint256(rwaExchangeSuspension[currencyKey].reason));
+            delete rwaExchangeSuspension[currencyKey];
         }
     }
 
@@ -425,11 +425,11 @@ contract SystemStatus is Owned, ISystemStatus {
     event FuturesSuspended(uint256 reason);
     event FuturesResumed(uint256 reason);
 
-    event TribeExchangeSuspended(bytes32 currencyKey, uint256 reason);
-    event TribeExchangeResumed(bytes32 currencyKey, uint256 reason);
+    event RwaExchangeSuspended(bytes32 currencyKey, uint256 reason);
+    event RwaExchangeResumed(bytes32 currencyKey, uint256 reason);
 
-    event TribeSuspended(bytes32 currencyKey, uint256 reason);
-    event TribeResumed(bytes32 currencyKey, uint256 reason);
+    event RwaSuspended(bytes32 currencyKey, uint256 reason);
+    event RwaResumed(bytes32 currencyKey, uint256 reason);
 
     event FuturesMarketSuspended(bytes32 marketKey, uint256 reason);
     event FuturesMarketResumed(bytes32 marketKey, uint256 reason);

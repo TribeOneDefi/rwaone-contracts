@@ -202,7 +202,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     }
 
     // SIP 182: Wrapper Factory
-    // The fee for burning tribe and releasing token from the Wrapper.
+    // The fee for burning rwa and releasing token from the Wrapper.
     function wrapperBurnFeeRate(address wrapper) external view returns (int) {
         return getWrapperBurnFeeRate(wrapper);
     }
@@ -228,25 +228,25 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     }
 
     // SIP-120 Atomic exchanges
-    // equivalent asset to use for a tribe when considering external prices for atomic exchanges
+    // equivalent asset to use for a rwa when considering external prices for atomic exchanges
     function atomicEquivalentForDexPricing(bytes32 currencyKey) external view returns (address) {
         return getAtomicEquivalentForDexPricing(currencyKey);
     }
 
     // SIP-120 Atomic exchanges
-    // fee rate override for atomic exchanges into a tribe
+    // fee rate override for atomic exchanges into a rwa
     function atomicExchangeFeeRate(bytes32 currencyKey) external view returns (uint) {
         return getAtomicExchangeFeeRate(currencyKey);
     }
 
     // SIP-120 Atomic exchanges
-    // consideration window for determining tribe volatility
+    // consideration window for determining rwa volatility
     function atomicVolatilityConsiderationWindow(bytes32 currencyKey) external view returns (uint) {
         return getAtomicVolatilityConsiderationWindow(currencyKey);
     }
 
     // SIP-120 Atomic exchanges
-    // update threshold for determining tribe volatility
+    // update threshold for determining rwa volatility
     function atomicVolatilityUpdateThreshold(bytes32 currencyKey) external view returns (uint) {
         return getAtomicVolatilityUpdateThreshold(currencyKey);
     }
@@ -258,9 +258,9 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     }
 
     // SIP-229 Atomic exchanges
-    // enable/disable sending of tribes cross chain
-    function crossChainTribeTransferEnabled(bytes32 currencyKey) external view returns (uint) {
-        return getCrossChainTribeTransferEnabled(currencyKey);
+    // enable/disable sending of rwas cross chain
+    function crossChainRwaTransferEnabled(bytes32 currencyKey) external view returns (uint) {
+        return getCrossChainRwaTransferEnabled(currencyKey);
     }
 
     // ========== RESTRICTED ==========
@@ -359,13 +359,10 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     }
 
     /* ========== Exchange Fees Related ========== */
-    function setExchangeFeeRateForTribes(
-        bytes32[] calldata tribeKeys,
-        uint256[] calldata exchangeFeeRates
-    ) external onlyOwner {
-        flexibleStorage().setExchangeFeeRateForTribes(SETTING_EXCHANGE_FEE_RATE, tribeKeys, exchangeFeeRates);
-        for (uint i = 0; i < tribeKeys.length; i++) {
-            emit ExchangeFeeUpdated(tribeKeys[i], exchangeFeeRates[i]);
+    function setExchangeFeeRateForRwas(bytes32[] calldata rwaKeys, uint256[] calldata exchangeFeeRates) external onlyOwner {
+        flexibleStorage().setExchangeFeeRateForRwas(SETTING_EXCHANGE_FEE_RATE, rwaKeys, exchangeFeeRates);
+        for (uint i = 0; i < rwaKeys.length; i++) {
+            emit ExchangeFeeUpdated(rwaKeys[i], exchangeFeeRates[i]);
         }
     }
 
@@ -524,9 +521,9 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         emit PureChainlinkPriceForAtomicSwapsEnabledUpdated(_currencyKey, _enabled);
     }
 
-    function setCrossChainTribeTransferEnabled(bytes32 _currencyKey, uint _value) external onlyOwner {
-        flexibleStorage().setCrossChainTribeTransferEnabled(SETTING_CROSS_RWAONE_TRANSFER_ENABLED, _currencyKey, _value);
-        emit CrossChainTribeTransferEnabledUpdated(_currencyKey, _value);
+    function setCrossChainRwaTransferEnabled(bytes32 _currencyKey, uint _value) external onlyOwner {
+        flexibleStorage().setCrossChainRwaTransferEnabled(SETTING_CROSS_RWAONE_TRANSFER_ENABLED, _currencyKey, _value);
+        emit CrossChainRwaTransferEnabledUpdated(_currencyKey, _value);
     }
 
     // ========== EVENTS ==========
@@ -547,7 +544,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     event LiquidateRewardUpdated(uint newReward);
     event RateStalePeriodUpdated(uint rateStalePeriod);
     /* ========== Exchange Fees Related ========== */
-    event ExchangeFeeUpdated(bytes32 tribeKey, uint newExchangeFeeRate);
+    event ExchangeFeeUpdated(bytes32 rwaKey, uint newExchangeFeeRate);
     event ExchangeDynamicFeeThresholdUpdated(uint dynamicFeeThreshold);
     event ExchangeDynamicFeeWeightDecayUpdated(uint dynamicFeeWeightDecay);
     event ExchangeDynamicFeeRoundsUpdated(uint dynamicFeeRounds);
@@ -566,10 +563,10 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     event CollapseFeeRateUpdated(uint collapseFeeRate);
     event AtomicMaxVolumePerBlockUpdated(uint newMaxVolume);
     event AtomicTwapWindowUpdated(uint newWindow);
-    event AtomicEquivalentForDexPricingUpdated(bytes32 tribeKey, address equivalent);
-    event AtomicExchangeFeeUpdated(bytes32 tribeKey, uint newExchangeFeeRate);
-    event AtomicVolatilityConsiderationWindowUpdated(bytes32 tribeKey, uint newVolatilityConsiderationWindow);
-    event AtomicVolatilityUpdateThresholdUpdated(bytes32 tribeKey, uint newVolatilityUpdateThreshold);
-    event PureChainlinkPriceForAtomicSwapsEnabledUpdated(bytes32 tribeKey, bool enabled);
-    event CrossChainTribeTransferEnabledUpdated(bytes32 tribeKey, uint value);
+    event AtomicEquivalentForDexPricingUpdated(bytes32 rwaKey, address equivalent);
+    event AtomicExchangeFeeUpdated(bytes32 rwaKey, uint newExchangeFeeRate);
+    event AtomicVolatilityConsiderationWindowUpdated(bytes32 rwaKey, uint newVolatilityConsiderationWindow);
+    event AtomicVolatilityUpdateThresholdUpdated(bytes32 rwaKey, uint newVolatilityUpdateThreshold);
+    event PureChainlinkPriceForAtomicSwapsEnabledUpdated(bytes32 rwaKey, bool enabled);
+    event CrossChainRwaTransferEnabledUpdated(bytes32 rwaKey, uint value);
 }

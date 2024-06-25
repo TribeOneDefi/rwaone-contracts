@@ -47,7 +47,7 @@ module.exports = async ({
 			expected: ({ canSuspend } = {}) => canSuspend,
 			write: 'updateAccessControls',
 			writeArg: [
-				['System', 'Issuance', 'Exchange', 'TribeExchange', 'Tribe', 'Futures'].map(toBytes32),
+				['System', 'Issuance', 'Exchange', 'RwaExchange', 'Rwa', 'Futures'].map(toBytes32),
 				[statusOwner, statusOwner, statusOwner, statusOwner, statusOwner, statusOwner],
 				[true, true, true, true, true, true],
 				[true, true, true, true, true, true],
@@ -126,16 +126,16 @@ module.exports = async ({
 	}
 
 	if (ExchangeCircuitBreaker && SystemStatus) {
-		// SIP-65: ensure Exchanger can suspend tribes if price spikes occur
+		// SIP-65: ensure Exchanger can suspend rwas if price spikes occur
 		await runStep({
 			contract: 'SystemStatus',
 			target: SystemStatus,
 			read: 'accessControl',
-			readArg: [toBytes32('Tribe'), addressOf(ExchangeCircuitBreaker)],
+			readArg: [toBytes32('Rwa'), addressOf(ExchangeCircuitBreaker)],
 			expected: ({ canSuspend } = {}) => canSuspend,
 			write: 'updateAccessControl',
-			writeArg: [toBytes32('Tribe'), addressOf(ExchangeCircuitBreaker), true, false],
-			comment: 'Ensure the ExchangeCircuitBreaker contract can suspend tribes - see SIP-65',
+			writeArg: [toBytes32('Rwa'), addressOf(ExchangeCircuitBreaker), true, false],
+			comment: 'Ensure the ExchangeCircuitBreaker contract can suspend rwas - see SIP-65',
 		});
 	}
 
@@ -209,7 +209,7 @@ module.exports = async ({
 		await runStep({
 			contract: 'SupplySchedule',
 			target: SupplySchedule,
-			read: 'tribeetixProxy',
+			read: 'rwaoneProxy',
 			expected: input => input === addressOf(ProxyRwaone),
 			write: 'setRwaoneProxy',
 			writeArg: addressOf(ProxyRwaone),
@@ -231,7 +231,7 @@ module.exports = async ({
 		await runStep({
 			contract: 'RewardsDistribution',
 			target: RewardsDistribution,
-			read: 'tribeetixProxy',
+			read: 'rwaoneProxy',
 			expected: input => input === addressOf(ProxyRwaone),
 			write: 'setRwaoneProxy',
 			writeArg: addressOf(ProxyRwaone),

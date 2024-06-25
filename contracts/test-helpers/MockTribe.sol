@@ -5,9 +5,9 @@ import "../interfaces/ISystemStatus.sol";
 import "../interfaces/IAddressResolver.sol";
 import "../interfaces/IFeePool.sol";
 
-// Mock tribe that also adheres to system status
+// Mock rwa that also adheres to system status
 
-contract MockTribe is ExternStateToken {
+contract MockRwa is ExternStateToken {
     IAddressResolver private addressResolver;
     bytes32 public currencyKey;
 
@@ -30,14 +30,14 @@ contract MockTribe is ExternStateToken {
         addressResolver = _resolver;
     }
 
-    // Used for PurgeableTribe to test removal
+    // Used for PurgeableRwa to test removal
     function setTotalSupply(uint256 _totalSupply) external {
         totalSupply = _totalSupply;
     }
 
     /**
      * @notice _transferToFeeAddress function
-     * non-rUSD tribes are exchanged into rUSD via tribeInitiatedExchange
+     * non-rUSD rwas are exchanged into rUSD via rwaInitiatedExchange
      * notify feePool to record amount as fee paid to feePool */
     function _transferToFeeAddress(address to, uint value) internal returns (bool) {
         uint amountInUSD;
@@ -57,7 +57,7 @@ contract MockTribe is ExternStateToken {
     }
 
     function transfer(address to, uint value) external optionalProxy returns (bool) {
-        ISystemStatus(addressResolver.getAddress("SystemStatus")).requireTribeActive(currencyKey);
+        ISystemStatus(addressResolver.getAddress("SystemStatus")).requireRwaActive(currencyKey);
 
         // transfers to FEE_ADDRESS will be exchanged into rUSD and recorded as fee
         if (to == FEE_ADDRESS) {
@@ -74,7 +74,7 @@ contract MockTribe is ExternStateToken {
     }
 
     function transferFrom(address from, address to, uint value) external optionalProxy returns (bool) {
-        ISystemStatus(addressResolver.getAddress("SystemStatus")).requireTribeActive(currencyKey);
+        ISystemStatus(addressResolver.getAddress("SystemStatus")).requireRwaActive(currencyKey);
 
         return _transferFromByProxy(messageSender, from, to, value);
     }

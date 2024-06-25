@@ -85,7 +85,7 @@ contract FeePoolState is Owned, LimitedSetup {
      * @notice Logs an accounts issuance data in the current fee period which is then stored historically
      * @param account Message.Senders account address
      * @param debtRatio Debt of this account as a percentage of the global debt.
-     * @param debtEntryIndex The index in the global debt ledger. rwaone.tribeetixState().issuanceData(account)
+     * @param debtEntryIndex The index in the global debt ledger. rwaone.rwaoneState().issuanceData(account)
      * @param currentPeriodStartDebtIndex The startingDebtIndex of the current fee period
      * @dev onlyFeePool to call me on rwaone.issue() & rwaone.burn() calls to store the locked wRWAX
      * per fee period so we know to allocate the correct proportions of fees and rewards per period
@@ -121,7 +121,7 @@ contract FeePoolState is Owned, LimitedSetup {
     }
 
     /**
-     * @notice Import issuer data from tribeetixState.issuerData on FeePeriodClose() block #
+     * @notice Import issuer data from rwaoneState.issuerData on FeePeriodClose() block #
      * @dev Only callable by the contract owner, and only for 6 weeks after deployment.
      * @param accounts Array of issuing addresses
      * @param ratios Array of debt ratios

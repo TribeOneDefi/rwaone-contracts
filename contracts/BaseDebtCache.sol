@@ -26,7 +26,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
     using SafeDecimalMath for uint;
 
     uint internal _cachedDebt;
-    mapping(bytes32 => uint) internal _cachedTribeDebt;
+    mapping(bytes32 => uint) internal _cachedRwaDebt;
     mapping(bytes32 => uint) internal _excludedIssuedDebt;
     uint internal _cacheTimestamp;
     bool internal _cacheInvalid = true;
@@ -108,8 +108,8 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         return _cachedDebt;
     }
 
-    function cachedTribeDebt(bytes32 currencyKey) external view returns (uint) {
-        return _cachedTribeDebt[currencyKey];
+    function cachedRwaDebt(bytes32 currencyKey) external view returns (uint) {
+        return _cachedRwaDebt[currencyKey];
     }
 
     function cacheTimestamp() external view returns (uint) {
@@ -131,52 +131,52 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         return _cacheStale(_cacheTimestamp);
     }
 
-    function _issuedTribeValues(
+    function _issuedRwaValues(
         bytes32[] memory currencyKeys,
         uint[] memory rates
     ) internal view returns (uint[] memory values) {
         uint numValues = currencyKeys.length;
         values = new uint[](numValues);
-        ITribe[] memory tribes = issuer().getTribes(currencyKeys);
+        IRwa[] memory rwas = issuer().getRwas(currencyKeys);
 
         for (uint i = 0; i < numValues; i++) {
-            address tribeAddress = address(tribes[i]);
-            require(tribeAddress != address(0), "Tribe does not exist");
-            uint supply = IERC20(tribeAddress).totalSupply();
+            address rwaAddress = address(rwas[i]);
+            require(rwaAddress != address(0), "Rwa does not exist");
+            uint supply = IERC20(rwaAddress).totalSupply();
             values[i] = supply.multiplyDecimalRound(rates[i]);
         }
 
         return (values);
     }
 
-    function _currentTribeDebts(
+    function _currentRwaDebts(
         bytes32[] memory currencyKeys
     ) internal view returns (uint[] memory snxIssuedDebts, uint _futuresDebt, uint _excludedDebt, bool anyRateIsInvalid) {
         (uint[] memory rates, bool isInvalid) = exchangeRates().ratesAndInvalidForCurrencies(currencyKeys);
-        uint[] memory values = _issuedTribeValues(currencyKeys, rates);
+        uint[] memory values = _issuedRwaValues(currencyKeys, rates);
         (uint excludedDebt, bool isAnyNonSnxDebtRateInvalid) = _totalNonSnxBackedDebt(currencyKeys, rates, isInvalid);
         (uint futuresDebt, bool futuresDebtIsInvalid) = futuresMarketManager().totalDebt();
 
         return (values, futuresDebt, excludedDebt, isInvalid || futuresDebtIsInvalid || isAnyNonSnxDebtRateInvalid);
     }
 
-    function currentTribeDebts(
+    function currentRwaDebts(
         bytes32[] calldata currencyKeys
     ) external view returns (uint[] memory debtValues, uint futuresDebt, uint excludedDebt, bool anyRateIsInvalid) {
-        return _currentTribeDebts(currencyKeys);
+        return _currentRwaDebts(currencyKeys);
     }
 
-    function _cachedTribeDebts(bytes32[] memory currencyKeys) internal view returns (uint[] memory) {
+    function _cachedRwaDebts(bytes32[] memory currencyKeys) internal view returns (uint[] memory) {
         uint numKeys = currencyKeys.length;
         uint[] memory debts = new uint[](numKeys);
         for (uint i = 0; i < numKeys; i++) {
-            debts[i] = _cachedTribeDebt[currencyKeys[i]];
+            debts[i] = _cachedRwaDebt[currencyKeys[i]];
         }
         return debts;
     }
 
-    function cachedTribeDebts(bytes32[] calldata currencyKeys) external view returns (uint[] memory snxIssuedDebts) {
-        return _cachedTribeDebts(currencyKeys);
+    function cachedRwaDebts(bytes32[] calldata currencyKeys) external view returns (uint[] memory snxIssuedDebts) {
+        return _cachedRwaDebts(currencyKeys);
     }
 
     function _excludedIssuedDebts(bytes32[] memory currencyKeys) internal view returns (uint[] memory) {
@@ -205,13 +205,13 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         isInitialized = true;
 
         // get the currency keys from **previous** issuer, in case current issuer
-        // doesn't have all the tribes at this point
-        // warning: if a tribe won't be added to the current issuer before the next upgrade of this contract,
+        // doesn't have all the rwas at this point
+        // warning: if a rwa won't be added to the current issuer before the next upgrade of this contract,
         // its entry will be lost (because it won't be in the prevIssuer for next time).
         // if for some reason this is a problem, it should be possible to use recordExcludedDebtChange() to amend
         bytes32[] memory keys = prevIssuer.availableCurrencyKeys();
 
-        require(keys.length > 0, "previous Issuer has no tribes");
+        require(keys.length > 0, "previous Issuer has no rwas");
 
         // query for previous debt records
         uint[] memory debts = prevDebtCache.excludedIssuedDebts(keys);
@@ -248,7 +248,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
 
         // 2. EtherWrapper.
         // Subtract rETH and rUSD issued by EtherWrapper.
-        excludedDebt = excludedDebt.add(etherWrapper().totalIssuedTribes());
+        excludedDebt = excludedDebt.add(etherWrapper().totalIssuedRwas());
 
         // 3. WrapperFactory.
         // Get the debt issued by the Wrappers.
@@ -263,8 +263,8 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         bytes32[] memory currencyKeys = issuer().availableCurrencyKeys();
         (uint[] memory rates, bool isInvalid) = exchangeRates().ratesAndInvalidForCurrencies(currencyKeys);
 
-        // Sum all issued tribe values based on their supply.
-        uint[] memory values = _issuedTribeValues(currencyKeys, rates);
+        // Sum all issued rwa values based on their supply.
+        uint[] memory values = _issuedRwaValues(currencyKeys, rates);
         (uint excludedDebt, bool isAnyNonSnxDebtRateInvalid) = _totalNonSnxBackedDebt(currencyKeys, rates, isInvalid);
 
         uint numValues = values.length;
@@ -297,15 +297,15 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
     // Stub out all mutative functions as no-ops;
     // since they do nothing, there are no restrictions
 
-    function updateCachedTribeDebts(bytes32[] calldata currencyKeys) external {}
+    function updateCachedRwaDebts(bytes32[] calldata currencyKeys) external {}
 
-    function updateCachedTribeDebtWithRate(bytes32 currencyKey, uint currencyRate) external {}
+    function updateCachedRwaDebtWithRate(bytes32 currencyKey, uint currencyRate) external {}
 
-    function updateCachedTribeDebtsWithRates(bytes32[] calldata currencyKeys, uint[] calldata currencyRates) external {}
+    function updateCachedRwaDebtsWithRates(bytes32[] calldata currencyKeys, uint[] calldata currencyRates) external {}
 
     function updateDebtCacheValidity(bool currentlyInvalid) external {}
 
-    function purgeCachedTribeDebt(bytes32 currencyKey) external {}
+    function purgeCachedRwaDebt(bytes32 currencyKey) external {}
 
     function takeDebtSnapshot() external {}
 

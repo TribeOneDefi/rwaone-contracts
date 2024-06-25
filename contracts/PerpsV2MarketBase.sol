@@ -589,8 +589,8 @@ contract PerpsV2MarketBase is Owned, MixinPerpsV2MarketSettings, IPerpsV2MarketB
      */
     function _assetPrice() internal view returns (uint price, bool invalid) {
         (price, invalid) = _exchangeRates().rateAndInvalid(_baseAsset());
-        // Ensure we catch uninitialised rates or suspended state / tribe
-        invalid = invalid || price == 0 || _systemStatus().tribeSuspended(_baseAsset());
+        // Ensure we catch uninitialised rates or suspended state / rwa
+        invalid = invalid || price == 0 || _systemStatus().rwaSuspended(_baseAsset());
         return (price, invalid);
     }
 

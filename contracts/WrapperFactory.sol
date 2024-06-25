@@ -17,7 +17,7 @@ contract WrapperFactory is Owned, MixinResolver, IWrapperFactory {
     bytes32 public constant CONTRACT_NAME = "WrapperFactory";
 
     bytes32 internal constant CONTRACT_FLEXIBLESTORAGE = "FlexibleStorage";
-    bytes32 internal constant CONTRACT_RWAONE_RUSD = "TriberUSD";
+    bytes32 internal constant CONTRACT_RWAONE_RUSD = "RwarUSD";
     bytes32 internal constant CONTRACT_FEEPOOL = "FeePool";
 
     uint internal constant WRAPPER_VERSION = 1;
@@ -33,7 +33,7 @@ contract WrapperFactory is Owned, MixinResolver, IWrapperFactory {
     }
 
     /* ========== INTERNAL VIEWS ========== */
-    function triberUSD() internal view returns (IERC20) {
+    function rwarUSD() internal view returns (IERC20) {
         return IERC20(requireAndGetAddress(CONTRACT_RWAONE_RUSD));
     }
 
@@ -47,13 +47,13 @@ contract WrapperFactory is Owned, MixinResolver, IWrapperFactory {
 
     // ========== VIEWS ==========
     // Returns the version of a wrapper created by this wrapper factory
-    // Used by MultiCollateralTribe to know if it should trust the wrapper contract
+    // Used by MultiCollateralRwa to know if it should trust the wrapper contract
     function isWrapper(address possibleWrapper) external view returns (bool) {
         return flexibleStorage().getUIntValue(CONTRACT_NAME, bytes32(uint(address(possibleWrapper)))) > 0;
     }
 
     function feesEscrowed() public view returns (uint) {
-        return triberUSD().balanceOf(address(this));
+        return rwarUSD().balanceOf(address(this));
     }
 
     // ========== RESTRICTED ==========
@@ -66,18 +66,14 @@ contract WrapperFactory is Owned, MixinResolver, IWrapperFactory {
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
-    function createWrapper(
-        IERC20 token,
-        bytes32 currencyKey,
-        bytes32 tribeContractName
-    ) external onlyOwner returns (address) {
+    function createWrapper(IERC20 token, bytes32 currencyKey, bytes32 rwaContractName) external onlyOwner returns (address) {
         // Create the wrapper instance
-        Wrapper wrapper = new Wrapper(owner, address(resolver), token, currencyKey, tribeContractName);
+        Wrapper wrapper = new Wrapper(owner, address(resolver), token, currencyKey, rwaContractName);
 
         // Rebuild caches immediately since it will almost certainly need to be done
         wrapper.rebuildCache();
 
-        // Register it so that MultiCollateralTribe knows to trust it
+        // Register it so that MultiCollateralRwa knows to trust it
         flexibleStorage().setUIntValue(CONTRACT_NAME, bytes32(uint(address(wrapper))), WRAPPER_VERSION);
 
         emit WrapperCreated(address(token), currencyKey, address(wrapper));
@@ -91,7 +87,7 @@ contract WrapperFactory is Owned, MixinResolver, IWrapperFactory {
 
         if (amountRUSD > 0) {
             // Transfer rUSD to the fee pool
-            bool success = triberUSD().transfer(feePool().FEE_ADDRESS(), amountRUSD);
+            bool success = rwarUSD().transfer(feePool().FEE_ADDRESS(), amountRUSD);
             require(success, "Transfer did not succeed");
         }
     }

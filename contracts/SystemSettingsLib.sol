@@ -16,7 +16,7 @@ library SystemSettingsLib {
 
     bytes32 public constant SETTINGS_CONTRACT_NAME = "SystemSettings";
 
-    // No more tribes may be issued than the value of wRWAX backing them.
+    // No more rwas may be issued than the value of wRWAX backing them.
     uint public constant MAX_ISSUANCE_RATIO = 1e18;
 
     // The fee period must be between 1 day and 60 days.
@@ -180,18 +180,18 @@ library SystemSettingsLib {
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, period);
     }
 
-    function setExchangeFeeRateForTribes(
+    function setExchangeFeeRateForRwas(
         IFlexibleStorage flexibleStorage,
         bytes32 settingExchangeFeeRate,
-        bytes32[] calldata tribeKeys,
+        bytes32[] calldata rwaKeys,
         uint256[] calldata exchangeFeeRates
     ) external {
-        require(tribeKeys.length == exchangeFeeRates.length, "Array lengths dont match");
-        for (uint i = 0; i < tribeKeys.length; i++) {
+        require(rwaKeys.length == exchangeFeeRates.length, "Array lengths dont match");
+        for (uint i = 0; i < rwaKeys.length; i++) {
             require(exchangeFeeRates[i] <= MAX_EXCHANGE_FEE_RATE, "MAX_EXCHANGE_FEE_RATE exceeded");
             flexibleStorage.setUIntValue(
                 SETTINGS_CONTRACT_NAME,
-                keccak256(abi.encodePacked(settingExchangeFeeRate, tribeKeys[i])),
+                keccak256(abi.encodePacked(settingExchangeFeeRate, rwaKeys[i])),
                 exchangeFeeRates[i]
             );
         }
@@ -391,7 +391,7 @@ library SystemSettingsLib {
         );
     }
 
-    function setCrossChainTribeTransferEnabled(
+    function setCrossChainRwaTransferEnabled(
         IFlexibleStorage flexibleStorage,
         bytes32 settingName,
         bytes32 _currencyKey,

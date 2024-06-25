@@ -10,8 +10,8 @@ contract MockExchanger {
 
     IRwaone public rwaone;
 
-    constructor(IRwaone _tribeetix) public {
-        rwaone = _tribeetix;
+    constructor(IRwaone _rwaone) public {
+        rwaone = _rwaone;
     }
 
     // Mock settle function
@@ -20,11 +20,11 @@ contract MockExchanger {
         bytes32 currencyKey
     ) external returns (uint256 reclaimed, uint256 refunded, uint numEntriesSettled) {
         if (_mockReclaimAmount > 0) {
-            rwaone.tribes(currencyKey).burn(from, _mockReclaimAmount);
+            rwaone.rwas(currencyKey).burn(from, _mockReclaimAmount);
         }
 
         if (_mockRefundAmount > 0) {
-            rwaone.tribes(currencyKey).issue(from, _mockRefundAmount);
+            rwaone.rwas(currencyKey).issue(from, _mockRefundAmount);
         }
 
         _mockMaxSecsLeft = 0;

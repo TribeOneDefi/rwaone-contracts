@@ -52,7 +52,7 @@ const settle = async ({
 	ethToSeed,
 	showDebt,
 	useFork,
-	tribe,
+	rwa,
 }) => {
 	ensureNetwork(network);
 
@@ -83,8 +83,8 @@ const settle = async ({
 
 	const user = new ethers.Wallet(privateKey, provider);
 
-	if (tribe) {
-		console.log(gray('Filtered to tribe:'), yellow(tribe));
+	if (rwa) {
+		console.log(gray('Filtered to rwa:'), yellow(rwa));
 	}
 	console.log(gray('Using wallet', cyan(user.address)));
 	const balance = ethers.utils.formatEther(await provider.getBalance(user.address));
@@ -148,7 +148,7 @@ const settle = async ({
 			}
 			console.log(gray('-> Fetching page of results from target', yellow(target.address)));
 			const pageOfResults = await target.queryFilter(
-				'TribeExchange',
+				'RwaExchange',
 				startingBlock,
 				startingBlock + pageSize - 1
 			);
@@ -206,7 +206,7 @@ const settle = async ({
 			// Fetch all entries within the settlement
 			const results = [];
 			let earliestTimestamp = Infinity;
-			const fromTribes = [];
+			const fromRwas = [];
 			for (let i = 0; i < numEntries; i++) {
 				const { src, amount, timestamp } = await ExchangeState.getEntryAt(
 					account,
@@ -220,14 +220,14 @@ const settle = async ({
 					).toString()}`
 				);
 
-				fromTribes.push(src);
+				fromRwas.push(src);
 				earliestTimestamp = Math.min(timestamp, earliestTimestamp);
 			}
-			const isTribeTheDest = new RegExp(tribe).test(ethers.utils.toUtf8String(toCurrencyKey));
-			const isRwaOneSrcEntry = !!fromTribes.find(src => ethers.utils.toUtf8String(src) === tribe);
+			const isRwaTheDest = new RegExp(rwa).test(ethers.utils.toUtf8String(toCurrencyKey));
+			const isRwaOneSrcEntry = !!fromRwas.find(src => ethers.utils.toUtf8String(src) === rwa);
 
-			// skip when filtered by tribe if not the destination and not any of the sources
-			if (tribe && !isTribeTheDest && !isRwaOneSrcEntry) {
+			// skip when filtered by rwa if not the destination and not any of the sources
+			if (rwa && !isRwaTheDest && !isRwaOneSrcEntry) {
 				continue;
 			}
 
@@ -280,11 +280,11 @@ const settle = async ({
 				);
 				// see if user has enough funds to settle
 				if (reclaimAmount > 0) {
-					const tribe = await Rwaone.tribes(toCurrencyKey);
+					const rwa = await Rwaone.rwas(toCurrencyKey);
 
-					const Tribe = new ethers.Contract(tribe, getSource({ contract: 'Tribe' }).abi, provider);
+					const Rwa = new ethers.Contract(rwa, getSource({ contract: 'Rwa' }).abi, provider);
 
-					const balance = await Tribe.balanceOf(account);
+					const balance = await Rwa.balanceOf(account);
 
 					console.log(
 						gray('Warning: user does not have enough balance to be reclaimed'),
@@ -376,7 +376,7 @@ module.exports = {
 				'-r, --dry-run',
 				'If enabled, will not run any transactions but merely report on them.'
 			)
-			.option('-s, --tribe <tribe>', 'Filter to a specific tribe or regex')
+			.option('-s, --rwa <rwa>', 'Filter to a specific rwa or regex')
 			.option('-v, --private-key <value>', 'Provide private key to settle from given account')
 			.action(settle),
 };

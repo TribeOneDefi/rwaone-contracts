@@ -39,7 +39,7 @@ contract('DirectIntegrationManager', async accounts => {
 		await systemSettings.setAtomicMaxVolumePerBlock(400, { from: owner });
 		await systemSettings.setAtomicVolatilityConsiderationWindow(rETH, 500, { from: owner });
 		await systemSettings.setAtomicVolatilityUpdateThreshold(rETH, 700, { from: owner });
-		await systemSettings.setExchangeFeeRateForTribes([rETH], [800], { from: owner });
+		await systemSettings.setExchangeFeeRateForRwas([rETH], [800], { from: owner });
 		await systemSettings.setExchangeMaxDynamicFee(900, { from: owner });
 		await systemSettings.setExchangeDynamicFeeRounds(1000, { from: owner });
 		await systemSettings.setExchangeDynamicFeeThreshold(1100, { from: owner });

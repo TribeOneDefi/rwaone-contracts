@@ -9,7 +9,7 @@ const { toBytes32 } = require('../../../..');
 module.exports = async ({ deployer, runStep, feeds, useOvm }) => {
 	console.log(gray(`\n------ CONFIGURE STANDALONE FEEDS ------\n`));
 
-	// Setup remaining price feeds (that aren't tribes)
+	// Setup remaining price feeds (that aren't rwas)
 	const { ExchangeRates } = deployer.deployedContracts;
 
 	for (const { asset, feed } of Object.values(feeds)) {

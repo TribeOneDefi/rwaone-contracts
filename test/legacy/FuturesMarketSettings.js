@@ -39,7 +39,7 @@ contract('FuturesMarketSettings', accounts => {
 			FuturesMarketManager: futuresMarketManager,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD'],
+			rwas: ['rUSD'],
 			contracts: [
 				'FuturesMarketSettings',
 				'FuturesMarketManager',

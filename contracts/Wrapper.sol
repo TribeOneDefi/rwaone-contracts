@@ -4,7 +4,7 @@ pragma solidity ^0.5.16;
 import "./Owned.sol";
 import "./interfaces/IAddressResolver.sol";
 import "./interfaces/IWrapper.sol";
-import "./interfaces/ITribe.sol";
+import "./interfaces/IRwa.sol";
 import "./interfaces/IERC20.sol";
 
 // Internal references
@@ -29,7 +29,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
     bytes32 internal constant rUSD = "rUSD";
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
-    bytes32 private constant CONTRACT_RWAONE_RUSD = "TriberUSD";
+    bytes32 private constant CONTRACT_RWAONE_RUSD = "RwarUSD";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
     bytes32 private constant CONTRACT_SYSTEMSTATUS = "SystemStatus";
@@ -40,21 +40,21 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
     // NOTE: these values should ideally be `immutable` instead of public
     IERC20 public token;
     bytes32 public currencyKey;
-    bytes32 public tribeContractName;
+    bytes32 public rwaContractName;
 
-    uint public targetTribeIssued;
+    uint public targetRwaIssued;
 
     constructor(
         address _owner,
         address _resolver,
         IERC20 _token,
         bytes32 _currencyKey,
-        bytes32 _tribeContractName
+        bytes32 _rwaContractName
     ) public Owned(_owner) MixinSystemSettings(_resolver) {
         token = _token;
         currencyKey = _currencyKey;
-        tribeContractName = _tribeContractName;
-        targetTribeIssued = 0;
+        rwaContractName = _rwaContractName;
+        targetRwaIssued = 0;
         token.approve(address(this), uint256(-1));
     }
 
@@ -63,7 +63,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](6);
         newAddresses[0] = CONTRACT_RWAONE_RUSD;
-        newAddresses[1] = tribeContractName;
+        newAddresses[1] = rwaContractName;
         newAddresses[2] = CONTRACT_EXRATES;
         newAddresses[3] = CONTRACT_DEBTCACHE;
         newAddresses[4] = CONTRACT_SYSTEMSTATUS;
@@ -73,12 +73,12 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
     }
 
     /* ========== INTERNAL VIEWS ========== */
-    function triberUSD() internal view returns (ITribe) {
-        return ITribe(requireAndGetAddress(CONTRACT_RWAONE_RUSD));
+    function rwarUSD() internal view returns (IRwa) {
+        return IRwa(requireAndGetAddress(CONTRACT_RWAONE_RUSD));
     }
 
-    function tribe() internal view returns (ITribe) {
-        return ITribe(requireAndGetAddress(tribeContractName));
+    function rwa() internal view returns (IRwa) {
+        return IRwa(requireAndGetAddress(rwaContractName));
     }
 
     function exchangeRates() internal view returns (IExchangeRates) {
@@ -111,9 +111,9 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
         return maxToken.sub(balance);
     }
 
-    function totalIssuedTribes() public view returns (uint) {
-        // tribes issued by this contract is always exactly equal to the balance of reserves
-        return exchangeRates().effectiveValue(currencyKey, targetTribeIssued, rUSD);
+    function totalIssuedRwas() public view returns (uint) {
+        // rwas issued by this contract is always exactly equal to the balance of reserves
+        return exchangeRates().effectiveValue(currencyKey, targetRwaIssued, rUSD);
     }
 
     function getReserves() public view returns (uint) {
@@ -179,26 +179,26 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
         emit Minted(msg.sender, mintAmount, negative ? 0 : feeAmountTarget, actualAmountIn);
     }
 
-    // Burns `amountIn` tribe for `amountIn - fees` amount of token.
+    // Burns `amountIn` rwa for `amountIn - fees` amount of token.
     // `amountIn` is inclusive of fees, calculable via `calculateBurnFee`.
     function burn(uint amountIn) external notPaused issuanceActive {
-        require(amountIn <= IERC20(address(tribe())).balanceOf(msg.sender), "Balance is too low");
+        require(amountIn <= IERC20(address(rwa())).balanceOf(msg.sender), "Balance is too low");
         require(!exchangeRates().rateIsInvalid(currencyKey), "Currency rate is invalid");
-        require(totalIssuedTribes() > 0, "Contract cannot burn for token, token balance is zero");
+        require(totalIssuedRwas() > 0, "Contract cannot burn for token, token balance is zero");
 
-        (uint burnFee, bool negative) = calculateBurnFee(targetTribeIssued);
+        (uint burnFee, bool negative) = calculateBurnFee(targetRwaIssued);
 
         uint burnAmount;
         uint amountOut;
         if (negative) {
-            burnAmount = targetTribeIssued < amountIn ? targetTribeIssued.sub(burnFee) : amountIn;
+            burnAmount = targetRwaIssued < amountIn ? targetRwaIssued.sub(burnFee) : amountIn;
 
             amountOut = burnAmount.multiplyDecimal(
                 // -1e18 <= burnFeeRate <= 1e18 so this operation is safe
                 uint(int(SafeDecimalMath.unit()) - burnFeeRate())
             );
         } else {
-            burnAmount = targetTribeIssued.add(burnFee) < amountIn ? targetTribeIssued.add(burnFee) : amountIn;
+            burnAmount = targetRwaIssued.add(burnFee) < amountIn ? targetRwaIssued.add(burnFee) : amountIn;
             amountOut = burnAmount.divideDecimal(
                 // -1e18 <= burnFeeRate <= 1e18 so this operation is safe
                 uint(int(SafeDecimalMath.unit()) + burnFeeRate())
@@ -231,47 +231,47 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
     function _mint(uint amount) internal {
         uint reserves = getReserves();
 
-        uint excessAmount = reserves > targetTribeIssued.add(amount) ? reserves.sub(targetTribeIssued.add(amount)) : 0;
+        uint excessAmount = reserves > targetRwaIssued.add(amount) ? reserves.sub(targetRwaIssued.add(amount)) : 0;
         uint excessAmountUsd = exchangeRates().effectiveValue(currencyKey, excessAmount, rUSD);
 
         // Mint `amount` to user.
-        tribe().issue(msg.sender, amount);
+        rwa().issue(msg.sender, amount);
 
         // Escrow fee.
         if (excessAmountUsd > 0) {
-            triberUSD().issue(address(wrapperFactory()), excessAmountUsd);
+            rwarUSD().issue(address(wrapperFactory()), excessAmountUsd);
         }
 
-        // in the case of a negative fee extra tribes will be issued, billed to the snx stakers
-        _setTargetTribeIssued(reserves);
+        // in the case of a negative fee extra rwas will be issued, billed to the snx stakers
+        _setTargetRwaIssued(reserves);
     }
 
     function _burn(uint amount) internal {
         uint reserves = getReserves();
 
-        // this is logically equivalent to getReserves() - (targetTribeIssued - amount), without going negative
-        uint excessAmount = reserves.add(amount) > targetTribeIssued ? reserves.add(amount).sub(targetTribeIssued) : 0;
+        // this is logically equivalent to getReserves() - (targetRwaIssued - amount), without going negative
+        uint excessAmount = reserves.add(amount) > targetRwaIssued ? reserves.add(amount).sub(targetRwaIssued) : 0;
 
         uint excessAmountUsd = exchangeRates().effectiveValue(currencyKey, excessAmount, rUSD);
 
         // Burn `amount` of currencyKey from user.
-        tribe().burn(msg.sender, amount);
+        rwa().burn(msg.sender, amount);
 
         // We use burn/issue instead of burning the principal and transferring the fee.
         // This saves an approval and is cheaper.
         // Escrow fee.
         if (excessAmountUsd > 0) {
-            triberUSD().issue(address(wrapperFactory()), excessAmountUsd);
+            rwarUSD().issue(address(wrapperFactory()), excessAmountUsd);
         }
 
-        // in the case of a negative fee fewer tribes will be burned, billed to the snx stakers
-        _setTargetTribeIssued(reserves);
+        // in the case of a negative fee fewer rwas will be burned, billed to the snx stakers
+        _setTargetRwaIssued(reserves);
     }
 
-    function _setTargetTribeIssued(uint _targetTribeIssued) internal {
-        debtCache().recordExcludedDebtChange(currencyKey, int256(_targetTribeIssued) - int256(targetTribeIssued));
+    function _setTargetRwaIssued(uint _targetRwaIssued) internal {
+        debtCache().recordExcludedDebtChange(currencyKey, int256(_targetRwaIssued) - int256(targetRwaIssued));
 
-        targetTribeIssued = _targetTribeIssued;
+        targetRwaIssued = _targetRwaIssued;
     }
 
     function _safeTransferFrom(

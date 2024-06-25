@@ -43,7 +43,7 @@ module.exports = async ({
 		const addressArgs = [[], []];
 
 		const allContracts = Object.entries(deployer.deployedContracts);
-		
+
 		await Promise.all(
 			allContracts
 				// ignore adding contracts with the skipResolver and library options
@@ -66,8 +66,8 @@ module.exports = async ({
 				})
 		);
 
-		// SIP-165 For debt pool tribeesis, also add the ext:addresses, use the single network version if they exist in deployments
-		for (const debtPoolContractName of ['AggregatorIssuedTribes', 'AggregatorDebtRatio']) {
+		// SIP-165 For debt pool rwaesis, also add the ext:addresses, use the single network version if they exist in deployments
+		for (const debtPoolContractName of ['AggregatorIssuedRwas', 'AggregatorDebtRatio']) {
 			const resolverName = toBytes32(`ext:${debtPoolContractName}`);
 			const currentAddress = await AddressResolver.getAddress(resolverName);
 			const contract = deployer.deployedContracts[`OneNet${debtPoolContractName}`];
@@ -104,7 +104,7 @@ module.exports = async ({
 		console.log(
 			yellow(
 				'⚠⚠⚠ WARNING: Addresses have not been imported into the resolver,' +
-					' owner actions need to be performed before subsequent actions can be performed.'
+				' owner actions need to be performed before subsequent actions can be performed.'
 			)
 		);
 

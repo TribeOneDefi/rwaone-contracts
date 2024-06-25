@@ -36,7 +36,7 @@ async function _getAmount({ ctx, symbol, user, amount }) {
 		await _getETHFromOtherUsers({ ctx, user, amount });
 	} else {
 		throw new Error(
-			`Symbol ${symbol} not yet supported. TODO: Support via exchanging rUSD to other Tribes.`
+			`Symbol ${symbol} not yet supported. TODO: Support via exchanging rUSD to other Rwas.`
 		);
 	}
 }
@@ -129,7 +129,7 @@ async function _getRWAXForOwnerOnL2ByHackMinting({ ctx, amount }) {
 }
 
 async function _getrUSD({ ctx, user, amount }) {
-	let { Rwaone, TriberUSD } = ctx.contracts;
+	let { Rwaone, RwarUSD } = ctx.contracts;
 
 	let tx;
 
@@ -138,11 +138,11 @@ async function _getrUSD({ ctx, user, amount }) {
 	await ensureBalance({ ctx, symbol: 'wRWAX', user: ctx.users.owner, balance: requiredRWAX.mul(12) });
 
 	Rwaone = Rwaone.connect(ctx.users.owner);
-	tx = await Rwaone.issueTribes(amount);
+	tx = await Rwaone.issueRwas(amount);
 	await tx.wait();
 
-	TriberUSD = TriberUSD.connect(ctx.users.owner);
-	tx = await TriberUSD.transfer(user.address, amount);
+	RwarUSD = RwarUSD.connect(ctx.users.owner);
+	tx = await RwarUSD.transfer(user.address, amount);
 	await tx.wait();
 }
 
@@ -167,7 +167,7 @@ function _getTokenFromSymbol({ ctx, symbol }) {
 	} else if (symbol === 'WETH') {
 		return ctx.contracts.WETH;
 	} else {
-		return ctx.contracts[`Tribe${symbol}`];
+		return ctx.contracts[`Rwa${symbol}`];
 	}
 }
 

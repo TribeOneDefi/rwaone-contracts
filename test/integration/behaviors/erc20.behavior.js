@@ -18,7 +18,7 @@ function itBehavesLikeAnERC20({ ctx, contract }) {
 				contract = 'Rwaone';
 				proxyContractName = 'ProxyRwaone';
 			} else {
-				proxyContractName = `Proxy` + contract.replace('Tribe', '');
+				proxyContractName = `Proxy` + contract.replace('Rwa', '');
 			}
 
 			const Proxy = ctx.contracts[proxyContractName];

@@ -57,7 +57,7 @@ contract CollateralUtil is ICollateralUtil, ICollateralLoan, MixinSystemSettings
      * D = debt value in rUSD
      * V = collateral value in rUSD
      * P = liquidation penalty
-     * Calculates amount of tribes = (D - V * r) / (1 - (1 + P) * r)
+     * Calculates amount of rwas = (D - V * r) / (1 - (1 + P) * r)
      * Note: if you pass a loan in here that is not eligible for liquidation it will revert.
      * We check the ratio first in liquidateInternal and only pass eligible loans in.
      */

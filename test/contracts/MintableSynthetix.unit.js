@@ -9,7 +9,7 @@ const { smock } = require('@defi-wonderland/smock');
 const MintableRwaone = artifacts.require('MintableRwaone');
 
 contract('MintableRwaone (unit tests)', accounts => {
-	const [owner, tribeetixBridgeToBase, user1, mockAddress] = accounts;
+	const [owner, rwaoneBridgeToBase, user1, mockAddress] = accounts;
 
 	it('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
@@ -26,7 +26,7 @@ contract('MintableRwaone (unit tests)', accounts => {
 		let rewardsDistribution;
 		let systemStatus;
 		let rewardEscrowV2;
-		const RWAONEETIX_TOTAL_SUPPLY = toWei('100000000');
+		const RWAONE_TOTAL_SUPPLY = toWei('100000000');
 
 		beforeEach(async () => {
 			tokenState = await smock.fake('TokenState');
@@ -48,7 +48,7 @@ contract('MintableRwaone (unit tests)', accounts => {
 					'RewardEscrowV2',
 				].map(toBytes32),
 				[
-					tribeetixBridgeToBase,
+					rwaoneBridgeToBase,
 					systemStatus.address,
 					mockAddress,
 					mockAddress,
@@ -75,7 +75,7 @@ contract('MintableRwaone (unit tests)', accounts => {
 			beforeEach(async () => {
 				instance = await artifacts
 					.require('MintableRwaone')
-					.new(proxy.address, tokenState.address, owner, RWAONEETIX_TOTAL_SUPPLY, resolver.address);
+					.new(proxy.address, tokenState.address, owner, RWAONE_TOTAL_SUPPLY, resolver.address);
 				await instance.rebuildCache();
 			});
 
@@ -83,7 +83,7 @@ contract('MintableRwaone (unit tests)', accounts => {
 				assert.equal(await instance.proxy(), proxy.address);
 				assert.equal(await instance.tokenState(), tokenState.address);
 				assert.equal(await instance.owner(), owner);
-				assert.equal(await instance.totalSupply(), RWAONEETIX_TOTAL_SUPPLY);
+				assert.equal(await instance.totalSupply(), RWAONE_TOTAL_SUPPLY);
 				assert.equal(await instance.resolver(), resolver.address);
 			});
 
@@ -93,7 +93,7 @@ contract('MintableRwaone (unit tests)', accounts => {
 						await onlyGivenAddressCanInvoke({
 							fnc: instance.mintSecondary,
 							args: [user1, 100],
-							address: tribeetixBridgeToBase,
+							address: rwaoneBridgeToBase,
 							accounts,
 							reason: 'Can only be invoked by bridge',
 						});
@@ -104,12 +104,12 @@ contract('MintableRwaone (unit tests)', accounts => {
 					const amount = 100;
 					beforeEach(async () => {
 						await instance.mintSecondary(user1, amount, {
-							from: tribeetixBridgeToBase,
+							from: rwaoneBridgeToBase,
 						});
 					});
 
 					it('should increase the total supply', async () => {
-						const newSupply = new BN(RWAONEETIX_TOTAL_SUPPLY).add(new BN(amount));
+						const newSupply = new BN(RWAONE_TOTAL_SUPPLY).add(new BN(amount));
 						assert.bnEqual(await instance.totalSupply(), newSupply);
 					});
 				});
@@ -122,7 +122,7 @@ contract('MintableRwaone (unit tests)', accounts => {
 						await onlyGivenAddressCanInvoke({
 							fnc: instance.mintSecondaryRewards,
 							args: [amount],
-							address: tribeetixBridgeToBase,
+							address: rwaoneBridgeToBase,
 							accounts,
 							reason: 'Can only be invoked by bridge',
 						});
@@ -132,12 +132,12 @@ contract('MintableRwaone (unit tests)', accounts => {
 				describe('when invoked by the bridge', () => {
 					beforeEach(async () => {
 						await instance.mintSecondaryRewards(amount, {
-							from: tribeetixBridgeToBase,
+							from: rwaoneBridgeToBase,
 						});
 					});
 
 					it('should increase the total supply', async () => {
-						const newSupply = new BN(RWAONEETIX_TOTAL_SUPPLY).add(new BN(amount));
+						const newSupply = new BN(RWAONE_TOTAL_SUPPLY).add(new BN(amount));
 						assert.bnEqual(await instance.totalSupply(), newSupply);
 					});
 				});
@@ -150,7 +150,7 @@ contract('MintableRwaone (unit tests)', accounts => {
 						await onlyGivenAddressCanInvoke({
 							fnc: instance.burnSecondary,
 							args: [user1, amount],
-							address: tribeetixBridgeToBase,
+							address: rwaoneBridgeToBase,
 							accounts,
 							reason: 'Can only be invoked by bridge',
 						});
@@ -159,12 +159,12 @@ contract('MintableRwaone (unit tests)', accounts => {
 				describe('when invoked by the bridge', () => {
 					beforeEach(async () => {
 						await instance.burnSecondary(user1, amount, {
-							from: tribeetixBridgeToBase,
+							from: rwaoneBridgeToBase,
 						});
 					});
 
 					it('should decrease the total supply', async () => {
-						const newSupply = new BN(RWAONEETIX_TOTAL_SUPPLY).sub(new BN(amount));
+						const newSupply = new BN(RWAONE_TOTAL_SUPPLY).sub(new BN(amount));
 						assert.bnEqual(await instance.totalSupply(), newSupply);
 					});
 				});

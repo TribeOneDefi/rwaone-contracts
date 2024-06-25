@@ -61,11 +61,11 @@ contract('PerpsV2MarketData', accounts => {
 			PerpsV2MarketData: perpsV2MarketData,
 			ExchangeRates: exchangeRates,
 			CircuitBreaker: circuitBreaker,
-			TriberUSD: rUSD,
+			RwarUSD: rUSD,
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'rBTC', 'rETH', 'sLINK'],
+			rwas: ['rUSD', 'rBTC', 'rETH', 'sLINK'],
 			contracts: [
 				'FuturesMarketManager',
 				'PerpsV2MarketSettings',

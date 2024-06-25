@@ -4,7 +4,7 @@ const { assert, addSnapshotBeforeRestoreAfter } = require('../contracts/common')
 const { setupAllContracts } = require('../contracts/setup');
 const { toUnit, multiplyDecimal } = require('../utils')();
 const {
-	setExchangeFeeRateForTribes,
+	setExchangeFeeRateForRwas,
 	getDecodedLogs,
 	decodedEventEqual,
 	setupPriceAggregators,
@@ -21,9 +21,9 @@ const { toBytes32 } = require('../..');
 contract('TradingRewards', accounts => {
 	const [, owner, account1] = accounts;
 
-	const tribes = ['rUSD', 'rETH', 'rBTC', 'wRWAX'];
-	const tribeKeys = tribes.map(toBytes32);
-	const [rUSD, rETH, rBTC, wRWAX] = tribeKeys;
+	const rwas = ['rUSD', 'rETH', 'rBTC', 'wRWAX'];
+	const rwaKeys = rwas.map(toBytes32);
+	const [rUSD, rETH, rBTC, wRWAX] = rwaKeys;
 
 	let rwaone, exchanger, exchangeRates, rewards, resolver, systemSettings;
 	let rUSDContract, rETHContract, rBTCContract;
@@ -81,13 +81,13 @@ contract('TradingRewards', accounts => {
 				AddressResolver: resolver,
 				Exchanger: exchanger,
 				ExchangeRates: exchangeRates,
-				TriberUSD: rUSDContract,
-				TriberETH: rETHContract,
-				TriberBTC: rBTCContract,
+				RwarUSD: rUSDContract,
+				RwarETH: rETHContract,
+				RwarBTC: rBTCContract,
 				SystemSettings: systemSettings,
 			} = await setupAllContracts({
 				accounts,
-				tribes,
+				rwas,
 				contracts: [
 					'Rwaone',
 					'TradingRewards',
@@ -111,11 +111,11 @@ contract('TradingRewards', accounts => {
 		before('set exchange rates', async () => {
 			await updateAggregatorRates(exchangeRates, null, [rETH, rBTC, wRWAX], Object.values(rates));
 
-			await setExchangeFeeRateForTribes({
+			await setExchangeFeeRateForRwas({
 				owner,
 				systemSettings,
-				tribeKeys,
-				exchangeFeeRates: tribeKeys.map(() => allExchangeFeeRates),
+				rwaKeys,
+				exchangeFeeRates: rwaKeys.map(() => allExchangeFeeRates),
 			});
 		});
 
@@ -150,8 +150,8 @@ contract('TradingRewards', accounts => {
 					});
 				});
 
-				it('emitted a TribeExchange event', async () => {
-					assert.isTrue(exchangeLogs.some(log => log.name === 'TribeExchange'));
+				it('emitted a RwaExchange event', async () => {
+					assert.isTrue(exchangeLogs.some(log => log.name === 'RwaExchange'));
 				});
 
 				it('did not emit an ExchangeFeeRecorded event', async () => {
@@ -192,8 +192,8 @@ contract('TradingRewards', accounts => {
 						});
 					});
 
-					it('emitted a TribeExchange event', async () => {
-						assert.isTrue(exchangeLogs.some(log => log.name === 'TribeExchange'));
+					it('emitted a RwaExchange event', async () => {
+						assert.isTrue(exchangeLogs.some(log => log.name === 'RwaExchange'));
 					});
 
 					it('emitted an ExchangeFeeRecorded event', async () => {
@@ -251,11 +251,11 @@ contract('TradingRewards', accounts => {
 				before('set fee rate', async () => {
 					const zeroRate = toBN(0);
 
-					await setExchangeFeeRateForTribes({
+					await setExchangeFeeRateForRwas({
 						owner,
 						systemSettings,
-						tribeKeys,
-						exchangeFeeRates: tribeKeys.map(() => zeroRate),
+						rwaKeys,
+						exchangeFeeRates: rwaKeys.map(() => zeroRate),
 					});
 				});
 
@@ -269,8 +269,8 @@ contract('TradingRewards', accounts => {
 						});
 					});
 
-					it('emitted a TribeExchange event', async () => {
-						assert.isTrue(exchangeLogs.some(log => log.name === 'TribeExchange'));
+					it('emitted a RwaExchange event', async () => {
+						assert.isTrue(exchangeLogs.some(log => log.name === 'RwaExchange'));
 					});
 
 					it('did not emit an ExchangeFeeRecorded event', async () => {
@@ -298,8 +298,8 @@ contract('TradingRewards', accounts => {
 						exchangeLogs = await getExchangeLogs({ exchangeTx });
 					});
 
-					it('emitted a TribeExchange event', async () => {
-						assert.isTrue(exchangeLogs.some(log => log.name === 'TribeExchange'));
+					it('emitted a RwaExchange event', async () => {
+						assert.isTrue(exchangeLogs.some(log => log.name === 'RwaExchange'));
 					});
 
 					it('emitted an ExchangeFeeRecorded event', async () => {
@@ -323,8 +323,8 @@ contract('TradingRewards', accounts => {
 						exchangeLogs = await getExchangeLogs({ exchangeTx });
 					});
 
-					it('emitted a TribeExchange event', async () => {
-						assert.isTrue(exchangeLogs.some(log => log.name === 'TribeExchange'));
+					it('emitted a RwaExchange event', async () => {
+						assert.isTrue(exchangeLogs.some(log => log.name === 'RwaExchange'));
 					});
 
 					it('did not emit an ExchangeFeeRecorded event', async () => {

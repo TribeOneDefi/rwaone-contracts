@@ -1,8 +1,8 @@
 pragma solidity >=0.4.24;
 
-import "./ITribe.sol";
+import "./IRwa.sol";
 
-interface IVirtualTribe {
+interface IVirtualRwa {
     // Views
     function balanceOfUnderlying(address account) external view returns (uint);
 
@@ -14,7 +14,7 @@ interface IVirtualTribe {
 
     function settled() external view returns (bool);
 
-    function tribe() external view returns (ITribe);
+    function rwa() external view returns (IRwa);
 
     // Mutative functions
     function settle(address account) external;

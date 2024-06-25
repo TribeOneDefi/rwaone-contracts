@@ -4,7 +4,7 @@ pragma solidity ^0.5.16;
 import "./Owned.sol";
 import "./interfaces/IAddressResolver.sol";
 import "./interfaces/IEtherWrapper.sol";
-import "./interfaces/ITribe.sol";
+import "./interfaces/IRwa.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/IWETH.sol";
 
@@ -35,8 +35,8 @@ contract EtherWrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IE
     bytes32 internal constant wRWAX = "wRWAX";
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
-    bytes32 private constant CONTRACT_RWAONEHETH = "TriberETH";
-    bytes32 private constant CONTRACT_RWAONERUSD = "TriberUSD";
+    bytes32 private constant CONTRACT_RWAONEHETH = "RwarETH";
+    bytes32 private constant CONTRACT_RWAONERUSD = "RwarUSD";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
     bytes32 private constant CONTRACT_FEEPOOL = "FeePool";
@@ -70,12 +70,12 @@ contract EtherWrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IE
     }
 
     /* ========== INTERNAL VIEWS ========== */
-    function triberUSD() internal view returns (ITribe) {
-        return ITribe(requireAndGetAddress(CONTRACT_RWAONERUSD));
+    function rwarUSD() internal view returns (IRwa) {
+        return IRwa(requireAndGetAddress(CONTRACT_RWAONERUSD));
     }
 
-    function triberETH() internal view returns (ITribe) {
-        return ITribe(requireAndGetAddress(CONTRACT_RWAONEHETH));
+    function rwarETH() internal view returns (IRwa) {
+        return IRwa(requireAndGetAddress(CONTRACT_RWAONEHETH));
     }
 
     function feePool() internal view returns (IFeePool) {
@@ -107,8 +107,8 @@ contract EtherWrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IE
         return _weth.balanceOf(address(this));
     }
 
-    function totalIssuedTribes() public view returns (uint) {
-        // This contract issues two different tribes:
+    function totalIssuedRwas() public view returns (uint) {
+        // This contract issues two different rwas:
         // 1. rETH
         // 2. rUSD
         //
@@ -181,12 +181,12 @@ contract EtherWrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IE
         uint amountRUSD = exchangeRates().effectiveValue(rETH, feesEscrowed, rUSD);
 
         // Burn rETH.
-        triberETH().burn(address(this), feesEscrowed);
+        rwarETH().burn(address(this), feesEscrowed);
         // Pay down as much rETH debt as we burn. Any other debt is taken on by the stakers.
         rETHIssued = rETHIssued < feesEscrowed ? 0 : rETHIssued.sub(feesEscrowed);
 
         // Issue rUSD to the fee pool
-        issuer().tribes(rUSD).issue(feePool().FEE_ADDRESS(), amountRUSD);
+        issuer().rwas(rUSD).issue(feePool().FEE_ADDRESS(), amountRUSD);
         rUSDIssued = rUSDIssued.add(amountRUSD);
 
         // Tell the fee pool about this
@@ -215,10 +215,10 @@ contract EtherWrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IE
         _weth.transferFrom(msg.sender, address(this), amountIn);
 
         // Mint `amountIn - fees` rETH to user.
-        triberETH().issue(msg.sender, principal);
+        rwarETH().issue(msg.sender, principal);
 
         // Escrow fee.
-        triberETH().issue(address(this), feeAmountEth);
+        rwarETH().issue(address(this), feeAmountEth);
         feesEscrowed = feesEscrowed.add(feeAmountEth);
 
         // Add rETH debt.
@@ -231,18 +231,18 @@ contract EtherWrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IE
         // for burn, amount is inclusive of the fee.
         uint feeAmountEth = amountIn.sub(principal);
 
-        require(amountIn <= IERC20(address(triberETH())).allowance(msg.sender, address(this)), "Allowance not high enough");
-        require(amountIn <= IERC20(address(triberETH())).balanceOf(msg.sender), "Balance is too low");
+        require(amountIn <= IERC20(address(rwarETH())).allowance(msg.sender, address(this)), "Allowance not high enough");
+        require(amountIn <= IERC20(address(rwarETH())).balanceOf(msg.sender), "Balance is too low");
 
         // Burn `amountIn` rETH from user.
-        triberETH().burn(msg.sender, amountIn);
+        rwarETH().burn(msg.sender, amountIn);
         // rETH debt is repaid by burning.
         rETHIssued = rETHIssued < principal ? 0 : rETHIssued.sub(principal);
 
         // We use burn/issue instead of burning the principal and transferring the fee.
         // This saves an approval and is cheaper.
         // Escrow fee.
-        triberETH().issue(address(this), feeAmountEth);
+        rwarETH().issue(address(this), feeAmountEth);
         // We don't update rETHIssued, as only the principal was subtracted earlier.
         feesEscrowed = feesEscrowed.add(feeAmountEth);
 

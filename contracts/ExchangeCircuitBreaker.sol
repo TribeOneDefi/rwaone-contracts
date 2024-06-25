@@ -10,14 +10,14 @@ import "./interfaces/IExchangeCircuitBreaker.sol";
 import "./SafeDecimalMath.sol";
 
 // Internal references
-import "./interfaces/ITribe.sol";
+import "./interfaces/IRwa.sol";
 import "./interfaces/IIssuer.sol";
 import "./interfaces/ISystemStatus.sol";
 import "./interfaces/IExchangeRates.sol";
 import "./Proxyable.sol";
 
 /**
- * Compares current exchange rate to previous, and suspends a tribe if the
+ * Compares current exchange rate to previous, and suspends a rwa if the
  * difference is outside of deviation bounds.
  *
  * This contract's functionality has been superseded by `CircuitBreaker`, and therefore its *deprecated*.

@@ -11,7 +11,7 @@ import "./SafeCast.sol";
 import "./SafeDecimalMath.sol";
 
 // Internal references
-import "./interfaces/ITribe.sol";
+import "./interfaces/IRwa.sol";
 import "./interfaces/IRwaoneDebtShare.sol";
 import "./interfaces/IExchanger.sol";
 import "./interfaces/IDelegateApprovals.sol";
@@ -21,7 +21,7 @@ import "./interfaces/IHasBalance.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/ILiquidator.sol";
 import "./interfaces/ILiquidatorRewards.sol";
-import "./interfaces/ITribeRedeemer.sol";
+import "./interfaces/IRwaRedeemer.sol";
 import "./interfaces/ISystemStatus.sol";
 import "./Proxyable.sol";
 
@@ -32,9 +32,9 @@ interface IProxy {
 }
 
 interface IIssuerInternalDebtCache {
-    function updateCachedTribeDebtWithRate(bytes32 currencyKey, uint currencyRate) external;
+    function updateCachedRwaDebtWithRate(bytes32 currencyKey, uint currencyRate) external;
 
-    function updateCachedTribeDebtsWithRates(bytes32[] calldata currencyKeys, uint[] calldata currencyRates) external;
+    function updateCachedRwaDebtsWithRates(bytes32[] calldata currencyKeys, uint[] calldata currencyRates) external;
 
     function updateDebtCacheValidity(bool currentlyInvalid) external;
 
@@ -52,10 +52,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     bytes32 public constant CONTRACT_NAME = "Issuer";
 
-    // Available Tribes which can be used with the system
-    ITribe[] public availableTribes;
-    mapping(bytes32 => ITribe) public tribes;
-    mapping(address => bytes32) public tribesByAddress;
+    // Available Rwas which can be used with the system
+    IRwa[] public availableRwas;
+    mapping(bytes32 => IRwa) public rwas;
+    mapping(address => bytes32) public rwasByAddress;
 
     /* ========== ENCODED NAMES ========== */
 
@@ -68,24 +68,24 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
-    bytes32 private constant CONTRACT_RWAONEETIX = "Rwaone";
+    bytes32 private constant CONTRACT_RWAONE = "Rwaone";
     bytes32 private constant CONTRACT_EXCHANGER = "Exchanger";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
     bytes32 private constant CONTRACT_CIRCUIT_BREAKER = "CircuitBreaker";
-    bytes32 private constant CONTRACT_RWAONEETIXDEBTSHARE = "RwaoneDebtShare";
+    bytes32 private constant CONTRACT_RWAONEDEBTSHARE = "RwaoneDebtShare";
     bytes32 private constant CONTRACT_FEEPOOL = "FeePool";
     bytes32 private constant CONTRACT_DELEGATEAPPROVALS = "DelegateApprovals";
     bytes32 private constant CONTRACT_REWARDESCROW_V2 = "RewardEscrowV2";
     bytes32 private constant CONTRACT_LIQUIDATOR = "Liquidator";
     bytes32 private constant CONTRACT_LIQUIDATOR_REWARDS = "LiquidatorRewards";
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
-    bytes32 private constant CONTRACT_RWAONEREDEEMER = "TribeRedeemer";
-    bytes32 private constant CONTRACT_RWAONEETIXBRIDGETOOPTIMISM = "RwaoneBridgeToOptimism";
-    bytes32 private constant CONTRACT_RWAONEETIXBRIDGETOBASE = "RwaoneBridgeToBase";
+    bytes32 private constant CONTRACT_RWAONEREDEEMER = "RwaRedeemer";
+    bytes32 private constant CONTRACT_RWAONEBRIDGETOOPTIMISM = "RwaoneBridgeToOptimism";
+    bytes32 private constant CONTRACT_RWAONEBRIDGETOBASE = "RwaoneBridgeToBase";
     bytes32 private constant CONTRACT_DEBT_MIGRATOR_ON_ETHEREUM = "DebtMigratorOnEthereum";
     bytes32 private constant CONTRACT_DEBT_MIGRATOR_ON_OPTIMISM = "DebtMigratorOnOptimism";
 
-    bytes32 private constant CONTRACT_EXT_AGGREGATOR_ISSUED_RWAONES = "ext:AggregatorIssuedTribes";
+    bytes32 private constant CONTRACT_EXT_AGGREGATOR_ISSUED_RWAONES = "ext:AggregatorIssuedRwas";
     bytes32 private constant CONTRACT_EXT_AGGREGATOR_DEBT_RATIO = "ext:AggregatorDebtRatio";
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinSystemSettings(_resolver) {}
@@ -94,11 +94,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](14);
-        newAddresses[0] = CONTRACT_RWAONEETIX;
+        newAddresses[0] = CONTRACT_RWAONE;
         newAddresses[1] = CONTRACT_EXCHANGER;
         newAddresses[2] = CONTRACT_EXRATES;
         newAddresses[3] = CONTRACT_CIRCUIT_BREAKER;
-        newAddresses[4] = CONTRACT_RWAONEETIXDEBTSHARE;
+        newAddresses[4] = CONTRACT_RWAONEDEBTSHARE;
         newAddresses[5] = CONTRACT_FEEPOOL;
         newAddresses[6] = CONTRACT_DELEGATEAPPROVALS;
         newAddresses[7] = CONTRACT_REWARDESCROW_V2;
@@ -111,8 +111,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return combineArrays(existingAddresses, newAddresses);
     }
 
-    function tribeetixERC20() internal view returns (IERC20) {
-        return IERC20(requireAndGetAddress(CONTRACT_RWAONEETIX));
+    function rwaoneERC20() internal view returns (IERC20) {
+        return IERC20(requireAndGetAddress(CONTRACT_RWAONE));
     }
 
     function exchanger() internal view returns (IExchanger) {
@@ -127,8 +127,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return ICircuitBreaker(requireAndGetAddress(CONTRACT_CIRCUIT_BREAKER));
     }
 
-    function tribeetixDebtShare() internal view returns (IRwaoneDebtShare) {
-        return IRwaoneDebtShare(requireAndGetAddress(CONTRACT_RWAONEETIXDEBTSHARE));
+    function rwaoneDebtShare() internal view returns (IRwaoneDebtShare) {
+        return IRwaoneDebtShare(requireAndGetAddress(CONTRACT_RWAONEDEBTSHARE));
     }
 
     function liquidator() internal view returns (ILiquidator) {
@@ -151,25 +151,25 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return IIssuerInternalDebtCache(requireAndGetAddress(CONTRACT_DEBTCACHE));
     }
 
-    function tribeRedeemer() internal view returns (ITribeRedeemer) {
-        return ITribeRedeemer(requireAndGetAddress(CONTRACT_RWAONEREDEEMER));
+    function rwaRedeemer() internal view returns (IRwaRedeemer) {
+        return IRwaRedeemer(requireAndGetAddress(CONTRACT_RWAONEREDEEMER));
     }
 
     function allNetworksDebtInfo() public view returns (uint256 debt, uint256 sharesSupply, bool isStale) {
-        (, int256 rawIssuedTribes, , uint issuedTribesUpdatedAt, ) = _latestRoundData(
+        (, int256 rawIssuedRwas, , uint issuedRwasUpdatedAt, ) = _latestRoundData(
             requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_ISSUED_RWAONES)
         );
 
         (uint rawRatio, uint ratioUpdatedAt) = _rawDebtRatioAndUpdatedAt();
 
-        debt = uint(rawIssuedTribes);
+        debt = uint(rawIssuedRwas);
         sharesSupply = rawRatio == 0 ? 0 : debt.divideDecimalRoundPrecise(uint(rawRatio));
 
         uint stalePeriod = getRateStalePeriod();
 
         isStale =
             stalePeriod < block.timestamp &&
-            (block.timestamp - stalePeriod > issuedTribesUpdatedAt || block.timestamp - stalePeriod > ratioUpdatedAt);
+            (block.timestamp - stalePeriod > issuedRwasUpdatedAt || block.timestamp - stalePeriod > ratioUpdatedAt);
     }
 
     function issuanceRatio() external view returns (uint) {
@@ -202,11 +202,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     }
 
     function _debtShareBalanceOf(address account) internal view returns (uint) {
-        return tribeetixDebtShare().balanceOf(account);
+        return rwaoneDebtShare().balanceOf(account);
     }
 
     function _snxBalanceOf(address account) internal view returns (uint) {
-        return tribeetixERC20().balanceOf(account);
+        return rwaoneERC20().balanceOf(account);
     }
 
     function _rewardEscrowBalanceOf(address account) internal view returns (uint) {
@@ -214,14 +214,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     }
 
     function _availableCurrencyKeysWithOptionalRWAX(bool withRWAX) internal view returns (bytes32[] memory) {
-        bytes32[] memory currencyKeys = new bytes32[](availableTribes.length + (withRWAX ? 1 : 0));
+        bytes32[] memory currencyKeys = new bytes32[](availableRwas.length + (withRWAX ? 1 : 0));
 
-        for (uint i = 0; i < availableTribes.length; i++) {
-            currencyKeys[i] = tribesByAddress[address(availableTribes[i])];
+        for (uint i = 0; i < availableRwas.length; i++) {
+            currencyKeys[i] = rwasByAddress[address(availableRwas[i])];
         }
 
         if (withRWAX) {
-            currencyKeys[availableTribes.length] = wRWAX;
+            currencyKeys[availableRwas.length] = wRWAX;
         }
 
         return currencyKeys;
@@ -229,14 +229,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     // Returns the total value of the debt pool in currency specified by `currencyKey`.
     // To return only the wRWAX-backed debt, set `excludeCollateral` to true.
-    function _totalIssuedTribes(
+    function _totalIssuedRwas(
         bytes32 currencyKey,
         bool excludeCollateral
     ) internal view returns (uint totalIssued, bool anyRateIsInvalid) {
         (uint debt, , bool cacheIsInvalid, bool cacheIsStale) = debtCache().cacheInfo();
         anyRateIsInvalid = cacheIsInvalid || cacheIsStale;
 
-        // Add total issued tribes from non snx collateral back into the total if not excluded
+        // Add total issued rwas from non snx collateral back into the total if not excluded
         if (!excludeCollateral) {
             (uint nonSnxDebt, bool invalid) = debtCache().totalNonSnxBackedDebt();
             debt = debt.add(nonSnxDebt);
@@ -255,7 +255,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint debtShareBalance,
         bytes32 currencyKey
     ) internal view returns (uint debtBalance, uint totalSystemValue, bool anyRateIsInvalid) {
-        // What's the total value of the system excluding ETH backed tribes in their requested currency?
+        // What's the total value of the system excluding ETH backed rwas in their requested currency?
         (uint snxBackedAmount, , bool debtInfoStale) = allNetworksDebtInfo();
 
         if (debtShareBalance == 0) {
@@ -271,7 +271,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         anyRateIsInvalid = currencyRateInvalid || debtInfoStale;
     }
 
-    function _canBurnTribes(address account) internal view returns (bool) {
+    function _canBurnRwas(address account) internal view returns (bool) {
         return now >= _lastIssueEvent(account).add(getMinimumStakeTime());
     }
 
@@ -280,11 +280,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return flexibleStorage().getUIntValue(CONTRACT_NAME, keccak256(abi.encodePacked(LAST_ISSUE_EVENT, account)));
     }
 
-    function _remainingIssuableTribes(
+    function _remainingIssuableRwas(
         address _issuer
     ) internal view returns (uint maxIssuable, uint alreadyIssued, uint totalSystemDebt, bool anyRateIsInvalid) {
         (alreadyIssued, totalSystemDebt, anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_debtShareBalanceOf(_issuer), rUSD);
-        (uint issuable, bool isInvalid) = _maxIssuableTribes(_issuer);
+        (uint issuable, bool isInvalid) = _maxIssuableRwas(_issuer);
         maxIssuable = issuable;
         anyRateIsInvalid = anyRateIsInvalid || isInvalid;
 
@@ -303,7 +303,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return amount.divideDecimalRound(snxRate);
     }
 
-    function _maxIssuableTribes(address _issuer) internal view returns (uint, bool) {
+    function _maxIssuableRwas(address _issuer) internal view returns (uint, bool) {
         // What is the value of their wRWAX balance in rUSD
         (uint snxRate, bool isInvalid) = _rateAndInvalid(wRWAX);
         uint destinationValue = _snxToUSD(_collateral(_issuer), snxRate);
@@ -331,24 +331,24 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return getMinimumStakeTime();
     }
 
-    function canBurnTribes(address account) external view returns (bool) {
-        return _canBurnTribes(account);
+    function canBurnRwas(address account) external view returns (bool) {
+        return _canBurnRwas(account);
     }
 
     function availableCurrencyKeys() external view returns (bytes32[] memory) {
         return _availableCurrencyKeysWithOptionalRWAX(false);
     }
 
-    function availableTribeCount() external view returns (uint) {
-        return availableTribes.length;
+    function availableRwaCount() external view returns (uint) {
+        return availableRwas.length;
     }
 
-    function anyTribeOrRWAXRateIsInvalid() external view returns (bool anyRateInvalid) {
+    function anyRwaOrRWAXRateIsInvalid() external view returns (bool anyRateInvalid) {
         (, anyRateInvalid) = exchangeRates().ratesAndInvalidForCurrencies(_availableCurrencyKeysWithOptionalRWAX(true));
     }
 
-    function totalIssuedTribes(bytes32 currencyKey, bool excludeOtherCollateral) external view returns (uint totalIssued) {
-        (totalIssued, ) = _totalIssuedTribes(currencyKey, excludeOtherCollateral);
+    function totalIssuedRwas(bytes32 currencyKey, bool excludeOtherCollateral) external view returns (uint totalIssued) {
+        (totalIssued, ) = _totalIssuedRwas(currencyKey, excludeOtherCollateral);
     }
 
     function lastIssueEvent(address account) external view returns (uint) {
@@ -379,14 +379,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (debtBalance, , ) = _debtBalanceOfAndTotalDebt(debtShareBalance, currencyKey);
     }
 
-    function remainingIssuableTribes(
+    function remainingIssuableRwas(
         address _issuer
     ) external view returns (uint maxIssuable, uint alreadyIssued, uint totalSystemDebt) {
-        (maxIssuable, alreadyIssued, totalSystemDebt, ) = _remainingIssuableTribes(_issuer);
+        (maxIssuable, alreadyIssued, totalSystemDebt, ) = _remainingIssuableRwas(_issuer);
     }
 
-    function maxIssuableTribes(address _issuer) external view returns (uint) {
-        (uint maxIssuable, ) = _maxIssuableTribes(_issuer);
+    function maxIssuableRwas(address _issuer) external view returns (uint) {
+        (uint maxIssuable, ) = _maxIssuableRwas(_issuer);
         return maxIssuable;
     }
 
@@ -414,12 +414,12 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
     }
 
-    function getTribes(bytes32[] calldata currencyKeys) external view returns (ITribe[] memory) {
+    function getRwas(bytes32[] calldata currencyKeys) external view returns (IRwa[] memory) {
         uint numKeys = currencyKeys.length;
-        ITribe[] memory addresses = new ITribe[](numKeys);
+        IRwa[] memory addresses = new IRwa[](numKeys);
 
         for (uint i = 0; i < numKeys; i++) {
-            addresses[i] = tribes[currencyKeys[i]];
+            addresses[i] = rwas[currencyKeys[i]];
         }
 
         return addresses;
@@ -441,119 +441,119 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     /* ========== MUTATIVE FUNCTIONS ========== */
 
-    function _addTribe(ITribe tribe) internal {
-        bytes32 currencyKey = tribe.currencyKey();
-        require(tribes[currencyKey] == ITribe(0), "Tribe exists");
-        require(tribesByAddress[address(tribe)] == bytes32(0), "Tribe address already exists");
+    function _addRwa(IRwa rwa) internal {
+        bytes32 currencyKey = rwa.currencyKey();
+        require(rwas[currencyKey] == IRwa(0), "Rwa exists");
+        require(rwasByAddress[address(rwa)] == bytes32(0), "Rwa address already exists");
 
-        availableTribes.push(tribe);
-        tribes[currencyKey] = tribe;
-        tribesByAddress[address(tribe)] = currencyKey;
+        availableRwas.push(rwa);
+        rwas[currencyKey] = rwa;
+        rwasByAddress[address(rwa)] = currencyKey;
 
-        emit TribeAdded(currencyKey, address(tribe));
+        emit RwaAdded(currencyKey, address(rwa));
     }
 
-    function addTribe(ITribe tribe) external onlyOwner {
-        _addTribe(tribe);
-        // Invalidate the cache to force a snapshot to be recomputed. If a tribe were to be added
+    function addRwa(IRwa rwa) external onlyOwner {
+        _addRwa(rwa);
+        // Invalidate the cache to force a snapshot to be recomputed. If a rwa were to be added
         // back to the system and it still somehow had cached debt, this would force the value to be
         // updated.
         debtCache().updateDebtCacheValidity(true);
     }
 
-    function addTribes(ITribe[] calldata tribesToAdd) external onlyOwner {
-        uint numTribes = tribesToAdd.length;
-        for (uint i = 0; i < numTribes; i++) {
-            _addTribe(tribesToAdd[i]);
+    function addRwas(IRwa[] calldata rwasToAdd) external onlyOwner {
+        uint numRwas = rwasToAdd.length;
+        for (uint i = 0; i < numRwas; i++) {
+            _addRwa(rwasToAdd[i]);
         }
 
         // Invalidate the cache to force a snapshot to be recomputed.
         debtCache().updateDebtCacheValidity(true);
     }
 
-    function _removeTribe(bytes32 currencyKey) internal {
-        address tribeToRemove = address(tribes[currencyKey]);
-        require(tribeToRemove != address(0), "Tribe does not exist");
-        require(currencyKey != rUSD, "Cannot remove tribe");
+    function _removeRwa(bytes32 currencyKey) internal {
+        address rwaToRemove = address(rwas[currencyKey]);
+        require(rwaToRemove != address(0), "Rwa does not exist");
+        require(currencyKey != rUSD, "Cannot remove rwa");
 
-        uint tribeSupply = IERC20(tribeToRemove).totalSupply();
+        uint rwaSupply = IERC20(rwaToRemove).totalSupply();
 
-        if (tribeSupply > 0) {
+        if (rwaSupply > 0) {
             (uint amountOfrUSD, uint rateToRedeem, ) = exchangeRates().effectiveValueAndRates(
                 currencyKey,
-                tribeSupply,
+                rwaSupply,
                 "rUSD"
             );
             require(rateToRedeem > 0, "Cannot remove without rate");
-            ITribeRedeemer _tribeRedeemer = tribeRedeemer();
-            tribes[rUSD].issue(address(_tribeRedeemer), amountOfrUSD);
+            IRwaRedeemer _rwaRedeemer = rwaRedeemer();
+            rwas[rUSD].issue(address(_rwaRedeemer), amountOfrUSD);
             // ensure the debt cache is aware of the new rUSD issued
             debtCache().updateCachedrUSDDebt(SafeCast.toInt256(amountOfrUSD));
-            _tribeRedeemer.deprecate(IERC20(address(Proxyable(tribeToRemove).proxy())), rateToRedeem);
+            _rwaRedeemer.deprecate(IERC20(address(Proxyable(rwaToRemove).proxy())), rateToRedeem);
         }
 
-        // Remove the tribe from the availableTribes array.
-        for (uint i = 0; i < availableTribes.length; i++) {
-            if (address(availableTribes[i]) == tribeToRemove) {
-                delete availableTribes[i];
+        // Remove the rwa from the availableRwas array.
+        for (uint i = 0; i < availableRwas.length; i++) {
+            if (address(availableRwas[i]) == rwaToRemove) {
+                delete availableRwas[i];
 
-                // Copy the last tribe into the place of the one we just deleted
-                // If there's only one tribe, this is tribes[0] = tribes[0].
+                // Copy the last rwa into the place of the one we just deleted
+                // If there's only one rwa, this is rwas[0] = rwas[0].
                 // If we're deleting the last one, it's also a NOOP in the same way.
-                availableTribes[i] = availableTribes[availableTribes.length - 1];
+                availableRwas[i] = availableRwas[availableRwas.length - 1];
 
                 // Decrease the size of the array by one.
-                availableTribes.length--;
+                availableRwas.length--;
 
                 break;
             }
         }
 
-        // And remove it from the tribes mapping
-        delete tribesByAddress[tribeToRemove];
-        delete tribes[currencyKey];
+        // And remove it from the rwas mapping
+        delete rwasByAddress[rwaToRemove];
+        delete rwas[currencyKey];
 
-        emit TribeRemoved(currencyKey, tribeToRemove);
+        emit RwaRemoved(currencyKey, rwaToRemove);
     }
 
-    function removeTribe(bytes32 currencyKey) external onlyOwner {
+    function removeRwa(bytes32 currencyKey) external onlyOwner {
         // Remove its contribution from the debt pool snapshot, and
         // invalidate the cache to force a new snapshot.
         IIssuerInternalDebtCache cache = debtCache();
-        cache.updateCachedTribeDebtWithRate(currencyKey, 0);
+        cache.updateCachedRwaDebtWithRate(currencyKey, 0);
         cache.updateDebtCacheValidity(true);
 
-        _removeTribe(currencyKey);
+        _removeRwa(currencyKey);
     }
 
-    function removeTribes(bytes32[] calldata currencyKeys) external onlyOwner {
+    function removeRwas(bytes32[] calldata currencyKeys) external onlyOwner {
         uint numKeys = currencyKeys.length;
 
         // Remove their contributions from the debt pool snapshot, and
         // invalidate the cache to force a new snapshot.
         IIssuerInternalDebtCache cache = debtCache();
         uint[] memory zeroRates = new uint[](numKeys);
-        cache.updateCachedTribeDebtsWithRates(currencyKeys, zeroRates);
+        cache.updateCachedRwaDebtsWithRates(currencyKeys, zeroRates);
         cache.updateDebtCacheValidity(true);
 
         for (uint i = 0; i < numKeys; i++) {
-            _removeTribe(currencyKeys[i]);
+            _removeRwa(currencyKeys[i]);
         }
     }
 
-    function issueTribesWithoutDebt(
+    function issueRwasWithoutDebt(
         bytes32 currencyKey,
         address to,
         uint amount
     ) external onlyTrustedMinters returns (bool rateInvalid) {
-        require(address(tribes[currencyKey]) != address(0), "tribe doesn't exist");
-        require(amount > 0, "cannot issue 0 tribes");
+        require(address(rwas[currencyKey]) != address(0), "rwa doesn't exist");
+        require(amount > 0, "cannot issue 0 rwas");
 
         // record issue timestamp
         _setLastIssueEvent(to);
 
-        // Create their tribes
-        tribes[currencyKey].issue(to, amount);
+        // Create their rwas
+        rwas[currencyKey].issue(to, amount);
 
         // Account for the issued debt in the cache
         (uint rate, bool rateInvalid) = _rateAndInvalid(currencyKey);
@@ -563,18 +563,18 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return rateInvalid;
     }
 
-    function burnTribesWithoutDebt(
+    function burnRwasWithoutDebt(
         bytes32 currencyKey,
         address from,
         uint amount
     ) external onlyTrustedMinters returns (bool rateInvalid) {
-        require(address(tribes[currencyKey]) != address(0), "tribe doesn't exist");
-        require(amount > 0, "cannot issue 0 tribes");
+        require(address(rwas[currencyKey]) != address(0), "rwa doesn't exist");
+        require(amount > 0, "cannot issue 0 rwas");
 
         exchanger().settle(from, currencyKey);
 
-        // Burn some tribes
-        tribes[currencyKey].burn(from, amount);
+        // Burn some rwas
+        rwas[currencyKey].burn(from, amount);
 
         // Account for the burnt debt in the cache. If rate is invalid, the user won't be able to exchange
         (uint rate, bool rateInvalid) = _rateAndInvalid(currencyKey);
@@ -591,7 +591,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
      * @param amount The amount of debt shares moving across layers
      */
     function modifyDebtSharesForMigration(address account, uint amount) external onlyTrustedMigrators {
-        IRwaoneDebtShare sds = tribeetixDebtShare();
+        IRwaoneDebtShare sds = rwaoneDebtShare();
 
         if (msg.sender == resolver.getAddress(CONTRACT_DEBT_MIGRATOR_ON_ETHEREUM)) {
             sds.burnShare(account, amount);
@@ -607,53 +607,53 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
      */
     function upgradeCollateralShort(address short, uint amount) external onlyOwner {
         require(short == resolver.getAddress("CollateralShortLegacy"), "wrong address");
-        require(amount > 0, "cannot burn 0 tribes");
+        require(amount > 0, "cannot burn 0 rwas");
 
         exchanger().settle(short, rUSD);
 
-        tribes[rUSD].burn(short, amount);
+        rwas[rUSD].burn(short, amount);
     }
 
-    function issueTribes(address from, uint amount) external onlyRwaone {
-        require(amount > 0, "cannot issue 0 tribes");
+    function issueRwas(address from, uint amount) external onlyRwaone {
+        require(amount > 0, "cannot issue 0 rwas");
 
-        _issueTribes(from, amount, false);
+        _issueRwas(from, amount, false);
     }
 
-    function issueMaxTribes(address from) external onlyRwaone {
-        _issueTribes(from, 0, true);
+    function issueMaxRwas(address from) external onlyRwaone {
+        _issueRwas(from, 0, true);
     }
 
-    function issueTribesOnBehalf(address issueForAddress, address from, uint amount) external onlyRwaone {
+    function issueRwasOnBehalf(address issueForAddress, address from, uint amount) external onlyRwaone {
         _requireCanIssueOnBehalf(issueForAddress, from);
-        _issueTribes(issueForAddress, amount, false);
+        _issueRwas(issueForAddress, amount, false);
     }
 
-    function issueMaxTribesOnBehalf(address issueForAddress, address from) external onlyRwaone {
+    function issueMaxRwasOnBehalf(address issueForAddress, address from) external onlyRwaone {
         _requireCanIssueOnBehalf(issueForAddress, from);
-        _issueTribes(issueForAddress, 0, true);
+        _issueRwas(issueForAddress, 0, true);
     }
 
-    function burnTribes(address from, uint amount) external onlyRwaone {
-        _voluntaryBurnTribes(from, amount, false);
+    function burnRwas(address from, uint amount) external onlyRwaone {
+        _voluntaryBurnRwas(from, amount, false);
     }
 
-    function burnTribesOnBehalf(address burnForAddress, address from, uint amount) external onlyRwaone {
+    function burnRwasOnBehalf(address burnForAddress, address from, uint amount) external onlyRwaone {
         _requireCanBurnOnBehalf(burnForAddress, from);
-        _voluntaryBurnTribes(burnForAddress, amount, false);
+        _voluntaryBurnRwas(burnForAddress, amount, false);
     }
 
-    function burnTribesToTarget(address from) external onlyRwaone {
-        _voluntaryBurnTribes(from, 0, true);
+    function burnRwasToTarget(address from) external onlyRwaone {
+        _voluntaryBurnRwas(from, 0, true);
     }
 
-    function burnTribesToTargetOnBehalf(address burnForAddress, address from) external onlyRwaone {
+    function burnRwasToTargetOnBehalf(address burnForAddress, address from) external onlyRwaone {
         _requireCanBurnOnBehalf(burnForAddress, from);
-        _voluntaryBurnTribes(burnForAddress, 0, true);
+        _voluntaryBurnRwas(burnForAddress, 0, true);
     }
 
-    function burnForRedemption(address deprecatedTribeProxy, address account, uint balance) external onlyTribeRedeemer {
-        ITribe(IProxy(deprecatedTribeProxy).target()).burn(account, balance);
+    function burnForRedemption(address deprecatedRwaProxy, address account, uint balance) external onlyRwaRedeemer {
+        IRwa(IProxy(deprecatedRwaProxy).target()).burn(account, balance);
     }
 
     // SIP-148: Upgraded Liquidation Mechanism
@@ -780,7 +780,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function setCurrentPeriodId(uint128 periodId) external {
         require(msg.sender == requireAndGetAddress(CONTRACT_FEEPOOL), "Must be fee pool");
 
-        IRwaoneDebtShare sds = tribeetixDebtShare();
+        IRwaoneDebtShare sds = rwaoneDebtShare();
 
         if (sds.currentPeriodId() < periodId) {
             sds.takeSnapshot(periodId);
@@ -790,7 +790,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     /* ========== INTERNAL FUNCTIONS ========== */
 
     function _requireRatesNotInvalid(bool anyRateIsInvalid) internal pure {
-        require(!anyRateIsInvalid, "A tribe or wRWAX rate is invalid");
+        require(!anyRateIsInvalid, "A rwa or wRWAX rate is invalid");
     }
 
     function _requireCanIssueOnBehalf(address issueForAddress, address from) internal view {
@@ -801,12 +801,12 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         require(delegateApprovals().canBurnFor(burnForAddress, from), "Not approved to act on behalf");
     }
 
-    function _issueTribes(address from, uint amount, bool issueMax) internal {
+    function _issueRwas(address from, uint amount, bool issueMax) internal {
         if (_verifyCircuitBreakers()) {
             return;
         }
 
-        (uint maxIssuable, , , bool anyRateIsInvalid) = _remainingIssuableTribes(from);
+        (uint maxIssuable, , , bool anyRateIsInvalid) = _remainingIssuableRwas(from);
         _requireRatesNotInvalid(anyRateIsInvalid);
 
         if (!issueMax) {
@@ -821,14 +821,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // record issue timestamp
         _setLastIssueEvent(from);
 
-        // Create their tribes
-        tribes[rUSD].issue(from, amount);
+        // Create their rwas
+        rwas[rUSD].issue(from, amount);
 
         // Account for the issued debt in the cache
         debtCache().updateCachedrUSDDebt(SafeCast.toInt256(amount));
     }
 
-    function _burnTribes(
+    function _burnRwas(
         address debtAccount,
         address burnAccount,
         uint amount,
@@ -847,8 +847,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // Remove liquidated debt from the ledger
         _removeFromDebtRegister(debtAccount, amountBurnt, existingDebt);
 
-        // tribe.burn does a safe subtraction on balance (so it will revert if there are not enough tribes).
-        tribes[rUSD].burn(burnAccount, amountBurnt);
+        // rwa.burn does a safe subtraction on balance (so it will revert if there are not enough rwas).
+        rwas[rUSD].burn(burnAccount, amountBurnt);
 
         // Account for the burnt debt in the cache.
         debtCache().updateCachedrUSDDebt(-SafeCast.toInt256(amountBurnt));
@@ -857,14 +857,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     // If burning to target, `amount` is ignored, and the correct quantity of rUSD is burnt to reach the target
     // c-ratio, allowing fees to be claimed. In this case, pending settlements will be skipped as the user
     // will still have debt remaining after reaching their target.
-    function _voluntaryBurnTribes(address from, uint amount, bool burnToTarget) internal {
+    function _voluntaryBurnRwas(address from, uint amount, bool burnToTarget) internal {
         if (_verifyCircuitBreakers()) {
             return;
         }
 
         if (!burnToTarget) {
             // If not burning to target, then burning requires that the minimum stake time has elapsed.
-            require(_canBurnTribes(from), "Minimum stake time not reached");
+            require(_canBurnRwas(from), "Minimum stake time not reached");
             // First settle anything pending into rUSD as burning or issuing impacts the size of the debt pool
             (, uint refunded, uint numEntriesSettled) = exchanger().settle(from, rUSD);
             if (numEntriesSettled > 0) {
@@ -873,25 +873,25 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
 
         (uint existingDebt, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_debtShareBalanceOf(from), rUSD);
-        (uint maxIssuableTribesForAccount, bool snxRateInvalid) = _maxIssuableTribes(from);
+        (uint maxIssuableRwasForAccount, bool snxRateInvalid) = _maxIssuableRwas(from);
         _requireRatesNotInvalid(anyRateIsInvalid || snxRateInvalid);
         require(existingDebt > 0, "No debt to forgive");
 
         if (burnToTarget) {
-            amount = existingDebt.sub(maxIssuableTribesForAccount);
+            amount = existingDebt.sub(maxIssuableRwasForAccount);
         }
 
-        uint amountBurnt = _burnTribes(from, from, amount, existingDebt);
+        uint amountBurnt = _burnRwas(from, from, amount, existingDebt);
 
-        // Check and remove liquidation if existingDebt after burning is <= maxIssuableTribes
+        // Check and remove liquidation if existingDebt after burning is <= maxIssuableRwas
         // Issuance ratio is fixed so should remove any liquidations
-        if (existingDebt.sub(amountBurnt) <= maxIssuableTribesForAccount) {
+        if (existingDebt.sub(amountBurnt) <= maxIssuableRwasForAccount) {
             liquidator().removeAccountInLiquidation(from);
         }
     }
 
     function _setLastIssueEvent(address account) internal {
-        // Set the timestamp of the last issueTribes
+        // Set the timestamp of the last issueRwas
         flexibleStorage().setUIntValue(
             CONTRACT_NAME,
             keccak256(abi.encodePacked(LAST_ISSUE_EVENT, account)),
@@ -903,7 +903,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // important: this has to happen before any updates to user's debt shares
         liquidatorRewards().updateEntry(from);
 
-        IRwaoneDebtShare sds = tribeetixDebtShare();
+        IRwaoneDebtShare sds = rwaoneDebtShare();
 
         // it is possible (eg in tests, system initialized with extra debt) to have issued debt without any shares issued
         // in which case, the first account to mint gets the debt. yw.
@@ -919,7 +919,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // important: this has to happen before any updates to user's debt shares
         liquidatorRewards().updateEntry(from);
 
-        IRwaoneDebtShare sds = tribeetixDebtShare();
+        IRwaoneDebtShare sds = rwaoneDebtShare();
 
         uint currentDebtShare = _debtShareBalanceOf(from);
 
@@ -942,13 +942,13 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     /* ========== MODIFIERS ========== */
     modifier onlyRwaone() {
-        require(msg.sender == address(tribeetixERC20()), "Only Rwaone");
+        require(msg.sender == address(rwaoneERC20()), "Only Rwaone");
         _;
     }
 
     modifier onlyTrustedMinters() {
-        address bridgeL1 = resolver.getAddress(CONTRACT_RWAONEETIXBRIDGETOOPTIMISM);
-        address bridgeL2 = resolver.getAddress(CONTRACT_RWAONEETIXBRIDGETOBASE);
+        address bridgeL1 = resolver.getAddress(CONTRACT_RWAONEBRIDGETOOPTIMISM);
+        address bridgeL2 = resolver.getAddress(CONTRACT_RWAONEBRIDGETOBASE);
         address feePool = resolver.getAddress(CONTRACT_FEEPOOL);
         require(msg.sender == bridgeL1 || msg.sender == bridgeL2 || msg.sender == feePool, "only trusted minters");
         _;
@@ -962,17 +962,17 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _;
     }
 
-    function _onlyTribeRedeemer() internal view {
-        require(msg.sender == address(tribeRedeemer()), "Only TribeRedeemer");
+    function _onlyRwaRedeemer() internal view {
+        require(msg.sender == address(rwaRedeemer()), "Only RwaRedeemer");
     }
 
-    modifier onlyTribeRedeemer() {
-        _onlyTribeRedeemer();
+    modifier onlyRwaRedeemer() {
+        _onlyRwaRedeemer();
         _;
     }
 
     /* ========== EVENTS ========== */
 
-    event TribeAdded(bytes32 currencyKey, address tribe);
-    event TribeRemoved(bytes32 currencyKey, address tribe);
+    event RwaAdded(bytes32 currencyKey, address rwa);
+    event RwaRemoved(bytes32 currencyKey, address rwa);
 }

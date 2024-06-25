@@ -80,7 +80,7 @@ const constants = {
 	CONFIG_FILENAME: 'config.json',
 	RELEASES_FILENAME: 'releases.json',
 	PARAMS_FILENAME: 'params.json',
-	RWAONES_FILENAME: 'tribes.json',
+	RWAONES_FILENAME: 'rwas.json',
 	STAKING_REWARDS_FILENAME: 'rewards.json',
 	SHORTING_REWARDS_FILENAME: 'shorting-rewards.json',
 	OWNER_ACTIONS_FILENAME: 'owner-actions.json',
@@ -184,7 +184,7 @@ const defaults = {
 	CROSS_DOMAIN_FEE_PERIOD_CLOSE_GAS_LIMIT: `${8e6}`,
 
 	COLLATERAL_MANAGER: {
-		TRIBES: ['rUSD', 'rBTC', 'rETH'],
+		RWAS: ['rUSD', 'rBTC', 'rETH'],
 		SHORTS: ['rBTC', 'rETH'],
 		MAX_DEBT: w3utils.toWei('75000000'), // 75 million rUSD
 		MAX_SKEW_RATE: w3utils.toWei('0.2'),
@@ -192,19 +192,19 @@ const defaults = {
 		BASE_SHORT_RATE: Math.round((0.005 * 1e18) / 31556926).toString(),
 	},
 	COLLATERAL_ETH: {
-		TRIBES: ['rUSD', 'rETH'],
+		RWAS: ['rUSD', 'rETH'],
 		MIN_CRATIO: w3utils.toWei('1.3'),
 		MIN_COLLATERAL: w3utils.toWei('2'),
 		ISSUE_FEE_RATE: w3utils.toWei('0.001'),
 	},
 	COLLATERAL_RENBTC: {
-		TRIBES: ['rUSD', 'rBTC'],
+		RWAS: ['rUSD', 'rBTC'],
 		MIN_CRATIO: w3utils.toWei('1.3'),
 		MIN_COLLATERAL: w3utils.toWei('0.05'),
 		ISSUE_FEE_RATE: w3utils.toWei('0.001'),
 	},
 	COLLATERAL_SHORT: {
-		TRIBES: ['rBTC', 'rETH'],
+		RWAS: ['rBTC', 'rETH'],
 		MIN_CRATIO: w3utils.toWei('1.2'),
 		MIN_COLLATERAL: w3utils.toWei('1000'),
 		ISSUE_FEE_RATE: w3utils.toWei('0.005'),
@@ -389,10 +389,10 @@ const getOffchainFeeds = ({ network, path, fs, deploymentPath, useOvm = false } 
 };
 
 /**
- * Retrieve ths list of tribes for the network - returning their names, assets underlying, category, sign, description, and
+ * Retrieve ths list of rwas for the network - returning their names, assets underlying, category, sign, description, and
  * optional index and inverse properties
  */
-const getTribes = ({
+const getRwas = ({
 	network = 'mainnet',
 	path,
 	fs,
@@ -400,55 +400,55 @@ const getTribes = ({
 	useOvm = false,
 	skipPopulate = false,
 } = {}) => {
-	let tribes;
+	let rwas;
 
 	if (!deploymentPath && (!path || !fs)) {
-		tribes = data[getFolderNameForNetwork({ network, useOvm })].tribes;
+		rwas = data[getFolderNameForNetwork({ network, useOvm })].rwas;
 	} else {
-		const pathToTribeList = deploymentPath
+		const pathToRwaList = deploymentPath
 			? path.join(deploymentPath, constants.RWAONES_FILENAME)
 			: getPathToNetwork({ network, useOvm, path, file: constants.RWAONES_FILENAME });
-		if (!fs.existsSync(pathToTribeList)) {
-			throw Error(`Cannot find tribe list.`);
+		if (!fs.existsSync(pathToRwaList)) {
+			throw Error(`Cannot find rwa list.`);
 		}
-		tribes = JSON.parse(fs.readFileSync(pathToTribeList));
+		rwas = JSON.parse(fs.readFileSync(pathToRwaList));
 	}
 
 	if (skipPopulate) {
-		return tribes;
+		return rwas;
 	}
 
 	const feeds = getFeeds({ network, useOvm, path, fs, deploymentPath });
 
 	// copy all necessary index parameters from the longs to the corresponding shorts
-	return tribes.map(tribe => {
+	return rwas.map(rwa => {
 		// mixin the asset details
-		tribe = Object.assign({}, assets[tribe.asset], tribe);
+		rwa = Object.assign({}, assets[rwa.asset], rwa);
 
-		if (feeds[tribe.asset]) {
-			const { feed } = feeds[tribe.asset];
+		if (feeds[rwa.asset]) {
+			const { feed } = feeds[rwa.asset];
 
-			tribe = Object.assign({ feed }, tribe);
+			rwa = Object.assign({ feed }, rwa);
 		}
 
 		// replace an index placeholder with the index details
-		if (typeof tribe.index === 'string') {
-			const { index } = tribes.find(({ name }) => name === tribe.index) || {};
+		if (typeof rwa.index === 'string') {
+			const { index } = rwas.find(({ name }) => name === rwa.index) || {};
 			if (!index) {
 				throw Error(
-					`While processing ${tribe.name}, it's index mapping "${tribe.index}" cannot be found - this is an error in the deployment config and should be fixed`
+					`While processing ${rwa.name}, it's index mapping "${rwa.index}" cannot be found - this is an error in the deployment config and should be fixed`
 				);
 			}
-			tribe = Object.assign({}, tribe, { index });
+			rwa = Object.assign({}, rwa, { index });
 		}
 
-		if (tribe.index) {
-			tribe.index = tribe.index.map(indexEntry => {
+		if (rwa.index) {
+			rwa.index = rwa.index.map(indexEntry => {
 				return Object.assign({}, assets[indexEntry.asset], indexEntry);
 			});
 		}
 
-		return tribe;
+		return rwa;
 	});
 };
 
@@ -800,7 +800,7 @@ const getSuspensionReasons = ({ code = undefined } = {}) => {
 	const suspensionReasonMap = {
 		1: 'System Upgrade',
 		2: 'Market Closure',
-		4: 'iTribe Reprice',
+		4: 'iRwa Reprice',
 		6: 'Index Rebalance',
 		55: 'Circuit Breaker (Phase one)', // https://sips.rwaone.io/SIPS/sip-55
 		65: 'Decentralized Circuit Breaker (Phase two)', // https://sips.rwaone.io/SIPS/sip-65
@@ -816,7 +816,7 @@ const getSuspensionReasons = ({ code = undefined } = {}) => {
  * Retrieve the list of tokens used in the Rwaone protocol
  */
 const getTokens = ({ network = 'mainnet', path, fs, useOvm = false } = {}) => {
-	const tribes = getTribes({ network, useOvm, path, fs });
+	const rwas = getRwas({ network, useOvm, path, fs });
 	const targets = getTarget({ network, useOvm, path, fs });
 	const feeds = getFeeds({ network, useOvm, path, fs });
 
@@ -832,16 +832,16 @@ const getTokens = ({ network = 'mainnet', path, fs, useOvm = false } = {}) => {
 			feeds['wRWAX'].feed ? { feed: feeds['wRWAX'].feed } : {}
 		),
 	].concat(
-		tribes
+		rwas
 			.filter(({ category }) => category !== 'internal')
-			.map(tribe => ({
-				symbol: tribe.name,
-				asset: tribe.asset,
-				name: tribe.description,
-				address: (targets[`Proxy${tribe.name}`] || {}).address,
-				index: tribe.index,
+			.map(rwa => ({
+				symbol: rwa.name,
+				asset: rwa.asset,
+				name: rwa.description,
+				address: (targets[`Proxy${rwa.name}`] || {}).address,
+				index: rwa.index,
 				decimals: 18,
-				feed: tribe.feed,
+				feed: rwa.feed,
 			}))
 			.sort((a, b) => (a.symbol > b.symbol ? 1 : -1))
 	);
@@ -963,7 +963,7 @@ const wrap = ({ network, deploymentPath, fs, path, useOvm = false }) =>
 		'getShortingRewards',
 		'getFeeds',
 		'getOffchainFeeds',
-		'getTribes',
+		'getRwas',
 		'getTarget',
 		'getFuturesMarkets',
 		'getPerpsMarkets',
@@ -998,7 +998,7 @@ module.exports = {
 	getSuspensionReasons,
 	getFeeds,
 	getOffchainFeeds,
-	getTribes,
+	getRwas,
 	getFuturesMarkets,
 	getPerpsMarkets,
 	getPerpsV2ProxiedMarkets,

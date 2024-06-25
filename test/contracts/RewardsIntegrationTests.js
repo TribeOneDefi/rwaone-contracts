@@ -9,7 +9,7 @@ const { toBytes32 } = require('../..');
 const { fastForward, toUnit, multiplyDecimal } = require('../utils')();
 
 const {
-	setExchangeFeeRateForTribes,
+	setExchangeFeeRateForRwas,
 	setupPriceAggregators,
 	updateRatesWithDefaults,
 	updateAggregatorRates,
@@ -64,7 +64,7 @@ contract('Rewards Integration Tests', accounts => {
 		'ETH',
 	].map(toBytes32);
 
-	const tribeKeys = [rUSD, sAUD, sEUR, rBTC, iBTC, rETH, ETH];
+	const rwaKeys = [rUSD, sAUD, sEUR, rBTC, iBTC, rETH, ETH];
 
 	const initialInflationAmount = toUnit(800000);
 
@@ -128,7 +128,7 @@ contract('Rewards Integration Tests', accounts => {
 	// VARIABLES
 	let feePool,
 		rwaone,
-		tribeetixProxy,
+		rwaoneProxy,
 		exchangeRates,
 		exchanger,
 		debtCache,
@@ -153,15 +153,15 @@ contract('Rewards Integration Tests', accounts => {
 			RewardEscrowV2: rewardEscrow,
 			SupplySchedule: supplySchedule,
 			Rwaone: rwaone,
-			ProxyERC20Rwaone: tribeetixProxy,
-			TriberUSD: rUSDContract,
+			ProxyERC20Rwaone: rwaoneProxy,
+			RwarUSD: rUSDContract,
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'sAUD', 'sEUR', 'rBTC', 'iBTC', 'rETH'],
+			rwas: ['rUSD', 'sAUD', 'sEUR', 'rBTC', 'iBTC', 'rETH'],
 			contracts: [
 				'AddressResolver',
-				'Exchanger', // necessary for burnTribes to check settlement of rUSD
+				'Exchanger', // necessary for burnRwas to check settlement of rUSD
 				'ExchangeRates',
 				'FeePool',
 				'FeePoolEternalStorage', // necessary to claimFees()
@@ -177,17 +177,17 @@ contract('Rewards Integration Tests', accounts => {
 		}));
 
 		// use implementation ABI on the proxy address to simplify calling
-		rwaone = await artifacts.require('Rwaone').at(tribeetixProxy.address);
+		rwaone = await artifacts.require('Rwaone').at(rwaoneProxy.address);
 
 		await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, rBTC, iBTC, rETH, ETH]);
 
 		MINTER_RWAX_REWARD = await supplySchedule.minterReward();
 
-		await setExchangeFeeRateForTribes({
+		await setExchangeFeeRateForRwas({
 			owner,
 			systemSettings,
-			tribeKeys,
-			exchangeFeeRates: tribeKeys.map(() => exchangeFeeRate),
+			rwaKeys,
+			exchangeFeeRates: rwaKeys.map(() => exchangeFeeRate),
 		});
 	});
 
@@ -230,9 +230,9 @@ contract('Rewards Integration Tests', accounts => {
 			FEE_PERIOD_LENGTH = (await feePool.FEE_PERIOD_LENGTH()).toNumber();
 			CLAIMABLE_PERIODS = FEE_PERIOD_LENGTH - 1;
 
-			await rwaone.issueMaxTribes({ from: account1 });
-			await rwaone.issueMaxTribes({ from: account2 });
-			await rwaone.issueMaxTribes({ from: account3 });
+			await rwaone.issueMaxRwas({ from: account1 });
+			await rwaone.issueMaxRwas({ from: account2 });
+			await rwaone.issueMaxRwas({ from: account3 });
 		});
 
 		it('should allocate the 3 accounts a third of the rewards for 1 period', async () => {
@@ -489,11 +489,11 @@ contract('Rewards Integration Tests', accounts => {
 
 			// Account 1 leaves the system in week 2
 			const burnableTotal = await rwaone.debtBalanceOf(account1, rUSD);
-			await rwaone.burnTribes(burnableTotal, { from: account1 });
+			await rwaone.burnRwas(burnableTotal, { from: account1 });
 			// await logFeesByPeriod(account1);
 
 			// Account 1 comes back into the system
-			await rwaone.issueMaxTribes({ from: account1 });
+			await rwaone.issueMaxRwas({ from: account1 });
 
 			// Only Account 1 claims rewards
 			const rewardsAmount = third(periodOneMintableSupplyMinusMinterReward);
@@ -541,7 +541,7 @@ contract('Rewards Integration Tests', accounts => {
 
 			// Account 1 leaves the system
 			const burnableTotal = await rwaone.debtBalanceOf(account1, rUSD);
-			await rwaone.burnTribes(burnableTotal, { from: account1 });
+			await rwaone.burnRwas(burnableTotal, { from: account1 });
 
 			// FastForward into the second mintable week
 			await fastForwardAndUpdateRates(WEEK + MINUTE);
@@ -558,7 +558,7 @@ contract('Rewards Integration Tests', accounts => {
 			fastForwardAndCloseFeePeriod();
 
 			// Account1 Reenters in current unclosed period so no rewards yet
-			// await rwaone.issueMaxTribes({ from: account1 });
+			// await rwaone.issueMaxRwas({ from: account1 });
 
 			// Accounts 2 & 3 now have 33% of period 1 and 50% of period 2
 			// console.log('33% of p1', third(periodOneMintableSupplyMinusMinterReward).toString());
@@ -599,8 +599,8 @@ contract('Rewards Integration Tests', accounts => {
 	describe('Exchange Rate Shift tests', async () => {
 		it('should assign accounts (1,2,3) to have (40%,40%,20%) of the debt/rewards', async () => {
 			// Account 1&2 issue 10K USD and exchange in rBTC each, holding 50% of the total debt.
-			await rwaone.issueTribes(tenK, { from: account1 });
-			await rwaone.issueTribes(tenK, { from: account2 });
+			await rwaone.issueRwas(tenK, { from: account1 });
+			await rwaone.issueRwas(tenK, { from: account2 });
 
 			await rwaone.exchange(rUSD, tenK, rBTC, { from: account1 });
 			await rwaone.exchange(rUSD, tenK, rBTC, { from: account2 });
@@ -647,7 +647,7 @@ contract('Rewards Integration Tests', accounts => {
 			// Account 3 (enters the system and) mints 10K rUSD (minus half of an exchange fee - to balance the fact
 			// that the other two holders have doubled their rBTC holdings) and should have 20% of the debt not 33.33%
 			const potentialFee = exchangeFeeIncurred(toUnit('20000'));
-			await rwaone.issueTribes(tenK.sub(half(potentialFee)), { from: account3 });
+			await rwaone.issueRwas(tenK.sub(half(potentialFee)), { from: account3 });
 
 			// Get the wRWAX mintableSupply for week 2
 			const periodTwoMintableSupply = (await supplySchedule.mintableSupply()).sub(
@@ -747,7 +747,7 @@ contract('Rewards Integration Tests', accounts => {
 			// 	rUSD
 			// );
 
-			// await rwaone.burnTribes(amountAfterExchangeInUSD, { from: account1 });
+			// await rwaone.burnRwas(amountAfterExchangeInUSD, { from: account1 });
 
 			// // Get the wRWAX mintableSupply for week 3
 			// // const periodThreeMintableSupply = (await supplySchedule.mintableSupply()).sub(
@@ -793,7 +793,7 @@ contract('Rewards Integration Tests', accounts => {
 			// assert.bnClose(account3Escrow2[1], oneFifth(periodThreeMintableSupply), 15);
 
 			// // Acc1 mints 20K (40%) close p (40,40,20)');
-			// await rwaone.issueTribes(twentyK, { from: account1 });
+			// await rwaone.issueRwas(twentyK, { from: account1 });
 
 			// // Get the wRWAX mintableSupply for week 4
 			// const periodFourMintableSupply = (await supplySchedule.mintableSupply()).sub(
@@ -831,14 +831,14 @@ contract('Rewards Integration Tests', accounts => {
 
 	describe('3 Accounts issue 10K rUSD each in week 1', async () => {
 		beforeEach(async () => {
-			await rwaone.issueTribes(tenK, { from: account1 });
-			await rwaone.issueTribes(tenK, { from: account2 });
-			await rwaone.issueTribes(tenK, { from: account3 });
+			await rwaone.issueRwas(tenK, { from: account1 });
+			await rwaone.issueRwas(tenK, { from: account2 });
+			await rwaone.issueRwas(tenK, { from: account3 });
 		});
 
 		it('Acc1 issues and burns multiple times and should have accounts 1,2,3 rewards 50%,25%,25%', async () => {
 			// Acc 1 Issues 20K rUSD
-			await rwaone.issueTribes(tenK, { from: account1 });
+			await rwaone.issueRwas(tenK, { from: account1 });
 
 			// Close week 2
 			await fastForwardAndCloseFeePeriod();
@@ -884,11 +884,11 @@ contract('Rewards Integration Tests', accounts => {
 			);
 
 			// Acc1 Burns all
-			await rwaone.burnTribes(twentyK, { from: account1 });
+			await rwaone.burnRwas(twentyK, { from: account1 });
 			// Acc 1 Issues 10K rUSD
-			await rwaone.issueTribes(tenK, { from: account1 });
+			await rwaone.issueRwas(tenK, { from: account1 });
 			// Acc 1 Issues 10K rUSD again
-			await rwaone.issueTribes(tenK, { from: account1 });
+			await rwaone.issueRwas(tenK, { from: account1 });
 
 			// Get the wRWAX mintableSupply for week 2
 			const periodTwoMintableSupply = (await supplySchedule.mintableSupply()).sub(
@@ -932,10 +932,10 @@ contract('Rewards Integration Tests', accounts => {
 
 	describe('Collateralisation Ratio Penalties', async () => {
 		beforeEach(async () => {
-			// console.log('3 accounts issueMaxTribes in p1');
-			await rwaone.issueMaxTribes({ from: account1 });
-			await rwaone.issueMaxTribes({ from: account2 });
-			await rwaone.issueMaxTribes({ from: account3 });
+			// console.log('3 accounts issueMaxRwas in p1');
+			await rwaone.issueMaxRwas({ from: account1 });
+			await rwaone.issueMaxRwas({ from: account2 });
+			await rwaone.issueMaxRwas({ from: account3 });
 
 			// We should have zero rewards available because the period is still open.
 			const rewardsBefore = await feePool.feesAvailable(account1);
@@ -992,8 +992,8 @@ contract('Rewards Integration Tests', accounts => {
 	describe('When user is the last to call claimFees()', () => {
 		beforeEach(async () => {
 			const oneThousand = toUnit('10000');
-			await rwaone.issueTribes(oneThousand, { from: account2 });
-			await rwaone.issueTribes(oneThousand, { from: account1 });
+			await rwaone.issueRwas(oneThousand, { from: account2 });
+			await rwaone.issueRwas(oneThousand, { from: account1 });
 
 			await rwaone.exchange(rUSD, oneThousand, sAUD, { from: account2 });
 			await rwaone.exchange(rUSD, oneThousand, sAUD, { from: account1 });

@@ -44,14 +44,14 @@ contract('FuturesMarketManager', accounts => {
 			FuturesMarketSettings: futuresMarketSettings,
 			ExchangeRates: exchangeRates,
 			CircuitBreaker: circuitBreaker,
-			TriberUSD: rUSD,
+			RwarUSD: rUSD,
 			DebtCache: debtCache,
 			Rwaone: rwaone,
 			AddressResolver: addressResolver,
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD'],
+			rwas: ['rUSD'],
 			feeds: ['BTC', 'ETH', 'LINK'],
 			contracts: [
 				'FuturesMarketManager',
@@ -78,7 +78,7 @@ contract('FuturesMarketManager', accounts => {
 	describe('Basic parameters', () => {
 		it('Requires rUSD contract', async () => {
 			const required = await futuresMarketManager.resolverAddressesRequired();
-			assert.deepEqual(required, ['TriberUSD', 'FeePool', 'Exchanger'].map(toBytes32));
+			assert.deepEqual(required, ['RwarUSD', 'FeePool', 'Exchanger'].map(toBytes32));
 		});
 
 		it('only expected functions are mutable', () => {

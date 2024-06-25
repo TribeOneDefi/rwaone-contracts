@@ -5,10 +5,10 @@ const { toWei } = web3.utils;
 const { toBytes32 } = require('../..');
 const BN = require('bn.js');
 
-const RWAONEETIX_TOTAL_SUPPLY = toWei('100000000');
+const RWAONE_TOTAL_SUPPLY = toWei('100000000');
 
 contract('MintableRwaone (spec tests)', accounts => {
-	const [, owner, tribeetixBridgeToBase, account1] = accounts;
+	const [, owner, rwaoneBridgeToBase, account1] = accounts;
 
 	let mintableRwaone;
 	let addressResolver;
@@ -33,7 +33,7 @@ contract('MintableRwaone (spec tests)', accounts => {
 			// update resolver
 			await addressResolver.importAddresses(
 				[toBytes32('RwaoneBridgeToBase')],
-				[tribeetixBridgeToBase],
+				[rwaoneBridgeToBase],
 				{
 					from: owner,
 				}
@@ -47,7 +47,7 @@ contract('MintableRwaone (spec tests)', accounts => {
 			const amount = 100;
 			before('when RwaoneBridgeToBase calls mintSecondary()', async () => {
 				mintSecondaryTx = await mintableRwaone.mintSecondary(account1, amount, {
-					from: tribeetixBridgeToBase,
+					from: rwaoneBridgeToBase,
 				});
 			});
 
@@ -56,7 +56,7 @@ contract('MintableRwaone (spec tests)', accounts => {
 			});
 
 			it('should increase the total supply', async () => {
-				const newSupply = new BN(RWAONEETIX_TOTAL_SUPPLY).add(new BN(amount));
+				const newSupply = new BN(RWAONE_TOTAL_SUPPLY).add(new BN(amount));
 				assert.bnEqual(await mintableRwaone.totalSupply(), newSupply);
 			});
 
@@ -79,7 +79,7 @@ contract('MintableRwaone (spec tests)', accounts => {
 
 			before('when RwaoneBridgeToBase calls mintSecondaryRewards()', async () => {
 				mintSecondaryRewardsTx = await mintableRwaone.mintSecondaryRewards(amount, {
-					from: tribeetixBridgeToBase,
+					from: rwaoneBridgeToBase,
 				});
 			});
 
@@ -112,7 +112,7 @@ contract('MintableRwaone (spec tests)', accounts => {
 
 			before('when RwaoneBridgeToBase calls burnSecondary()', async () => {
 				burnSecondaryTx = await mintableRwaone.burnSecondary(account1, amount, {
-					from: tribeetixBridgeToBase,
+					from: rwaoneBridgeToBase,
 				});
 			});
 			it('should tranfer the tokens to the right account', async () => {

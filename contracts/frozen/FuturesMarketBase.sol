@@ -609,8 +609,8 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
      */
     function assetPrice() public view returns (uint price, bool invalid) {
         (price, invalid) = _exchangeCircuitBreaker().rateWithInvalid(baseAsset);
-        // Ensure we catch uninitialised rates or suspended state / tribe
-        invalid = invalid || price == 0 || _systemStatus().tribeSuspended(baseAsset);
+        // Ensure we catch uninitialised rates or suspended state / rwa
+        invalid = invalid || price == 0 || _systemStatus().rwaSuspended(baseAsset);
         return (price, invalid);
     }
 
@@ -619,15 +619,15 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
     /* ---------- Market Operations ---------- */
 
     /*
-     * The current base price, reverting if it is invalid, or if system or tribe is suspended.
+     * The current base price, reverting if it is invalid, or if system or rwa is suspended.
      * This is mutative because the circuit breaker stores the last price on every invocation.
      */
     function _assetPriceRequireSystemChecks() internal returns (uint) {
         // check that futures market isn't suspended, revert with appropriate message
         _systemStatus().requireFuturesMarketActive(marketKey); // asset and market may be different
-        // check that tribe is active, and wasn't suspended, revert with appropriate message
-        _systemStatus().requireTribeActive(baseAsset);
-        // check if circuit breaker if price is within deviation tolerance and system & tribe is active
+        // check that rwa is active, and wasn't suspended, revert with appropriate message
+        _systemStatus().requireRwaActive(baseAsset);
+        // check if circuit breaker if price is within deviation tolerance and system & rwa is active
         // note: rateWithBreakCircuit (mutative) is used here instead of rateWithInvalid (view). This is
         //  despite reverting immediately after if circuit is broken, which may seem silly.
         //  This is in order to persist last-rate in exchangeCircuitBreaker in the happy case

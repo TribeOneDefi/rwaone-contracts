@@ -12,7 +12,7 @@ import "./SafeDecimalMath.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/IRwaone.sol";
 
-// https://docs.rwaone.io/contracts/source/contracts/tribeetixescrow
+// https://docs.rwaone.io/contracts/source/contracts/rwaoneescrow
 contract RwaoneEscrow is Owned, LimitedSetup(8 weeks), IHasBalance {
     using SafeMath for uint;
 
@@ -37,15 +37,15 @@ contract RwaoneEscrow is Owned, LimitedSetup(8 weeks), IHasBalance {
 
     /* ========== CONSTRUCTOR ========== */
 
-    constructor(address _owner, IRwaone _tribeetix) public Owned(_owner) {
-        rwaone = _tribeetix;
+    constructor(address _owner, IRwaone _rwaone) public Owned(_owner) {
+        rwaone = _rwaone;
     }
 
     /* ========== SETTERS ========== */
 
-    function setRwaone(IRwaone _tribeetix) external onlyOwner {
-        rwaone = _tribeetix;
-        emit RwaoneUpdated(address(_tribeetix));
+    function setRwaone(IRwaone _rwaone) external onlyOwner {
+        rwaone = _rwaone;
+        emit RwaoneUpdated(address(_rwaone));
     }
 
     /* ========== VIEW FUNCTIONS ========== */

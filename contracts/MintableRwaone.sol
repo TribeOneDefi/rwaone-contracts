@@ -4,9 +4,9 @@ pragma experimental ABIEncoderV2;
 // Inheritance
 import "./BaseRwaone.sol";
 
-// https://docs.rwaone.io/contracts/source/contracts/mintabletribeetix
+// https://docs.rwaone.io/contracts/source/contracts/mintablerwaone
 contract MintableRwaone is BaseRwaone {
-    bytes32 private constant CONTRACT_RWAONEETIX_BRIDGE = "RwaoneBridgeToBase";
+    bytes32 private constant CONTRACT_RWAONE_BRIDGE = "RwaoneBridgeToBase";
 
     constructor(
         address payable _proxy,
@@ -24,7 +24,7 @@ contract MintableRwaone is BaseRwaone {
     }
 
     function onlyAllowFromBridge() internal view {
-        require(msg.sender == tribeetixBridge(), "Can only be invoked by bridge");
+        require(msg.sender == rwaoneBridge(), "Can only be invoked by bridge");
     }
 
     /* ========== MODIFIERS =================== */
@@ -38,12 +38,12 @@ contract MintableRwaone is BaseRwaone {
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = BaseRwaone.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](1);
-        newAddresses[0] = CONTRACT_RWAONEETIX_BRIDGE;
+        newAddresses[0] = CONTRACT_RWAONE_BRIDGE;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
-    function tribeetixBridge() internal view returns (address) {
-        return requireAndGetAddress(CONTRACT_RWAONEETIX_BRIDGE);
+    function rwaoneBridge() internal view returns (address) {
+        return requireAndGetAddress(CONTRACT_RWAONE_BRIDGE);
     }
 
     /* ========== RESTRICTED FUNCTIONS ========== */

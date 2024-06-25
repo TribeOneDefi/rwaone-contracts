@@ -14,14 +14,14 @@ const {
 	constants: { ZERO_ADDRESS, ZERO_BYTES32 },
 } = require('../..');
 
-const VirtualTribe = artifacts.require('VirtualTribe');
-const VirtualTribeMastercopy = artifacts.require('VirtualTribeMastercopy');
+const VirtualRwa = artifacts.require('VirtualRwa');
+const VirtualRwaMastercopy = artifacts.require('VirtualRwaMastercopy');
 
-contract('VirtualTribeMastercopy (unit tests)', async accounts => {
-	const [, owner, mockResolver, mockTribe] = accounts;
+contract('VirtualRwaMastercopy (unit tests)', async accounts => {
+	const [, owner, mockResolver, mockRwa] = accounts;
 
-	it('ensure same functions as VirtualTribe are mutative', () => {
-		for (const abi of [VirtualTribe.abi, VirtualTribeMastercopy.abi]) {
+	it('ensure same functions as VirtualRwa are mutative', () => {
+		for (const abi of [VirtualRwa.abi, VirtualRwaMastercopy.abi]) {
 			ensureOnlyExpectedMutativeFunctions({
 				abi,
 				ignoreParents: ['ERC20'],
@@ -36,7 +36,7 @@ contract('VirtualTribeMastercopy (unit tests)', async accounts => {
 		before(async () => { });
 
 		beforeEach(async () => {
-			instance = await VirtualTribeMastercopy.new();
+			instance = await VirtualRwaMastercopy.new();
 		});
 
 		it('is initialized', async () => {
@@ -45,19 +45,19 @@ contract('VirtualTribeMastercopy (unit tests)', async accounts => {
 
 		it('and the instance cannot be initialized again', async () => {
 			await assert.revert(
-				instance.initialize(mockTribe, mockResolver, owner, '10', toBytes32('rUSD')),
-				'vTribe already initialized'
+				instance.initialize(mockRwa, mockResolver, owner, '10', toBytes32('rUSD')),
+				'vRwa already initialized'
 			);
 		});
 
 		it('and the state is empty', async () => {
-			assert.equal(await instance.tribe(), ZERO_ADDRESS);
+			assert.equal(await instance.rwa(), ZERO_ADDRESS);
 			assert.equal(await instance.resolver(), ZERO_ADDRESS);
 			assert.equal(await instance.totalSupply(), '0');
 			assert.equal(await instance.balanceOf(owner), '0');
 			assert.equal(await instance.balanceOfUnderlying(owner), '0');
 			assert.equal(await instance.currencyKey(), ZERO_BYTES32);
-			assert.equal(trimUtf8EscapeChars(await instance.name()), 'Virtual Tribe ');
+			assert.equal(trimUtf8EscapeChars(await instance.name()), 'Virtual Rwa ');
 			assert.equal(trimUtf8EscapeChars(await instance.symbol()), 'v');
 		});
 

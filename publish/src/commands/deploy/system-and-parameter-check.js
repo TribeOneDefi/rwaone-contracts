@@ -20,7 +20,7 @@ const {
 
 module.exports = async ({
 	account,
-	addNewTribes,
+	addNewRwas,
 	concurrency,
 	config,
 	deployer,
@@ -35,7 +35,7 @@ module.exports = async ({
 	providerUrl,
 	skipFeedChecks,
 	feeds,
-	tribes,
+	rwas,
 	useFork,
 	useOvm,
 	yes,
@@ -115,8 +115,8 @@ module.exports = async ({
 		process.exit();
 	}
 
-	const newTribesToAdd = tribes
-		.filter(({ name }) => !config[`Tribe${name}`])
+	const newRwasToAdd = rwas
+		.filter(({ name }) => !config[`Rwa${name}`])
 		.map(({ name }) => name);
 
 	let aggregatedPriceResults = 'N/A';
@@ -127,7 +127,7 @@ module.exports = async ({
 			network,
 			useOvm,
 			providerUrl,
-			tribes,
+			rwas,
 			oldExrates,
 			feeds,
 		});
@@ -181,8 +181,8 @@ module.exports = async ({
 			(latestSolTimestamp > earliestCompiledTimestamp
 				? yellow(' ⚠⚠⚠ this is later than the last build! Is this intentional?')
 				: green(' ✅')),
-		'Add any new tribes found?': addNewTribes
-			? green('✅ YES\n\t\t\t\t') + newTribesToAdd.join(', ')
+		'Add any new rwas found?': addNewRwas
+			? green('✅ YES\n\t\t\t\t') + newRwasToAdd.join(', ')
 			: yellow('⚠ NO'),
 		'Deployer account:': account,
 		'Rwaone totalSupply': `${Math.round(formatUnits(currentRwaoneSupply) / 1e6)}m`,
@@ -204,7 +204,7 @@ module.exports = async ({
 			)
 				.filter(([, { deploy }]) => deploy)
 				.map(([contract]) => contract)
-				.join(', ')}` + `\nIt will also set proxy targets and add tribes to Rwaone.\n`
+				.join(', ')}` + `\nIt will also set proxy targets and add rwas to Rwaone.\n`
 		) + gray('-'.repeat(50))
 	);
 

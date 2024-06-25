@@ -31,10 +31,10 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
     bytes32 private constant CONTRACT_SYSTEMSTATUS = "SystemStatus";
-    bytes32 private constant CONTRACT_RWAONEETIX = "Rwaone";
+    bytes32 private constant CONTRACT_RWAONE = "Rwaone";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
-    bytes32 private constant CONTRACT_RWAONEETIXESCROW = "RwaoneEscrow";
+    bytes32 private constant CONTRACT_RWAONEESCROW = "RwaoneEscrow";
     bytes32 private constant CONTRACT_V3_LEGACYMARKET = "LegacyMarket";
 
     /* ========== CONSTANTS ========== */
@@ -52,14 +52,14 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](4);
         newAddresses[0] = CONTRACT_SYSTEMSTATUS;
-        newAddresses[1] = CONTRACT_RWAONEETIX;
+        newAddresses[1] = CONTRACT_RWAONE;
         newAddresses[2] = CONTRACT_ISSUER;
         newAddresses[3] = CONTRACT_EXRATES;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
     function rwaone() internal view returns (IRwaone) {
-        return IRwaone(requireAndGetAddress(CONTRACT_RWAONEETIX));
+        return IRwaone(requireAndGetAddress(CONTRACT_RWAONE));
     }
 
     function systemStatus() internal view returns (ISystemStatus) {
@@ -195,7 +195,7 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
      * V = collateral value
      * P = liquidation penalty
      * S = debt amount to redeem
-     * Calculates amount of tribes = (D - V * r) / (1 - (1 + P) * r)
+     * Calculates amount of rwas = (D - V * r) / (1 - (1 + P) * r)
      *
      * Derivation of the formula:
      *   Collateral "sold" with penalty: collateral-sold = S * (1 + P)
@@ -230,7 +230,7 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
 
     /* ========== MUTATIVE FUNCTIONS ========== */
 
-    // totalIssuedTribes checks tribes for staleness
+    // totalIssuedRwas checks rwas for staleness
     // check snx rate is not stale
     function flagAccountForLiquidation(address account) external rateNotInvalid("wRWAX") {
         systemStatus().requireSystemActive();
@@ -309,7 +309,7 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
     }
 
     modifier rateNotInvalid(bytes32 currencyKey) {
-        require(!exchangeRates().rateIsInvalid(currencyKey), "Rate invalid or not a tribe");
+        require(!exchangeRates().rateIsInvalid(currencyKey), "Rate invalid or not a rwa");
         _;
     }
 

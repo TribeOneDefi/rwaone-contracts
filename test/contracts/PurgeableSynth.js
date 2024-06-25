@@ -6,7 +6,7 @@ const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 
 const TokenState = artifacts.require('TokenState');
 const Proxy = artifacts.require('Proxy');
-const PurgeableTribe = artifacts.require('PurgeableTribe');
+const PurgeableRwa = artifacts.require('PurgeableRwa');
 
 const { fastForward, toUnit } = require('../utils')();
 const {
@@ -15,8 +15,8 @@ const {
 } = require('../..');
 
 const {
-	setExchangeFeeRateForTribes,
-	issueTribesToUser,
+	setExchangeFeeRateForRwas,
+	issueRwasToUser,
 	onlyGivenAddressCanInvoke,
 	ensureOnlyExpectedMutativeFunctions,
 	setStatus,
@@ -26,9 +26,9 @@ const {
 
 const { setupAllContracts } = require('./setup');
 
-contract('PurgeableTribe', accounts => {
+contract('PurgeableRwa', accounts => {
 	const [rUSD, wRWAX, sAUD, iETH] = ['rUSD', 'wRWAX', 'sAUD', 'iETH'].map(toBytes32);
-	const tribeKeys = [rUSD, sAUD, iETH];
+	const rwaKeys = [rUSD, sAUD, iETH];
 	const [deployerAccount, owner, , , account1, account2] = accounts;
 
 	let exchangeRates,
@@ -43,21 +43,21 @@ contract('PurgeableTribe', accounts => {
 		issuer;
 
 	before(async () => {
-		PurgeableTribe.link(await artifacts.require('SafeDecimalMath').new());
+		PurgeableRwa.link(await artifacts.require('SafeDecimalMath').new());
 
 		({
 			AddressResolver: addressResolver,
 			ExchangeRates: exchangeRates,
 			Exchanger: exchanger,
-			TriberUSD: rUSDContract,
-			TribesAUD: sAUDContract,
+			RwarUSD: rUSDContract,
+			RwasAUD: sAUDContract,
 			SystemStatus: systemStatus,
 			SystemSettings: systemSettings,
 			DebtCache: debtCache,
 			Issuer: issuer,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'sAUD'],
+			rwas: ['rUSD', 'sAUD'],
 			contracts: [
 				'ExchangeRates',
 				'Exchanger',
@@ -79,17 +79,17 @@ contract('PurgeableTribe', accounts => {
 	beforeEach(async () => {
 		// set a 0.3% exchange fee rate
 		const exchangeFeeRate = toUnit('0.003');
-		await setExchangeFeeRateForTribes({
+		await setExchangeFeeRateForRwas({
 			owner,
 			systemSettings,
-			tribeKeys,
-			exchangeFeeRates: tribeKeys.map(() => exchangeFeeRate),
+			rwaKeys,
+			exchangeFeeRates: rwaKeys.map(() => exchangeFeeRate),
 		});
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
 
-	const deployTribe = async ({ currencyKey, proxy, tokenState }) => {
+	const deployRwa = async ({ currencyKey, proxy, tokenState }) => {
 		tokenState =
 			tokenState ||
 			(await TokenState.new(owner, ZERO_ADDRESS, {
@@ -98,10 +98,10 @@ contract('PurgeableTribe', accounts => {
 
 		proxy = proxy || (await Proxy.new(owner, { from: deployerAccount }));
 
-		const tribe = await PurgeableTribe.new(
+		const rwa = await PurgeableRwa.new(
 			proxy.address,
 			tokenState.address,
-			`Tribe ${currencyKey}`,
+			`Rwa ${currencyKey}`,
 			currencyKey,
 			owner,
 			toBytes32(currencyKey),
@@ -111,27 +111,27 @@ contract('PurgeableTribe', accounts => {
 				from: deployerAccount,
 			}
 		);
-		return { tribe, tokenState, proxy };
+		return { rwa, tokenState, proxy };
 	};
 
-	describe('when a Purgeable tribe is added and connected to Rwaone', () => {
+	describe('when a Purgeable rwa is added and connected to Rwaone', () => {
 		beforeEach(async () => {
-			// Create iETH as a PurgeableTribe as we do not create any PurgeableTribe
+			// Create iETH as a PurgeableRwa as we do not create any PurgeableRwa
 			// in the migration script
-			const { tribe, tokenState, proxy } = await deployTribe({
+			const { rwa, tokenState, proxy } = await deployRwa({
 				currencyKey: 'iETH',
 			});
-			await tokenState.setAssociatedContract(tribe.address, { from: owner });
-			await proxy.setTarget(tribe.address, { from: owner });
-			await issuer.addTribe(tribe.address, { from: owner });
+			await tokenState.setAssociatedContract(rwa.address, { from: owner });
+			await proxy.setTarget(rwa.address, { from: owner });
+			await issuer.addRwa(rwa.address, { from: owner });
 
-			iETHContract = tribe;
+			iETHContract = rwa;
 		});
 
 		it('ensure only known functions are mutative', () => {
 			ensureOnlyExpectedMutativeFunctions({
 				abi: iETHContract.abi,
-				ignoreParents: ['Tribe'],
+				ignoreParents: ['Rwa'],
 				expected: ['purge'],
 			});
 		});
@@ -162,7 +162,7 @@ contract('PurgeableTribe', accounts => {
 			});
 		});
 
-		describe("when there's a price for the purgeable tribe", () => {
+		describe("when there's a price for the purgeable rwa", () => {
 			beforeEach(async () => {
 				await updateAggregatorRates(
 					exchangeRates,
@@ -173,7 +173,7 @@ contract('PurgeableTribe', accounts => {
 				await debtCache.takeDebtSnapshot();
 			});
 
-			describe('and a user holds 100K USD worth of purgeable tribe iETH', () => {
+			describe('and a user holds 100K USD worth of purgeable rwa iETH', () => {
 				let amountToExchange;
 				let userrUSDBalance;
 				let balanceBeforePurge;
@@ -181,11 +181,11 @@ contract('PurgeableTribe', accounts => {
 					// issue the user 100K USD worth of iETH
 					amountToExchange = toUnit(1e5);
 					const iETHAmount = await exchangeRates.effectiveValue(rUSD, amountToExchange, iETH);
-					await issueTribesToUser({
+					await issueRwasToUser({
 						owner,
 						issuer,
 						addressResolver,
-						tribeContract: iETHContract,
+						rwaContract: iETHContract,
 						user: account1,
 						amount: iETHAmount,
 					});
@@ -202,7 +202,7 @@ contract('PurgeableTribe', accounts => {
 						assert.equal(await iETHContract.balanceOf(account1), '0');
 					});
 				});
-				describe('when the tribe is stale', () => {
+				describe('when the rwa is stale', () => {
 					beforeEach(async () => {
 						await fastForward((await exchangeRates.rateStalePeriod()).add(web3.utils.toBN('300')));
 					});
@@ -223,7 +223,7 @@ contract('PurgeableTribe', accounts => {
 						});
 					});
 				});
-				describe('when purge is called for the tribe', () => {
+				describe('when purge is called for the rwa', () => {
 					let txn;
 					beforeEach(async () => {
 						txn = await iETHContract.purge([account1], { from: owner });
@@ -251,7 +251,7 @@ contract('PurgeableTribe', accounts => {
 							'User must be credited back in rUSD from the purge'
 						);
 					});
-					it('then the tribe has totalSupply back at 0', async () => {
+					it('then the rwa has totalSupply back at 0', async () => {
 						const iETHTotalSupply = await iETHContract.totalSupply();
 						assert.bnEqual(iETHTotalSupply, toUnit(0), 'Total supply must be 0 after the purge');
 					});
@@ -294,17 +294,17 @@ contract('PurgeableTribe', accounts => {
 					});
 				});
 
-				describe('when the user holds 5000 USD worth of the purgeable tribe iETH', () => {
+				describe('when the user holds 5000 USD worth of the purgeable rwa iETH', () => {
 					beforeEach(async () => {
 						// Note: 5000 is chosen to be large enough to accommodate exchange fees which
-						// ultimately limit the total supply of that tribe
+						// ultimately limit the total supply of that rwa
 						const amountToExchange = toUnit(5000);
 						const iETHAmount = await exchangeRates.effectiveValue(rUSD, amountToExchange, iETH);
-						await issueTribesToUser({
+						await issueRwasToUser({
 							owner,
 							issuer,
 							addressResolver,
-							tribeContract: iETHContract,
+							rwaContract: iETHContract,
 							user: account2,
 							amount: iETHAmount,
 						});
@@ -324,58 +324,58 @@ contract('PurgeableTribe', accounts => {
 		});
 	});
 
-	describe('Replacing an existing Tribe with a Purgeable one to purge and remove it', () => {
+	describe('Replacing an existing Rwa with a Purgeable one to purge and remove it', () => {
 		describe('when sAUD has a price', () => {
 			beforeEach(async () => {
 				await updateAggregatorRates(exchangeRates, null, [sAUD], ['0.776845993'].map(toUnit));
 				await debtCache.takeDebtSnapshot();
 			});
 			describe('when a user holds some sAUD', () => {
-				let userBalanceOfOldTribe;
+				let userBalanceOfOldRwa;
 				let userrUSDBalance;
 				beforeEach(async () => {
 					const amountToExchange = toUnit('100');
 
-					// as sAUD is MockTribe, we can invoke this directly
+					// as sAUD is MockRwa, we can invoke this directly
 					await sAUDContract.issue(account1, amountToExchange);
 
 					userrUSDBalance = await rUSDContract.balanceOf(account1);
-					this.oldTribe = sAUDContract;
-					userBalanceOfOldTribe = await this.oldTribe.balanceOf(account1);
+					this.oldRwa = sAUDContract;
+					userBalanceOfOldRwa = await this.oldRwa.balanceOf(account1);
 					assert.equal(
-						userBalanceOfOldTribe.gt(toUnit('0')),
+						userBalanceOfOldRwa.gt(toUnit('0')),
 						true,
 						'The sAUD balance is greater than zero after exchange'
 					);
 				});
 
-				describe('when the sAUD tribe has its totalSupply set to 0 by the owner', () => {
+				describe('when the sAUD rwa has its totalSupply set to 0 by the owner', () => {
 					beforeEach(async () => {
-						this.totalSupply = await this.oldTribe.totalSupply();
-						this.oldTokenState = await TokenState.at(await this.oldTribe.tokenState());
-						this.oldProxy = await Proxy.at(await this.oldTribe.proxy());
-						await this.oldTribe.setTotalSupply(toUnit('0'), { from: owner });
+						this.totalSupply = await this.oldRwa.totalSupply();
+						this.oldTokenState = await TokenState.at(await this.oldRwa.tokenState());
+						this.oldProxy = await Proxy.at(await this.oldRwa.proxy());
+						await this.oldRwa.setTotalSupply(toUnit('0'), { from: owner });
 					});
-					describe('and the old sAUD tribe is removed from Rwaone', () => {
+					describe('and the old sAUD rwa is removed from Rwaone', () => {
 						beforeEach(async () => {
-							await issuer.removeTribe(sAUD, { from: owner });
+							await issuer.removeRwa(sAUD, { from: owner });
 						});
-						describe('when a Purgeable tribe is added to replace the existing sAUD', () => {
+						describe('when a Purgeable rwa is added to replace the existing sAUD', () => {
 							beforeEach(async () => {
-								const { tribe } = await deployTribe({
+								const { rwa } = await deployRwa({
 									currencyKey: 'sAUD',
 									proxy: this.oldProxy,
 									tokenState: this.oldTokenState,
 								});
-								this.replacement = tribe;
+								this.replacement = rwa;
 							});
 							describe('and it is added to Rwaone', () => {
 								beforeEach(async () => {
-									await issuer.addTribe(this.replacement.address, { from: owner });
+									await issuer.addRwa(this.replacement.address, { from: owner });
 									await this.replacement.rebuildCache();
 								});
 
-								describe('and the old sAUD TokenState and Proxy is connected to the replacement tribe', () => {
+								describe('and the old sAUD TokenState and Proxy is connected to the replacement rwa', () => {
 									beforeEach(async () => {
 										await this.oldTokenState.setAssociatedContract(this.replacement.address, {
 											from: owner,
@@ -388,7 +388,7 @@ contract('PurgeableTribe', accounts => {
 										const balance = await this.replacement.balanceOf(account1);
 										assert.bnEqual(
 											balance,
-											userBalanceOfOldTribe,
+											userBalanceOfOldRwa,
 											'The balance after connecting TokenState must not have changed'
 										);
 									});
@@ -406,7 +406,7 @@ contract('PurgeableTribe', accounts => {
 											const balance = await rUSDContract.balanceOf(account1);
 
 											const { amountReceived } = await exchanger.getAmountsForExchange(
-												userBalanceOfOldTribe,
+												userBalanceOfOldRwa,
 												sAUD,
 												rUSD
 											);
@@ -422,18 +422,18 @@ contract('PurgeableTribe', accounts => {
 
 											assert.eventEqual(purgedEvent, 'Purged', {
 												account: account1,
-												value: userBalanceOfOldTribe,
+												value: userBalanceOfOldRwa,
 											});
 										});
-										describe('when the purged tribe is removed from the system', () => {
+										describe('when the purged rwa is removed from the system', () => {
 											beforeEach(async () => {
-												await issuer.removeTribe(sAUD, { from: owner });
+												await issuer.removeRwa(sAUD, { from: owner });
 											});
 											it('then the balance remains in USD (and no errors occur)', async () => {
 												const balance = await rUSDContract.balanceOf(account1);
 
 												const { amountReceived } = await exchanger.getAmountsForExchange(
-													userBalanceOfOldTribe,
+													userBalanceOfOldRwa,
 													sAUD,
 													rUSD
 												);

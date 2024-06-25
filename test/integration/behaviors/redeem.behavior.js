@@ -9,25 +9,25 @@ const { skipWaitingPeriod } = require('../utils/skip');
 const { increaseStalePeriodAndCheckRatesAndCache } = require('../utils/rates');
 
 function itCanRedeem({ ctx }) {
-	describe('redemption of deprecated tribes', () => {
+	describe('redemption of deprecated rwas', () => {
 		let owner;
 		let someUser;
-		let Rwaone, Issuer, TribeToRedeem, TriberUSD, TribeToRedeemProxy, TribeRedeemer;
+		let Rwaone, Issuer, RwaToRedeem, RwarUSD, RwaToRedeemProxy, RwaRedeemer;
 		let totalDebtBeforeRemoval;
-		let tribe;
+		let rwa;
 
 		before('target contracts and users', () => {
-			// rETH and rBTC can't be removed because the debt may be too large for removeTribe to not underflow
+			// rETH and rBTC can't be removed because the debt may be too large for removeRwa to not underflow
 			// during debt update, so rETHBTC is used here
-			tribe = 'rETHBTC';
+			rwa = 'rETHBTC';
 
 			({
 				Rwaone,
 				Issuer,
-				[`Tribe${tribe}`]: TribeToRedeem,
-				[`Proxy${tribe}`]: TribeToRedeemProxy,
-				TriberUSD,
-				TribeRedeemer,
+				[`Rwa${rwa}`]: RwaToRedeem,
+				[`Proxy${rwa}`]: RwaToRedeemProxy,
+				RwarUSD,
+				RwaRedeemer,
 			} = ctx.contracts);
 
 			({ owner, someUser } = ctx.users);
@@ -42,10 +42,10 @@ function itCanRedeem({ ctx }) {
 			});
 		});
 
-		before(`ensure the user has some of the target tribe`, async () => {
+		before(`ensure the user has some of the target rwa`, async () => {
 			await ensureBalance({
 				ctx,
-				symbol: tribe,
+				symbol: rwa,
 				user: someUser,
 				balance: ethers.utils.parseEther('100'),
 			});
@@ -60,45 +60,45 @@ function itCanRedeem({ ctx }) {
 		});
 
 		before('record total system debt', async () => {
-			totalDebtBeforeRemoval = await Issuer.totalIssuedTribes(toBytes32('rUSD'), true);
+			totalDebtBeforeRemoval = await Issuer.totalIssuedRwas(toBytes32('rUSD'), true);
 		});
 
-		describe(`deprecating the tribe`, () => {
-			before(`when the owner removes the tribe`, async () => {
+		describe(`deprecating the rwa`, () => {
+			before(`when the owner removes the rwa`, async () => {
 				Issuer = Issuer.connect(owner);
-				// note: this sets the tribe as redeemed and cannot be undone without
+				// note: this sets the rwa as redeemed and cannot be undone without
 				// redeploying locally or restarting a fork
-				const tx = await Issuer.removeTribe(toBytes32(tribe));
+				const tx = await Issuer.removeRwa(toBytes32(rwa));
 				await tx.wait();
 			});
 
 			it('then the total system debt is unchanged', async () => {
 				assert.bnEqual(
-					await Issuer.totalIssuedTribes(toBytes32('rUSD'), true),
+					await Issuer.totalIssuedRwas(toBytes32('rUSD'), true),
 					totalDebtBeforeRemoval
 				);
 			});
-			it(`and the tribe is removed from the system`, async () => {
-				assert.equal(await Rwaone.tribes(toBytes32(tribe)), ZERO_ADDRESS);
+			it(`and the rwa is removed from the system`, async () => {
+				assert.equal(await Rwaone.rwas(toBytes32(rwa)), ZERO_ADDRESS);
 			});
 			describe('user redemption', () => {
 				let rUSDBeforeRedemption;
 				before(async () => {
-					rUSDBeforeRedemption = await TriberUSD.balanceOf(someUser.address);
+					rUSDBeforeRedemption = await RwarUSD.balanceOf(someUser.address);
 				});
 
-				before(`when the user redeems their tribe`, async () => {
-					TribeRedeemer = TribeRedeemer.connect(someUser);
-					const tx = await TribeRedeemer.redeem(TribeToRedeemProxy.address);
+				before(`when the user redeems their rwa`, async () => {
+					RwaRedeemer = RwaRedeemer.connect(someUser);
+					const tx = await RwaRedeemer.redeem(RwaToRedeemProxy.address);
 					await tx.wait();
 				});
 
-				it(`then the user has no more tribe`, async () => {
-					assert.equal(await TribeToRedeem.balanceOf(someUser.address), '0');
+				it(`then the user has no more rwa`, async () => {
+					assert.equal(await RwaToRedeem.balanceOf(someUser.address), '0');
 				});
 
 				it('and they have more rUSD again', async () => {
-					assert.bnGt(await TriberUSD.balanceOf(someUser.address), rUSDBeforeRedemption);
+					assert.bnGt(await RwarUSD.balanceOf(someUser.address), rUSDBeforeRedemption);
 				});
 			});
 		});

@@ -2,13 +2,13 @@ pragma solidity ^0.5.16;
 
 import "./BaseOneNetAggregator.sol";
 
-contract OneNetAggregatorIssuedTribes is BaseOneNetAggregator {
-    bytes32 public constant CONTRACT_NAME = "OneNetAggregatorIssuedTribes";
+contract OneNetAggregatorIssuedRwas is BaseOneNetAggregator {
+    bytes32 public constant CONTRACT_NAME = "OneNetAggregatorIssuedRwas";
 
     constructor(AddressResolver _resolver) public BaseOneNetAggregator(_resolver) {}
 
     function getRoundData(uint80) public view returns (uint80, int256, uint256, uint256, uint80) {
-        uint totalIssuedTribes = IIssuer(resolver.requireAndGetAddress("Issuer", "aggregate debt info")).totalIssuedTribes(
+        uint totalIssuedRwas = IIssuer(resolver.requireAndGetAddress("Issuer", "aggregate debt info")).totalIssuedRwas(
             "rUSD",
             true
         );
@@ -19,6 +19,6 @@ contract OneNetAggregatorIssuedTribes is BaseOneNetAggregator {
             dataTimestamp = overrideTimestamp;
         }
 
-        return (1, int256(totalIssuedTribes), dataTimestamp, dataTimestamp, 1);
+        return (1, int256(totalIssuedRwas), dataTimestamp, dataTimestamp, 1);
     }
 }

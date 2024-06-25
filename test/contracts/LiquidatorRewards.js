@@ -22,10 +22,10 @@ contract('LiquidatorRewards', accounts => {
 		circuitBreaker,
 		exchangeRates,
 		liquidatorRewards,
-		tribes,
+		rwas,
 		rwaone,
-		tribeetixProxy,
-		tribeetixDebtShare,
+		rwaoneProxy,
+		rwaoneDebtShare,
 		systemSettings;
 
 	const ZERO_BN = toBN(0);
@@ -35,8 +35,8 @@ contract('LiquidatorRewards', accounts => {
 		await rwaone.transfer(stakingAccount1, snxCollateral, { from: owner });
 		await rwaone.transfer(stakingAccount2, snxCollateral, { from: owner });
 
-		await rwaone.issueMaxTribes({ from: stakingAccount1 });
-		await rwaone.issueMaxTribes({ from: stakingAccount2 });
+		await rwaone.issueMaxRwas({ from: stakingAccount1 });
+		await rwaone.issueMaxRwas({ from: stakingAccount2 });
 
 		await addressResolver.importAddresses(['Rwaone'].map(toBytes32), [mockRwaone], {
 			from: owner,
@@ -61,7 +61,7 @@ contract('LiquidatorRewards', accounts => {
 	addSnapshotBeforeRestoreAfterEach();
 
 	before(async () => {
-		tribes = ['rUSD', 'sAUD', 'sEUR', 'rETH'];
+		rwas = ['rUSD', 'sAUD', 'sEUR', 'rETH'];
 		({
 			AddressResolver: addressResolver,
 			CircuitBreaker: circuitBreaker,
@@ -69,12 +69,12 @@ contract('LiquidatorRewards', accounts => {
 			ExchangeRates: exchangeRates,
 			LiquidatorRewards: liquidatorRewards,
 			Rwaone: rwaone,
-			ProxyERC20Rwaone: tribeetixProxy,
-			RwaoneDebtShare: tribeetixDebtShare,
+			ProxyERC20Rwaone: rwaoneProxy,
+			RwaoneDebtShare: rwaoneDebtShare,
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes,
+			rwas,
 			contracts: [
 				'AddressResolver',
 				'CollateralManager',
@@ -93,7 +93,7 @@ contract('LiquidatorRewards', accounts => {
 		}));
 
 		// use implementation ABI on the proxy address to simplify calling
-		rwaone = await artifacts.require('Rwaone').at(tribeetixProxy.address);
+		rwaone = await artifacts.require('Rwaone').at(rwaoneProxy.address);
 
 		await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, rETH, ETH]);
 	});
@@ -202,7 +202,7 @@ contract('LiquidatorRewards', accounts => {
 			assert.bnEqual(
 				accumulatedRewardsAfter,
 				accumulatedRewardsBefore.add(
-					newRewards.mul(toUnit(1)).div(await tribeetixDebtShare.totalSupply())
+					newRewards.mul(toUnit(1)).div(await rwaoneDebtShare.totalSupply())
 				)
 			);
 		});
@@ -221,15 +221,15 @@ contract('LiquidatorRewards', accounts => {
 
 			it('equal after minting', async () => {
 				const beforeEarnedValue = await liquidatorRewards.earned(stakingAccount1);
-				const beforeDebtShareBalance = await tribeetixDebtShare.balanceOf(stakingAccount2);
-				const beforeDebtSharesSupply = await tribeetixDebtShare.totalSupply();
+				const beforeDebtShareBalance = await rwaoneDebtShare.balanceOf(stakingAccount2);
+				const beforeDebtSharesSupply = await rwaoneDebtShare.totalSupply();
 
 				await rwaone.transfer(stakingAccount2, toUnit('1000'), { from: owner });
-				await rwaone.issueMaxTribes({ from: stakingAccount2 });
+				await rwaone.issueMaxRwas({ from: stakingAccount2 });
 
 				const afterEarnedValue = await liquidatorRewards.earned(stakingAccount1);
-				const afterDebtShareBalance = await tribeetixDebtShare.balanceOf(stakingAccount2);
-				const afterDebtSharesSupply = await tribeetixDebtShare.totalSupply();
+				const afterDebtShareBalance = await rwaoneDebtShare.balanceOf(stakingAccount2);
+				const afterDebtSharesSupply = await rwaoneDebtShare.totalSupply();
 
 				assert.bnEqual(afterEarnedValue, beforeEarnedValue);
 				assert.bnGt(afterDebtShareBalance, beforeDebtShareBalance);
@@ -238,18 +238,18 @@ contract('LiquidatorRewards', accounts => {
 
 			it('equal after burning', async () => {
 				const beforeEarnedValue = await liquidatorRewards.earned(stakingAccount1);
-				const beforeDebtShareBalance = await tribeetixDebtShare.balanceOf(stakingAccount2);
-				const beforeDebtSharesSupply = await tribeetixDebtShare.totalSupply();
+				const beforeDebtShareBalance = await rwaoneDebtShare.balanceOf(stakingAccount2);
+				const beforeDebtSharesSupply = await rwaoneDebtShare.totalSupply();
 
-				// skip minimumStakeTime in order to burn tribes
+				// skip minimumStakeTime in order to burn rwas
 				await systemSettings.setMinimumStakeTime(10, { from: owner });
 				await fastForward(10);
 
-				await rwaone.burnTribes(toUnit('100'), { from: stakingAccount2 });
+				await rwaone.burnRwas(toUnit('100'), { from: stakingAccount2 });
 
 				const afterEarnedValue = await liquidatorRewards.earned(stakingAccount1);
-				const afterDebtShareBalance = await tribeetixDebtShare.balanceOf(stakingAccount2);
-				const afterDebtSharesSupply = await tribeetixDebtShare.totalSupply();
+				const afterDebtShareBalance = await rwaoneDebtShare.balanceOf(stakingAccount2);
+				const afterDebtSharesSupply = await rwaoneDebtShare.totalSupply();
 
 				assert.bnEqual(afterEarnedValue, beforeEarnedValue);
 				assert.bnLt(afterDebtShareBalance, beforeDebtShareBalance);

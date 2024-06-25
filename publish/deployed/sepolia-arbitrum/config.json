@@ -62,7 +62,7 @@
 	"SystemStatus": {
 		"deploy": true
 	},
-	"TribeUtil": {
+	"RwaUtil": {
 		"deploy": true
 	},
 	"DappMaintenance": {
@@ -119,7 +119,7 @@
 	"RwaoneBridgeToOptimism": {
 		"deploy": true
 	},
-	"VirtualTribeMastercopy": {
+	"VirtualRwaMastercopy": {
 		"deploy": true
 	},
 	"RwaoneBridgeEscrow": {
@@ -140,7 +140,7 @@
 	"OwnerRelayOnEthereum": {
 		"deploy": true
 	},
-	"TribeRedeemer": {
+	"RwaRedeemer": {
 		"deploy": true
 	},
 	"SystemSettingsLib": {
@@ -164,7 +164,7 @@
 	"FuturesMarketSettings": {
 		"deploy": true
 	},
-	"OneNetAggregatorIssuedTribes": {
+	"OneNetAggregatorIssuedRwas": {
 		"deploy": true
 	},
 	"OneNetAggregatorDebtRatio": {
@@ -197,7 +197,7 @@
 	"ProxyrUSD": {
 		"deploy": true
 	},
-	"TriberUSD": {
+	"RwarUSD": {
 		"deploy": true
 	},
 	"TokenStaterETH": {
@@ -206,7 +206,7 @@
 	"ProxyrJPY": {
 		"deploy": true
 	},
-	"TriberJPY": {
+	"RwarJPY": {
 		"deploy": true
 	},
 	"TokenStaterJPY": {
@@ -218,7 +218,7 @@
 	"ProxyrXAU": {
 		"deploy": true
 	},
-	"TriberXAU": {
+	"RwarXAU": {
 		"deploy": true
 	},
 	"TokenStaterNVDA": {
@@ -227,13 +227,13 @@
 	"ProxyrNVDA": {
 		"deploy": true
 	},
-	"TriberNVDA": {
+	"RwarNVDA": {
 		"deploy": true
 	},
 	"ProxyrETH": {
 		"deploy": true
 	},
-	"TriberETH": {
+	"RwarETH": {
 		"deploy": true
 	},
 	"TokenStaterBTC": {
@@ -242,7 +242,7 @@
 	"ProxyrBTC": {
 		"deploy": true
 	},
-	"TriberBTC": {
+	"RwarBTC": {
 		"deploy": true
 	},
 	"PerpsV2MarketSettings": {
@@ -365,7 +365,7 @@
 	"ProxyrTSLA": {
 		"deploy": true
 	},
-	"TriberTSLA": {
+	"RwarTSLA": {
 		"deploy": true
 	},
 	"PerpsV2ProxyTSLAPERP": {
@@ -395,7 +395,7 @@
 	"ProxyrEUR": {
 		"deploy": true
 	},
-	"TriberEUR": {
+	"RwarEUR": {
 		"deploy": true
 	},
 	"PerpsV2ProxyEURPERP": {
@@ -425,7 +425,7 @@
 	"ProxyrPAX": {
 		"deploy": true
 	},
-	"TriberPAX": {
+	"RwarPAX": {
 		"deploy": true
 	},
 	"PerpsV2ProxyPAXPERP": {
@@ -455,7 +455,7 @@
 	"ProxyrWASHINGTON": {
 		"deploy": true
 	},
-	"TriberWASHINGTON": {
+	"RwarWASHINGTON": {
 		"deploy": true
 	},
 	"PerpsV2ProxyWASHINGTONPERP": {
@@ -485,7 +485,7 @@
 	"ProxyrLOSANGLES": {
 		"deploy": true
 	},
-	"TriberLOSANGLES": {
+	"RwarLOSANGLES": {
 		"deploy": true
 	},
 	"PerpsV2ProxyLOSANGLESPERP": {
@@ -515,7 +515,7 @@
 	"ProxyrNEWYORK": {
 		"deploy": true
 	},
-	"TriberNEWYORK": {
+	"RwarNEWYORK": {
 		"deploy": true
 	},
 	"PerpsV2ProxyNEWYORKPERP": {
@@ -539,7 +539,7 @@
 	"PerpsV2MarketViewsNEWYORKPERP": {
 		"deploy": true
 	},
-	"TriberATLANTA": {
+	"RwarATLANTA": {
 		"deploy": true
 	},
 	"TokenStaterATLANTA": {

@@ -21,19 +21,19 @@ const {
 	constants: { BUILD_FOLDER, CONFIG_FILENAME, RWAONES_FILENAME, DEPLOYMENT_FILENAME },
 } = require('../../../..');
 
-const addTribesToProtocol = require('./add-tribes-to-protocol');
+const addRwasToProtocol = require('./add-rwas-to-protocol');
 const configureLegacySettings = require('./configure-legacy-settings');
 const configureRewardEscrow = require('./configure-reward-escrow');
 const configureLoans = require('./configure-loans');
 const configureStandalonePriceFeeds = require('./configure-standalone-price-feeds');
 const configureOffchainPriceFeeds = require('./configure-offchain-price-feeds');
-const configureTribes = require('./configure-tribes');
+const configureRwas = require('./configure-rwas');
 const configureFutures = require('./configure-futures');
 const configureSystemSettings = require('./configure-system-settings');
 const deployCore = require('./deploy-core');
 const deployDappUtils = require('./deploy-dapp-utils.js');
 const deployLoans = require('./deploy-loans');
-const deployTribes = require('./deploy-tribes');
+const deployRwas = require('./deploy-rwas');
 const deployFutures = require('./deploy-futures');
 const {
 	deployPerpsV2Generics,
@@ -60,7 +60,7 @@ const DEFAULTS = {
 };
 
 const deploy = async ({
-	addNewTribes,
+	addNewRwas,
 	buildPath = DEFAULTS.buildPath,
 	concurrency,
 	deploymentPath,
@@ -98,7 +98,7 @@ const deploy = async ({
 		config,
 		params,
 		configFile,
-		tribes,
+		rwas,
 		deployment,
 		deploymentFile,
 		ownerActions,
@@ -228,7 +228,7 @@ const deploy = async ({
 	} = await systemAndParameterCheck({
 		account,
 		buildPath,
-		addNewTribes,
+		addNewRwas,
 		concurrency,
 		config,
 		deployer,
@@ -242,7 +242,7 @@ const deploy = async ({
 		network,
 		skipFeedChecks,
 		feeds,
-		tribes,
+		rwas,
 		providerUrl,
 		useFork,
 		useOvm,
@@ -290,17 +290,17 @@ const deploy = async ({
 		useOvm,
 	});
 
-	const { tribesToAdd } = await deployTribes({
+	const { rwasToAdd } = await deployRwas({
 		account,
 		addressOf,
-		addNewTribes,
+		addNewRwas,
 		config,
 		deployer,
 		freshDeploy,
 		deploymentPath,
 		generateSolidity,
 		network,
-		tribes,
+		rwas,
 		systemSuspended,
 		useFork,
 		yes,
@@ -453,9 +453,9 @@ const deploy = async ({
 		runStep,
 	});
 
-	// Configure all feeds as standalone in case they are being used as tribe currency keys (through tribe),
+	// Configure all feeds as standalone in case they are being used as rwa currency keys (through rwa),
 	// or directly (e.g. futures). Adding just one or the other may cause issues if e.g. initially futures
-	// market exists, but later a tribe is added. Or if initially both exist, but later the spot tribe
+	// market exists, but later a rwa is added. Or if initially both exist, but later the spot rwa
 	// is removed. The standalone feed should always be added and available.
 	await configureStandalonePriceFeeds({
 		deployer,
@@ -473,7 +473,7 @@ const deploy = async ({
 		});
 	}
 
-	await configureTribes({
+	await configureRwas({
 		addressOf,
 		explorerLinkPrefix,
 		generateSolidity,
@@ -481,14 +481,14 @@ const deploy = async ({
 		deployer,
 		network,
 		runStep,
-		tribes,
+		rwas,
 	});
 
-	await addTribesToProtocol({
+	await addRwasToProtocol({
 		addressOf,
 		deployer,
 		runStep,
-		tribesToAdd,
+		rwasToAdd,
 	});
 
 	await configureSystemSettings({
@@ -499,7 +499,7 @@ const deploy = async ({
 		getDeployParameter,
 		network,
 		runStep,
-		tribes,
+		rwas,
 	});
 
 	await configureLoans({
@@ -568,8 +568,8 @@ module.exports = {
 			.command('deploy')
 			.description('Deploy compiled solidity files')
 			.option(
-				'-a, --add-new-tribes',
-				`Whether or not any new tribes in the ${RWAONES_FILENAME} file should be deployed if there is no entry in the config file`,
+				'-a, --add-new-rwas',
+				`Whether or not any new rwas in the ${RWAONES_FILENAME} file should be deployed if there is no entry in the config file`,
 				true
 			)
 			.option(
@@ -579,7 +579,7 @@ module.exports = {
 			)
 			.option(
 				'-d, --deployment-path <value>',
-				`Path to a folder that has your input configuration file ${CONFIG_FILENAME}, the tribe list ${RWAONES_FILENAME} and where your ${DEPLOYMENT_FILENAME} files will go`
+				`Path to a folder that has your input configuration file ${CONFIG_FILENAME}, the rwa list ${RWAONES_FILENAME} and where your ${DEPLOYMENT_FILENAME} files will go`
 			)
 			.option(
 				'-e, --concurrency <value>',

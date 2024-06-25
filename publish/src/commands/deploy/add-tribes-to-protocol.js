@@ -2,45 +2,45 @@
 
 const { gray } = require('chalk');
 
-module.exports = async ({ addressOf, deployer, runStep, tribesToAdd }) => {
-	console.log(gray(`\n------ ADD TRIBES TO ISSUER ------\n`));
+module.exports = async ({ addressOf, deployer, runStep, rwasToAdd }) => {
+	console.log(gray(`\n------ ADD RWAS TO ISSUER ------\n`));
 
 	const { Issuer } = deployer.deployedContracts;
 
-	// Set up the connection to the Issuer for each Tribe (requires FlexibleStorage to have been configured)
+	// Set up the connection to the Issuer for each Rwa (requires FlexibleStorage to have been configured)
 
-	// First filter out all those tribes which are already properly imported
-	console.log(gray('Filtering tribes to add to the issuer.'));
-	const filteredTribes = [];
+	// First filter out all those rwas which are already properly imported
+	console.log(gray('Filtering rwas to add to the issuer.'));
+	const filteredRwas = [];
 	const seen = new Set();
-	for (const tribe of tribesToAdd) {
-		const issuerTribeAddress = await Issuer.tribes(tribe.currencyKeyInBytes);
-		const currentTribeAddress = addressOf(tribe.tribe);
-		if (issuerTribeAddress === currentTribeAddress) {
-			console.log(gray(`${currentTribeAddress} requires no action`));
-		} else if (!seen.has(tribe.currencyKeyInBytes)) {
-			console.log(gray(`${currentTribeAddress} will be added to the issuer.`));
-			filteredTribes.push(tribe);
+	for (const rwa of rwasToAdd) {
+		const issuerRwaAddress = await Issuer.rwas(rwa.currencyKeyInBytes);
+		const currentRwaAddress = addressOf(rwa.rwa);
+		if (issuerRwaAddress === currentRwaAddress) {
+			console.log(gray(`${currentRwaAddress} requires no action`));
+		} else if (!seen.has(rwa.currencyKeyInBytes)) {
+			console.log(gray(`${currentRwaAddress} will be added to the issuer.`));
+			filteredRwas.push(rwa);
 		}
-		seen.add(tribe.currencyKeyInBytes);
+		seen.add(rwa.currencyKeyInBytes);
 	}
 
-	const tribeChunkSize = 15;
+	const rwaChunkSize = 15;
 	let batchCounter = 1;
-	for (let i = 0; i < filteredTribes.length; i += tribeChunkSize) {
-		const chunk = filteredTribes.slice(i, i + tribeChunkSize);
+	for (let i = 0; i < filteredRwas.length; i += rwaChunkSize) {
+		const chunk = filteredRwas.slice(i, i + rwaChunkSize);
 		await runStep({
 			contract: 'Issuer',
 			target: Issuer,
-			read: 'getTribes',
-			readArg: [chunk.map(tribe => tribe.currencyKeyInBytes)],
+			read: 'getRwas',
+			readArg: [chunk.map(rwa => rwa.currencyKeyInBytes)],
 			expected: input =>
 				input.length === chunk.length &&
-				input.every((cur, idx) => cur === addressOf(chunk[idx].tribe)),
-			write: 'addTribes',
-			writeArg: [chunk.map(tribe => addressOf(tribe.tribe))],
-			gasLimit: 1e5 * tribeChunkSize,
-			comment: `Add tribes to the Issuer contract - batch ${batchCounter++}`,
+				input.every((cur, idx) => cur === addressOf(chunk[idx].rwa)),
+			write: 'addRwas',
+			writeArg: [chunk.map(rwa => addressOf(rwa.rwa))],
+			gasLimit: 1e5 * rwaChunkSize,
+			comment: `Add rwas to the Issuer contract - batch ${batchCounter++}`,
 		});
 	}
 };

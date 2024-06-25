@@ -19,17 +19,17 @@ contract Migration_NaosOptimism is BaseMigration {
     address public constant OWNER = 0x6d4a64C57612841c2C6745dB2a4E4db34F002D20;
 
     // ----------------------------
-    // EXISTING RWAONEETIX CONTRACTS
+    // EXISTING RWAONE CONTRACTS
     // ----------------------------
 
     // https://explorer.optimism.io/address/0x95A6a3f44a70172E7d50a9e28c85Dfd712756B8C
     AddressResolver public constant addressresolver_i = AddressResolver(0x95A6a3f44a70172E7d50a9e28c85Dfd712756B8C);
     // https://explorer.optimism.io/address/0x8700dAec35aF8Ff88c16BdF0418774CB3D7599B4
-    ProxyERC20 public constant proxytribeetix_i = ProxyERC20(0x8700dAec35aF8Ff88c16BdF0418774CB3D7599B4);
+    ProxyERC20 public constant proxyrwaone_i = ProxyERC20(0x8700dAec35aF8Ff88c16BdF0418774CB3D7599B4);
     // https://explorer.optimism.io/address/0xE8c41bE1A167314ABAF2423b72Bf8da826943FFD
     SystemStatus public constant systemstatus_i = SystemStatus(0xE8c41bE1A167314ABAF2423b72Bf8da826943FFD);
     // https://explorer.optimism.io/address/0xB9c6CA25452E7f6D0D3340CE1e9B573421afc2eE
-    TokenState public constant tokenstatetribeetix_i = TokenState(0xB9c6CA25452E7f6D0D3340CE1e9B573421afc2eE);
+    TokenState public constant tokenstaterwaone_i = TokenState(0xB9c6CA25452E7f6D0D3340CE1e9B573421afc2eE);
     // https://explorer.optimism.io/address/0x5d9187630E99dBce4BcAB8733B76757f7F44aA2e
     RewardsDistribution public constant rewardsdistribution_i =
         RewardsDistribution(0x5d9187630E99dBce4BcAB8733B76757f7F44aA2e);
@@ -50,9 +50,9 @@ contract Migration_NaosOptimism is BaseMigration {
     function contractsRequiringOwnership() public pure returns (address[] memory contracts) {
         contracts = new address[](6);
         contracts[0] = address(addressresolver_i);
-        contracts[1] = address(proxytribeetix_i);
+        contracts[1] = address(proxyrwaone_i);
         contracts[2] = address(systemstatus_i);
-        contracts[3] = address(tokenstatetribeetix_i);
+        contracts[3] = address(tokenstaterwaone_i);
         contracts[4] = address(rewardsdistribution_i);
         contracts[5] = address(issuer_i);
     }
@@ -67,15 +67,15 @@ contract Migration_NaosOptimism is BaseMigration {
         // Rebuild the resolver caches in all MixinResolver contracts - batch 1;
         addressresolver_rebuildCaches_1();
         // Ensure the wRWAX proxy has the correct Rwaone target set;
-        proxytribeetix_i.setTarget(Proxyable(new_Rwaone_contract));
+        proxyrwaone_i.setTarget(Proxyable(new_Rwaone_contract));
         // Ensure Issuer contract can suspend issuance - see SIP-165;
         systemstatus_i.updateAccessControl("Issuance", new_Issuer_contract, true, false);
         // Ensure the Rwaone contract can write to its TokenState contract;
-        tokenstatetribeetix_i.setAssociatedContract(new_Rwaone_contract);
+        tokenstaterwaone_i.setAssociatedContract(new_Rwaone_contract);
         // Ensure the RewardsDistribution has Rwaone set as its authority for distribution;
         rewardsdistribution_i.setAuthority(new_Rwaone_contract);
-        // Add tribes to the Issuer contract - batch 1;
-        issuer_addTribes_8();
+        // Add rwas to the Issuer contract - batch 1;
+        issuer_addRwas_8();
 
         // NOMINATE OWNERSHIP back to owner for aforementioned contracts
         nominateAll();
@@ -133,13 +133,13 @@ contract Migration_NaosOptimism is BaseMigration {
         addressresolver_i.rebuildCaches(addressresolver_rebuildCaches_destinations_1_0);
     }
 
-    function issuer_addTribes_8() internal {
-        ITribe[] memory issuer_addTribes_tribesToAdd_8_0 = new ITribe[](5);
-        issuer_addTribes_tribesToAdd_8_0[0] = ITribe(0xDfA2d3a0d32F870D87f8A0d7AA6b9CdEB7bc5AdB);
-        issuer_addTribes_tribesToAdd_8_0[1] = ITribe(0xe9dceA0136FEFC76c4E639Ec60CCE70482E2aCF7);
-        issuer_addTribes_tribesToAdd_8_0[2] = ITribe(0x421DEF861D623F7123dfE0878D86E9576cbb3975);
-        issuer_addTribes_tribesToAdd_8_0[3] = ITribe(0xdEdb0b04AFF1525bb4B6167F00e61601690c1fF2);
-        issuer_addTribes_tribesToAdd_8_0[4] = ITribe(0x34c2360ffe5D21542f76e991FFD104f281D4B3fb);
-        issuer_i.addTribes(issuer_addTribes_tribesToAdd_8_0);
+    function issuer_addRwas_8() internal {
+        IRwa[] memory issuer_addRwas_rwasToAdd_8_0 = new IRwa[](5);
+        issuer_addRwas_rwasToAdd_8_0[0] = IRwa(0xDfA2d3a0d32F870D87f8A0d7AA6b9CdEB7bc5AdB);
+        issuer_addRwas_rwasToAdd_8_0[1] = IRwa(0xe9dceA0136FEFC76c4E639Ec60CCE70482E2aCF7);
+        issuer_addRwas_rwasToAdd_8_0[2] = IRwa(0x421DEF861D623F7123dfE0878D86E9576cbb3975);
+        issuer_addRwas_rwasToAdd_8_0[3] = IRwa(0xdEdb0b04AFF1525bb4B6167F00e61601690c1fF2);
+        issuer_addRwas_rwasToAdd_8_0[4] = IRwa(0x34c2360ffe5D21542f76e991FFD104f281D4B3fb);
+        issuer_i.addRwas(issuer_addRwas_rwasToAdd_8_0);
     }
 }

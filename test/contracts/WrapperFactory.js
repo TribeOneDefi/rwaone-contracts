@@ -21,7 +21,7 @@ const { toBytes32 } = require('../..');
 const { toBN } = require('web3-utils');
 
 contract('WrapperFactory', async accounts => {
-	const tribes = ['rUSD', 'rETH', 'ETH', 'wRWAX'];
+	const rwas = ['rUSD', 'rETH', 'ETH', 'wRWAX'];
 	const [rETH, ETH] = ['rETH', 'ETH'].map(toBytes32);
 
 	const [, owner, , , account1] = accounts;
@@ -32,7 +32,7 @@ contract('WrapperFactory', async accounts => {
 		feePool,
 		exchangeRates,
 		FEE_ADDRESS,
-		rUSDTribe,
+		rUSDRwa,
 		wrapperFactory,
 		weth;
 
@@ -43,12 +43,12 @@ contract('WrapperFactory', async accounts => {
 			FeePool: feePool,
 			ExchangeRates: exchangeRates,
 			WrapperFactory: wrapperFactory,
-			TriberUSD: rUSDTribe,
+			RwarUSD: rUSDRwa,
 			WETH: weth,
 			FlexibleStorage: flexibleStorage,
 		} = await setupAllContracts({
 			accounts,
-			tribes,
+			rwas,
 			contracts: [
 				'Rwaone',
 				'AddressResolver',
@@ -130,7 +130,7 @@ contract('WrapperFactory', async accounts => {
 			let txn;
 
 			before(async () => {
-				txn = await wrapperFactory.createWrapper(weth.address, rETH, toBytes32('TriberETH'), {
+				txn = await wrapperFactory.createWrapper(weth.address, rETH, toBytes32('RwarETH'), {
 					from: owner,
 				});
 			});
@@ -146,8 +146,8 @@ contract('WrapperFactory', async accounts => {
 			it('created wrapper has rebuilt cache', async () => {
 				const etherWrapper = await artifacts.require('Wrapper').at(createdWrapperAddress);
 
-				// call totalIssuedTribes because it depends on address for ExchangeRates
-				await etherWrapper.totalIssuedTribes();
+				// call totalIssuedRwas because it depends on address for ExchangeRates
+				await etherWrapper.totalIssuedRwas();
 			});
 
 			it('registers to isWrapper', async () => {
@@ -156,7 +156,7 @@ contract('WrapperFactory', async accounts => {
 		});
 	});
 
-	describe('totalIssuedTribes', async () => { });
+	describe('totalIssuedRwas', async () => { });
 
 	describe('distributeFees', async () => {
 		let tx;
@@ -165,7 +165,7 @@ contract('WrapperFactory', async accounts => {
 
 		before(async () => {
 			// deploy a wrapper
-			const txn = await wrapperFactory.createWrapper(weth.address, rETH, toBytes32('TriberETH'), {
+			const txn = await wrapperFactory.createWrapper(weth.address, rETH, toBytes32('RwarETH'), {
 				from: owner,
 			});
 
@@ -190,7 +190,7 @@ contract('WrapperFactory', async accounts => {
 		it('issues rUSD to the feepool', async () => {
 			const logs = await getDecodedLogs({
 				hash: tx.tx,
-				contracts: [rUSDTribe],
+				contracts: [rUSDRwa],
 			});
 
 			// sanity
@@ -198,7 +198,7 @@ contract('WrapperFactory', async accounts => {
 
 			decodedEventEqual({
 				event: 'Transfer',
-				emittedFrom: await rUSDTribe.proxy(),
+				emittedFrom: await rUSDRwa.proxy(),
 				args: [wrapperFactory.address, FEE_ADDRESS, feesEscrowed],
 				log: logs
 					.reverse()

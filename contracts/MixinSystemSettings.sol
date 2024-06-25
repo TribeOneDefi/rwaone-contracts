@@ -56,7 +56,7 @@ contract MixinSystemSettings is MixinResolver {
     bytes32 internal constant SETTING_ATOMIC_VOLATILITY_CONSIDERATION_WINDOW = "atomicVolConsiderationWindow";
     bytes32 internal constant SETTING_ATOMIC_VOLATILITY_UPDATE_THRESHOLD = "atomicVolUpdateThreshold";
     bytes32 internal constant SETTING_PURE_CHAINLINK_PRICE_FOR_ATOMIC_SWAPS_ENABLED = "pureChainlinkForAtomicsEnabled";
-    bytes32 internal constant SETTING_CROSS_RWAONE_TRANSFER_ENABLED = "crossChainTribeTransferEnabled";
+    bytes32 internal constant SETTING_CROSS_RWAONE_TRANSFER_ENABLED = "crossChainRwaTransferEnabled";
 
     bytes32 internal constant CONTRACT_FLEXIBLESTORAGE = "FlexibleStorage";
 
@@ -307,7 +307,7 @@ contract MixinSystemSettings is MixinResolver {
             );
     }
 
-    function getCrossChainTribeTransferEnabled(bytes32 currencyKey) internal view returns (uint) {
+    function getCrossChainRwaTransferEnabled(bytes32 currencyKey) internal view returns (uint) {
         return
             flexibleStorage().getUIntValue(
                 SETTING_CONTRACT_NAME,

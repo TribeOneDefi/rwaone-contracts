@@ -15,7 +15,7 @@ import "@chainlink/contracts-0.0.10/src/v0.5/interfaces/AggregatorV2V3Interface.
 
 // Internal references
 import "./interfaces/IERC20.sol";
-import "./interfaces/ITribe.sol";
+import "./interfaces/IRwa.sol";
 import "./interfaces/ISystemStatus.sol";
 import "./interfaces/IRwaone.sol";
 import "./interfaces/IRwaoneDebtShare.sol";
@@ -69,7 +69,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
     bytes32 private constant CONTRACT_SYSTEMSTATUS = "SystemStatus";
-    bytes32 private constant CONTRACT_RWAONEETIXDEBTSHARE = "RwaoneDebtShare";
+    bytes32 private constant CONTRACT_RWAONEDEBTSHARE = "RwaoneDebtShare";
     bytes32 private constant CONTRACT_FEEPOOLETERNALSTORAGE = "FeePoolEternalStorage";
     bytes32 private constant CONTRACT_EXCHANGER = "Exchanger";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
@@ -81,10 +81,10 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     bytes32 private constant CONTRACT_FUTURES_MARKET_MANAGER = "FuturesMarketManager";
     bytes32 private constant CONTRACT_WRAPPER_FACTORY = "WrapperFactory";
 
-    bytes32 private constant CONTRACT_RWAONEETIX_BRIDGE_TO_OPTIMISM = "RwaoneBridgeToOptimism";
-    bytes32 private constant CONTRACT_RWAONEETIX_BRIDGE_TO_BASE = "RwaoneBridgeToBase";
+    bytes32 private constant CONTRACT_RWAONE_BRIDGE_TO_OPTIMISM = "RwaoneBridgeToOptimism";
+    bytes32 private constant CONTRACT_RWAONE_BRIDGE_TO_BASE = "RwaoneBridgeToBase";
 
-    bytes32 private constant CONTRACT_EXT_AGGREGATOR_ISSUED_RWAONES = "ext:AggregatorIssuedTribes";
+    bytes32 private constant CONTRACT_EXT_AGGREGATOR_ISSUED_RWAONES = "ext:AggregatorIssuedRwas";
     bytes32 private constant CONTRACT_EXT_AGGREGATOR_DEBT_RATIO = "ext:AggregatorDebtRatio";
 
     /* ========== ETERNAL STORAGE CONSTANTS ========== */
@@ -106,7 +106,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](14);
         newAddresses[0] = CONTRACT_SYSTEMSTATUS;
-        newAddresses[1] = CONTRACT_RWAONEETIXDEBTSHARE;
+        newAddresses[1] = CONTRACT_RWAONEDEBTSHARE;
         newAddresses[2] = CONTRACT_FEEPOOLETERNALSTORAGE;
         newAddresses[3] = CONTRACT_EXCHANGER;
         newAddresses[4] = CONTRACT_ISSUER;
@@ -126,8 +126,8 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         return ISystemStatus(requireAndGetAddress(CONTRACT_SYSTEMSTATUS));
     }
 
-    function tribeetixDebtShare() internal view returns (IRwaoneDebtShare) {
-        return IRwaoneDebtShare(requireAndGetAddress(CONTRACT_RWAONEETIXDEBTSHARE));
+    function rwaoneDebtShare() internal view returns (IRwaoneDebtShare) {
+        return IRwaoneDebtShare(requireAndGetAddress(CONTRACT_RWAONEDEBTSHARE));
     }
 
     function feePoolEternalStorage() internal view returns (FeePoolEternalStorage) {
@@ -192,7 +192,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     }
 
     function allNetworksDebtSharesSupply() public view returns (uint256 sharesSupply, uint256 updatedAt) {
-        (, int256 rawIssuedTribes, , uint issuedTribesUpdatedAt, ) = AggregatorV2V3Interface(
+        (, int256 rawIssuedRwas, , uint issuedRwasUpdatedAt, ) = AggregatorV2V3Interface(
             requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_ISSUED_RWAONES)
         ).latestRoundData();
 
@@ -200,9 +200,9 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
             requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_DEBT_RATIO)
         ).latestRoundData();
 
-        uint debt = uint(rawIssuedTribes);
+        uint debt = uint(rawIssuedRwas);
         sharesSupply = rawRatio == 0 ? 0 : debt.divideDecimalRoundPrecise(uint(rawRatio));
-        updatedAt = issuedTribesUpdatedAt < ratioUpdatedAt ? issuedTribesUpdatedAt : ratioUpdatedAt;
+        updatedAt = issuedRwasUpdatedAt < ratioUpdatedAt ? issuedRwasUpdatedAt : ratioUpdatedAt;
     }
 
     function recentFeePeriods(
@@ -270,7 +270,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
         // inform other chain of the chosen values
         IRwaoneBridgeToOptimism(
-            resolver.requireAndGetAddress(CONTRACT_RWAONEETIX_BRIDGE_TO_OPTIMISM, "Missing contract: RwaoneBridgeToOptimism")
+            resolver.requireAndGetAddress(CONTRACT_RWAONE_BRIDGE_TO_OPTIMISM, "Missing contract: RwaoneBridgeToOptimism")
         ).closeFeePeriod(snxBackedDebt, debtSharesSupply);
     }
 
@@ -309,7 +309,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
         // Note: As of SIP-255, all rUSD fee are now automatically burned and are effectively shared amongst stakers in the form of reduced debt.
         if (_recentFeePeriodsStorage(0).feesToDistribute > 0) {
-            issuer().burnTribesWithoutDebt(rUSD, FEE_ADDRESS, _recentFeePeriodsStorage(0).feesToDistribute);
+            issuer().burnRwasWithoutDebt(rUSD, FEE_ADDRESS, _recentFeePeriodsStorage(0).feesToDistribute);
 
             // Mark the burnt fees as claimed.
             _recentFeePeriodsStorage(0).feesClaimed = _recentFeePeriodsStorage(0).feesToDistribute;
@@ -364,12 +364,12 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         uint availableRewards;
 
         // Address won't be able to claim fees if it is too far below the target c-ratio.
-        // It will need to burn tribes then try claiming again.
+        // It will need to burn rwas then try claiming again.
         (bool feesClaimable, bool anyRateIsInvalid) = _isFeesClaimableAndAnyRatesInvalid(claimingAddress);
 
         require(feesClaimable, "C-Ratio below penalty threshold");
 
-        require(!anyRateIsInvalid, "A tribe or wRWAX rate is invalid");
+        require(!anyRateIsInvalid, "A rwa or wRWAX rate is invalid");
 
         // Get the claimingAddress available fees and rewards
         (availableFees, availableRewards) = feesAvailable(claimingAddress);
@@ -550,7 +550,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
      * This also does not consider pending fees in the wrappers since they are distributed at fee period close.
      */
     function feesToBurn(address account) public view returns (uint feesFromPeriod) {
-        IRwaoneDebtShare sds = tribeetixDebtShare();
+        IRwaoneDebtShare sds = rwaoneDebtShare();
         uint userOwnershipPercentage = sds.sharePercent(account);
         (feesFromPeriod, ) = _feesAndRewardsFromPeriod(0, userOwnershipPercentage);
         return feesFromPeriod;
@@ -590,7 +590,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     function feesByPeriod(address account) public view returns (uint[FEE_PERIOD_LENGTH][2] memory results) {
         // What's the user's debt entry index and the debt they owe to the system at current feePeriod
         uint userOwnershipPercentage;
-        IRwaoneDebtShare sds = tribeetixDebtShare();
+        IRwaoneDebtShare sds = rwaoneDebtShare();
 
         userOwnershipPercentage = sds.sharePercent(account);
 
@@ -653,7 +653,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         // If the period being checked is uninitialised then return 0. This is only at the start of the system.
         if (_recentFeePeriodsStorage(period - 1).startTime == 0) return 0;
 
-        return tribeetixDebtShare().sharePercentOnPeriod(account, uint(_recentFeePeriods[period].feePeriodId));
+        return rwaoneDebtShare().sharePercentOnPeriod(account, uint(_recentFeePeriods[period].feePeriodId));
     }
 
     /**
@@ -689,7 +689,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     function _isInternalContract(address account) internal view returns (bool) {
         return
             account == address(exchanger()) ||
-            issuer().tribesByAddress(account) != bytes32(0) ||
+            issuer().rwasByAddress(account) != bytes32(0) ||
             collateralManager().hasCollateral(account) ||
             account == address(futuresMarketManager()) ||
             account == address(wrapperFactory()) ||
@@ -703,7 +703,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
     modifier onlyRelayer() {
         require(
-            msg.sender == address(this) || msg.sender == resolver.getAddress(CONTRACT_RWAONEETIX_BRIDGE_TO_BASE),
+            msg.sender == address(this) || msg.sender == resolver.getAddress(CONTRACT_RWAONE_BRIDGE_TO_BASE),
             "Only valid relayer can call"
         );
         _;

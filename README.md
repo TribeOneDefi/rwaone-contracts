@@ -4,12 +4,12 @@
 [![codecov](https://codecov.io/gh/Rwaoneio/rwaone/branch/develop/graph/badge.svg)](https://codecov.io/gh/Rwaoneio/rwaone)
 [![npm version](https://badge.fury.io/js/rwaone.svg)](https://badge.fury.io/js/rwaone)
 [![Discord](https://img.shields.io/discord/413890591840272394.svg?color=768AD4&label=discord&logo=https%3A%2F%2Fdiscordapp.com%2Fassets%2F8c9701b98ad4372b58f13fd9f65f966e.svg)](https://discord.com/invite/Rwaone)
-[![Twitter Follow](https://img.shields.io/twitter/follow/tribeetix_io.svg?label=tribeetix_io&style=social)](https://twitter.com/tribeetix_io)
+[![Twitter Follow](https://img.shields.io/twitter/follow/rwaone_io.svg?label=rwaone_io&style=social)](https://twitter.com/rwaone_io)
 
 Rwaone is a crypto-backed rwaone asset platform.
 
-It is a multi-token system, powered by wRWAX, the Rwaone Network Token. wRWAX holders can stake wRWAX to issue Tribes, on-chain rwaone assets via the [Staking dApp](https://staking.rwaone.io) The network currently supports an ever-growing [list of rwaone assets](https://www.rwaone.io/tribes/). Please see the [list of the deployed contracts on MAIN and TESTNETS](https://docs.rwaone.io/addresses/)
-Tribes can be traded using [Kwenta](https://kwenta.io)
+It is a multi-token system, powered by wRWAX, the Rwaone Network Token. wRWAX holders can stake wRWAX to issue Rwas, on-chain rwaone assets via the [Staking dApp](https://staking.rwaone.io) The network currently supports an ever-growing [list of rwaone assets](https://www.rwaone.io/rwas/). Please see the [list of the deployed contracts on MAIN and TESTNETS](https://docs.rwaone.io/addresses/)
+Rwas can be traded using [Kwenta](https://kwenta.io)
 
 Rwaone uses a proxy system so that upgrades will not be disruptive to the functionality of the contract. This smooths user interaction, since new functionality will become available without any interruption in their experience. It is also transparent to the community at large, since each upgrade is accompanied by events announcing those upgrades. New releases are managed via the [Rwaone Improvement Proposal (SIP)](https://sips.rwaone.io/all-sip) system similar to the [EIPs](https://eips.ethereum.org/all)
 
@@ -27,7 +27,7 @@ For the latest system documentation see [docs.rwaone.io](https://docs.rwaone.io)
 
 ### Community
 
-[![Discord](https://img.shields.io/discord/413890591840272394.svg?color=768AD4&label=discord&logo=https%3A%2F%2Fdiscordapp.com%2Fassets%2F8c9701b98ad4372b58f13fd9f65f966e.svg)](https://discordapp.com/channels/413890591840272394/) [![Twitter Follow](https://img.shields.io/twitter/follow/tribeetix_io.svg?label=tribeetix_io&style=social)](https://twitter.com/tribeetix_io)
+[![Discord](https://img.shields.io/discord/413890591840272394.svg?color=768AD4&label=discord&logo=https%3A%2F%2Fdiscordapp.com%2Fassets%2F8c9701b98ad4372b58f13fd9f65f966e.svg)](https://discordapp.com/channels/413890591840272394/) [![Twitter Follow](https://img.shields.io/twitter/follow/rwaone_io.svg?label=rwaone_io&style=social)](https://twitter.com/rwaone_io)
 
 For a guide from the community, see [rwaone.community](https://rwaone.community)
 
@@ -64,7 +64,7 @@ This repo may be installed via `npm install` to support both node.js scripting a
 
 All interfaces are available via the path [`rwaone/contracts/interfaces`](./contracts/interfaces/).
 
-:zap: In your code, the key is to use `IAddressResolver` which can be tied to the immutable proxy: [`ReadProxyAddressResolver`](https://contracts.rwaone.io/ReadProxyAddressResolver) ([introduced in SIP-57](https://sips.rwaone.io/sips/sip-57)). You can then fetch `Rwaone`, `FeePool`, `Depot`, et al via `IAddressResolver.getAddress(bytes32 name)` where `name` is the `bytes32` version of the contract name (case-sensitive). Or you can fetch any tribe using `IAddressResolver.getTribe(bytes32 tribe)` where `tribe` is the `bytes32` name of the tribe (e.g. `iETH`, `rUSD`, `sDEFI`).
+:zap: In your code, the key is to use `IAddressResolver` which can be tied to the immutable proxy: [`ReadProxyAddressResolver`](https://contracts.rwaone.io/ReadProxyAddressResolver) ([introduced in SIP-57](https://sips.rwaone.io/sips/sip-57)). You can then fetch `Rwaone`, `FeePool`, `Depot`, et al via `IAddressResolver.getAddress(bytes32 name)` where `name` is the `bytes32` version of the contract name (case-sensitive). Or you can fetch any rwa using `IAddressResolver.getRwa(bytes32 rwa)` where `rwa` is the `bytes32` name of the rwa (e.g. `iETH`, `rUSD`, `sDEFI`).
 
 E.g.
 
@@ -82,27 +82,27 @@ contract MyContract {
   // This should be instantiated with our ReadProxyAddressResolver
   // it's a ReadProxy that won't change, so safe to code it here without a setter
   // see https://docs.rwaone.io/addresses for addresses in mainnet and testnets
-  IAddressResolver public tribeetixResolver;
+  IAddressResolver public rwaoneResolver;
 
   constructor(IAddressResolver _snxResolver) public {
-    tribeetixResolver = _snxResolver;
+    rwaoneResolver = _snxResolver;
   }
 
-  function tribeetixIssue() external {
-    IRwaone rwaone = tribeetixResolver.getAddress('Rwaone');
+  function rwaoneIssue() external {
+    IRwaone rwaone = rwaoneResolver.getAddress('Rwaone');
     require(rwaone != address(0), 'Rwaone is missing from Rwaone resolver');
 
     // Issue for msg.sender = address(MyContract)
-    rwaone.issueMaxTribes();
+    rwaone.issueMaxRwas();
   }
 
-  function tribeetixIssueOnBehalf(address user) external {
-    IRwaone rwaone = tribeetixResolver.getAddress('Rwaone');
+  function rwaoneIssueOnBehalf(address user) external {
+    IRwaone rwaone = rwaoneResolver.getAddress('Rwaone');
     require(rwaone != address(0), 'Rwaone is missing from Rwaone resolver');
 
     // Note: this will fail if `DelegateApprovals.approveIssueOnBehalf(address(MyContract))` has
     // not yet been invoked by the `user`
-    rwaone.issueMaxTribesOnBehalf(user);
+    rwaone.issueMaxRwasOnBehalf(user);
   }
 }
 ```
@@ -114,9 +114,9 @@ contract MyContract {
 - `getSource({ network })` Return `abi` and `bytecode` for a contract `source`
 - `getSuspensionReasons({ code })` Return mapping of `SystemStatus` suspension codes to string reasons
 - `getStakingRewards({ network })` Return the list of staking reward contracts available.
-- `getTribes({ network })` Return the list of tribes for a network
+- `getRwas({ network })` Return the list of rwas for a network
 - `getTarget({ network })` Return the information about a contract's `address` and `source` file. The contract names are those specified in [docs.rwaone.io/addresses](https://docs.rwaone.io/addresses)
-- `getTokens({ network })` Return the list of tokens (tribes and `wRWAX`) used in the system, along with their addresses.
+- `getTokens({ network })` Return the list of tokens (rwas and `wRWAX`) used in the system, along with their addresses.
 - `getUsers({ network })` Return the list of user accounts within the Rwaone protocol (e.g. `owner`, `fee`, etc)
 - `getVersions({ network, byContract = false })` Return the list of deployed versions to the network keyed by tagged version. If `byContract` is `true`, it keys by `contract` name.
 - `networks` Return the list of supported networks
@@ -151,7 +151,7 @@ snx.getAST({ source: 'Rwaone.sol' });
      'contracts/MixinResolver.sol',
      'contracts/interfaces/IRwaone.sol',
      'contracts/TokenState.sol',
-     'contracts/interfaces/ITribe.sol',
+     'contracts/interfaces/IRwa.sol',
      'contracts/interfaces/IERC20.sol',
      'contracts/interfaces/ISystemStatus.sol',
      'contracts/interfaces/IExchanger.sol',
@@ -197,8 +197,8 @@ snx.getSuspensionReasons();
 };
 */
 
-// retrieve the array of tribes used
-snx.getTribes({ network: 'goerli' }).map(({ name }) => name);
+// retrieve the array of rwas used
+snx.getRwas({ network: 'goerli' }).map(({ name }) => name);
 // ['rUSD', 'sEUR', ...]
 
 // retrieve an object detailing the contract deployed to the given network.
@@ -258,13 +258,13 @@ snx.toBytes32('rUSD');
 Same as above but as a CLI tool that outputs JSON, using names without the `get` prefixes:
 
 ```bash
-$ npx rwaone ast contracts/Tribe.sol
+$ npx rwaone ast contracts/Rwa.sol
 {
   "imports": [
     "contracts/Owned.sol",
     "contracts/ExternStateToken.sol",
     "contracts/MixinResolver.sol",
-    "contracts/interfaces/ITribe.sol",
+    "contracts/interfaces/IRwa.sol",
     "contracts/interfaces/IERC20.sol",
     "contracts/interfaces/ISystemStatus.sol",
     "contracts/interfaces/IFeePool.sol",
@@ -290,7 +290,7 @@ $ npx rwaone source --network goerli --contract Proxy
 $ npx rwaone suspension-reason --code 2
 Market Closure
 
-$ npx rwaone tribes --network goerli --key name
+$ npx rwaone rwas --network goerli --key name
 ["rUSD", "sEUR", ... ]
 
 $ npx rwaone target --network goerli --contract ProxyRwaone

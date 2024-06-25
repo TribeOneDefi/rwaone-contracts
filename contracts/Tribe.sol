@@ -4,7 +4,7 @@ pragma solidity ^0.5.16;
 import "./Owned.sol";
 import "./ExternStateToken.sol";
 import "./MixinResolver.sol";
-import "./interfaces/ITribe.sol";
+import "./interfaces/IRwa.sol";
 import "./interfaces/IERC20.sol";
 
 // Internal references
@@ -14,13 +14,13 @@ import "./interfaces/IExchanger.sol";
 import "./interfaces/IIssuer.sol";
 import "./interfaces/IFuturesMarketManager.sol";
 
-// https://docs.rwaone.io/contracts/source/contracts/tribe
-contract Tribe is Owned, IERC20, ExternStateToken, MixinResolver, ITribe {
-    bytes32 public constant CONTRACT_NAME = "Tribe";
+// https://docs.rwaone.io/contracts/source/contracts/rwa
+contract Rwa is Owned, IERC20, ExternStateToken, MixinResolver, IRwa {
+    bytes32 public constant CONTRACT_NAME = "Rwa";
 
     /* ========== STATE VARIABLES ========== */
 
-    // Currency key which identifies this Tribe to the Rwaone system
+    // Currency key which identifies this Rwa to the Rwaone system
     bytes32 public currencyKey;
 
     uint8 public constant DECIMALS = 18;
@@ -77,10 +77,10 @@ contract Tribe is Owned, IERC20, ExternStateToken, MixinResolver, ITribe {
     }
 
     function transferAndSettle(address to, uint value) public onlyProxyOrInternal returns (bool) {
-        // Exchanger.settle ensures tribe is active
+        // Exchanger.settle ensures rwa is active
         (, , uint numEntriesSettled) = exchanger().settle(messageSender, currencyKey);
 
-        // Save gas instead of calling transferableTribes
+        // Save gas instead of calling transferableRwas
         uint balanceAfter = value;
 
         if (numEntriesSettled > 0) {
@@ -100,10 +100,10 @@ contract Tribe is Owned, IERC20, ExternStateToken, MixinResolver, ITribe {
     }
 
     function transferFromAndSettle(address from, address to, uint value) public onlyProxyOrInternal returns (bool) {
-        // Exchanger.settle() ensures tribe is active
+        // Exchanger.settle() ensures rwa is active
         (, , uint numEntriesSettled) = exchanger().settle(from, currencyKey);
 
-        // Save gas instead of calling transferableTribes
+        // Save gas instead of calling transferableRwas
         uint balanceAfter = value;
 
         if (numEntriesSettled > 0) {
@@ -118,7 +118,7 @@ contract Tribe is Owned, IERC20, ExternStateToken, MixinResolver, ITribe {
 
     /**
      * @notice _transferToFeeAddress function
-     * non-rUSD tribes are exchanged into rUSD via tribeInitiatedExchange
+     * non-rUSD rwas are exchanged into rUSD via rwaInitiatedExchange
      * notify feePool to record amount as fee paid to feePool */
     function _transferToFeeAddress(address to, uint value) internal returns (bool) {
         uint amountInUSD;
@@ -128,7 +128,7 @@ contract Tribe is Owned, IERC20, ExternStateToken, MixinResolver, ITribe {
             amountInUSD = value;
             super._internalTransfer(messageSender, to, value);
         } else {
-            // else exchange tribe into rUSD and send to FEE_ADDRESS
+            // else exchange rwa into rUSD and send to FEE_ADDRESS
             (amountInUSD, ) = exchanger().exchange(
                 messageSender,
                 messageSender,
@@ -211,11 +211,11 @@ contract Tribe is Owned, IERC20, ExternStateToken, MixinResolver, ITribe {
 
     function _ensureCanTransfer(address from, uint value) internal view {
         require(exchanger().maxSecsLeftInWaitingPeriod(from, currencyKey) == 0, "Cannot transfer during waiting period");
-        require(transferableTribes(from) >= value, "Insufficient balance after any settlement owing");
-        systemStatus().requireTribeActive(currencyKey);
+        require(transferableRwas(from) >= value, "Insufficient balance after any settlement owing");
+        systemStatus().requireRwaActive(currencyKey);
     }
 
-    function transferableTribes(address account) public view returns (uint) {
+    function transferableRwas(address account) public view returns (uint) {
         (uint reclaimAmount, , ) = exchanger().settlementOwing(account, currencyKey);
 
         // Note: ignoring rebate amount here because a settle() is required in order to
@@ -284,7 +284,7 @@ contract Tribe is Owned, IERC20, ExternStateToken, MixinResolver, ITribe {
             // ordered to reduce gas for more frequent calls
             caller == resolver.getAddress("CollateralShort") ||
             // not used frequently
-            caller == resolver.getAddress("TribeRedeemer") ||
+            caller == resolver.getAddress("RwaRedeemer") ||
             caller == resolver.getAddress("WrapperFactory") || // transfer not used by users
             // legacy
             caller == resolver.getAddress("NativeEtherWrapper") ||

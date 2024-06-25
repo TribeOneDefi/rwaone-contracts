@@ -18,11 +18,11 @@ describe('staking & claiming integration tests (L1, L2)', () => {
 		const amountToIssueAndBurnrUSD = ethers.utils.parseEther('1');
 
 		let user;
-		let Rwaone, TriberUSD, FeePool;
+		let Rwaone, RwarUSD, FeePool;
 		let balancerUSD, debtrUSD;
 
 		before('target contracts and users', () => {
-			({ Rwaone, TriberUSD, FeePool } = ctx.l1.contracts);
+			({ Rwaone, RwarUSD, FeePool } = ctx.l1.contracts);
 
 			user = ctx.l1.users.someUser;
 		});
@@ -33,20 +33,20 @@ describe('staking & claiming integration tests (L1, L2)', () => {
 
 		describe('when the user issues rUSD', () => {
 			before('record balances', async () => {
-				balancerUSD = await TriberUSD.balanceOf(user.address);
+				balancerUSD = await RwarUSD.balanceOf(user.address);
 			});
 
 			before('issue rUSD', async () => {
 				Rwaone = Rwaone.connect(user);
 
-				const tx = await Rwaone.issueTribes(amountToIssueAndBurnrUSD);
+				const tx = await Rwaone.issueRwas(amountToIssueAndBurnrUSD);
 				const { gasUsed } = await tx.wait();
-				console.log(`issueTribes() gas used: ${Math.round(gasUsed / 1000).toString()}k`);
+				console.log(`issueRwas() gas used: ${Math.round(gasUsed / 1000).toString()}k`);
 			});
 
 			it('issues the expected amount of rUSD', async () => {
 				assert.bnEqual(
-					await TriberUSD.balanceOf(user.address),
+					await RwarUSD.balanceOf(user.address),
 					balancerUSD.add(amountToIssueAndBurnrUSD)
 				);
 			});
@@ -70,7 +70,7 @@ describe('staking & claiming integration tests (L1, L2)', () => {
 
 					describe('when the user claims rewards', () => {
 						before('record balances', async () => {
-							balancerUSD = await TriberUSD.balanceOf(user.address);
+							balancerUSD = await RwarUSD.balanceOf(user.address);
 						});
 
 						before('claim', async () => {
@@ -82,7 +82,7 @@ describe('staking & claiming integration tests (L1, L2)', () => {
 						});
 
 						it('shows no change in the users rUSD balance', async () => {
-							assert.bnEqual(await TriberUSD.balanceOf(user.address), balancerUSD);
+							assert.bnEqual(await RwarUSD.balanceOf(user.address), balancerUSD);
 						});
 					});
 				});
@@ -100,9 +100,9 @@ describe('staking & claiming integration tests (L1, L2)', () => {
 				before('burn rUSD', async () => {
 					Rwaone = Rwaone.connect(user);
 
-					const tx = await Rwaone.burnTribes(amountToIssueAndBurnrUSD);
+					const tx = await Rwaone.burnRwas(amountToIssueAndBurnrUSD);
 					const { gasUsed } = await tx.wait();
-					console.log(`burnTribes() gas used: ${Math.round(gasUsed / 1000).toString()}k`);
+					console.log(`burnRwas() gas used: ${Math.round(gasUsed / 1000).toString()}k`);
 				});
 
 				it('reduced the expected amount of debt', async () => {

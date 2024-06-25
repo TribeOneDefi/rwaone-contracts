@@ -60,23 +60,23 @@ module.exports = async ({
 			comment: 'Ensure the CollateralEth is connected to the CollateralManager',
 		});
 
-		const CollateralEthTribes = (await getDeployParameter('COLLATERAL_ETH'))['TRIBES']; // COLLATERAL_ETH tribes - ['rUSD', 'rETH']
+		const CollateralEthRwas = (await getDeployParameter('COLLATERAL_ETH'))['RWAS']; // COLLATERAL_ETH rwas - ['rUSD', 'rETH']
 		await runStep({
 			contract: 'CollateralEth',
 			gasLimit: 1e6,
 			target: CollateralEth,
-			read: 'areTribesAndCurrenciesSet',
+			read: 'areRwasAndCurrenciesSet',
 			readArg: [
-				CollateralEthTribes.map(key => toBytes32(`Tribe${key}`)),
-				CollateralEthTribes.map(toBytes32),
+				CollateralEthRwas.map(key => toBytes32(`Rwa${key}`)),
+				CollateralEthRwas.map(toBytes32),
 			],
 			expected: input => input,
-			write: 'addTribes',
+			write: 'addRwas',
 			writeArg: [
-				CollateralEthTribes.map(key => toBytes32(`Tribe${key}`)),
-				CollateralEthTribes.map(toBytes32),
+				CollateralEthRwas.map(key => toBytes32(`Rwa${key}`)),
+				CollateralEthRwas.map(toBytes32),
 			],
-			comment: 'Ensure the CollateralEth contract has all associated tribes added',
+			comment: 'Ensure the CollateralEth contract has all associated rwas added',
 		});
 
 		const issueFeeRate = (await getDeployParameter('COLLATERAL_ETH'))['ISSUE_FEE_RATE'];
@@ -102,23 +102,23 @@ module.exports = async ({
 			comment: 'Ensure the CollateralErc20 contract is connected to the CollateralManager',
 		});
 
-		const CollateralErc20Tribes = (await getDeployParameter('COLLATERAL_RENBTC'))['TRIBES']; // COLLATERAL_RENBTC tribes - ['rUSD', 'rBTC']
+		const CollateralErc20Rwas = (await getDeployParameter('COLLATERAL_RENBTC'))['RWAS']; // COLLATERAL_RENBTC rwas - ['rUSD', 'rBTC']
 		await runStep({
 			contract: 'CollateralErc20',
 			gasLimit: 1e6,
 			target: CollateralErc20,
-			read: 'areTribesAndCurrenciesSet',
+			read: 'areRwasAndCurrenciesSet',
 			readArg: [
-				CollateralErc20Tribes.map(key => toBytes32(`Tribe${key}`)),
-				CollateralErc20Tribes.map(toBytes32),
+				CollateralErc20Rwas.map(key => toBytes32(`Rwa${key}`)),
+				CollateralErc20Rwas.map(toBytes32),
 			],
 			expected: input => input,
-			write: 'addTribes',
+			write: 'addRwas',
 			writeArg: [
-				CollateralErc20Tribes.map(key => toBytes32(`Tribe${key}`)),
-				CollateralErc20Tribes.map(toBytes32),
+				CollateralErc20Rwas.map(key => toBytes32(`Rwa${key}`)),
+				CollateralErc20Rwas.map(toBytes32),
 			],
-			comment: 'Ensure the CollateralErc20 contract has all associated tribes added',
+			comment: 'Ensure the CollateralErc20 contract has all associated rwas added',
 		});
 
 		const issueFeeRate = (await getDeployParameter('COLLATERAL_RENBTC'))['ISSUE_FEE_RATE'];
@@ -144,23 +144,23 @@ module.exports = async ({
 			comment: 'Ensure the CollateralShort contract is connected to the CollateralManager',
 		});
 
-		const CollateralShortTribes = (await getDeployParameter('COLLATERAL_SHORT'))['TRIBES']; // COLLATERAL_SHORT tribes - ['rBTC', 'rETH']
+		const CollateralShortRwas = (await getDeployParameter('COLLATERAL_SHORT'))['RWAS']; // COLLATERAL_SHORT rwas - ['rBTC', 'rETH']
 		await runStep({
 			contract: 'CollateralShort',
 			gasLimit: 1e6,
 			target: CollateralShort,
-			read: 'areTribesAndCurrenciesSet',
+			read: 'areRwasAndCurrenciesSet',
 			readArg: [
-				CollateralShortTribes.map(key => toBytes32(`Tribe${key}`)),
-				CollateralShortTribes.map(toBytes32),
+				CollateralShortRwas.map(key => toBytes32(`Rwa${key}`)),
+				CollateralShortRwas.map(toBytes32),
 			],
 			expected: input => input,
-			write: 'addTribes',
+			write: 'addRwas',
 			writeArg: [
-				CollateralShortTribes.map(key => toBytes32(`Tribe${key}`)),
-				CollateralShortTribes.map(toBytes32),
+				CollateralShortRwas.map(key => toBytes32(`Rwa${key}`)),
+				CollateralShortRwas.map(toBytes32),
 			],
-			comment: 'Ensure the CollateralShort contract has all associated tribes added',
+			comment: 'Ensure the CollateralShort contract has all associated rwas added',
 		});
 
 		const issueFeeRate = (await getDeployParameter('COLLATERAL_SHORT'))['ISSUE_FEE_RATE'];
@@ -235,35 +235,35 @@ module.exports = async ({
 		comment: 'Set the base short rate in the CollateralManager',
 	});
 
-	// add to the manager if the tribes aren't already added.
-	const CollateralManagerTribes = collateralManagerDefaults['TRIBES'];
-	for (const tribe of CollateralManagerTribes) {
+	// add to the manager if the rwas aren't already added.
+	const CollateralManagerRwas = collateralManagerDefaults['RWAS'];
+	for (const rwa of CollateralManagerRwas) {
 		await runStep({
 			contract: 'CollateralManager',
 			gasLimit: 1e6,
 			target: CollateralManager,
-			read: 'tribesByKey',
-			readArg: toBytes32(tribe),
+			read: 'rwasByKey',
+			readArg: toBytes32(rwa),
 			expected: input => input,
-			write: 'addTribes',
-			writeArg: [toBytes32(`Tribe${tribe}`), toBytes32(tribe)],
-			comment: `Ensure the CollateralManager contract has associated ${tribe} added`,
+			write: 'addRwas',
+			writeArg: [toBytes32(`Rwa${rwa}`), toBytes32(rwa)],
+			comment: `Ensure the CollateralManager contract has associated ${rwa} added`,
 		});
 	}
 
 	const CollateralManagerShorts = collateralManagerDefaults['SHORTS'];
-	if (CollateralManager.shortableTribesByKey) {
-		for (const tribe of CollateralManagerShorts) {
+	if (CollateralManager.shortableRwasByKey) {
+		for (const rwa of CollateralManagerShorts) {
 			await runStep({
 				contract: 'CollateralManager',
 				gasLimit: 1e6,
 				target: CollateralManager,
-				read: 'shortableTribesByKey',
-				readArg: toBytes32(tribe),
+				read: 'shortableRwasByKey',
+				readArg: toBytes32(rwa),
 				expected: input => input,
-				write: 'addShortableTribes',
-				writeArg: [toBytes32(`Tribe${tribe}`), toBytes32(tribe)],
-				comment: `Ensure the CollateralManager contract has associated short ${tribe} added`,
+				write: 'addShortableRwas',
+				writeArg: [toBytes32(`Rwa${rwa}`), toBytes32(rwa)],
+				comment: `Ensure the CollateralManager contract has associated short ${rwa} added`,
 			});
 		}
 	}

@@ -57,7 +57,7 @@ contract Rwaone is BaseRwaone {
         external
         exchangeActive(sourceCurrencyKey, destinationCurrencyKey)
         optionalProxy
-        returns (uint amountReceived, IVirtualTribe vTribe)
+        returns (uint amountReceived, IVirtualRwa vRwa)
     {
         return
             exchanger().exchange(
@@ -174,7 +174,7 @@ contract Rwaone is BaseRwaone {
 
     // ========== EVENTS ==========
 
-    event AtomicTribeExchange(
+    event AtomicRwaExchange(
         address indexed account,
         bytes32 fromCurrencyKey,
         uint256 fromAmount,
@@ -183,9 +183,9 @@ contract Rwaone is BaseRwaone {
         address toAddress
     );
     bytes32 internal constant ATOMIC_RWAONE_EXCHANGE_SIG =
-        keccak256("AtomicTribeExchange(address,bytes32,uint256,bytes32,uint256,address)");
+        keccak256("AtomicRwaExchange(address,bytes32,uint256,bytes32,uint256,address)");
 
-    function emitAtomicTribeExchange(
+    function emitAtomicRwaExchange(
         address account,
         bytes32 fromCurrencyKey,
         uint256 fromAmount,

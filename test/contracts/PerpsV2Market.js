@@ -200,7 +200,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			Exchanger: exchanger,
 			CircuitBreaker: circuitBreaker,
 			AddressResolver: addressResolver,
-			TriberUSD: rUSD,
+			RwarUSD: rUSD,
 			Rwaone: rwaone,
 			FeePool: feePool,
 			DebtCache: debtCache,
@@ -208,7 +208,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes: ['rUSD', 'rBTC', 'rETH'],
+			rwas: ['rUSD', 'rBTC', 'rETH'],
 			contracts: [
 				'FuturesMarketManager',
 				{ contract: 'PerpsV2MarketStateBTC', properties: { perpSuffix: marketKeySuffix } },
@@ -248,9 +248,9 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			await rUSD.issue(t, traderInitialBalance);
 		}
 
-		// allow owner to suspend system or tribes
+		// allow owner to suspend system or rwas
 		await systemStatus.updateAccessControls(
-			[toBytes32('System'), toBytes32('Tribe')],
+			[toBytes32('System'), toBytes32('Rwa')],
 			[owner, owner],
 			[true, true],
 			[true, true],
@@ -1486,19 +1486,19 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			assert.bnClose((await perpsV2Market.accessibleMargin(trader))[0], toBN('0'), toUnit('0.1'));
 		});
 
-		it('Reverts if the tribe is suspended', async () => {
+		it('Reverts if the rwa is suspended', async () => {
 			await perpsV2Market.transferMargin(toUnit('1000'), { from: trader });
 
 			// suspend
-			await systemStatus.suspendTribe(baseAsset, 65, { from: owner });
+			await systemStatus.suspendRwa(baseAsset, 65, { from: owner });
 			// should revert
 			await assert.revert(
 				perpsV2Market.transferMargin(toUnit('-1000'), { from: trader }),
-				'Tribe is suspended'
+				'Rwa is suspended'
 			);
 
 			// resume
-			await systemStatus.resumeTribe(baseAsset, { from: owner });
+			await systemStatus.resumeRwa(baseAsset, { from: owner });
 			// should work now
 			await perpsV2Market.transferMargin(toUnit('-1000'), { from: trader });
 			assert.bnClose((await perpsV2Market.accessibleMargin(trader))[0], toBN('0'), toUnit('0.1'));
@@ -1881,7 +1881,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			assert.bnEqual(position.lastPrice, fillPrice);
 		});
 
-		it('Cannot modify a position if the tribe is suspended', async () => {
+		it('Cannot modify a position if the rwa is suspended', async () => {
 			const margin = toUnit('1000');
 			await perpsV2Market.transferMargin(margin, { from: trader });
 			const size = toUnit('10');
@@ -1893,15 +1893,15 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 			const desiredFillPrice = fillPriceMeta[1];
 
 			// suspend
-			await systemStatus.suspendTribe(baseAsset, 65, { from: owner });
+			await systemStatus.suspendRwa(baseAsset, 65, { from: owner });
 			// should revert modifying position
 			await assert.revert(
 				perpsV2Market.modifyPosition(size, desiredFillPrice, { from: trader }),
-				'Tribe is suspended'
+				'Rwa is suspended'
 			);
 
 			// resume
-			await systemStatus.resumeTribe(baseAsset, { from: owner });
+			await systemStatus.resumeRwa(baseAsset, { from: owner });
 			// should work now
 			await perpsV2Market.modifyPosition(size, desiredFillPrice, { from: trader });
 			const position = await perpsV2Market.positions(trader);
@@ -3277,19 +3277,19 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 					);
 				});
 
-				it('Reverts if the tribe is suspended', async () => {
+				it('Reverts if the rwa is suspended', async () => {
 					await perpsV2Market.transferMargin(toUnit('1000'), { from: trader });
 
 					// suspend
-					await systemStatus.suspendTribe(baseAsset, 65, { from: owner });
+					await systemStatus.suspendRwa(baseAsset, 65, { from: owner });
 					// should revert
 					await assert.revert(
 						perpsV2Market.withdrawAllMargin({ from: trader }),
-						'Tribe is suspended'
+						'Rwa is suspended'
 					);
 
 					// resume
-					await systemStatus.resumeTribe(baseAsset, { from: owner });
+					await systemStatus.resumeRwa(baseAsset, { from: owner });
 					// should work now
 					await perpsV2Market.withdrawAllMargin({ from: trader });
 					assert.bnClose(
@@ -5510,7 +5510,7 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 				assert.isTrue(await perpsV2Market.canLiquidate(trader));
 			});
 
-			it('No liquidations while the tribe is suspended', async () => {
+			it('No liquidations while the rwa is suspended', async () => {
 				await setPrice(baseAsset, toUnit('250'));
 				await perpsV2Market.transferMargin(toUnit('1000'), { from: trader });
 
@@ -5527,11 +5527,11 @@ contract('PerpsV2Market PerpsV2MarketAtomic', accounts => {
 				assert.isTrue(await perpsV2Market.canLiquidate(trader));
 
 				// suspend
-				await systemStatus.suspendTribe(baseAsset, 65, { from: owner });
+				await systemStatus.suspendRwa(baseAsset, 65, { from: owner });
 				assert.isFalse(await perpsV2Market.canLiquidate(trader));
 
 				// resume
-				await systemStatus.resumeTribe(baseAsset, { from: owner });
+				await systemStatus.resumeRwa(baseAsset, { from: owner });
 				// should work now
 				assert.isTrue(await perpsV2Market.canLiquidate(trader));
 			});

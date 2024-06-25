@@ -17,17 +17,17 @@ const {
 	constants: { ZERO_ADDRESS },
 } = require('../..');
 
-let TribeRedeemer;
+let RwaRedeemer;
 
-contract('TribeRedeemer (unit tests)', async accounts => {
+contract('RwaRedeemer (unit tests)', async accounts => {
 	const [account1] = accounts;
 
 	before(async () => {
-		TribeRedeemer = artifacts.require('TribeRedeemer');
+		RwaRedeemer = artifacts.require('RwaRedeemer');
 	});
 	it('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
-			abi: TribeRedeemer.abi,
+			abi: RwaRedeemer.abi,
 			ignoreParents: ['Owned', 'MixinResolver'],
 			expected: ['deprecate', 'redeem', 'redeemAll', 'redeemPartial'],
 		});
@@ -35,19 +35,19 @@ contract('TribeRedeemer (unit tests)', async accounts => {
 
 	describe('when a contract is instantiated', () => {
 		let instance;
-		let tribe, otherTribe;
+		let rwa, otherRwa;
 		beforeEach(async () => {
 			({ mocks: this.mocks, resolver: this.resolver } = await prepareSmocks({
-				contracts: ['Issuer', 'Tribe:TriberUSD'],
+				contracts: ['Issuer', 'Rwa:RwarUSD'],
 				accounts: accounts.slice(10), // mock using accounts after the first few
 			}));
 		});
 		beforeEach(async () => {
-			tribe = await smock.fake('ERC20');
-			otherTribe = await smock.fake('ERC20');
+			rwa = await smock.fake('ERC20');
+			otherRwa = await smock.fake('ERC20');
 		});
 		beforeEach(async () => {
-			instance = await TribeRedeemer.new(this.resolver.address);
+			instance = await RwaRedeemer.new(this.resolver.address);
 			await instance.rebuildCache();
 		});
 		it('by default there are no obvious redemptions', async () => {
@@ -57,41 +57,41 @@ contract('TribeRedeemer (unit tests)', async accounts => {
 			it('may only be called by the Issuer', async () => {
 				await onlyGivenAddressCanInvoke({
 					fnc: instance.deprecate,
-					args: [tribe.address, parseEther('100')],
+					args: [rwa.address, parseEther('100')],
 					address: this.mocks['Issuer'].address,
 					accounts,
 					reason: 'Restricted to Issuer contract',
 				});
 			});
 
-			describe('when the tribe has some supply', () => {
+			describe('when the rwa has some supply', () => {
 				beforeEach(async () => {
-					tribe.totalSupply.returns(parseEther('999'));
+					rwa.totalSupply.returns(parseEther('999'));
 				});
 
-				describe('when there is sufficient rUSD for the tribe to be deprecated', () => {
+				describe('when there is sufficient rUSD for the rwa to be deprecated', () => {
 					beforeEach(async () => {
 						// smock rUSD balance to prevent the deprecation failing
-						this.mocks['TriberUSD'].balanceOf.returns(parseEther('10000'));
+						this.mocks['RwarUSD'].balanceOf.returns(parseEther('10000'));
 					});
 
 					describe('when successfully executed', () => {
 						let txn;
 
 						beforeEach(async () => {
-							txn = await instance.deprecate(tribe.address, parseEther('10'), {
+							txn = await instance.deprecate(rwa.address, parseEther('10'), {
 								from: this.mocks['Issuer'].address,
 							});
 						});
 						it('updates the redemption with the supplied rate', async () => {
-							assert.bnEqual(await instance.redemptions(tribe.address), parseEther('10'));
+							assert.bnEqual(await instance.redemptions(rwa.address), parseEther('10'));
 						});
 
 						it('emits the correct event', async () => {
-							assert.eventEqual(txn, 'TribeDeprecated', {
-								tribe: tribe.address,
+							assert.eventEqual(txn, 'RwaDeprecated', {
+								rwa: rwa.address,
 								rateToRedeem: parseEther('10'),
-								totalTribeSupply: parseEther('999'),
+								totalRwaSupply: parseEther('999'),
 								supplyInrUSD: parseEther('9990'),
 							});
 						});
@@ -101,187 +101,187 @@ contract('TribeRedeemer (unit tests)', async accounts => {
 
 			it('reverts when the rate is 0', async () => {
 				await assert.revert(
-					instance.deprecate(tribe.address, '0', {
+					instance.deprecate(rwa.address, '0', {
 						from: this.mocks['Issuer'].address,
 					}),
-					'No rate for tribe to redeem'
+					'No rate for rwa to redeem'
 				);
 			});
 
-			describe('when the tribe has some supply', () => {
+			describe('when the rwa has some supply', () => {
 				beforeEach(async () => {
-					tribe.totalSupply.returns(parseEther('1000'));
+					rwa.totalSupply.returns(parseEther('1000'));
 				});
 
 				it('deprecation fails when insufficient rUSD supply', async () => {
 					await assert.revert(
-						instance.deprecate(tribe.address, parseEther('1000'), {
+						instance.deprecate(rwa.address, parseEther('1000'), {
 							from: this.mocks['Issuer'].address,
 						}),
 						'rUSD must first be supplied'
 					);
 				});
 
-				describe('when there is sufficient rUSD for the tribe to be deprecated', () => {
+				describe('when there is sufficient rUSD for the rwa to be deprecated', () => {
 					beforeEach(async () => {
 						// smock rUSD balance to prevent the deprecation failing
-						this.mocks['TriberUSD'].balanceOf.returns(parseEther('2000'));
+						this.mocks['RwarUSD'].balanceOf.returns(parseEther('2000'));
 					});
 					it('then deprecation succeeds', async () => {
-						await instance.deprecate(tribe.address, parseEther('2'), {
+						await instance.deprecate(rwa.address, parseEther('2'), {
 							from: this.mocks['Issuer'].address,
 						});
 					});
 				});
 			});
 
-			describe('when a tribe is deprecated', () => {
+			describe('when a rwa is deprecated', () => {
 				beforeEach(async () => {
-					await instance.deprecate(tribe.address, parseEther('100'), {
+					await instance.deprecate(rwa.address, parseEther('100'), {
 						from: this.mocks['Issuer'].address,
 					});
 				});
 				it('then it cannot be deprecated again', async () => {
 					await assert.revert(
-						instance.deprecate(tribe.address, parseEther('5'), {
+						instance.deprecate(rwa.address, parseEther('5'), {
 							from: this.mocks['Issuer'].address,
 						}),
-						'Tribe is already deprecated'
+						'Rwa is already deprecated'
 					);
 				});
 			});
 		});
 		describe('totalSupply()', () => {
-			it('is 0 when no total supply of the underlying tribe', async () => {
-				assert.equal(await instance.totalSupply(tribe.address), '0');
+			it('is 0 when no total supply of the underlying rwa', async () => {
+				assert.equal(await instance.totalSupply(rwa.address), '0');
 			});
 
-			describe('when a tribe is deprecated', () => {
+			describe('when a rwa is deprecated', () => {
 				beforeEach(async () => {
-					await instance.deprecate(tribe.address, parseEther('100'), {
+					await instance.deprecate(rwa.address, parseEther('100'), {
 						from: this.mocks['Issuer'].address,
 					});
 				});
-				it('total supply is still 0 as no total supply of the underlying tribe', async () => {
-					assert.equal(await instance.totalSupply(tribe.address), '0');
+				it('total supply is still 0 as no total supply of the underlying rwa', async () => {
+					assert.equal(await instance.totalSupply(rwa.address), '0');
 				});
 			});
 
-			describe('when the tribe has some supply', () => {
+			describe('when the rwa has some supply', () => {
 				beforeEach(async () => {
-					tribe.totalSupply.returns(parseEther('1000'));
+					rwa.totalSupply.returns(parseEther('1000'));
 				});
 				it('then totalSupply returns 0 as there is no redemption rate', async () => {
-					assert.equal(await instance.totalSupply(tribe.address), '0');
+					assert.equal(await instance.totalSupply(rwa.address), '0');
 				});
-				describe('when a tribe is deprecated', () => {
+				describe('when a rwa is deprecated', () => {
 					beforeEach(async () => {
 						// smock rUSD balance to prevent the deprecation failing
-						this.mocks['TriberUSD'].balanceOf.returns(parseEther('2000'));
-						await instance.deprecate(tribe.address, parseEther('2'), {
+						this.mocks['RwarUSD'].balanceOf.returns(parseEther('2000'));
+						await instance.deprecate(rwa.address, parseEther('2'), {
 							from: this.mocks['Issuer'].address,
 						});
 					});
-					it('total supply will be the tribe supply multiplied by the redemption rate', async () => {
-						assert.bnEqual(await instance.totalSupply(tribe.address), parseEther('2000'));
+					it('total supply will be the rwa supply multiplied by the redemption rate', async () => {
+						assert.bnEqual(await instance.totalSupply(rwa.address), parseEther('2000'));
 					});
 				});
 			});
 		});
 		describe('balanceOf()', () => {
-			it('is 0 when no balance of the underlying tribe', async () => {
-				assert.equal(await instance.balanceOf(tribe.address, account1), '0');
+			it('is 0 when no balance of the underlying rwa', async () => {
+				assert.equal(await instance.balanceOf(rwa.address, account1), '0');
 			});
 
-			describe('when a tribe is deprecated', () => {
+			describe('when a rwa is deprecated', () => {
 				beforeEach(async () => {
-					await instance.deprecate(tribe.address, parseEther('100'), {
+					await instance.deprecate(rwa.address, parseEther('100'), {
 						from: this.mocks['Issuer'].address,
 					});
 				});
-				it('balance of is still 0 as no total supply of the underlying tribe', async () => {
-					assert.equal(await instance.balanceOf(tribe.address, account1), '0');
+				it('balance of is still 0 as no total supply of the underlying rwa', async () => {
+					assert.equal(await instance.balanceOf(rwa.address, account1), '0');
 				});
 			});
 
-			describe('when the tribe has some balance', () => {
+			describe('when the rwa has some balance', () => {
 				beforeEach(async () => {
-					tribe.balanceOf.returns(parseEther('5'));
+					rwa.balanceOf.returns(parseEther('5'));
 				});
 				it('then balance of still returns 0 as there is no redemption rate', async () => {
-					assert.equal(await instance.balanceOf(tribe.address, account1), '0');
+					assert.equal(await instance.balanceOf(rwa.address, account1), '0');
 				});
-				describe('when a tribe is deprecated', () => {
+				describe('when a rwa is deprecated', () => {
 					beforeEach(async () => {
 						// smock rUSD balance to prevent the deprecation failing
-						this.mocks['TriberUSD'].balanceOf.returns(parseEther('2000'));
-						await instance.deprecate(tribe.address, parseEther('2'), {
+						this.mocks['RwarUSD'].balanceOf.returns(parseEther('2000'));
+						await instance.deprecate(rwa.address, parseEther('2'), {
 							from: this.mocks['Issuer'].address,
 						});
 					});
-					it('balance of will be the tribe supply multiplied by the redemption rate', async () => {
-						assert.bnEqual(await instance.balanceOf(tribe.address, account1), parseEther('10'));
+					it('balance of will be the rwa supply multiplied by the redemption rate', async () => {
+						assert.bnEqual(await instance.balanceOf(rwa.address, account1), parseEther('10'));
 					});
 				});
 			});
 		});
 		describe('redemption', () => {
 			describe('redeem()', () => {
-				it('reverts when tribe not redeemable', async () => {
+				it('reverts when rwa not redeemable', async () => {
 					await assert.revert(
-						instance.redeem(tribe.address, {
+						instance.redeem(rwa.address, {
 							from: account1,
 						}),
-						'Tribe not redeemable'
+						'Rwa not redeemable'
 					);
 				});
 
-				describe('when tribe marked for redemption', () => {
+				describe('when rwa marked for redemption', () => {
 					beforeEach(async () => {
 						// smock rUSD balance to prevent the deprecation failing
-						this.mocks['TriberUSD'].balanceOf.returns(parseEther('2000'));
-						await instance.deprecate(tribe.address, parseEther('2'), {
+						this.mocks['RwarUSD'].balanceOf.returns(parseEther('2000'));
+						await instance.deprecate(rwa.address, parseEther('2'), {
 							from: this.mocks['Issuer'].address,
 						});
 					});
 					it('redemption reverts when user has no balance', async () => {
 						await assert.revert(
-							instance.redeem(tribe.address, {
+							instance.redeem(rwa.address, {
 								from: account1,
 							}),
-							'No balance of tribe to redeem'
+							'No balance of rwa to redeem'
 						);
 					});
-					describe('when the user has a tribe balance', () => {
+					describe('when the user has a rwa balance', () => {
 						let userBalance;
 						beforeEach(async () => {
 							userBalance = parseEther('5');
-							tribe.balanceOf.returns(userBalance);
+							rwa.balanceOf.returns(userBalance);
 						});
 						describe('when redemption is called by the user', () => {
 							let txn;
 							beforeEach(async () => {
-								txn = await instance.redeem(tribe.address, { from: account1 });
+								txn = await instance.redeem(rwa.address, { from: account1 });
 							});
 							it('then Issuer.burnForRedemption is called with the correct arguments', async () => {
 								assert.equal(this.mocks['Issuer'].burnForRedemption.calls.length, 1);
-								assert.equal(this.mocks['Issuer'].burnForRedemption.calls[0][0], tribe.address);
+								assert.equal(this.mocks['Issuer'].burnForRedemption.calls[0][0], rwa.address);
 								assert.equal(this.mocks['Issuer'].burnForRedemption.calls[0][1], account1);
 								assert.bnEqual(this.mocks['Issuer'].burnForRedemption.calls[0][2], userBalance);
 							});
 							it('transfers the correct amount of rUSD to the user', async () => {
-								assert.equal(this.mocks['TriberUSD'].transfer.calls.length, 1);
-								assert.equal(this.mocks['TriberUSD'].transfer.calls[0][0], account1);
+								assert.equal(this.mocks['RwarUSD'].transfer.calls.length, 1);
+								assert.equal(this.mocks['RwarUSD'].transfer.calls[0][0], account1);
 								assert.bnEqual(
-									this.mocks['TriberUSD'].transfer.calls[0][1],
+									this.mocks['RwarUSD'].transfer.calls[0][1],
 									parseEther('10') // 5 units deprecated at price 2 is 10
 								);
 							});
-							it('emitting a TribeRedeemed event', async () => {
-								assert.eventEqual(txn, 'TribeRedeemed', {
-									tribe: tribe.address,
+							it('emitting a RwaRedeemed event', async () => {
+								assert.eventEqual(txn, 'RwaRedeemed', {
+									rwa: rwa.address,
 									account: account1,
-									amountOfTribe: userBalance,
+									amountOfRwa: userBalance,
 									amountInrUSD: parseEther('10'),
 								});
 							});
@@ -290,62 +290,62 @@ contract('TribeRedeemer (unit tests)', async accounts => {
 				});
 			});
 			describe('redeemAll()', () => {
-				it('reverts when neither tribes are redeemable', async () => {
+				it('reverts when neither rwas are redeemable', async () => {
 					await assert.revert(
-						instance.redeemAll([tribe.address, otherTribe.address], {
+						instance.redeemAll([rwa.address, otherRwa.address], {
 							from: account1,
 						}),
-						'Tribe not redeemable'
+						'Rwa not redeemable'
 					);
 				});
 
-				describe('when a tribe marked for redemption', () => {
+				describe('when a rwa marked for redemption', () => {
 					beforeEach(async () => {
 						// smock rUSD balance to prevent the deprecation failing
-						this.mocks['TriberUSD'].balanceOf.returns(parseEther('2000'));
+						this.mocks['RwarUSD'].balanceOf.returns(parseEther('2000'));
 					});
 					beforeEach(async () => {
-						await instance.deprecate(tribe.address, parseEther('2'), {
+						await instance.deprecate(rwa.address, parseEther('2'), {
 							from: this.mocks['Issuer'].address,
 						});
 					});
-					describe('when the user has a tribe balance for both tribes', () => {
+					describe('when the user has a rwa balance for both rwas', () => {
 						let userBalance;
 						beforeEach(async () => {
 							userBalance = parseEther('5');
 							// both mocked with 5 units of balance each for the user
-							tribe.balanceOf.returns(userBalance);
-							otherTribe.balanceOf.returns(userBalance);
+							rwa.balanceOf.returns(userBalance);
+							otherRwa.balanceOf.returns(userBalance);
 						});
-						describe('when redeemAll is called by the user for both tribes', () => {
-							it('reverts when one tribe not redeemable', async () => {
+						describe('when redeemAll is called by the user for both rwas', () => {
+							it('reverts when one rwa not redeemable', async () => {
 								await assert.revert(
-									instance.redeemAll([tribe.address, otherTribe.address], {
+									instance.redeemAll([rwa.address, otherRwa.address], {
 										from: account1,
 									}),
-									'Tribe not redeemable'
+									'Rwa not redeemable'
 								);
 							});
-							describe('when the other tribe is also deprecated', () => {
+							describe('when the other rwa is also deprecated', () => {
 								beforeEach(async () => {
-									await instance.deprecate(otherTribe.address, parseEther('2'), {
+									await instance.deprecate(otherRwa.address, parseEther('2'), {
 										from: this.mocks['Issuer'].address,
 									});
 								});
 
 								describe('when redemption is called by the user', () => {
 									beforeEach(async () => {
-										await instance.redeemAll([tribe.address, otherTribe.address], {
+										await instance.redeemAll([rwa.address, otherRwa.address], {
 											from: account1,
 										});
 									});
 									[0, 1].forEach(i => {
-										describe(`For tribe ${i}`, () => {
+										describe(`For rwa ${i}`, () => {
 											it('then Issuer.burnForRedemption is called with the correct arguments', async () => {
 												assert.equal(this.mocks['Issuer'].burnForRedemption.calls.length, 2);
 												assert.equal(
 													this.mocks['Issuer'].burnForRedemption.calls[i][0],
-													[tribe.address, otherTribe.address][i]
+													[rwa.address, otherRwa.address][i]
 												);
 												assert.equal(this.mocks['Issuer'].burnForRedemption.calls[i][1], account1);
 												assert.bnEqual(
@@ -354,10 +354,10 @@ contract('TribeRedeemer (unit tests)', async accounts => {
 												);
 											});
 											it('transfers the correct amount of rUSD to the user', async () => {
-												assert.equal(this.mocks['TriberUSD'].transfer.calls.length, 2);
-												assert.equal(this.mocks['TriberUSD'].transfer.calls[i][0], account1);
+												assert.equal(this.mocks['RwarUSD'].transfer.calls.length, 2);
+												assert.equal(this.mocks['RwarUSD'].transfer.calls[i][0], account1);
 												assert.bnEqual(
-													this.mocks['TriberUSD'].transfer.calls[i][1],
+													this.mocks['RwarUSD'].transfer.calls[i][1],
 													parseEther('10') // 5 units deprecated at price 2 is 10
 												);
 											});
@@ -370,68 +370,68 @@ contract('TribeRedeemer (unit tests)', async accounts => {
 				});
 			});
 			describe('redeemPartial()', () => {
-				describe('when the user has a tribe balance', () => {
+				describe('when the user has a rwa balance', () => {
 					beforeEach(async () => {
-						tribe.balanceOf.returns(parseEther('1'));
+						rwa.balanceOf.returns(parseEther('1'));
 					});
-					it('reverts when tribe not redeemable', async () => {
+					it('reverts when rwa not redeemable', async () => {
 						await assert.revert(
-							instance.redeemPartial(tribe.address, parseEther('1'), {
+							instance.redeemPartial(rwa.address, parseEther('1'), {
 								from: account1,
 							}),
-							'Tribe not redeemable'
+							'Rwa not redeemable'
 						);
 					});
 				});
 
-				describe('when tribe marked for redemption', () => {
+				describe('when rwa marked for redemption', () => {
 					beforeEach(async () => {
 						// smock rUSD balance to prevent the deprecation failing
-						this.mocks['TriberUSD'].balanceOf.returns(parseEther('2000'));
-						await instance.deprecate(tribe.address, parseEther('2'), {
+						this.mocks['RwarUSD'].balanceOf.returns(parseEther('2000'));
+						await instance.deprecate(rwa.address, parseEther('2'), {
 							from: this.mocks['Issuer'].address,
 						});
 					});
 					it('partial redemption reverts when user has no balance', async () => {
 						await assert.revert(
-							instance.redeemPartial(tribe.address, parseEther('1'), {
+							instance.redeemPartial(rwa.address, parseEther('1'), {
 								from: account1,
 							}),
 							'Insufficient balance'
 						);
 					});
-					describe('when the user has a tribe balance', () => {
+					describe('when the user has a rwa balance', () => {
 						let userBalance;
 						beforeEach(async () => {
 							userBalance = parseEther('5');
-							tribe.balanceOf.returns(userBalance);
+							rwa.balanceOf.returns(userBalance);
 						});
 						describe('when partial redemption is called by the user', () => {
 							let txn;
 							beforeEach(async () => {
-								txn = await instance.redeemPartial(tribe.address, parseEther('1'), {
+								txn = await instance.redeemPartial(rwa.address, parseEther('1'), {
 									from: account1,
 								});
 							});
 							it('then Issuer.burnForRedemption is called with the correct arguments', async () => {
 								assert.equal(this.mocks['Issuer'].burnForRedemption.calls.length, 1);
-								assert.equal(this.mocks['Issuer'].burnForRedemption.calls[0][0], tribe.address);
+								assert.equal(this.mocks['Issuer'].burnForRedemption.calls[0][0], rwa.address);
 								assert.equal(this.mocks['Issuer'].burnForRedemption.calls[0][1], account1);
 								assert.bnEqual(this.mocks['Issuer'].burnForRedemption.calls[0][2], parseEther('1'));
 							});
 							it('transfers the correct amount of rUSD to the user', async () => {
-								assert.equal(this.mocks['TriberUSD'].transfer.calls.length, 1);
-								assert.equal(this.mocks['TriberUSD'].transfer.calls[0][0], account1);
+								assert.equal(this.mocks['RwarUSD'].transfer.calls.length, 1);
+								assert.equal(this.mocks['RwarUSD'].transfer.calls[0][0], account1);
 								assert.bnEqual(
-									this.mocks['TriberUSD'].transfer.calls[0][1],
+									this.mocks['RwarUSD'].transfer.calls[0][1],
 									parseEther('2') // 1 units deprecated at price 2 is 2
 								);
 							});
-							it('emitting a TribeRedeemed event', async () => {
-								assert.eventEqual(txn, 'TribeRedeemed', {
-									tribe: tribe.address,
+							it('emitting a RwaRedeemed event', async () => {
+								assert.eventEqual(txn, 'RwaRedeemed', {
+									rwa: rwa.address,
 									account: account1,
-									amountOfTribe: parseEther('1'),
+									amountOfRwa: parseEther('1'),
 									amountInrUSD: parseEther('2'),
 								});
 							});

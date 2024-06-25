@@ -20,8 +20,8 @@
       console.log("sources", sources);
       const targets = rwaone.getTarget({ network });
       console.log("targets", targets);
-      const tribes = rwaone.getTribes({ network });
-      console.log("tribes", tribes);
+      const rwas = rwaone.getRwas({ network });
+      console.log("rwas", rwas);
       const users = rwaone.getUsers({ network });
       console.log("users", users);
       console.log(
@@ -30,8 +30,8 @@
           "0x534e580000000000000000000000000000000000000000000000000000000000"
       );
       const rETHContract = new ethers.Contract(
-        targets.TriberETH.address,
-        sources[targets.TriberETH.source].abi,
+        targets.RwarETH.address,
+        sources[targets.RwarETH.source].abi,
         ethers.getDefaultProvider(network)
       );
       rETHContract.totalSupply().then(unformattedTotalSupply => {

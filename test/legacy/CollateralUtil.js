@@ -41,10 +41,10 @@ contract('CollateralUtil', async accounts => {
 		feePool,
 		exchangeRates,
 		addressResolver,
-		rUSDTribe,
-		rBTCTribe,
+		rUSDRwa,
+		rBTCRwa,
 		renBTC,
-		tribes,
+		rwas,
 		manager,
 		issuer,
 		util,
@@ -57,14 +57,14 @@ contract('CollateralUtil', async accounts => {
 	};
 
 	const issuerUSDToAccount = async (issueAmount, receiver) => {
-		// Set up the depositor with an amount of tribes to deposit.
-		await rUSDTribe.issue(receiver, issueAmount, {
+		// Set up the depositor with an amount of rwas to deposit.
+		await rUSDRwa.issue(receiver, issueAmount, {
 			from: owner,
 		});
 	};
 
 	const issuerBTCtoAccount = async (issueAmount, receiver) => {
-		await rBTCTribe.issue(receiver, issueAmount, { from: owner });
+		await rBTCRwa.issue(receiver, issueAmount, { from: owner });
 	};
 
 	const issueRenBTCtoAccount = async (issueAmount, receiver) => {
@@ -89,11 +89,11 @@ contract('CollateralUtil', async accounts => {
 	};
 
 	const setupMultiCollateral = async () => {
-		tribes = ['rUSD', 'rBTC'];
+		rwas = ['rUSD', 'rBTC'];
 		({
 			ExchangeRates: exchangeRates,
-			TriberUSD: rUSDTribe,
-			TriberBTC: rBTCTribe,
+			RwarUSD: rUSDRwa,
+			RwarBTC: rBTCRwa,
 			FeePool: feePool,
 			AddressResolver: addressResolver,
 			Issuer: issuer,
@@ -104,7 +104,7 @@ contract('CollateralUtil', async accounts => {
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes,
+			rwas,
 			contracts: [
 				'Rwaone',
 				'FeePool',
@@ -158,18 +158,18 @@ contract('CollateralUtil', async accounts => {
 
 		await manager.addCollaterals([cerc20.address], { from: owner });
 
-		await cerc20.addTribes(
-			['TriberUSD', 'TriberBTC'].map(toBytes32),
+		await cerc20.addRwas(
+			['RwarUSD', 'RwarBTC'].map(toBytes32),
 			['rUSD', 'rBTC'].map(toBytes32),
 			{ from: owner }
 		);
 
-		await manager.addTribes(
-			['TriberUSD', 'TriberBTC'].map(toBytes32),
+		await manager.addRwas(
+			['RwarUSD', 'RwarBTC'].map(toBytes32),
 			['rUSD', 'rBTC'].map(toBytes32),
 			{ from: owner }
 		);
-		// rebuild the cache to add the tribes we need.
+		// rebuild the cache to add the rwas we need.
 		await manager.rebuildCache();
 
 		// Issue ren and set allowance
@@ -217,7 +217,7 @@ contract('CollateralUtil', async accounts => {
 		 * P = liquidation penalty
 		 * Calculates amount of rUSD = (D - V * r) / (1 - (1 + P) * r)
 		 *
-		 * To go back to another tribe, remember to do effective value
+		 * To go back to another rwa, remember to do effective value
 		 */
 
 		beforeEach(async () => {

@@ -27,12 +27,12 @@ const DEFAULTS = {
 	batchSize: 15,
 };
 
-const purgeTribes = async ({
+const purgeRwas = async ({
 	network = DEFAULTS.network,
 	deploymentPath,
 	maxFeePerGas,
 	maxPriorityFeePerGas = DEFAULTS.priorityGasPrice,
-	tribesToPurge = [],
+	rwasToPurge = [],
 	dryRun = false,
 	yes,
 	privateKey,
@@ -45,31 +45,31 @@ const purgeTribes = async ({
 	deploymentPath = deploymentPath || getDeploymentPathForNetwork({ network });
 	ensureDeploymentPath(deploymentPath);
 
-	const { tribes, deployment } = loadAndCheckRequiredSources({
+	const { rwas, deployment } = loadAndCheckRequiredSources({
 		deploymentPath,
 		network,
 	});
 
-	if (tribesToPurge.length < 1) {
-		console.log(gray('No tribes provided. Please use --tribes-to-purge option'));
+	if (rwasToPurge.length < 1) {
+		console.log(gray('No rwas provided. Please use --rwas-to-purge option'));
 		return;
 	}
 
-	// sanity-check the tribe list
-	for (const tribe of tribesToPurge) {
-		if (tribes.filter(({ name }) => name === tribe).length < 1) {
-			console.error(red(`Tribe ${tribe} not found!`));
+	// sanity-check the rwa list
+	for (const rwa of rwasToPurge) {
+		if (rwas.filter(({ name }) => name === rwa).length < 1) {
+			console.error(red(`Rwa ${rwa} not found!`));
 			process.exitCode = 1;
 			return;
-		} else if (['rUSD'].indexOf(tribe) >= 0) {
-			console.error(red(`Tribe ${tribe} cannot be purged`));
+		} else if (['rUSD'].indexOf(rwa) >= 0) {
+			console.error(red(`Rwa ${rwa} cannot be purged`));
 			process.exitCode = 1;
 			return;
 		}
 	}
 
-	if (tribesToPurge.length > 1 && proxyAddress) {
-		console.error(red(`Cannot provide a proxy address with multiple tribes`));
+	if (rwasToPurge.length > 1 && proxyAddress) {
+		console.error(red(`Cannot provide a proxy address with multiple rwas`));
 		process.exitCode = 1;
 		return;
 	}
@@ -109,7 +109,7 @@ const purgeTribes = async ({
 				cyan(
 					`${yellow(
 						'⚠ WARNING'
-					)}: This action will purge the following tribes from the Rwaone contract on ${network}:\n- ${tribesToPurge.join(
+					)}: This action will purge the following rwas from the Rwaone contract on ${network}:\n- ${rwasToPurge.join(
 						'\n- '
 					)}`
 				) + '\nDo you want to continue? (y/n) '
@@ -120,18 +120,18 @@ const purgeTribes = async ({
 		}
 	}
 
-	const { address: tribeetixAddress, source } = deployment.targets['Rwaone'];
-	const { abi: tribeetixABI } = deployment.sources[source];
-	const Rwaone = new ethers.Contract(tribeetixAddress, tribeetixABI, wallet);
+	const { address: rwaoneAddress, source } = deployment.targets['Rwaone'];
+	const { abi: rwaoneABI } = deployment.sources[source];
+	const Rwaone = new ethers.Contract(rwaoneAddress, rwaoneABI, wallet);
 
 	let totalBatches = 0;
-	for (const currencyKey of tribesToPurge) {
-		const { address: tribeAddress, source: tribeSource } = deployment.targets[
-			`Tribe${currencyKey}`
+	for (const currencyKey of rwasToPurge) {
+		const { address: rwaAddress, source: rwaSource } = deployment.targets[
+			`Rwa${currencyKey}`
 		];
 
-		const { abi: tribeABI } = deployment.sources[tribeSource];
-		const Tribe = new ethers.Contract(tribeAddress, tribeABI, wallet);
+		const { abi: rwaABI } = deployment.sources[rwaSource];
+		const Rwa = new ethers.Contract(rwaAddress, rwaABI, wallet);
 		proxyAddress = proxyAddress || deployment.targets[`Proxy${currencyKey}`].address;
 
 		console.log(
@@ -139,22 +139,22 @@ const purgeTribes = async ({
 				'For',
 				currencyKey,
 				'using source of',
-				tribeSource,
+				rwaSource,
 				'at address',
-				tribeAddress,
+				rwaAddress,
 				'proxy',
 				proxyAddress
 			)
 		);
 
-		const currentTribeInRWAX = await Rwaone.tribes(toBytes32(currencyKey));
+		const currentRwaInRWAX = await Rwaone.rwas(toBytes32(currencyKey));
 
-		if (tribeAddress !== currentTribeInRWAX) {
+		if (rwaAddress !== currentRwaInRWAX) {
 			console.error(
 				red(
-					`Tribe address in Rwaone for ${currencyKey} is different from what's deployed in Rwaone to the local ${DEPLOYMENT_FILENAME} of ${network} \ndeployed: ${yellow(
-						currentTribeInRWAX
-					)}\nlocal:    ${yellow(tribeAddress)}`
+					`Rwa address in Rwaone for ${currencyKey} is different from what's deployed in Rwaone to the local ${DEPLOYMENT_FILENAME} of ${network} \ndeployed: ${yellow(
+						currentRwaInRWAX
+					)}\nlocal:    ${yellow(rwaAddress)}`
 				)
 			);
 			process.exitCode = 1;
@@ -175,13 +175,13 @@ const purgeTribes = async ({
 			console.log(gray(`Found ${topTokenHolders.length} possible holders of ${currencyKey}`));
 			// Filter out any 0 holder
 			const supplyPerEntry = await Promise.all(
-				topTokenHolders.map(entry => Tribe.balanceOf(entry))
+				topTokenHolders.map(entry => Rwa.balanceOf(entry))
 			);
 			addresses = topTokenHolders.filter((e, i) => supplyPerEntry[i] !== '0');
 			console.log(gray(`Filtered to ${addresses.length} with supply`));
 		}
 
-		const totalSupplyBefore = ethers.utils.formatEther(await Tribe.totalSupply());
+		const totalSupplyBefore = ethers.utils.formatEther(await Rwa.totalSupply());
 
 		if (Number(totalSupplyBefore) === 0) {
 			console.log(gray('Total supply is 0, exiting.'));
@@ -206,8 +206,8 @@ const purgeTribes = async ({
 			} else {
 				await performTransactionalStep({
 					signer: wallet,
-					contract: `Tribe${currencyKey}`,
-					target: Tribe,
+					contract: `Rwa${currencyKey}`,
+					target: Rwa,
 					write: 'purge',
 					writeArg: [entries], // explicitly pass array of args so array not splat as params
 					maxFeePerGas,
@@ -219,13 +219,13 @@ const purgeTribes = async ({
 		}
 
 		// step 3. confirmation
-		const totalSupply = ethers.utils.formatEther(await Tribe.totalSupply());
+		const totalSupply = ethers.utils.formatEther(await Rwa.totalSupply());
 		if (Number(totalSupply) > 0) {
 			console.log(
 				yellow(
 					`⚠⚠⚠ WARNING: totalSupply is not 0 after purge of ${currencyKey}. It is ${totalSupply}. ` +
 					`Were there 100 or 1000 holders noted above? If so then we have likely hit the tokenHolder ` +
-					`API limit; another purge is required for this tribe.`
+					`API limit; another purge is required for this rwa.`
 				)
 			);
 		}
@@ -234,11 +234,11 @@ const purgeTribes = async ({
 };
 
 module.exports = {
-	purgeTribes,
+	purgeRwas,
 	cmd: program =>
 		program
-			.command('purge-tribes')
-			.description('Purge a number of tribes from the system')
+			.command('purge-rwas')
+			.description('Purge a number of rwas from the system')
 			.option(
 				'-a, --addresses <value>',
 				'The list of holder addresses (use in testnets when Ethplorer API does not return holders)',
@@ -276,7 +276,7 @@ module.exports = {
 			)
 			.option(
 				'-p, --proxy-address <value>',
-				'Override the proxy address for the token (only works with a single tribe given)'
+				'Override the proxy address for the token (only works with a single rwa given)'
 			)
 			.option(
 				'-k, --use-fork',
@@ -285,13 +285,13 @@ module.exports = {
 			)
 			.option('-y, --yes', 'Dont prompt, just reply yes.')
 			.option(
-				'-s, --tribes-to-purge <value>',
-				'The list of tribes to purge',
+				'-s, --rwas-to-purge <value>',
+				'The list of rwas to purge',
 				(val, memo) => {
 					memo.push(val);
 					return memo;
 				},
 				[]
 			)
-			.action(purgeTribes),
+			.action(purgeRwas),
 };

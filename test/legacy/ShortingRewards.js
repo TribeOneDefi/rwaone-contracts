@@ -44,11 +44,11 @@ contract('ShortingRewards', accounts => {
 		rewardsDistribution,
 		systemSettings,
 		feePool,
-		tribes,
+		rwas,
 		short,
-		rUSDTribe,
-		rBTCTribe,
-		rETHTribe,
+		rUSDRwa,
+		rBTCRwa,
+		rETHRwa,
 		issuer,
 		debtCache,
 		managerState,
@@ -79,18 +79,18 @@ contract('ShortingRewards', accounts => {
 	};
 
 	const issuerUSDToAccount = async (issueAmount, receiver) => {
-		// Set up the depositor with an amount of tribes to deposit.
-		await rUSDTribe.issue(receiver, issueAmount, {
+		// Set up the depositor with an amount of rwas to deposit.
+		await rUSDRwa.issue(receiver, issueAmount, {
 			from: owner,
 		});
 	};
 
 	const issuerBTCtoAccount = async (issueAmount, receiver) => {
-		await rBTCTribe.issue(receiver, issueAmount, { from: owner });
+		await rBTCRwa.issue(receiver, issueAmount, { from: owner });
 	};
 
 	const issuerETHToAccount = async (issueAmount, receiver) => {
-		await rETHTribe.issue(receiver, issueAmount, { from: owner });
+		await rETHRwa.issue(receiver, issueAmount, { from: owner });
 	};
 
 	const deployShort = async ({ owner, manager, resolver, collatKey, minColat, minSize }) => {
@@ -109,12 +109,12 @@ contract('ShortingRewards', accounts => {
 	});
 
 	before(async () => {
-		tribes = ['rUSD', 'rBTC', 'rETH', 'iBTC', 'iETH'];
+		rwas = ['rUSD', 'rBTC', 'rETH', 'iBTC', 'iETH'];
 		({
 			ExchangeRates: exchangeRates,
-			TriberUSD: rUSDTribe,
-			TriberBTC: rBTCTribe,
-			TriberETH: rETHTribe,
+			RwarUSD: rUSDRwa,
+			RwarBTC: rBTCRwa,
+			RwarETH: rETHRwa,
 			FeePool: feePool,
 			AddressResolver: addressResolver,
 			Issuer: issuer,
@@ -125,7 +125,7 @@ contract('ShortingRewards', accounts => {
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			tribes,
+			rwas,
 			contracts: [
 				'Rwaone',
 				'FeePool',
@@ -190,19 +190,19 @@ contract('ShortingRewards', accounts => {
 
 		await manager.addCollaterals([short.address], { from: owner });
 
-		await short.addTribes(
-			['TriberBTC', 'TriberETH'].map(toBytes32),
+		await short.addRwas(
+			['RwarBTC', 'RwarETH'].map(toBytes32),
 			['rBTC', 'rETH'].map(toBytes32),
 			{ from: owner }
 		);
 
-		await manager.addShortableTribes(
-			['TriberBTC', 'TriberETH'].map(toBytes32),
+		await manager.addShortableRwas(
+			['RwarBTC', 'RwarETH'].map(toBytes32),
 			['rBTC', 'rETH'].map(toBytes32),
 			{ from: owner }
 		);
 
-		await rUSDTribe.approve(short.address, toUnit(100000), { from: account1 });
+		await rUSDRwa.approve(short.address, toUnit(100000), { from: account1 });
 
 		shortingRewards = await setupContract({
 			accounts,
