@@ -225,6 +225,22 @@ const defaults = {
 	// SIP-120
 	ATOMIC_MAX_VOLUME_PER_BLOCK: w3utils.toWei(`${2e5}`), // 200k
 	ATOMIC_TWAP_WINDOW: '1800', // 30 mins
+	ATOMIC_EXCHANGE_FEE_RATES: {
+		'rUSD': w3utils.toWei('0.003'),
+		'rJPY': w3utils.toWei('0.003'),
+		'rNVDA': w3utils.toWei('0.003'),
+		'rTSLA': w3utils.toWei('0.03'),
+		'rXAU': w3utils.toWei('0.03'),
+		'rPAX': w3utils.toWei('0.03'),
+		'rBTC': w3utils.toWei('0.03'),
+		'rETH': w3utils.toWei('0.03'),
+		'rEUR': w3utils.toWei('0.03'),
+		'rNEWYORK': w3utils.toWei('0.03'),
+		'rATLANTA': w3utils.toWei('0.03'),
+		'rLOSANGLES': w3utils.toWei('0.03'),
+		'rWASHINGTON': w3utils.toWei('0.03'),
+	},
+	
 };
 
 /**
