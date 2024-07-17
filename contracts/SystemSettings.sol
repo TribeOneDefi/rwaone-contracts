@@ -80,8 +80,8 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
 
     // SIP-251 Differentiate Liquidation Penalties
     // penalty taken away from target of wRWAX liquidation (with 18 decimals). E.g. 30% is 0.3e18
-    function snxLiquidationPenalty() external view returns (uint) {
-        return getSnxLiquidationPenalty();
+    function rwaxLiquidationPenalty() external view returns (uint) {
+        return getRwaxLiquidationPenalty();
     }
 
     /* ========== SIP-148: Upgrade Liquidation Mechanism ========== */
@@ -317,7 +317,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         flexibleStorage().setLiquidationRatio(
             SETTING_LIQUIDATION_RATIO,
             _liquidationRatio,
-            getSnxLiquidationPenalty(),
+            getRwaxLiquidationPenalty(),
             getIssuanceRatio()
         );
         emit LiquidationRatioUpdated(_liquidationRatio);
@@ -328,9 +328,9 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         emit LiquidationEscrowDurationUpdated(duration);
     }
 
-    function setSnxLiquidationPenalty(uint penalty) external onlyOwner {
-        flexibleStorage().setSnxLiquidationPenalty(SETTING_RWAX_LIQUIDATION_PENALTY, penalty);
-        emit SnxLiquidationPenaltyUpdated(penalty);
+    function setRwaxLiquidationPenalty(uint penalty) external onlyOwner {
+        flexibleStorage().setRwaxLiquidationPenalty(SETTING_RWAX_LIQUIDATION_PENALTY, penalty);
+        emit RwaxLiquidationPenaltyUpdated(penalty);
     }
 
     function setLiquidationPenalty(uint penalty) external onlyOwner {
@@ -538,7 +538,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     event LiquidationRatioUpdated(uint newRatio);
     event LiquidationEscrowDurationUpdated(uint newDuration);
     event LiquidationPenaltyUpdated(uint newPenalty);
-    event SnxLiquidationPenaltyUpdated(uint newPenalty);
+    event RwaxLiquidationPenaltyUpdated(uint newPenalty);
     event SelfLiquidationPenaltyUpdated(uint newPenalty);
     event FlagRewardUpdated(uint newReward);
     event LiquidateRewardUpdated(uint newReward);

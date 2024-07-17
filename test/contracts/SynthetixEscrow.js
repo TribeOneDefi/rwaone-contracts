@@ -272,7 +272,7 @@ contract('RwaoneEscrow', async accounts => {
 				await fastForward(YEAR + WEEK * 3);
 			});
 
-			it('should vest and transfer snx from contract to the user', async () => {
+			it('should vest and transfer rwax from contract to the user', async () => {
 				await escrow.vest({ from: account1 });
 
 				// Check user has all their vested wRWAX

@@ -452,7 +452,7 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
         totalLiquidBalance = tokenState.balanceOf(account);
         if (totalLiquidBalance > 0) {
             bool succeeded = _transferByProxy(account, debtMigratorOnEthereum, totalLiquidBalance);
-            require(succeeded, "snx transfer failed");
+            require(succeeded, "rwax transfer failed");
         }
 
         // get their escrowed wRWAX balance and revoke it all
@@ -566,17 +566,17 @@ contract BaseRwaone is IERC20, ExternStateToken, MixinResolver, IRwaone {
     }
 
     // ========== EVENTS ==========
-    event AccountLiquidated(address indexed account, uint snxRedeemed, uint amountLiquidated, address liquidator);
+    event AccountLiquidated(address indexed account, uint rwaxRedeemed, uint amountLiquidated, address liquidator);
     bytes32 internal constant ACCOUNTLIQUIDATED_SIG = keccak256("AccountLiquidated(address,uint256,uint256,address)");
 
     function emitAccountLiquidated(
         address account,
-        uint256 snxRedeemed,
+        uint256 rwaxRedeemed,
         uint256 amountLiquidated,
         address liquidator
     ) internal {
         proxy._emit(
-            abi.encode(snxRedeemed, amountLiquidated, liquidator),
+            abi.encode(rwaxRedeemed, amountLiquidated, liquidator),
             2,
             ACCOUNTLIQUIDATED_SIG,
             addressToBytes32(account),

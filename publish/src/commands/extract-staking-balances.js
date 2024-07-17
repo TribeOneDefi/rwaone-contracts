@@ -39,7 +39,7 @@ async function extractStakingBalances({
 		path,
 	});
 
-	const { abi: snxABI } = getSource({ contract: 'Rwaone' });
+	const { abi: rwaxABI } = getSource({ contract: 'Rwaone' });
 
 	/** *********** Replace Settings Here *********** **/
 
@@ -159,8 +159,8 @@ async function extractStakingBalances({
 
 	// Looks for all transfers into the staking contract
 	async function fetchStakedBalances() {
-		const iRwa = new ethers.Contract(iRwaAddress, snxABI, provider);
-		const stakingContract = new ethers.Contract(stakingAddress, snxABI, provider);
+		const iRwa = new ethers.Contract(iRwaAddress, rwaxABI, provider);
+		const stakingContract = new ethers.Contract(stakingAddress, rwaxABI, provider);
 
 		const currentBlock = await provider.getBlockNumber();
 		const deploymentBlockDetails = await provider.getBlock(deploymentBlock);

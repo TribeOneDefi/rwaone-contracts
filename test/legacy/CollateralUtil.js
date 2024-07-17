@@ -201,9 +201,9 @@ contract('CollateralUtil', async accounts => {
 	});
 
 	describe('Default settings', () => {
-		it('snx liquidation penalty', async () => {
-			const snxLiquidationPenalty = await systemSettings.snxLiquidationPenalty();
-			assert.bnEqual(snxLiquidationPenalty, RWAX_LIQUIDATION_PENALTY);
+		it('rwax liquidation penalty', async () => {
+			const rwaxLiquidationPenalty = await systemSettings.rwaxLiquidationPenalty();
+			assert.bnEqual(rwaxLiquidationPenalty, RWAX_LIQUIDATION_PENALTY);
 		});
 	});
 
@@ -259,15 +259,15 @@ contract('CollateralUtil', async accounts => {
 			assert.bnClose(amountToLiquidate, toUnit(5000), '10000');
 		});
 
-		it('ignores snxLiquidationPenalty when calculating the liquidation amount (uses liquidationPenalty)', async () => {
+		it('ignores rwaxLiquidationPenalty when calculating the liquidation amount (uses liquidationPenalty)', async () => {
 			await updateAggregatorRates(exchangeRates, null, [rBTC], [toUnit(7000)]);
 
-			await systemSettings.setSnxLiquidationPenalty(toUnit('0.2'), { from: owner });
+			await systemSettings.setRwaxLiquidationPenalty(toUnit('0.2'), { from: owner });
 			amountToLiquidate = await cerc20.liquidationAmount(id);
 
 			assert.bnClose(amountToLiquidate, toUnit(1250), '10000');
 
-			await systemSettings.setSnxLiquidationPenalty(toUnit('.1'), { from: owner });
+			await systemSettings.setRwaxLiquidationPenalty(toUnit('.1'), { from: owner });
 			amountToLiquidate = await cerc20.liquidationAmount(id);
 
 			assert.bnClose(amountToLiquidate, toUnit(1250), '10000');

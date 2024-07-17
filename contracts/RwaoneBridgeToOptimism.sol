@@ -110,13 +110,13 @@ contract RwaoneBridgeToOptimism is BaseRwaoneBridge, IRwaoneBridgeToOptimism, iO
 
     // ========= RESTRICTED FUNCTIONS ==============
 
-    function closeFeePeriod(uint snxBackedAmount, uint totalDebtShares) external requireInitiationActive {
+    function closeFeePeriod(uint rwaxBackedAmount, uint totalDebtShares) external requireInitiationActive {
         require(msg.sender == address(feePool()), "Only the fee pool can call this");
 
         IRwaoneBridgeToBase bridgeToBase;
         bytes memory messageData = abi.encodeWithSelector(
             bridgeToBase.finalizeFeePeriodClose.selector,
-            snxBackedAmount,
+            rwaxBackedAmount,
             totalDebtShares
         );
 
@@ -127,7 +127,7 @@ contract RwaoneBridgeToOptimism is BaseRwaoneBridge, IRwaoneBridgeToOptimism, iO
             uint32(getCrossDomainMessageGasLimit(CrossDomainMessageGasLimits.CloseFeePeriod))
         );
 
-        emit FeePeriodClosed(snxBackedAmount, totalDebtShares);
+        emit FeePeriodClosed(rwaxBackedAmount, totalDebtShares);
     }
 
     // invoked by Messenger on L1 after L2 waiting period elapses
@@ -243,5 +243,5 @@ contract RwaoneBridgeToOptimism is BaseRwaoneBridge, IRwaoneBridgeToOptimism, iO
 
     event RewardDepositInitiated(address indexed account, uint256 amount);
 
-    event FeePeriodClosed(uint snxBackedDebt, uint totalDebtShares);
+    event FeePeriodClosed(uint rwaxBackedDebt, uint totalDebtShares);
 }

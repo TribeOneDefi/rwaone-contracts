@@ -11,12 +11,12 @@ defaultValue = "local"
 [setting.owner]
 defaultValue = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 
-# some snx and rUSD will be minted by this address
+# some rwax and rUSD will be minted by this address
 [setting.test_user]
 defaultValue = "0x48914229deDd5A9922f44441ffCCfC2Cb7856Ee9"
 
 # how much should wRWAX be worth (6 decimals)
-[setting.rate_snx]
+[setting.rate_rwax]
 defaultValue = "5000000"
 
 # how much should ETH be worth (6 decimals)
@@ -27,11 +27,11 @@ defaultValue = "5000000000"
 [setting.rate_btc]
 defaultValue = "50000000000"
 
-[import.aggregator_snx]
+[import.aggregator_rwax]
 source = "chainlink:0.7-mock"
-options.rate = "<%= settings.rate_snx %>"
+options.rate = "<%= settings.rate_rwax %>"
 options.timestamp = "1558469483"
-options.salt = "snx"
+options.salt = "rwax"
 
 [import.aggregator_eth]
 source = "chainlink:0.7-mock"
@@ -51,7 +51,7 @@ func = "deploy"
 args = ["<%= settings.network %>"]
 modified = ["contracts", "publish/src", "publish/deployed/local"]
 
-[invoke.transfer_owner_snx]
+[invoke.transfer_owner_rwax]
 target = ["ProxyRwaone"]
 
 fromCall.func = "owner"
@@ -180,17 +180,17 @@ args = []
 
 depends = ["invoke.set_ownership"]
 
-[invoke.set_aggregator_snx]
+[invoke.set_aggregator_rwax]
 target = ["ExchangeRates"]
 
 from = "<%= settings.owner %>"
 func = "addAggregator"
 args = [
     "0x534e580000000000000000000000000000000000000000000000000000000000",
-    "<%= imports.aggregator_snx.contracts.aggregator.address %>",
+    "<%= imports.aggregator_rwax.contracts.aggregator.address %>",
 ]
 
-depends = ["invoke.accept_ownership", "import.aggregator_snx"]
+depends = ["invoke.accept_ownership", "import.aggregator_rwax"]
 
 [invoke.set_aggregator_eth]
 target = ["ExchangeRates"]
@@ -241,14 +241,14 @@ func = "takeDebtSnapshot"
 
 depends = ["run.rwaone"]
 
-[invoke.test_user_snx]
+[invoke.test_user_rwax]
 target = ["ProxyRwaone"]
 
 from = "<%= settings.owner %>"
 func = "transfer"
 args = ["<%= settings.test_user %>", "10000000000000000000000000"]
 
-depends = ["invoke.transfer_owner_snx"]
+depends = ["invoke.transfer_owner_rwax"]
 
 [invoke.test_user_mint]
 target = ["Rwaone"]
@@ -259,7 +259,7 @@ args = ["1000000000000000000000"]
 #args = ['1']
 
 depends = [
-    "invoke.test_user_snx",
+    "invoke.test_user_rwax",
     "invoke.increase_snapshot_stale_time",
     "invoke.increase_rate_stale_time",
 ]

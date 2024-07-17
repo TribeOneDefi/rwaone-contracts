@@ -89,7 +89,7 @@ contract DebtMigratorOnOptimism is BaseDebtMigrator, IDebtMigrator {
         address account,
         uint debtSharesMigrated,
         uint escrowMigrated,
-        uint liquidSnxMigrated,
+        uint liquidRwaxMigrated,
         bytes calldata debtPayload
     ) external onlyCounterpart {
         _incrementDebtTransferCounter(DEBT_TRANSFER_RECV, debtSharesMigrated);
@@ -99,11 +99,11 @@ contract DebtMigratorOnOptimism is BaseDebtMigrator, IDebtMigrator {
             _finalizeEscrow(account, escrowMigrated);
         }
 
-        if (liquidSnxMigrated > 0) {
-            _rwaoneERC20().transfer(account, liquidSnxMigrated);
+        if (liquidRwaxMigrated > 0) {
+            _rwaoneERC20().transfer(account, liquidRwaxMigrated);
         }
 
-        emit MigrationFinalized(account, debtSharesMigrated, escrowMigrated, liquidSnxMigrated);
+        emit MigrationFinalized(account, debtSharesMigrated, escrowMigrated, liquidRwaxMigrated);
     }
 
     /* ========== EVENTS ========== */

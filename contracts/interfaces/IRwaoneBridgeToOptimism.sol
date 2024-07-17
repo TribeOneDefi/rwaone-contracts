@@ -2,7 +2,7 @@ pragma solidity >=0.4.24;
 pragma experimental ABIEncoderV2;
 
 interface IRwaoneBridgeToOptimism {
-    function closeFeePeriod(uint snxBackedDebt, uint debtSharesSupply) external;
+    function closeFeePeriod(uint rwaxBackedDebt, uint debtSharesSupply) external;
 
     function migrateEscrow(uint256[][] calldata entryIDs) external;
 

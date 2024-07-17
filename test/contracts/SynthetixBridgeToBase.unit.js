@@ -9,7 +9,7 @@ const { expect } = require('chai');
 const RwaoneBridgeToBase = artifacts.require('RwaoneBridgeToBase');
 
 contract('RwaoneBridgeToBase (unit tests)', accounts => {
-	const [owner, user1, snxBridgeToOptimism, smockedMessenger, randomAddress] = accounts;
+	const [owner, user1, rwaxBridgeToOptimism, smockedMessenger, randomAddress] = accounts;
 
 	it('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
@@ -73,7 +73,7 @@ contract('RwaoneBridgeToBase (unit tests)', accounts => {
 					flexibleStorage.address,
 					messenger.address,
 					mintableRwaone.address,
-					snxBridgeToOptimism,
+					rwaxBridgeToOptimism,
 					rewardEscrow.address,
 					feePool.address,
 					issuer.address,
@@ -91,7 +91,7 @@ contract('RwaoneBridgeToBase (unit tests)', accounts => {
 			mintableRwaone.balanceOf.returns(() => web3.utils.toWei('1'));
 			mintableRwaone.transferableRwaone.returns(() => web3.utils.toWei('1'));
 			messenger.sendMessage.returns(() => { });
-			messenger.xDomainMessageSender.returns(() => snxBridgeToOptimism);
+			messenger.xDomainMessageSender.returns(() => rwaxBridgeToOptimism);
 			rewardEscrow.importVestingEntries.returns(() => { });
 			flexibleStorage.getUIntValue.returns(() => '3000000');
 		});
@@ -166,7 +166,7 @@ contract('RwaoneBridgeToBase (unit tests)', accounts => {
 
 			describe('withdraw', () => {
 				describe('failure modes', () => {
-					it('does not work when the user has less trasferable snx than the withdrawal amount', async () => {
+					it('does not work when the user has less trasferable rwax than the withdrawal amount', async () => {
 						mintableRwaone.transferableRwaone.returns(() => '0');
 						await assert.revert(instance.withdraw('1'), 'Not enough transferable wRWAX');
 					});
@@ -193,7 +193,7 @@ contract('RwaoneBridgeToBase (unit tests)', accounts => {
 
 					it('the message is relayed', async () => {
 						expect(messenger.sendMessage).to.have.length(0);
-						messenger.sendMessage.returnsAtCall(0, snxBridgeToOptimism);
+						messenger.sendMessage.returnsAtCall(0, rwaxBridgeToOptimism);
 						const expectedData = getDataOfEncodedFncCall({
 							fnc: 'finalizeWithdrawal',
 							args: [user1, amount],
@@ -215,7 +215,7 @@ contract('RwaoneBridgeToBase (unit tests)', accounts => {
 
 			describe('withdrawTo', () => {
 				describe('failure modes', () => {
-					it('does not work when the user has less trasferable snx than the withdrawal amount', async () => {
+					it('does not work when the user has less trasferable rwax than the withdrawal amount', async () => {
 						mintableRwaone.transferableRwaone.returns(() => '0');
 						await assert.revert(
 							instance.withdrawTo(randomAddress, '1'),
@@ -245,7 +245,7 @@ contract('RwaoneBridgeToBase (unit tests)', accounts => {
 
 					it('the message is relayed', async () => {
 						expect(messenger.sendMessage).to.have.length(0);
-						messenger.sendMessage.returnsAtCall(0, snxBridgeToOptimism);
+						messenger.sendMessage.returnsAtCall(0, rwaxBridgeToOptimism);
 						const expectedData = getDataOfEncodedFncCall({
 							fnc: 'finalizeWithdrawal',
 							args: [randomAddress, amount],

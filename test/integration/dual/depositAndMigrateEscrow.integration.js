@@ -13,7 +13,7 @@ describe('depositAndMigrateEscrow() integration tests (L1, L2)', () => {
 	let Rwaone, RewardEscrowV2, RwaoneBridgeToOptimism;
 
 	let initialParametersL1, initialParametersL2, initialUserL1Balance;
-	const snxAmount = ethers.utils.parseEther('100');
+	const rwaxAmount = ethers.utils.parseEther('100');
 
 	before('record initial escrow state', async () => {
 		initialParametersL1 = await retrieveEscrowParameters({ ctx: ctx.l1 });
@@ -32,7 +32,7 @@ describe('depositAndMigrateEscrow() integration tests (L1, L2)', () => {
 			token: Rwaone,
 			owner: user,
 			beneficiary: RewardEscrowV2,
-			amount: snxAmount,
+			amount: rwaxAmount,
 		});
 	});
 

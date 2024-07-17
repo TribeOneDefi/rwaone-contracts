@@ -91,10 +91,10 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
     }
 
     function liquidationPenalty() external view returns (uint) {
-        // SIP-251: use getSnxLiquidationPenalty instead of getLiquidationPenalty
+        // SIP-251: use getRwaxLiquidationPenalty instead of getLiquidationPenalty
         // which is used for loans / shorts (collateral contracts).
         // Keeping the view name because it makes sense in the context of this contract.
-        return getSnxLiquidationPenalty();
+        return getRwaxLiquidationPenalty();
     }
 
     function selfLiquidationPenalty() external view returns (uint) {
@@ -145,7 +145,7 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
         } else {
             // Not open for self-liquidation when the account's collateral value is less than debt issued + forced penalty
             uint unit = SafeDecimalMath.unit();
-            if (accountCollateralisationRatio > (unit.divideDecimal(unit.add(getSnxLiquidationPenalty())))) {
+            if (accountCollateralisationRatio > (unit.divideDecimal(unit.add(getRwaxLiquidationPenalty())))) {
                 return false;
             }
         }
@@ -231,7 +231,7 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
     /* ========== MUTATIVE FUNCTIONS ========== */
 
     // totalIssuedRwas checks rwas for staleness
-    // check snx rate is not stale
+    // check rwax rate is not stale
     function flagAccountForLiquidation(address account) external rateNotInvalid("wRWAX") {
         systemStatus().requireSystemActive();
 

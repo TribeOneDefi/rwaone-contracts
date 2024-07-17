@@ -487,7 +487,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 					});
 
 					describe('when exchange rates hit circuit breakers', () => {
-						behaviors.whenMockedSusdAndSethSeparatelyToIssueAndBurn(() => {
+						behaviors.whenMockedRusdAndSethSeparatelyToIssueAndBurn(() => {
 							behaviors.whenMockedWithExchangeRatesValidity({ valid: true }, () => {
 								behaviors.whenMockedWithNoPriorExchangesToSettle(() => {
 									behaviors.whenMockedWithRwaUintSystemSetting(
@@ -603,7 +603,7 @@ contract('ExchangerWithFeeRecAlternatives (unit tests)', async accounts => {
 						const lastUsdRate = unit;
 						const lastEthRate = toUnit('100'); // 1 ETH -> 100 USD
 
-						behaviors.whenMockedSusdAndSethSeparatelyToIssueAndBurn(() => {
+						behaviors.whenMockedRusdAndSethSeparatelyToIssueAndBurn(() => {
 							behaviors.whenMockedFeePool(() => {
 								behaviors.whenMockedWithExchangeRatesValidity({ valid: true }, () => {
 									behaviors.whenMockedWithNoPriorExchangesToSettle(() => {

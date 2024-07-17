@@ -290,7 +290,7 @@ module.exports = function ({ accounts }) {
 				cb();
 			});
 		},
-		whenMockedSusdAndSethSeparatelyToIssueAndBurn: cb => {
+		whenMockedRusdAndSethSeparatelyToIssueAndBurn: cb => {
 			describe(`when mocked rUSD and rETH`, () => {
 				async function mockRwa(currencyKey) {
 					const rwa = await smock.fake('Rwa');

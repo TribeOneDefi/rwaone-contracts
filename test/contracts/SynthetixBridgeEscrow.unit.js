@@ -7,7 +7,7 @@ const { smock } = require('@defi-wonderland/smock');
 const RwaoneBridgeEscrow = artifacts.require('RwaoneBridgeEscrow');
 
 contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
-	const [owner, snxBridgeToOptimism] = accounts;
+	const [owner, rwaxBridgeToOptimism] = accounts;
 
 	it('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
@@ -45,7 +45,7 @@ contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 					it('reverts when not invoked by the owner', async () => {
 						await onlyGivenAddressCanInvoke({
 							fnc: instance.approveBridge,
-							args: [IERC20.address, snxBridgeToOptimism, '100'],
+							args: [IERC20.address, rwaxBridgeToOptimism, '100'],
 							accounts,
 							reason: 'Only the contract owner may perform this action',
 							address: owner,
@@ -57,17 +57,17 @@ contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 					let txn;
 					const amount = '100';
 					beforeEach(async () => {
-						txn = await instance.approveBridge(IERC20.address, snxBridgeToOptimism, amount, {
+						txn = await instance.approveBridge(IERC20.address, rwaxBridgeToOptimism, amount, {
 							from: owner,
 						});
 					});
 
 					it('an BridgeApproval event is emitted', async () => {
-						assert.eventEqual(txn, 'BridgeApproval', [IERC20.address, snxBridgeToOptimism, amount]);
+						assert.eventEqual(txn, 'BridgeApproval', [IERC20.address, rwaxBridgeToOptimism, amount]);
 					});
 
 					it('approve is called via Rwaone', async () => {
-						IERC20.approve.returnsAtCall(0, snxBridgeToOptimism);
+						IERC20.approve.returnsAtCall(0, rwaxBridgeToOptimism);
 						IERC20.approve.returnsAtCall(1, amount);
 					});
 				});

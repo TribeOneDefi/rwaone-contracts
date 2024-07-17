@@ -38,7 +38,7 @@ interface IIssuerInternalDebtCache {
 
     function updateDebtCacheValidity(bool currentlyInvalid) external;
 
-    function totalNonSnxBackedDebt() external view returns (uint excludedDebt, bool isInvalid);
+    function totalNonRwaxBackedDebt() external view returns (uint excludedDebt, bool isInvalid);
 
     function cacheInfo() external view returns (uint cachedDebt, uint timestamp, bool isInvalid, bool isStale);
 
@@ -205,7 +205,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return rwaoneDebtShare().balanceOf(account);
     }
 
-    function _snxBalanceOf(address account) internal view returns (uint) {
+    function _rwaxBalanceOf(address account) internal view returns (uint) {
         return rwaoneERC20().balanceOf(account);
     }
 
@@ -236,10 +236,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (uint debt, , bool cacheIsInvalid, bool cacheIsStale) = debtCache().cacheInfo();
         anyRateIsInvalid = cacheIsInvalid || cacheIsStale;
 
-        // Add total issued rwas from non snx collateral back into the total if not excluded
+        // Add total issued rwas from non rwax collateral back into the total if not excluded
         if (!excludeCollateral) {
-            (uint nonSnxDebt, bool invalid) = debtCache().totalNonSnxBackedDebt();
-            debt = debt.add(nonSnxDebt);
+            (uint nonRwaxDebt, bool invalid) = debtCache().totalNonRwaxBackedDebt();
+            debt = debt.add(nonRwaxDebt);
             anyRateIsInvalid = anyRateIsInvalid || invalid;
         }
 
@@ -256,17 +256,17 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         bytes32 currencyKey
     ) internal view returns (uint debtBalance, uint totalSystemValue, bool anyRateIsInvalid) {
         // What's the total value of the system excluding ETH backed rwas in their requested currency?
-        (uint snxBackedAmount, , bool debtInfoStale) = allNetworksDebtInfo();
+        (uint rwaxBackedAmount, , bool debtInfoStale) = allNetworksDebtInfo();
 
         if (debtShareBalance == 0) {
-            return (0, snxBackedAmount, debtInfoStale);
+            return (0, rwaxBackedAmount, debtInfoStale);
         }
 
         // existing functionality requires for us to convert into the exchange rate specified by `currencyKey`
         (uint currencyRate, bool currencyRateInvalid) = _rateAndInvalid(currencyKey);
 
         debtBalance = _debtForShares(debtShareBalance).divideDecimalRound(currencyRate);
-        totalSystemValue = snxBackedAmount;
+        totalSystemValue = rwaxBackedAmount;
 
         anyRateIsInvalid = currencyRateInvalid || debtInfoStale;
     }
@@ -295,18 +295,18 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
     }
 
-    function _snxToUSD(uint amount, uint snxRate) internal pure returns (uint) {
-        return amount.multiplyDecimalRound(snxRate);
+    function _rwaxToUSD(uint amount, uint rwaxRate) internal pure returns (uint) {
+        return amount.multiplyDecimalRound(rwaxRate);
     }
 
-    function _usdToSnx(uint amount, uint snxRate) internal pure returns (uint) {
-        return amount.divideDecimalRound(snxRate);
+    function _usdToRwax(uint amount, uint rwaxRate) internal pure returns (uint) {
+        return amount.divideDecimalRound(rwaxRate);
     }
 
     function _maxIssuableRwas(address _issuer) internal view returns (uint, bool) {
         // What is the value of their wRWAX balance in rUSD
-        (uint snxRate, bool isInvalid) = _rateAndInvalid(wRWAX);
-        uint destinationValue = _snxToUSD(_collateral(_issuer), snxRate);
+        (uint rwaxRate, bool isInvalid) = _rateAndInvalid(wRWAX);
+        uint destinationValue = _rwaxToUSD(_collateral(_issuer), rwaxRate);
 
         // They're allowed to issue up to issuanceRatio of that value
         return (destinationValue.multiplyDecimal(getIssuanceRatio()), isInvalid);
@@ -324,7 +324,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     }
 
     function _collateral(address account) internal view returns (uint) {
-        return _snxBalanceOf(account).add(_rewardEscrowBalanceOf(account)).add(liquidatorRewards().earned(account));
+        return _rwaxBalanceOf(account).add(_rewardEscrowBalanceOf(account)).add(liquidatorRewards().earned(account));
     }
 
     function minimumStakeTime() external view returns (uint) {
@@ -697,8 +697,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (debtBalance, , anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_debtShareBalanceOf(account), rUSD);
 
         // Get the wRWAX rate
-        (uint snxRate, bool snxRateInvalid) = _rateAndInvalid(wRWAX);
-        _requireRatesNotInvalid(anyRateIsInvalid || snxRateInvalid);
+        (uint rwaxRate, bool rwaxRateInvalid) = _rateAndInvalid(wRWAX);
+        _requireRatesNotInvalid(anyRateIsInvalid || rwaxRateInvalid);
 
         uint penalty;
         if (isSelfLiquidation) {
@@ -708,17 +708,17 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             // Calculate the amount of debt to remove and wRWAX to redeem for a self liquidation
             debtToRemove = liquidator().calculateAmountToFixCollateral(
                 debtBalance,
-                _snxToUSD(_collateral(account), snxRate),
+                _rwaxToUSD(_collateral(account), rwaxRate),
                 penalty
             );
 
             // Get the minimum values for both totalRedeemed and debtToRemove
             totalRedeemed = _getMinValue(
-                _usdToSnx(debtToRemove, snxRate).multiplyDecimal(SafeDecimalMath.unit().add(penalty)),
-                _snxBalanceOf(account)
+                _usdToRwax(debtToRemove, rwaxRate).multiplyDecimal(SafeDecimalMath.unit().add(penalty)),
+                _rwaxBalanceOf(account)
             );
             debtToRemove = _getMinValue(
-                _snxToUSD(totalRedeemed, snxRate).divideDecimal(SafeDecimalMath.unit().add(penalty)),
+                _rwaxToUSD(totalRedeemed, rwaxRate).divideDecimal(SafeDecimalMath.unit().add(penalty)),
                 debtToRemove
             );
 
@@ -727,15 +727,15 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         } else {
             // In the case of forced Liquidation
             // Get the forced liquidation penalty and sum of the flag and liquidate rewards.
-            penalty = getSnxLiquidationPenalty();
+            penalty = getRwaxLiquidationPenalty();
             uint rewardsSum = getLiquidateReward().add(getFlagReward());
 
             // Get the total USD value of their wRWAX collateral (including escrow and rewards minus the flag and liquidate rewards)
-            uint collateralForAccountUSD = _snxToUSD(_collateral(account).sub(rewardsSum), snxRate);
+            uint collateralForAccountUSD = _rwaxToUSD(_collateral(account).sub(rewardsSum), rwaxRate);
 
             // Calculate the amount of debt to remove and the rUSD value of the wRWAX required to liquidate.
             debtToRemove = liquidator().calculateAmountToFixCollateral(debtBalance, collateralForAccountUSD, penalty);
-            uint redeemTarget = _usdToSnx(debtToRemove, snxRate).multiplyDecimal(SafeDecimalMath.unit().add(penalty));
+            uint redeemTarget = _usdToRwax(debtToRemove, rwaxRate).multiplyDecimal(SafeDecimalMath.unit().add(penalty));
 
             if (redeemTarget.add(rewardsSum) >= _collateral(account)) {
                 // need to wipe out the account
@@ -761,7 +761,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     ) internal view returns (uint totalRedeemed, uint escrowToLiquidate) {
         // The balanceOf here can be considered "transferable" since it's not escrowed,
         // and it is the only wRWAX that can potentially be transfered if unstaked.
-        uint transferable = _snxBalanceOf(account);
+        uint transferable = _rwaxBalanceOf(account);
         if (redeemTarget.add(rewardsSum) <= transferable) {
             // transferable is enough
             return (redeemTarget, 0);
@@ -873,8 +873,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
 
         (uint existingDebt, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_debtShareBalanceOf(from), rUSD);
-        (uint maxIssuableRwasForAccount, bool snxRateInvalid) = _maxIssuableRwas(from);
-        _requireRatesNotInvalid(anyRateIsInvalid || snxRateInvalid);
+        (uint maxIssuableRwasForAccount, bool rwaxRateInvalid) = _maxIssuableRwas(from);
+        _requireRatesNotInvalid(anyRateIsInvalid || rwaxRateInvalid);
         require(existingDebt > 0, "No debt to forgive");
 
         if (burnToTarget) {

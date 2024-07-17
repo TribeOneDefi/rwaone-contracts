@@ -103,11 +103,11 @@ contract RwaoneBridgeToBase is BaseRwaoneBridge, IRwaoneBridgeToBase, iOVM_L2Dep
     }
 
     // invoked by Messenger on L2
-    function finalizeFeePeriodClose(uint256 snxBackedAmount, uint256 totalDebtShares) external onlyCounterpart {
+    function finalizeFeePeriodClose(uint256 rwaxBackedAmount, uint256 totalDebtShares) external onlyCounterpart {
         // now tell Rwaone to mint these tokens, deposited in L1, into reward escrow on L2
-        feePool().closeSecondary(snxBackedAmount, totalDebtShares);
+        feePool().closeSecondary(rwaxBackedAmount, totalDebtShares);
 
-        emit FeePeriodCloseFinalized(snxBackedAmount, totalDebtShares);
+        emit FeePeriodCloseFinalized(rwaxBackedAmount, totalDebtShares);
     }
 
     // ========== EVENTS ==========
@@ -118,5 +118,5 @@ contract RwaoneBridgeToBase is BaseRwaoneBridge, IRwaoneBridgeToBase, iOVM_L2Dep
     );
 
     event RewardDepositFinalized(address from, uint256 amount);
-    event FeePeriodCloseFinalized(uint snxBackedAmount, uint totalDebtShares);
+    event FeePeriodCloseFinalized(uint rwaxBackedAmount, uint totalDebtShares);
 }

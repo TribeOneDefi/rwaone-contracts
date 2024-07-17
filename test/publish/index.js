@@ -24,7 +24,7 @@ const commands = {
 	removeRwas: require('../../publish/src/commands/remove-rwas').removeRwas,
 };
 
-const snx = require('../..');
+const rwax = require('../..');
 const {
 	toBytes32,
 	constants: {
@@ -51,7 +51,7 @@ const {
 		ATOMIC_TWAP_WINDOW,
 	},
 	wrap,
-} = snx;
+} = rwax;
 
 const concurrency = isCI ? 1 : 10;
 const limitPromise = pLimit(concurrency);
@@ -287,7 +287,7 @@ describe('publish scripts', () => {
 					assert.strictEqual((await Liquidator.liquidationDelay()).toString(), LIQUIDATION_DELAY);
 					assert.strictEqual((await Liquidator.liquidationRatio()).toString(), LIQUIDATION_RATIO);
 					assert.strictEqual(
-						(await SystemSettings.snxLiquidationPenalty()).toString(),
+						(await SystemSettings.rwaxLiquidationPenalty()).toString(),
 						RWAX_LIQUIDATION_PENALTY
 					);
 					assert.strictEqual((await ExchangeRates.rateStalePeriod()).toString(), RATE_STALE_PERIOD);
@@ -312,7 +312,7 @@ describe('publish scripts', () => {
 					let newLiquidationsDelay;
 					let newLiquidationsRatio;
 					let newLiquidationsPenalty;
-					let newSnxLiquidationsPenalty;
+					let newRwaxLiquidationsPenalty;
 					let newRateStalePeriod;
 					let newAtomicTwapWindow;
 					let newRateForrUSD;
@@ -329,7 +329,7 @@ describe('publish scripts', () => {
 						newLiquidationsDelay = newFeePeriodDuration;
 						newLiquidationsRatio = ethers.utils.parseEther('0.6').toString(); // must be above newIssuanceRatio * 2
 						newLiquidationsPenalty = ethers.utils.parseEther('0.25').toString();
-						newSnxLiquidationsPenalty = ethers.utils.parseEther('0.25').toString();
+						newRwaxLiquidationsPenalty = ethers.utils.parseEther('0.25').toString();
 						newRateStalePeriod = '3400';
 						newAtomicTwapWindow = '1800';
 						newRateForrUSD = ethers.utils.parseEther('0.1').toString();
@@ -368,8 +368,8 @@ describe('publish scripts', () => {
 						tx = await SystemSettings.setLiquidationRatio(newLiquidationsRatio, overrides);
 						await tx.wait();
 
-						tx = await SystemSettings.setSnxLiquidationPenalty(
-							newSnxLiquidationsPenalty,
+						tx = await SystemSettings.setRwaxLiquidationPenalty(
+							newRwaxLiquidationsPenalty,
 							overrides
 						);
 						await tx.wait();
@@ -448,8 +448,8 @@ describe('publish scripts', () => {
 								newLiquidationsRatio
 							);
 							assert.strictEqual(
-								(await SystemSettings.snxLiquidationPenalty()).toString(),
-								newSnxLiquidationsPenalty
+								(await SystemSettings.rwaxLiquidationPenalty()).toString(),
+								newRwaxLiquidationsPenalty
 							);
 							assert.strictEqual(
 								(await ExchangeRates.rateStalePeriod()).toString(),
@@ -1122,7 +1122,7 @@ describe('publish scripts', () => {
 									'SystemStatus',
 								].map(contractName =>
 									callMethodWithRetry(
-										AddressResolver.getAddress(snx.toBytes32(contractName))
+										AddressResolver.getAddress(rwax.toBytes32(contractName))
 									).then(found => ({ contractName, ok: found === targets[contractName].address }))
 								)
 							);
@@ -1149,7 +1149,7 @@ describe('publish scripts', () => {
 							AddressResolver = getContract({ target: 'AddressResolver' });
 
 							const existingExchanger = await callMethodWithRetry(
-								AddressResolver.getAddress(snx.toBytes32('Exchanger'))
+								AddressResolver.getAddress(rwax.toBytes32('Exchanger'))
 							);
 
 							assert.strictEqual(existingExchanger, targets['Exchanger'].address);
@@ -1167,7 +1167,7 @@ describe('publish scripts', () => {
 							const targets = getTarget();
 
 							const actualExchanger = await callMethodWithRetry(
-								AddressResolver.getAddress(snx.toBytes32('Exchanger'))
+								AddressResolver.getAddress(rwax.toBytes32('Exchanger'))
 							);
 
 							assert.strictEqual(actualExchanger, targets['Exchanger'].address);

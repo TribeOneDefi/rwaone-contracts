@@ -31,9 +31,9 @@ contract('LiquidatorRewards', accounts => {
 	const ZERO_BN = toBN(0);
 
 	const setupStakers = async () => {
-		const snxCollateral = toUnit('1000');
-		await rwaone.transfer(stakingAccount1, snxCollateral, { from: owner });
-		await rwaone.transfer(stakingAccount2, snxCollateral, { from: owner });
+		const rwaxCollateral = toUnit('1000');
+		await rwaone.transfer(stakingAccount1, rwaxCollateral, { from: owner });
+		await rwaone.transfer(stakingAccount2, rwaxCollateral, { from: owner });
 
 		await rwaone.issueMaxRwas({ from: stakingAccount1 });
 		await rwaone.issueMaxRwas({ from: stakingAccount2 });

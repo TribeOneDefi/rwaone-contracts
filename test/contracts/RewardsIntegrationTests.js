@@ -200,8 +200,8 @@ contract('Rewards Integration Tests', accounts => {
 		await fastForwardAndUpdateRates(WEEK + DAY);
 
 		// Assign 1/3 of total wRWAX to 3 accounts
-		const snxTotalSupply = await rwaone.totalSupply();
-		const thirdOfRWAX = third(snxTotalSupply);
+		const rwaxTotalSupply = await rwaone.totalSupply();
+		const thirdOfRWAX = third(rwaxTotalSupply);
 
 		await rwaone.transfer(account1, thirdOfRWAX, { from: owner });
 		await rwaone.transfer(account2, thirdOfRWAX, { from: owner });
@@ -963,8 +963,8 @@ contract('Rewards Integration Tests', accounts => {
 			// we will be able to claim fees
 			assert.equal(await feePool.isFeesClaimable(account1), true);
 
-			const snxRewards = await feePool.feesAvailable(account1);
-			assert.bnClose(snxRewards[1], third(periodOneMintableSupplyMinusMinterReward), gweiTolerance);
+			const rwaxRewards = await feePool.feesAvailable(account1);
+			assert.bnClose(rwaxRewards[1], third(periodOneMintableSupplyMinusMinterReward), gweiTolerance);
 
 			// And if we claim them
 			await feePool.claimFees({ from: account1 });
@@ -1010,7 +1010,7 @@ contract('Rewards Integration Tests', accounts => {
 			const claimFeesTx = await feePool.claimFees({ from: account2 });
 			assert.eventEqual(claimFeesTx, 'FeesClaimed', {
 				rUSDAmount: feesAvailableUSD[0],
-				snxRewards: feesAvailableUSD[1],
+				rwaxRewards: feesAvailableUSD[1],
 			});
 
 			const newUSDBalance = await rUSDContract.balanceOf(account2);
@@ -1042,7 +1042,7 @@ contract('Rewards Integration Tests', accounts => {
 			const transaction = await feePool.claimFees({ from: account1 });
 			assert.eventEqual(transaction, 'FeesClaimed', {
 				rUSDAmount: feesAvailableUSDAcc1[0],
-				snxRewards: feesAvailableUSDAcc1[1],
+				rwaxRewards: feesAvailableUSDAcc1[1],
 			});
 		});
 	});

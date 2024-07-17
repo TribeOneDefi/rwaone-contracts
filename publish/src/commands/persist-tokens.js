@@ -51,7 +51,7 @@ const persistTokens = async ({ network, yes, privateKey, assetsVersion }) => {
 
 	const output = {
 		name: 'Rwaone',
-		logoURI: `${baseURI}/snx/wRWAX.svg`,
+		logoURI: `${baseURI}/rwax/wRWAX.svg`,
 		keywords: ['rwaone', 'defi', 'derivatives', 'rwas', 'rwaones'],
 		timestamp: new Date().toISOString(),
 		tags: {
@@ -80,7 +80,7 @@ const persistTokens = async ({ network, yes, privateKey, assetsVersion }) => {
 			symbol,
 			name: symbol === 'wRWAX' ? 'Rwaone Network Token' : `Rwa ${name}`,
 			decimals,
-			logoURI: baseURI + (symbol === 'wRWAX' ? '/snx/wRWAX.svg' : `/rwas/${symbol}.svg`),
+			logoURI: baseURI + (symbol === 'wRWAX' ? '/rwax/wRWAX.svg' : `/rwas/${symbol}.svg`),
 			tags: [].concat(index ? 'index' : []).concat(symbol !== 'wRWAX' ? 'rwa' : []),
 		})),
 	};
@@ -128,7 +128,7 @@ const persistTokens = async ({ network, yes, privateKey, assetsVersion }) => {
 		process.exit(1);
 	}
 
-	const ensName = 'rwas.snx.eth';
+	const ensName = 'rwas.rwax.eth';
 	const content = `ipfs://${hash}`;
 
 	console.log(red('setContent not emitted. Not supported at the moment.'));

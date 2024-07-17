@@ -1448,12 +1448,12 @@ contract('DebtCache', async accounts => {
 		});
 	});
 
-	describe('totalNonSnxBackedDebt', async () => {
-		let totalNonSnxBackedDebt;
+	describe('totalNonRwaxBackedDebt', async () => {
+		let totalNonRwaxBackedDebt;
 		let currentDebt;
 
-		const getTotalNonSnxBackedDebt = async () => {
-			const { excludedDebt } = await debtCache.totalNonSnxBackedDebt();
+		const getTotalNonRwaxBackedDebt = async () => {
+			const { excludedDebt } = await debtCache.totalNonRwaxBackedDebt();
 			return excludedDebt;
 		};
 
@@ -1463,7 +1463,7 @@ contract('DebtCache', async accounts => {
 			await rwaone.transfer(account1, toUnit('1000'), { from: owner });
 			await rwaone.issueRwas(toUnit('10'), { from: account1 });
 
-			totalNonSnxBackedDebt = await getTotalNonSnxBackedDebt();
+			totalNonRwaxBackedDebt = await getTotalNonRwaxBackedDebt();
 			currentDebt = await debtCache.currentDebt();
 		});
 
@@ -1483,8 +1483,8 @@ contract('DebtCache', async accounts => {
 
 			it('increases non-wRWAX debt', async () => {
 				assert.bnEqual(
-					totalNonSnxBackedDebt.add(multiplyDecimalRound(oneETH, rate)),
-					await getTotalNonSnxBackedDebt()
+					totalNonRwaxBackedDebt.add(multiplyDecimalRound(oneETH, rate)),
+					await getTotalNonRwaxBackedDebt()
 				);
 			});
 			it('is excluded from currentDebt', async () => {
@@ -1500,8 +1500,8 @@ contract('DebtCache', async accounts => {
 
 				it('non-wRWAX debt is unchanged', async () => {
 					assert.bnEqual(
-						totalNonSnxBackedDebt.add(multiplyDecimalRound(oneETH, rate)),
-						await getTotalNonSnxBackedDebt()
+						totalNonRwaxBackedDebt.add(multiplyDecimalRound(oneETH, rate)),
+						await getTotalNonRwaxBackedDebt()
 					);
 				});
 				it('currentDebt is unchanged', async () => {
@@ -1564,7 +1564,7 @@ contract('DebtCache', async accounts => {
 			});
 
 			it('increases non-wRWAX debt', async () => {
-				assert.bnEqual(totalNonSnxBackedDebt.add(rate), await getTotalNonSnxBackedDebt());
+				assert.bnEqual(totalNonRwaxBackedDebt.add(rate), await getTotalNonRwaxBackedDebt());
 			});
 			it('is excluded from currentDebt', async () => {
 				assert.bnEqual(currentDebt, await debtCache.currentDebt());

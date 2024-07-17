@@ -129,11 +129,11 @@ library SystemSettingsLib {
         IFlexibleStorage flexibleStorage,
         bytes32 settingName,
         uint _liquidationRatio,
-        uint getSnxLiquidationPenalty,
+        uint getRwaxLiquidationPenalty,
         uint getIssuanceRatio
     ) external {
         require(
-            _liquidationRatio <= MAX_LIQUIDATION_RATIO.divideDecimal(SafeDecimalMath.unit().add(getSnxLiquidationPenalty)),
+            _liquidationRatio <= MAX_LIQUIDATION_RATIO.divideDecimal(SafeDecimalMath.unit().add(getRwaxLiquidationPenalty)),
             "liquidationRatio > MAX_LIQUIDATION_RATIO / (1 + penalty)"
         );
 
@@ -149,7 +149,7 @@ library SystemSettingsLib {
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, duration);
     }
 
-    function setSnxLiquidationPenalty(IFlexibleStorage flexibleStorage, bytes32 settingName, uint penalty) external {
+    function setRwaxLiquidationPenalty(IFlexibleStorage flexibleStorage, bytes32 settingName, uint penalty) external {
         // MAX_LIQUIDATION_PENALTY is enforced on both Collateral and wRWAX liquidations
         require(penalty <= MAX_LIQUIDATION_PENALTY, "penalty > MAX_LIQUIDATION_PENALTY");
 

@@ -1871,7 +1871,7 @@ const setupAllContracts = async ({
 			returnObj['SystemSettings'].setLiquidationPenalty(LIQUIDATION_PENALTY, {
 				from: owner,
 			}),
-			returnObj['SystemSettings'].setSnxLiquidationPenalty(RWAX_LIQUIDATION_PENALTY, {
+			returnObj['SystemSettings'].setRwaxLiquidationPenalty(RWAX_LIQUIDATION_PENALTY, {
 				from: owner,
 			}),
 			returnObj['SystemSettings'].setSelfLiquidationPenalty(SELF_LIQUIDATION_PENALTY, {

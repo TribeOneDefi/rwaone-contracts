@@ -1110,7 +1110,7 @@ contract('FeePool', async accounts => {
 
 				assert.eventEqual(claimFeesTx, 'FeesClaimed', {
 					rUSDAmount: feesBurnedUSD,
-					snxRewards: feesAvailableUSD[1],
+					rwaxRewards: feesAvailableUSD[1],
 				});
 
 				const afterUSDBalance = await rUSDContract.balanceOf(owner);
@@ -1150,7 +1150,7 @@ contract('FeePool', async accounts => {
 
 				assert.eventEqual(claimFeesTx, 'FeesClaimed', {
 					rUSDAmount: feesBurnedUSD,
-					snxRewards: feesAvailableUSD[1],
+					rwaxRewards: feesAvailableUSD[1],
 				});
 
 				const afterUSDBalance = await rUSDContract.balanceOf(owner);

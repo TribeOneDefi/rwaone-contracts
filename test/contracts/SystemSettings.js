@@ -78,7 +78,7 @@ contract('SystemSettings', async accounts => {
 				'setLiquidationPenalty',
 				'setLiquidationRatio',
 				'setLiquidationEscrowDuration',
-				'setSnxLiquidationPenalty',
+				'setRwaxLiquidationPenalty',
 				'setSelfLiquidationPenalty',
 				'setLiquidateReward',
 				'setFlagReward',
@@ -482,7 +482,7 @@ contract('SystemSettings', async accounts => {
 		});
 		describe('given liquidation penalty is 10%', () => {
 			beforeEach(async () => {
-				await systemSettings.setSnxLiquidationPenalty(toUnit('0.1'), { from: owner });
+				await systemSettings.setRwaxLiquidationPenalty(toUnit('0.1'), { from: owner });
 			});
 			it('owner can change liquidationRatio to 150%', async () => {
 				const ratio = divideDecimal(toUnit('2'), toUnit('3'));
@@ -644,10 +644,10 @@ contract('SystemSettings', async accounts => {
 		});
 	});
 
-	describe('setSnxLiquidationPenalty()', () => {
+	describe('setRwaxLiquidationPenalty()', () => {
 		it('can only be invoked by owner', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: systemSettings.setSnxLiquidationPenalty,
+				fnc: systemSettings.setRwaxLiquidationPenalty,
 				args: [toUnit('.1')],
 				address: owner,
 				accounts,
@@ -655,30 +655,30 @@ contract('SystemSettings', async accounts => {
 			});
 		});
 
-		it('when setSnxLiquidationPenalty is set above MAX_LIQUIDATION_PENALTY then revert', async () => {
+		it('when setRwaxLiquidationPenalty is set above MAX_LIQUIDATION_PENALTY then revert', async () => {
 			// Have to hardcode here due to public const not available in Solidity V5
 			// https://ethereum.stackexchange.com/a/102633/33908
 			const MAX_LIQUIDATION_PENALTY = toUnit('0.25');
-			const newSnxLiquidationPenalty = MAX_LIQUIDATION_PENALTY.add(toUnit('1'));
+			const newRwaxLiquidationPenalty = MAX_LIQUIDATION_PENALTY.add(toUnit('1'));
 			await assert.revert(
-				systemSettings.setSnxLiquidationPenalty(newSnxLiquidationPenalty, {
+				systemSettings.setRwaxLiquidationPenalty(newRwaxLiquidationPenalty, {
 					from: owner,
 				}),
 				'penalty > MAX_LIQUIDATION_PENALTY'
 			);
 		});
 
-		it('owner can set SnxLiquidationPenalty to 25%', async () => {
-			await systemSettings.setSnxLiquidationPenalty(toUnit('.25'), { from: owner });
-			assert.bnEqual(await systemSettings.snxLiquidationPenalty(), toUnit('.25'));
+		it('owner can set RwaxLiquidationPenalty to 25%', async () => {
+			await systemSettings.setRwaxLiquidationPenalty(toUnit('.25'), { from: owner });
+			assert.bnEqual(await systemSettings.rwaxLiquidationPenalty(), toUnit('.25'));
 		});
-		it('owner can set SnxLiquidationPenalty to 1%', async () => {
-			await systemSettings.setSnxLiquidationPenalty(toUnit('.01'), { from: owner });
-			assert.bnEqual(await systemSettings.snxLiquidationPenalty(), toUnit('.01'));
+		it('owner can set RwaxLiquidationPenalty to 1%', async () => {
+			await systemSettings.setRwaxLiquidationPenalty(toUnit('.01'), { from: owner });
+			assert.bnEqual(await systemSettings.rwaxLiquidationPenalty(), toUnit('.01'));
 		});
-		it('owner can set SnxLiquidationPenalty to 0%', async () => {
-			await systemSettings.setSnxLiquidationPenalty(toUnit('0'), { from: owner });
-			assert.bnEqual(await systemSettings.snxLiquidationPenalty(), toUnit('0'));
+		it('owner can set RwaxLiquidationPenalty to 0%', async () => {
+			await systemSettings.setRwaxLiquidationPenalty(toUnit('0'), { from: owner });
+			assert.bnEqual(await systemSettings.rwaxLiquidationPenalty(), toUnit('0'));
 		});
 	});
 

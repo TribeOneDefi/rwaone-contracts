@@ -638,7 +638,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 
 			describe('remainingIssuableRwas()', () => {
 				it("should correctly calculate a user's remaining issuable rwas with prior issuance", async () => {
-					const snx2usdRate = await exchangeRates.rateForCurrency(wRWAX);
+					const rwax2usdRate = await exchangeRates.rateForCurrency(wRWAX);
 					const issuanceRatio = await systemSettings.issuanceRatio();
 
 					const issuedRwaones = web3.utils.toBN('200012');
@@ -652,7 +652,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 
 					const expectedIssuableRwas = multiplyDecimal(
 						toUnit(issuedRwaones),
-						multiplyDecimal(snx2usdRate, issuanceRatio)
+						multiplyDecimal(rwax2usdRate, issuanceRatio)
 					).sub(amountIssued);
 
 					const issuableRwas = await issuer.remainingIssuableRwas(account1);
@@ -664,7 +664,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 
 				it("should correctly calculate a user's remaining issuable rwas without prior issuance", async () => {
-					const snx2usdRate = await exchangeRates.rateForCurrency(wRWAX);
+					const rwax2usdRate = await exchangeRates.rateForCurrency(wRWAX);
 					const issuanceRatio = await systemSettings.issuanceRatio();
 
 					const issuedRwaones = web3.utils.toBN('20');
@@ -674,7 +674,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 
 					const expectedIssuableRwas = multiplyDecimal(
 						toUnit(issuedRwaones),
-						multiplyDecimal(snx2usdRate, issuanceRatio)
+						multiplyDecimal(rwax2usdRate, issuanceRatio)
 					);
 
 					const remainingIssuable = await issuer.remainingIssuableRwas(account1);
@@ -706,7 +706,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 
 				it("should correctly calculate a user's maximum issuable rwas with prior issuance", async () => {
-					const snx2usdRate = await exchangeRates.rateForCurrency(wRWAX);
+					const rwax2usdRate = await exchangeRates.rateForCurrency(wRWAX);
 
 					const issuedRwaones = web3.utils.toBN('320001');
 					await rwaone.transfer(account1, toUnit(issuedRwaones), {
@@ -719,7 +719,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 
 					const expectedIssuableRwas = multiplyDecimal(
 						toUnit(issuedRwaones),
-						multiplyDecimal(snx2usdRate, issuanceRatio)
+						multiplyDecimal(rwax2usdRate, issuanceRatio)
 					);
 
 					const maxIssuableRwas = await rwaone.maxIssuableRwas(account1);
@@ -2428,7 +2428,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 
 				it("should not include escrowed rwaone when calculating a user's collaterisation ratio", async () => {
-					const snx2usdRate = await exchangeRates.rateForCurrency(wRWAX);
+					const rwax2usdRate = await exchangeRates.rateForCurrency(wRWAX);
 					const transferredRwaones = toUnit('60000');
 					await rwaone.transfer(account1, transferredRwaones, {
 						from: owner,
@@ -2459,13 +2459,13 @@ contract('Issuer (via Rwaone)', async accounts => {
 					const collaterisationRatio = await rwaone.collateralisationRatio(account1);
 					const expectedCollaterisationRatio = divideDecimal(
 						maxIssuable,
-						multiplyDecimal(transferredRwaones, snx2usdRate)
+						multiplyDecimal(transferredRwaones, rwax2usdRate)
 					);
 					assert.bnEqual(collaterisationRatio, expectedCollaterisationRatio);
 				});
 
 				it("should include escrowed reward rwaone when calculating a user's collateralisation ratio", async () => {
-					const snx2usdRate = await exchangeRates.rateForCurrency(wRWAX);
+					const rwax2usdRate = await exchangeRates.rateForCurrency(wRWAX);
 					const transferredRwaones = toUnit('60000');
 					await rwaone.transfer(account1, transferredRwaones, {
 						from: owner,
@@ -2487,7 +2487,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 					const collaterisationRatio = await rwaone.collateralisationRatio(account1);
 					const expectedCollaterisationRatio = divideDecimal(
 						maxIssuable,
-						multiplyDecimal(escrowedRwaones.add(transferredRwaones), snx2usdRate)
+						multiplyDecimal(escrowedRwaones.add(transferredRwaones), rwax2usdRate)
 					);
 					assert.bnEqual(collaterisationRatio, expectedCollaterisationRatio);
 				});
@@ -2498,8 +2498,8 @@ contract('Issuer (via Rwaone)', async accounts => {
 					assert.bnEqual(collateral, 0);
 
 					// ensure account1 has no wRWAX balance
-					const snxBalance = await rwaone.balanceOf(account1);
-					assert.bnEqual(snxBalance, 0);
+					const rwaxBalance = await rwaone.balanceOf(account1);
+					assert.bnEqual(rwaxBalance, 0);
 
 					// Append escrow amount to account1
 					const escrowedAmount = toUnit('15000');
@@ -2527,8 +2527,8 @@ contract('Issuer (via Rwaone)', async accounts => {
 					assert.bnEqual(collateral, 0);
 
 					// ensure account1 has no wRWAX balance
-					const snxBalance = await rwaone.balanceOf(account1);
-					assert.bnEqual(snxBalance, 0);
+					const rwaxBalance = await rwaone.balanceOf(account1);
+					assert.bnEqual(rwaxBalance, 0);
 
 					// Append escrow amount to account1
 					const escrowedAmount = toUnit('15000');
@@ -2610,7 +2610,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 				});
 
 				it("should correctly calculate a user's max issuable rwas with escrowed rwaone", async () => {
-					const snx2usdRate = await exchangeRates.rateForCurrency(wRWAX);
+					const rwax2usdRate = await exchangeRates.rateForCurrency(wRWAX);
 					const transferredRwaones = toUnit('60000');
 					await rwaone.transfer(account1, transferredRwaones, {
 						from: owner,
@@ -2631,7 +2631,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 					// Compare
 					const issuanceRatio = await systemSettings.issuanceRatio();
 					const expectedMaxIssuable = multiplyDecimal(
-						multiplyDecimal(escrowedRwaones.add(transferredRwaones), snx2usdRate),
+						multiplyDecimal(escrowedRwaones.add(transferredRwaones), rwax2usdRate),
 						issuanceRatio
 					);
 					assert.bnEqual(maxIssuable, expectedMaxIssuable);
@@ -2905,7 +2905,7 @@ contract('Issuer (via Rwaone)', async accounts => {
 					// issue some initial debt to work with
 					await rwaone.issueRwas(toUnit('100'), { from: owner });
 
-					// send test user some snx so he can mint too
+					// send test user some rwax so he can mint too
 					await rwaone.transfer(account1, toUnit('1000000'), { from: owner });
 				});
 

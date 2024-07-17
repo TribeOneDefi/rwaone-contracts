@@ -71,7 +71,7 @@ contract('BaseRewardEscrowV2', async accounts => {
 			await newRewardEscrowV2.rebuildCache({ from: owner });
 
 			const balance = await mockedRwaone.balanceOf(baseRewardEscrowV2.address);
-			// in hypothetical migration snx balance would be transferred over to new escrow contract
+			// in hypothetical migration rwax balance would be transferred over to new escrow contract
 			// TODO: the `mockToken` implementation does not make it easy to do unchecked transfers,
 			// so we don't have an easy way to check if the old contract somehow got funds or not other than
 			// revert
@@ -289,7 +289,7 @@ contract('BaseRewardEscrowV2', async accounts => {
 						timeElapsed = YEAR / 2;
 						await fastForward(timeElapsed);
 					});
-					assertWithFallback('then the vesting entry has 0 snx claimable', async e => {
+					assertWithFallback('then the vesting entry has 0 rwax claimable', async e => {
 						const claimable = await e.getVestingEntryClaimable(account1, entryID);
 						assert.bnEqual(claimable, 0);
 					});
@@ -514,7 +514,7 @@ contract('BaseRewardEscrowV2', async accounts => {
 				// fast forward to after escrow.endTime
 				fastForward(duration + 10);
 			});
-			assertWithFallback('should vest and transfer all the snx to the user', async (e, s) => {
+			assertWithFallback('should vest and transfer all the rwax to the user', async (e, s) => {
 				await e.vest([entryID], { from: account1 });
 
 				// Check user has all their vested wRWAX
@@ -623,7 +623,7 @@ contract('BaseRewardEscrowV2', async accounts => {
 			});
 
 			describe('When another user (account 1) vests all their entries', () => {
-				assertWithFallback('should vest all entries and transfer snx to the user', async (e, s) => {
+				assertWithFallback('should vest all entries and transfer rwax to the user', async (e, s) => {
 					await e.vest([entryID1, entryID2, entryID3], {
 						from: account2,
 					});
@@ -640,7 +640,7 @@ contract('BaseRewardEscrowV2', async accounts => {
 			});
 
 			assertWithFallback(
-				'should vest all entries and transfer snx from contract to the user',
+				'should vest all entries and transfer rwax from contract to the user',
 				async (e, s) => {
 					await e.vest([entryID1, entryID2, entryID3], {
 						from: account1,
@@ -769,7 +769,7 @@ contract('BaseRewardEscrowV2', async accounts => {
 			});
 
 			describe('When another user (account 1) vests all their entries', () => {
-				assertWithFallback('should vest all entries and transfer snx to the user', async (e, s) => {
+				assertWithFallback('should vest all entries and transfer rwax to the user', async (e, s) => {
 					await e.vest([entryID1, entryID2, entryID3], {
 						from: account2,
 					});
@@ -792,7 +792,7 @@ contract('BaseRewardEscrowV2', async accounts => {
 				});
 
 				assertWithFallback(
-					'should vest only first 2 entries and transfer snx from contract to the user',
+					'should vest only first 2 entries and transfer rwax from contract to the user',
 					async (e, s) => {
 						await e.vest([entryID1, entryID2, entryID3], {
 							from: account1,

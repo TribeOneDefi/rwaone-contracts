@@ -48,7 +48,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     struct FeePeriod {
         uint64 feePeriodId;
         uint64 startTime;
-        uint allNetworksSnxBackedDebt;
+        uint allNetworksRwaxBackedDebt;
         uint allNetworksDebtSharesSupply;
         uint feesToDistribute;
         uint feesClaimed;
@@ -182,7 +182,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         return getTargetThreshold();
     }
 
-    function allNetworksSnxBackedDebt() public view returns (uint256 debt, uint256 updatedAt) {
+    function allNetworksRwaxBackedDebt() public view returns (uint256 debt, uint256 updatedAt) {
         (, int256 rawData, , uint timestamp, ) = AggregatorV2V3Interface(
             requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_ISSUED_RWAONES)
         ).latestRoundData();
@@ -262,32 +262,32 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         require(_recentFeePeriodsStorage(0).startTime <= (now - getFeePeriodDuration()), "Too early to close fee period");
 
         // get current oracle values
-        (uint snxBackedDebt, ) = allNetworksSnxBackedDebt();
+        (uint rwaxBackedDebt, ) = allNetworksRwaxBackedDebt();
         (uint debtSharesSupply, ) = allNetworksDebtSharesSupply();
 
         // close on this chain
-        _closeSecondary(snxBackedDebt, debtSharesSupply);
+        _closeSecondary(rwaxBackedDebt, debtSharesSupply);
 
         // inform other chain of the chosen values
         IRwaoneBridgeToOptimism(
             resolver.requireAndGetAddress(CONTRACT_RWAONE_BRIDGE_TO_OPTIMISM, "Missing contract: RwaoneBridgeToOptimism")
-        ).closeFeePeriod(snxBackedDebt, debtSharesSupply);
+        ).closeFeePeriod(rwaxBackedDebt, debtSharesSupply);
     }
 
-    function closeSecondary(uint allNetworksSnxBackedDebt, uint allNetworksDebtSharesSupply) external onlyRelayer {
-        _closeSecondary(allNetworksSnxBackedDebt, allNetworksDebtSharesSupply);
+    function closeSecondary(uint allNetworksRwaxBackedDebt, uint allNetworksDebtSharesSupply) external onlyRelayer {
+        _closeSecondary(allNetworksRwaxBackedDebt, allNetworksDebtSharesSupply);
     }
 
     /**
      * @notice Close the current fee period and start a new one.
      */
-    function _closeSecondary(uint allNetworksSnxBackedDebt, uint allNetworksDebtSharesSupply) internal {
+    function _closeSecondary(uint allNetworksRwaxBackedDebt, uint allNetworksDebtSharesSupply) internal {
         etherWrapper().distributeFees();
         wrapperFactory().distributeFees();
 
-        // before closing the current fee period, set the recorded snxBackedDebt and debtSharesSupply
+        // before closing the current fee period, set the recorded rwaxBackedDebt and debtSharesSupply
         _recentFeePeriodsStorage(0).allNetworksDebtSharesSupply = allNetworksDebtSharesSupply;
-        _recentFeePeriodsStorage(0).allNetworksSnxBackedDebt = allNetworksSnxBackedDebt;
+        _recentFeePeriodsStorage(0).allNetworksRwaxBackedDebt = allNetworksRwaxBackedDebt;
 
         // Note:  periodClosing is the current period & periodToRollover is the last open claimable period
         FeePeriod storage periodClosing = _recentFeePeriodsStorage(0);
@@ -419,7 +419,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
             feesClaimed: feesClaimed,
             rewardsToDistribute: rewardsToDistribute,
             rewardsClaimed: rewardsClaimed,
-            allNetworksSnxBackedDebt: 0,
+            allNetworksRwaxBackedDebt: 0,
             allNetworksDebtSharesSupply: 0
         });
 
@@ -431,11 +431,11 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
     /**
      * @notice Record the reward payment in our recentFeePeriods.
-     * @param snxAmount The amount of wRWAX tokens.
+     * @param rwaxAmount The amount of wRWAX tokens.
      */
-    function _recordRewardPayment(uint snxAmount) internal returns (uint) {
+    function _recordRewardPayment(uint rwaxAmount) internal returns (uint) {
         // Don't assign to the parameter
-        uint remainingToAllocate = snxAmount;
+        uint remainingToAllocate = rwaxAmount;
 
         uint rewardPaid;
 
@@ -465,15 +465,15 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     /**
      * @notice Send the rewards to claiming address - will be locked in rewardEscrow.
      * @param account The address to send the fees to.
-     * @param snxAmount The amount of wRWAX.
+     * @param rwaxAmount The amount of wRWAX.
      */
-    function _payRewards(address account, uint snxAmount) internal notFeeAddress(account) {
+    function _payRewards(address account, uint rwaxAmount) internal notFeeAddress(account) {
         /* Escrow the tokens for 1 year. */
         uint escrowDuration = 52 weeks;
 
         // Record vesting entry for claiming address and amount
         // wRWAX already minted to rewardEscrow balance
-        rewardEscrowV2().appendVestingEntry(account, snxAmount, escrowDuration);
+        rewardEscrowV2().appendVestingEntry(account, rwaxAmount, escrowDuration);
     }
 
     /**
@@ -728,10 +728,10 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         proxy._emit(abi.encode(feePeriodId), 1, FEEPERIODCLOSED_SIG, 0, 0, 0);
     }
 
-    event FeesClaimed(address account, uint rUSDAmount, uint snxRewards);
+    event FeesClaimed(address account, uint rUSDAmount, uint rwaxRewards);
     bytes32 private constant FEESCLAIMED_SIG = keccak256("FeesClaimed(address,uint256,uint256)");
 
-    function emitFeesClaimed(address account, uint rUSDAmount, uint snxRewards) internal {
-        proxy._emit(abi.encode(account, rUSDAmount, snxRewards), 1, FEESCLAIMED_SIG, 0, 0, 0);
+    function emitFeesClaimed(address account, uint rUSDAmount, uint rwaxRewards) internal {
+        proxy._emit(abi.encode(account, rUSDAmount, rwaxRewards), 1, FEESCLAIMED_SIG, 0, 0, 0);
     }
 }

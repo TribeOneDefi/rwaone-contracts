@@ -40,7 +40,7 @@ function itCanLiquidate({ ctx }) {
 		before('system settings are set', async () => {
 			await SystemSettings.setIssuanceRatio(ethers.utils.parseEther('0.25')); // 400% c-ratio
 			await SystemSettings.setLiquidationRatio(ethers.utils.parseEther('0.5')); // 200% c-ratio
-			await SystemSettings.setSnxLiquidationPenalty(ethers.utils.parseEther('0.3')); // 30% penalty
+			await SystemSettings.setRwaxLiquidationPenalty(ethers.utils.parseEther('0.3')); // 30% penalty
 			await SystemSettings.setSelfLiquidationPenalty(ethers.utils.parseEther('0.2')); // 20% penalty
 			await SystemSettings.setFlagReward(ethers.utils.parseEther('1')); // 1 wRWAX
 			await SystemSettings.setLiquidateReward(ethers.utils.parseEther('2')); // 2 wRWAX
@@ -141,16 +141,16 @@ function itCanLiquidate({ ctx }) {
 					let tx;
 					let beforeCRatio;
 					let beforeDebtShares, beforeSharesSupply;
-					let beforeFlagRewardCredittedSnx,
-						beforeLiquidateRewardCredittedSnx,
-						beforeRemainingRewardCredittedSnx;
+					let beforeFlagRewardCredittedRwax,
+						beforeLiquidateRewardCredittedRwax,
+						beforeRemainingRewardCredittedRwax;
 
 					before('liquidatorUser calls liquidateDelinquentAccount', async () => {
 						beforeDebtShares = await RwaoneDebtShare.balanceOf(liquidatedUser.address);
 						beforeSharesSupply = await RwaoneDebtShare.totalSupply();
-						beforeFlagRewardCredittedSnx = await Rwaone.balanceOf(flaggerUser.address);
-						beforeLiquidateRewardCredittedSnx = await Rwaone.balanceOf(liquidatorUser.address);
-						beforeRemainingRewardCredittedSnx = await Rwaone.balanceOf(
+						beforeFlagRewardCredittedRwax = await Rwaone.balanceOf(flaggerUser.address);
+						beforeLiquidateRewardCredittedRwax = await Rwaone.balanceOf(liquidatorUser.address);
+						beforeRemainingRewardCredittedRwax = await Rwaone.balanceOf(
 							LiquidatorRewards.address
 						);
 
@@ -194,7 +194,7 @@ function itCanLiquidate({ ctx }) {
 						const flagReward = await Liquidator.flagReward();
 						assert.bnEqual(
 							await Rwaone.balanceOf(flaggerUser.address),
-							beforeFlagRewardCredittedSnx.add(flagReward)
+							beforeFlagRewardCredittedRwax.add(flagReward)
 						);
 					});
 
@@ -202,17 +202,17 @@ function itCanLiquidate({ ctx }) {
 						const liquidateReward = await Liquidator.liquidateReward();
 						assert.bnEqual(
 							await Rwaone.balanceOf(liquidatorUser.address),
-							beforeLiquidateRewardCredittedSnx.add(liquidateReward)
+							beforeLiquidateRewardCredittedRwax.add(liquidateReward)
 						);
 					});
 
 					it('transfers the redeemed wRWAX to LiquidatorRewards', async () => {
 						const { events } = await tx.wait();
 						const liqEvent = events.find(l => l.event === 'AccountLiquidated');
-						const snxRedeemed = liqEvent.args.snxRedeemed;
+						const rwaxRedeemed = liqEvent.args.rwaxRedeemed;
 						assert.bnEqual(
 							await Rwaone.balanceOf(LiquidatorRewards.address),
-							beforeRemainingRewardCredittedSnx.add(snxRedeemed)
+							beforeRemainingRewardCredittedRwax.add(rwaxRedeemed)
 						);
 					});
 
@@ -289,9 +289,9 @@ function itCanLiquidate({ ctx }) {
 					let collateralBefore;
 					let flagReward, liquidateReward;
 					let beforeDebtShares, beforeSharesSupply, beforeDebtBalance;
-					let beforeFlagRewardCredittedSnx,
-						beforeLiquidateRewardCredittedSnx,
-						beforeRemainingRewardCredittedSnx;
+					let beforeFlagRewardCredittedRwax,
+						beforeLiquidateRewardCredittedRwax,
+						beforeRemainingRewardCredittedRwax;
 
 					before('liquidatorUser calls liquidateDelinquentAccount', async () => {
 						flagReward = await Liquidator.flagReward();
@@ -300,9 +300,9 @@ function itCanLiquidate({ ctx }) {
 						collateralBefore = await Rwaone.collateral(user7.address);
 						beforeDebtShares = await RwaoneDebtShare.balanceOf(user7.address);
 						beforeSharesSupply = await RwaoneDebtShare.totalSupply();
-						beforeFlagRewardCredittedSnx = await Rwaone.balanceOf(flaggerUser.address);
-						beforeLiquidateRewardCredittedSnx = await Rwaone.balanceOf(liquidatorUser.address);
-						beforeRemainingRewardCredittedSnx = await Rwaone.balanceOf(
+						beforeFlagRewardCredittedRwax = await Rwaone.balanceOf(flaggerUser.address);
+						beforeLiquidateRewardCredittedRwax = await Rwaone.balanceOf(liquidatorUser.address);
+						beforeRemainingRewardCredittedRwax = await Rwaone.balanceOf(
 							LiquidatorRewards.address
 						);
 						beforeDebtBalance = await Rwaone.debtBalanceOf(user7.address, toBytes32('rUSD'));
@@ -349,7 +349,7 @@ function itCanLiquidate({ ctx }) {
 						const flagReward = await Liquidator.flagReward();
 						assert.bnEqual(
 							await Rwaone.balanceOf(flaggerUser.address),
-							beforeFlagRewardCredittedSnx.add(flagReward)
+							beforeFlagRewardCredittedRwax.add(flagReward)
 						);
 					});
 
@@ -357,17 +357,17 @@ function itCanLiquidate({ ctx }) {
 						const liquidateReward = await Liquidator.liquidateReward();
 						assert.bnEqual(
 							await Rwaone.balanceOf(liquidatorUser.address),
-							beforeLiquidateRewardCredittedSnx.add(liquidateReward)
+							beforeLiquidateRewardCredittedRwax.add(liquidateReward)
 						);
 					});
 
 					it('transfers the redeemed wRWAX to LiquidatorRewards', async () => {
 						const { events } = await tx.wait();
 						const liqEvent = events.find(l => l.event === 'AccountLiquidated');
-						const snxRedeemed = liqEvent.args.snxRedeemed;
+						const rwaxRedeemed = liqEvent.args.rwaxRedeemed;
 						assert.bnEqual(
 							await Rwaone.balanceOf(LiquidatorRewards.address),
-							beforeRemainingRewardCredittedSnx.add(snxRedeemed)
+							beforeRemainingRewardCredittedRwax.add(rwaxRedeemed)
 						);
 					});
 
@@ -397,7 +397,7 @@ function itCanLiquidate({ ctx }) {
 			let flagReward, liquidateReward;
 			let beforeEscrowBalance, beforeDebtBalance;
 			let beforeDebtShares, beforeSharesSupply;
-			let beforeSnxBalance, beforeRewardsCredittedSnx;
+			let beforeRwaxBalance, beforeRewardsCredittedRwax;
 
 			before('ensure exchange rate is set', async () => {
 				exchangeRate = await getRate({ ctx, symbol: 'wRWAX' });
@@ -457,12 +457,12 @@ function itCanLiquidate({ ctx }) {
 			});
 
 			before('liquidatorUser calls liquidateDelinquentAccount', async () => {
-				beforeSnxBalance = await Rwaone.balanceOf(user8.address);
+				beforeRwaxBalance = await Rwaone.balanceOf(user8.address);
 				beforeEscrowBalance = await RewardEscrowV2.totalEscrowedAccountBalance(user8.address);
 				beforeDebtShares = await RwaoneDebtShare.balanceOf(user8.address);
 				beforeSharesSupply = await RwaoneDebtShare.totalSupply();
 				beforeDebtBalance = await Rwaone.debtBalanceOf(user8.address, toBytes32('rUSD'));
-				beforeRewardsCredittedSnx = await Rwaone.balanceOf(LiquidatorRewards.address);
+				beforeRewardsCredittedRwax = await Rwaone.balanceOf(LiquidatorRewards.address);
 
 				viewResults = await Liquidator.liquidationAmounts(user8.address, false);
 				tx = await Rwaone.connect(liquidatorUser).liquidateDelinquentAccount(user8.address);
@@ -484,8 +484,8 @@ function itCanLiquidate({ ctx }) {
 			});
 
 			it('should remove all transferable collateral', async () => {
-				const afterSnxBalance = await Rwaone.balanceOf(user8.address);
-				assert.bnEqual(afterSnxBalance, '0');
+				const afterRwaxBalance = await Rwaone.balanceOf(user8.address);
+				assert.bnEqual(afterRwaxBalance, '0');
 			});
 
 			it('should remove all escrow', async () => {
@@ -501,7 +501,7 @@ function itCanLiquidate({ ctx }) {
 			it('results correspond to view before liquidation', async () => {
 				assert.bnEqual(
 					viewResults.totalRedeemed,
-					beforeSnxBalance.add(beforeEscrowBalance).sub(flagReward.add(liquidateReward))
+					beforeRwaxBalance.add(beforeEscrowBalance).sub(flagReward.add(liquidateReward))
 				);
 				assert.bnEqual(viewResults.escrowToLiquidate, beforeEscrowBalance);
 				assert.bnEqual(viewResults.initialDebtBalance, beforeDebtBalance);
@@ -514,11 +514,11 @@ function itCanLiquidate({ ctx }) {
 				const { events } = await tx.wait();
 				const liqEvent = events.find(l => l.event === 'AccountLiquidated');
 				const amountLiquidated = liqEvent.args.amountLiquidated;
-				const snxRedeemed = liqEvent.args.snxRedeemed;
+				const rwaxRedeemed = liqEvent.args.rwaxRedeemed;
 
 				assert.bnEqual(
-					snxRedeemed,
-					beforeSnxBalance.add(beforeEscrowBalance).sub(flagReward.add(liquidateReward))
+					rwaxRedeemed,
+					beforeRwaxBalance.add(beforeEscrowBalance).sub(flagReward.add(liquidateReward))
 				);
 				assert.bnEqual(amountLiquidated.toString(), beforeDebtBalance.toString()); // the variance is due to a rounding error as a result of multiplication of the wRWAX rate
 			});
@@ -539,10 +539,10 @@ function itCanLiquidate({ ctx }) {
 			it('transfers the redeemed wRWAX + escrow to LiquidatorRewards', async () => {
 				const { events } = await tx.wait();
 				const liqEvent = events.find(l => l.event === 'AccountLiquidated');
-				const snxRedeemed = liqEvent.args.snxRedeemed;
+				const rwaxRedeemed = liqEvent.args.rwaxRedeemed;
 				assert.bnEqual(
 					await Rwaone.balanceOf(LiquidatorRewards.address),
-					beforeRewardsCredittedSnx.add(snxRedeemed)
+					beforeRewardsCredittedRwax.add(rwaxRedeemed)
 				);
 			});
 

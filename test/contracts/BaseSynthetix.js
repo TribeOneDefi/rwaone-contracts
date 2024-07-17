@@ -662,7 +662,7 @@ contract('BaseRwaone', async accounts => {
 				from: owner,
 			});
 
-			// transfer some snx to the LegacyMarket
+			// transfer some rwax to the LegacyMarket
 			assert.bnEqual(await baseRwaoneImpl.balanceOf(account2), toUnit('0'));
 			await baseRwaoneProxy.transfer(account2, toUnit('10'), { from: owner });
 			assert.bnEqual(await baseRwaoneImpl.balanceOf(account2), toUnit('10'));

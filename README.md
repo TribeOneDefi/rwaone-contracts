@@ -84,8 +84,8 @@ contract MyContract {
   // see https://docs.rwaone.io/addresses for addresses in mainnet and testnets
   IAddressResolver public rwaoneResolver;
 
-  constructor(IAddressResolver _snxResolver) public {
-    rwaoneResolver = _snxResolver;
+  constructor(IAddressResolver _rwaxResolver) public {
+    rwaoneResolver = _rwaxResolver;
   }
 
   function rwaoneIssue() external {
@@ -125,9 +125,9 @@ contract MyContract {
 #### Via code
 
 ```javascript
-const snx = require('rwaone');
+const rwax = require('rwaone');
 
-snx.getAST();
+rwax.getAST();
 /*
 { 'contracts/AddressResolver.sol':
    { imports:
@@ -144,7 +144,7 @@ snx.getAST();
      libraries: {} },
 */
 
-snx.getAST({ source: 'Rwaone.sol' });
+rwax.getAST({ source: 'Rwaone.sol' });
 /*
 { imports:
    [ 'contracts/ExternStateToken.sol',
@@ -175,11 +175,11 @@ snx.getAST({ source: 'Rwaone.sol' });
 */
 
 // Get the path to the network
-snx.getPathToNetwork({ network: 'mainnet' });
+rwax.getPathToNetwork({ network: 'mainnet' });
 //'.../Rwaoneio/rwaone/publish/deployed/mainnet'
 
 // retrieve an object detailing the contract ABI and bytecode
-snx.getSource({ network: 'goerli', contract: 'Proxy' });
+rwax.getSource({ network: 'goerli', contract: 'Proxy' });
 /*
 {
   bytecode: '0..0',
@@ -187,7 +187,7 @@ snx.getSource({ network: 'goerli', contract: 'Proxy' });
 }
 */
 
-snx.getSuspensionReasons();
+rwax.getSuspensionReasons();
 /*
 {
 	1: 'System Upgrade',
@@ -198,11 +198,11 @@ snx.getSuspensionReasons();
 */
 
 // retrieve the array of rwas used
-snx.getRwas({ network: 'goerli' }).map(({ name }) => name);
+rwax.getRwas({ network: 'goerli' }).map(({ name }) => name);
 // ['rUSD', 'sEUR', ...]
 
 // retrieve an object detailing the contract deployed to the given network.
-snx.getTarget({ network: 'goerli', contract: 'ProxyRwaone' });
+rwax.getTarget({ network: 'goerli', contract: 'ProxyRwaone' });
 /*
 {
 	name: 'ProxyRwaone',
@@ -216,7 +216,7 @@ snx.getTarget({ network: 'goerli', contract: 'ProxyRwaone' });
 */
 
 // retrieve the list of system user addresses
-snx.getUsers({ network: 'mainnet' });
+rwax.getUsers({ network: 'mainnet' });
 /*
 [ { name: 'owner',
     address: '0xEb3107117FEAd7de89Cd14D463D340A2E6917769' },
@@ -232,7 +232,7 @@ snx.getUsers({ network: 'mainnet' });
     address: '0x0000000000000000000000000000000000000000' } ]
 */
 
-snx.getVersions();
+rwax.getVersions();
 /*
 { 'v2.21.12-107':
    { tag: 'v2.21.12-107',
@@ -246,10 +246,10 @@ snx.getVersions();
 }
 */
 
-snx.networks;
+rwax.networks;
 // [ 'local', 'goerli', 'mainnet' ]
 
-snx.toBytes32('rUSD');
+rwax.toBytes32('rUSD');
 // '0x7355534400000000000000000000000000000000000000000000000000000000'
 ```
 

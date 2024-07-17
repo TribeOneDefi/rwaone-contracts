@@ -396,6 +396,6 @@ module.exports = {
 				'Filter out small amounts that are not worth the gas cost',
 				'5'
 			)
-			.option('--csv <file>', 'CSV of all addresses to scan', 'snx.csv')
+			.option('--csv <file>', 'CSV of all addresses to scan', 'rwax.csv')
 			.action(liquidatorRewardsRestitution),
 };

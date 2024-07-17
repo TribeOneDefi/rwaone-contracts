@@ -46,7 +46,7 @@ contract('RewardEscrowV2Storage', async accounts => {
 		);
 		await frozenRewardEscrowV2.rebuildCache();
 		await rwaone.rebuildCache();
-		// mint some snx into it
+		// mint some rwax into it
 		await rwaone.mintSecondary(frozenRewardEscrowV2.address, toUnit(1000), {
 			from: owner,
 		});

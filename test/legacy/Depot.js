@@ -34,7 +34,7 @@ contract('Depot', async accounts => {
 		systemStatus,
 		exchangeRates,
 		ethRate,
-		snxRate;
+		rwaxRate;
 
 	const [, owner, , fundsWallet, address1, address2, address3] = accounts;
 
@@ -92,9 +92,9 @@ contract('Depot', async accounts => {
 	addSnapshotBeforeRestoreAfterEach();
 
 	beforeEach(async () => {
-		snxRate = toUnit('0.1');
+		rwaxRate = toUnit('0.1');
 		ethRate = toUnit('172');
-		await updateAggregatorRates(exchangeRates, null, [wRWAX, ETH], [snxRate, ethRate]);
+		await updateAggregatorRates(exchangeRates, null, [wRWAX, ETH], [rwaxRate, ethRate]);
 	});
 
 	it('should set constructor params on deployment', async () => {
@@ -801,12 +801,12 @@ contract('Depot', async accounts => {
 		describe('exchangeEtherForRWAXAtRate', () => {
 			const ethToSend = toUnit('1');
 			const ethToSendFromPurchaser = { from: purchaser, value: ethToSend };
-			let snxToPurchase;
+			let rwaxToPurchase;
 			let txn;
 
 			beforeEach(async () => {
 				const purchaseValueDollars = multiplyDecimal(ethToSend, ethRate);
-				snxToPurchase = divideDecimal(purchaseValueDollars, snxRate);
+				rwaxToPurchase = divideDecimal(purchaseValueDollars, rwaxRate);
 				// Send some wRWAX to the Depot contract
 				await rwaone.transfer(depot.address, toUnit('1000000'), {
 					from: owner,
@@ -815,14 +815,14 @@ contract('Depot', async accounts => {
 
 			describe('when the purchaser supplies a rate', () => {
 				it('when exchangeEtherForRWAXAtRate is invoked, it works as expected', async () => {
-					txn = await depot.exchangeEtherForRWAXAtRate(ethRate, snxRate, ethToSendFromPurchaser);
+					txn = await depot.exchangeEtherForRWAXAtRate(ethRate, rwaxRate, ethToSendFromPurchaser);
 					const exchangeEvent = txn.logs.find(log => log.event === 'Exchange');
 
 					assert.eventEqual(exchangeEvent, 'Exchange', {
 						fromCurrency: 'ETH',
 						fromAmount: ethToSend,
 						toCurrency: 'wRWAX',
-						toAmount: snxToPurchase,
+						toAmount: rwaxToPurchase,
 					});
 				});
 				it('when purchaser supplies a rate lower than the current rate', async () => {
@@ -840,7 +840,7 @@ contract('Depot', async accounts => {
 				it('when the purchaser supplies a rate and the rate is changed in by the oracle', async () => {
 					await updateAggregatorRates(exchangeRates, null, [wRWAX, ETH], ['0.1', '134'].map(toUnit));
 					await assert.revert(
-						depot.exchangeEtherForRWAXAtRate(ethRate, snxRate, ethToSendFromPurchaser),
+						depot.exchangeEtherForRWAXAtRate(ethRate, rwaxRate, ethToSendFromPurchaser),
 						'Guaranteed ether rate would not be received'
 					);
 				});
@@ -853,7 +853,7 @@ contract('Depot', async accounts => {
 			const depotRWAXAmount = toUnit('1000000');
 			const rwasToSend = toUnit('1');
 			const fromPurchaser = { from: purchaser };
-			let snxToPurchase;
+			let rwaxToPurchase;
 			let txn;
 
 			beforeEach(async () => {
@@ -871,19 +871,19 @@ contract('Depot', async accounts => {
 				const depotRWAXBalance = await rwaone.balanceOf(depot.address);
 				assert.bnEqual(depotRWAXBalance, depotRWAXAmount);
 
-				snxToPurchase = divideDecimal(rwasToSend, snxRate);
+				rwaxToPurchase = divideDecimal(rwasToSend, rwaxRate);
 			});
 
 			describe('when the purchaser supplies a rate', () => {
 				it('when exchangeRwasForRWAXAtRate is invoked, it works as expected', async () => {
-					txn = await depot.exchangeRwasForRWAXAtRate(rwasToSend, snxRate, fromPurchaser);
+					txn = await depot.exchangeRwasForRWAXAtRate(rwasToSend, rwaxRate, fromPurchaser);
 					const exchangeEvent = txn.logs.find(log => log.event === 'Exchange');
 
 					assert.eventEqual(exchangeEvent, 'Exchange', {
 						fromCurrency: 'rUSD',
 						fromAmount: rwasToSend,
 						toCurrency: 'wRWAX',
-						toAmount: snxToPurchase,
+						toAmount: rwaxToPurchase,
 					});
 				});
 				it('when purchaser supplies a rate lower than the current rate', async () => {
@@ -903,7 +903,7 @@ contract('Depot', async accounts => {
 				it.skip('when the purchaser supplies a rate and the rate is changed in by the oracle', async () => {
 					await updateAggregatorRates(exchangeRates, null, [wRWAX], ['0.05'].map(toUnit));
 					await assert.revert(
-						depot.exchangeRwasForRWAXAtRate(rwasToSend, snxRate, fromPurchaser),
+						depot.exchangeRwasForRWAXAtRate(rwasToSend, rwaxRate, fromPurchaser),
 						'Guaranteed rate would not be received'
 					);
 				});
@@ -1161,7 +1161,7 @@ contract('Depot', async accounts => {
 			});
 
 			const purchaseValueInRwas = multiplyDecimal(ethToSend, ethRate);
-			const purchaseValueInRwaone = divideDecimal(purchaseValueInRwas, snxRate);
+			const purchaseValueInRwaone = divideDecimal(purchaseValueInRwas, rwaxRate);
 
 			const purchaserRWAXEndBalance = await rwaone.balanceOf(purchaser);
 
@@ -1229,7 +1229,7 @@ contract('Depot', async accounts => {
 				from: purchaser,
 			});
 
-			const purchaseValueInRwaone = divideDecimal(rwasToSend, snxRate);
+			const purchaseValueInRwaone = divideDecimal(rwasToSend, rwaxRate);
 
 			const purchaserRWAXEndBalance = await rwaone.balanceOf(purchaser);
 
@@ -1249,11 +1249,11 @@ contract('Depot', async accounts => {
 	});
 
 	describe('withdrawRwaone', () => {
-		const snxAmount = toUnit('1000000');
+		const rwaxAmount = toUnit('1000000');
 
 		beforeEach(async () => {
 			// Send some wRWAX to the Depot contract
-			await rwaone.transfer(depot.address, snxAmount, {
+			await rwaone.transfer(depot.address, rwaxAmount, {
 				from: owner,
 			});
 		});
@@ -1261,7 +1261,7 @@ contract('Depot', async accounts => {
 		it('when non owner withdrawRwaone calls then revert', async () => {
 			await onlyGivenAddressCanInvoke({
 				fnc: depot.withdrawRwaone,
-				args: [snxAmount],
+				args: [rwaxAmount],
 				accounts,
 				address: owner,
 				reason: 'Only the contract owner may perform this action',
@@ -1271,9 +1271,9 @@ contract('Depot', async accounts => {
 		it('when owner calls withdrawRwaone then withdrawRwaone', async () => {
 			const depotRWAXBalanceBefore = await rwaone.balanceOf(depot.address);
 
-			assert.bnEqual(depotRWAXBalanceBefore, snxAmount);
+			assert.bnEqual(depotRWAXBalanceBefore, rwaxAmount);
 
-			await depot.withdrawRwaone(snxAmount, { from: owner });
+			await depot.withdrawRwaone(rwaxAmount, { from: owner });
 
 			const depotRWAXBalanceAfter = await rwaone.balanceOf(depot.address);
 			assert.bnEqual(depotRWAXBalanceAfter, toUnit('0'));

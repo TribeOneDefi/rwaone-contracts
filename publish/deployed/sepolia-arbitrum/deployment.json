@@ -58,9 +58,7 @@
 			"timestamp": "2024-06-26T04:07:45.000Z",
 			"txn": "https://sepolia.arbiscan.io/tx/0x61a4f867b2a39a526329bdb30d8bdfb4e9db6a8549bbb06beac8dccd24197743",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"ReadProxyAddressResolver": {
 			"name": "ReadProxyAddressResolver",
@@ -70,9 +68,7 @@
 			"timestamp": "2024-06-26T04:07:47.000Z",
 			"txn": "https://sepolia.arbiscan.io/tx/0xecbd04fb7da89951c1edd3dd5c9e378c37e6099fd5817dbe63d9455e14a2832a",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"OneNetAggregatorIssuedRwas": {
 			"name": "OneNetAggregatorIssuedRwas",
@@ -82,9 +78,7 @@
 			"timestamp": "2024-06-26T04:07:49.998Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x31069f2255835010EACCf4952B041EbF56BA9571"
-			]
+			"constructorArgs": ["0x31069f2255835010EACCf4952B041EbF56BA9571"]
 		},
 		"OneNetAggregatorDebtRatio": {
 			"name": "OneNetAggregatorDebtRatio",
@@ -94,9 +88,7 @@
 			"timestamp": "2024-06-26T04:07:52.288Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x31069f2255835010EACCf4952B041EbF56BA9571"
-			]
+			"constructorArgs": ["0x31069f2255835010EACCf4952B041EbF56BA9571"]
 		},
 		"FlexibleStorage": {
 			"name": "FlexibleStorage",
@@ -106,9 +98,7 @@
 			"timestamp": "2024-06-26T04:07:54.310Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x31069f2255835010EACCf4952B041EbF56BA9571"
-			]
+			"constructorArgs": ["0x31069f2255835010EACCf4952B041EbF56BA9571"]
 		},
 		"SystemSettings": {
 			"name": "SystemSettings",
@@ -131,9 +121,7 @@
 			"timestamp": "2024-06-26T04:07:59.072Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"ExchangeRates": {
 			"name": "ExchangeRates",
@@ -169,9 +157,7 @@
 			"timestamp": "2024-06-26T04:08:05.291Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"Rwaone": {
 			"name": "Rwaone",
@@ -289,9 +275,7 @@
 			"timestamp": "2024-06-26T04:08:23.975Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"DelegateApprovalsEternalStorage": {
 			"name": "DelegateApprovalsEternalStorage",
@@ -525,9 +509,7 @@
 			"timestamp": "2024-06-26T04:09:01.000Z",
 			"txn": "https://sepolia.arbiscan.io/tx/0xf526e25dd5f6d113c7189b492a1013b7403a9828ef0214342c5ee0ee22aa7d29",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x8D8ea5d5764517E4fbd626bd04DC92E1Ab031bB3"
-			]
+			"constructorArgs": ["0x8D8ea5d5764517E4fbd626bd04DC92E1Ab031bB3"]
 		},
 		"RwaoneBridgeToOptimism": {
 			"name": "RwaoneBridgeToOptimism",
@@ -550,9 +532,7 @@
 			"timestamp": "2024-06-26T04:09:06.069Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"OwnerRelayOnEthereum": {
 			"name": "OwnerRelayOnEthereum",
@@ -588,9 +568,7 @@
 			"timestamp": "2024-06-26T04:09:11.955Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x31069f2255835010EACCf4952B041EbF56BA9571"
-			]
+			"constructorArgs": ["0x31069f2255835010EACCf4952B041EbF56BA9571"]
 		},
 		"WrapperFactory": {
 			"name": "WrapperFactory",
@@ -639,9 +617,7 @@
 			"timestamp": "2024-06-26T04:09:20.376Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"RwarUSD": {
 			"name": "RwarUSD",
@@ -683,9 +659,7 @@
 			"timestamp": "2024-06-26T04:09:26.308Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"RwarETH": {
 			"name": "RwarETH",
@@ -727,9 +701,7 @@
 			"timestamp": "2024-06-26T04:09:33.213Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"RwarBTC": {
 			"name": "RwarBTC",
@@ -771,9 +743,7 @@
 			"timestamp": "2024-06-26T04:09:39.483Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"RwarJPY": {
 			"name": "RwarJPY",
@@ -815,9 +785,7 @@
 			"timestamp": "2024-06-26T04:09:45.715Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"RwarXAU": {
 			"name": "RwarXAU",
@@ -859,9 +827,7 @@
 			"timestamp": "2024-06-26T04:09:51.939Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"RwarNVDA": {
 			"name": "RwarNVDA",
@@ -903,9 +869,7 @@
 			"timestamp": "2024-06-26T04:09:58.091Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"RwarTSLA": {
 			"name": "RwarTSLA",
@@ -947,9 +911,7 @@
 			"timestamp": "2024-06-26T04:10:04.462Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"RwarPAX": {
 			"name": "RwarPAX",
@@ -991,9 +953,7 @@
 			"timestamp": "2024-06-26T04:10:10.319Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"RwarEUR": {
 			"name": "RwarEUR",
@@ -1035,9 +995,7 @@
 			"timestamp": "2024-06-26T04:10:16.516Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"RwarNEWYORK": {
 			"name": "RwarNEWYORK",
@@ -1079,9 +1037,7 @@
 			"timestamp": "2024-06-26T04:10:22.821Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"RwarATLANTA": {
 			"name": "RwarATLANTA",
@@ -1123,9 +1079,7 @@
 			"timestamp": "2024-06-26T04:10:29.224Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"RwarLOSANGLES": {
 			"name": "RwarLOSANGLES",
@@ -1167,9 +1121,7 @@
 			"timestamp": "2024-06-26T04:10:36.085Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"RwarWASHINGTON": {
 			"name": "RwarWASHINGTON",
@@ -1239,9 +1191,7 @@
 			"timestamp": "2024-06-26T04:10:47.243Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x31069f2255835010EACCf4952B041EbF56BA9571"
-			]
+			"constructorArgs": ["0x31069f2255835010EACCf4952B041EbF56BA9571"]
 		},
 		"CollateralManagerState": {
 			"name": "CollateralManagerState",
@@ -1299,11 +1249,7 @@
 			"timestamp": "2024-06-26T04:10:55.548Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"renBTC",
-				"renBTC",
-				8
-			]
+			"constructorArgs": ["renBTC", "renBTC", 8]
 		},
 		"CollateralErc20": {
 			"name": "CollateralErc20",
@@ -1362,9 +1308,7 @@
 			"timestamp": "2024-06-26T04:11:04.473Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x31069f2255835010EACCf4952B041EbF56BA9571"
-			]
+			"constructorArgs": ["0x31069f2255835010EACCf4952B041EbF56BA9571"]
 		},
 		"PerpsV2MarketSettings": {
 			"name": "PerpsV2MarketSettings",
@@ -1400,9 +1344,7 @@
 			"timestamp": "2024-06-26T04:11:25.361Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x31069f2255835010EACCf4952B041EbF56BA9571"
-			]
+			"constructorArgs": ["0x31069f2255835010EACCf4952B041EbF56BA9571"]
 		},
 		"FuturesMarketSettings": {
 			"name": "FuturesMarketSettings",
@@ -1425,9 +1367,7 @@
 			"timestamp": "2024-06-26T04:11:33.222Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"PerpsV2MarketStateETHPERP": {
 			"name": "PerpsV2MarketStateETHPERP",
@@ -1439,9 +1379,7 @@
 			"network": "sepolia-arbitrum",
 			"constructorArgs": [
 				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3",
-				[
-					"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-				],
+				["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"],
 				"0x7245544800000000000000000000000000000000000000000000000000000000",
 				"0x7245544850455250000000000000000000000000000000000000000000000000",
 				"0x5691e9d70F3ed84040c998380dba8B1CE6ef380E"
@@ -1529,9 +1467,7 @@
 			"timestamp": "2024-06-26T04:15:30.303Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"PerpsV2MarketStateBTCPERP": {
 			"name": "PerpsV2MarketStateBTCPERP",
@@ -1543,9 +1479,7 @@
 			"network": "sepolia-arbitrum",
 			"constructorArgs": [
 				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3",
-				[
-					"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-				],
+				["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"],
 				"0x7242544300000000000000000000000000000000000000000000000000000000",
 				"0x7242544350455250000000000000000000000000000000000000000000000000",
 				"0x5f4ff030fc77ded113631eE720F3cacCF08F3B57"
@@ -1633,9 +1567,7 @@
 			"timestamp": "2024-06-26T04:19:22.945Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"PerpsV2MarketStateEURPERP": {
 			"name": "PerpsV2MarketStateEURPERP",
@@ -1647,9 +1579,7 @@
 			"network": "sepolia-arbitrum",
 			"constructorArgs": [
 				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3",
-				[
-					"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-				],
+				["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"],
 				"0x7245555200000000000000000000000000000000000000000000000000000000",
 				"0x7245555250455250000000000000000000000000000000000000000000000000",
 				"0x6A1b719c4e429A9205278F888eaf2F02724d0C96"
@@ -1737,9 +1667,7 @@
 			"timestamp": "2024-06-26T04:23:15.006Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"PerpsV2MarketStateJPYPERP": {
 			"name": "PerpsV2MarketStateJPYPERP",
@@ -1751,9 +1679,7 @@
 			"network": "sepolia-arbitrum",
 			"constructorArgs": [
 				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3",
-				[
-					"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-				],
+				["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"],
 				"0x724a505900000000000000000000000000000000000000000000000000000000",
 				"0x724a505950455250000000000000000000000000000000000000000000000000",
 				"0x8D12424C36D720f18102B0836E0cB4B6128Ba2AE"
@@ -1841,9 +1767,7 @@
 			"timestamp": "2024-06-26T04:27:04.640Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"PerpsV2MarketStateXAUPERP": {
 			"name": "PerpsV2MarketStateXAUPERP",
@@ -1855,9 +1779,7 @@
 			"network": "sepolia-arbitrum",
 			"constructorArgs": [
 				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3",
-				[
-					"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-				],
+				["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"],
 				"0x7258415500000000000000000000000000000000000000000000000000000000",
 				"0x7258415550455250000000000000000000000000000000000000000000000000",
 				"0x470b610758876710b1d2921048628bDc88309dE6"
@@ -1945,9 +1867,7 @@
 			"timestamp": "2024-06-26T04:34:37.951Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"PerpsV2MarketStateNVDAPERP": {
 			"name": "PerpsV2MarketStateNVDAPERP",
@@ -1959,9 +1879,7 @@
 			"network": "sepolia-arbitrum",
 			"constructorArgs": [
 				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3",
-				[
-					"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-				],
+				["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"],
 				"0x724e564441000000000000000000000000000000000000000000000000000000",
 				"0x724e564441504552500000000000000000000000000000000000000000000000",
 				"0xD60f9695e6C7E36811F2Da61D000DE7034D5A2Ed"
@@ -2049,9 +1967,7 @@
 			"timestamp": "2024-06-26T09:35:27.854Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"PerpsV2MarketStateTSLAPERP": {
 			"name": "PerpsV2MarketStateTSLAPERP",
@@ -2063,9 +1979,7 @@
 			"network": "sepolia-arbitrum",
 			"constructorArgs": [
 				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3",
-				[
-					"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-				],
+				["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"],
 				"0x7254534c41000000000000000000000000000000000000000000000000000000",
 				"0x7254534c41504552500000000000000000000000000000000000000000000000",
 				"0x29E6D4ce3D7eC1b8E7490b066d0110b2E7e54B6D"
@@ -2153,9 +2067,7 @@
 			"timestamp": "2024-06-26T10:06:46.020Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"PerpsV2MarketStateLOSANGLESPERP": {
 			"name": "PerpsV2MarketStateLOSANGLESPERP",
@@ -2167,9 +2079,7 @@
 			"network": "sepolia-arbitrum",
 			"constructorArgs": [
 				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3",
-				[
-					"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-				],
+				["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"],
 				"0x724c4f53414e474c455300000000000000000000000000000000000000000000",
 				"0x724c4f53414e474c455350455250000000000000000000000000000000000000",
 				"0x0000000000000000000000000000000000000000"
@@ -2257,9 +2167,7 @@
 			"timestamp": "2024-06-26T10:10:28.746Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"PerpsV2MarketStateNEWYORKPERP": {
 			"name": "PerpsV2MarketStateNEWYORKPERP",
@@ -2271,9 +2179,7 @@
 			"network": "sepolia-arbitrum",
 			"constructorArgs": [
 				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3",
-				[
-					"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-				],
+				["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"],
 				"0x724e4557594f524b000000000000000000000000000000000000000000000000",
 				"0x724e4557594f524b504552500000000000000000000000000000000000000000",
 				"0x0000000000000000000000000000000000000000"
@@ -2361,9 +2267,7 @@
 			"timestamp": "2024-06-26T10:14:09.086Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"PerpsV2MarketStateWASHINGTONPERP": {
 			"name": "PerpsV2MarketStateWASHINGTONPERP",
@@ -2375,9 +2279,7 @@
 			"network": "sepolia-arbitrum",
 			"constructorArgs": [
 				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3",
-				[
-					"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-				],
+				["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"],
 				"0x7257415348494e47544f4e000000000000000000000000000000000000000000",
 				"0x7257415348494e47544f4e504552500000000000000000000000000000000000",
 				"0x0000000000000000000000000000000000000000"
@@ -2465,9 +2367,7 @@
 			"timestamp": "2024-06-26T10:17:52.298Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"PerpsV2MarketStateATLANTAPERP": {
 			"name": "PerpsV2MarketStateATLANTAPERP",
@@ -2479,9 +2379,7 @@
 			"network": "sepolia-arbitrum",
 			"constructorArgs": [
 				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3",
-				[
-					"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-				],
+				["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"],
 				"0x7241544c414e5441000000000000000000000000000000000000000000000000",
 				"0x7241544c414e5441504552500000000000000000000000000000000000000000",
 				"0x0000000000000000000000000000000000000000"
@@ -2569,9 +2467,7 @@
 			"timestamp": "2024-06-26T10:21:30.955Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		},
 		"PerpsV2MarketStatePAXPERP": {
 			"name": "PerpsV2MarketStatePAXPERP",
@@ -2583,9 +2479,7 @@
 			"network": "sepolia-arbitrum",
 			"constructorArgs": [
 				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3",
-				[
-					"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-				],
+				["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"],
 				"0x7250415800000000000000000000000000000000000000000000000000000000",
 				"0x7250415850455250000000000000000000000000000000000000000000000000",
 				"0x0000000000000000000000000000000000000000"
@@ -2673,9 +2567,7 @@
 			"timestamp": "2024-06-26T10:25:14.790Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x31069f2255835010EACCf4952B041EbF56BA9571"
-			]
+			"constructorArgs": ["0x31069f2255835010EACCf4952B041EbF56BA9571"]
 		},
 		"DappMaintenance": {
 			"name": "DappMaintenance",
@@ -2685,9 +2577,7 @@
 			"timestamp": "2024-06-26T10:25:16.726Z",
 			"txn": "",
 			"network": "sepolia-arbitrum",
-			"constructorArgs": [
-				"0x08a74A0075a2C3A786A84439812a141C6C8b73f3"
-			]
+			"constructorArgs": ["0x08a74A0075a2C3A786A84439812a141C6C8b73f3"]
 		}
 	},
 	"sources": {
@@ -6512,7 +6402,7 @@
 							"type": "uint256"
 						}
 					],
-					"name": "SnxLiquidationPenaltyUpdated",
+					"name": "RwaxLiquidationPenaltyUpdated",
 					"type": "event"
 				},
 				{
@@ -7843,7 +7733,7 @@
 							"type": "uint256"
 						}
 					],
-					"name": "setSnxLiquidationPenalty",
+					"name": "setRwaxLiquidationPenalty",
 					"outputs": [],
 					"payable": false,
 					"stateMutability": "nonpayable",
@@ -7957,7 +7847,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "snxLiquidationPenalty",
+					"name": "rwaxLiquidationPenalty",
 					"outputs": [
 						{
 							"internalType": "uint256",
@@ -11676,7 +11566,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "snxRedeemed",
+							"name": "rwaxRedeemed",
 							"type": "uint256"
 						},
 						{
@@ -22316,7 +22206,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "snxRewards",
+							"name": "rwaxRewards",
 							"type": "uint256"
 						}
 					],
@@ -22445,7 +22335,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "allNetworksSnxBackedDebt",
+					"name": "allNetworksRwaxBackedDebt",
 					"outputs": [
 						{
 							"internalType": "uint256",
@@ -22512,7 +22402,7 @@
 					"inputs": [
 						{
 							"internalType": "uint256",
-							"name": "allNetworksSnxBackedDebt",
+							"name": "allNetworksRwaxBackedDebt",
 							"type": "uint256"
 						},
 						{
@@ -24215,7 +24105,7 @@
 					"outputs": [
 						{
 							"internalType": "uint256[]",
-							"name": "snxIssuedDebts",
+							"name": "rwaxIssuedDebts",
 							"type": "uint256[]"
 						}
 					],
@@ -24496,7 +24386,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "totalNonSnxBackedDebt",
+					"name": "totalNonRwaxBackedDebt",
 					"outputs": [
 						{
 							"internalType": "uint256",
@@ -30075,7 +29965,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "snxBackedDebt",
+							"name": "rwaxBackedDebt",
 							"type": "uint256"
 						},
 						{
@@ -30249,7 +30139,7 @@
 					"inputs": [
 						{
 							"internalType": "uint256",
-							"name": "snxBackedAmount",
+							"name": "rwaxBackedAmount",
 							"type": "uint256"
 						},
 						{

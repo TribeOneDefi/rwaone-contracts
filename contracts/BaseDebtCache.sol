@@ -151,13 +151,13 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
 
     function _currentRwaDebts(
         bytes32[] memory currencyKeys
-    ) internal view returns (uint[] memory snxIssuedDebts, uint _futuresDebt, uint _excludedDebt, bool anyRateIsInvalid) {
+    ) internal view returns (uint[] memory rwaxIssuedDebts, uint _futuresDebt, uint _excludedDebt, bool anyRateIsInvalid) {
         (uint[] memory rates, bool isInvalid) = exchangeRates().ratesAndInvalidForCurrencies(currencyKeys);
         uint[] memory values = _issuedRwaValues(currencyKeys, rates);
-        (uint excludedDebt, bool isAnyNonSnxDebtRateInvalid) = _totalNonSnxBackedDebt(currencyKeys, rates, isInvalid);
+        (uint excludedDebt, bool isAnyNonRwaxDebtRateInvalid) = _totalNonRwaxBackedDebt(currencyKeys, rates, isInvalid);
         (uint futuresDebt, bool futuresDebtIsInvalid) = futuresMarketManager().totalDebt();
 
-        return (values, futuresDebt, excludedDebt, isInvalid || futuresDebtIsInvalid || isAnyNonSnxDebtRateInvalid);
+        return (values, futuresDebt, excludedDebt, isInvalid || futuresDebtIsInvalid || isAnyNonRwaxDebtRateInvalid);
     }
 
     function currentRwaDebts(
@@ -175,7 +175,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         return debts;
     }
 
-    function cachedRwaDebts(bytes32[] calldata currencyKeys) external view returns (uint[] memory snxIssuedDebts) {
+    function cachedRwaDebts(bytes32[] calldata currencyKeys) external view returns (uint[] memory rwaxIssuedDebts) {
         return _cachedRwaDebts(currencyKeys);
     }
 
@@ -227,14 +227,14 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
     }
 
     // Returns the total rUSD debt backed by non-wRWAX collateral.
-    function totalNonSnxBackedDebt() external view returns (uint excludedDebt, bool isInvalid) {
+    function totalNonRwaxBackedDebt() external view returns (uint excludedDebt, bool isInvalid) {
         bytes32[] memory currencyKeys = issuer().availableCurrencyKeys();
         (uint[] memory rates, bool ratesAreInvalid) = exchangeRates().ratesAndInvalidForCurrencies(currencyKeys);
 
-        return _totalNonSnxBackedDebt(currencyKeys, rates, ratesAreInvalid);
+        return _totalNonRwaxBackedDebt(currencyKeys, rates, ratesAreInvalid);
     }
 
-    function _totalNonSnxBackedDebt(
+    function _totalNonRwaxBackedDebt(
         bytes32[] memory currencyKeys,
         uint[] memory rates,
         bool ratesAreInvalid
@@ -265,7 +265,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
 
         // Sum all issued rwa values based on their supply.
         uint[] memory values = _issuedRwaValues(currencyKeys, rates);
-        (uint excludedDebt, bool isAnyNonSnxDebtRateInvalid) = _totalNonSnxBackedDebt(currencyKeys, rates, isInvalid);
+        (uint excludedDebt, bool isAnyNonRwaxDebtRateInvalid) = _totalNonRwaxBackedDebt(currencyKeys, rates, isInvalid);
 
         uint numValues = values.length;
         uint total;
@@ -280,7 +280,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         // Ensure that if the excluded non-wRWAX debt exceeds wRWAX-backed debt, no overflow occurs
         total = total < excludedDebt ? 0 : total.sub(excludedDebt);
 
-        return (total, isInvalid || futuresDebtIsInvalid || isAnyNonSnxDebtRateInvalid);
+        return (total, isInvalid || futuresDebtIsInvalid || isAnyNonRwaxDebtRateInvalid);
     }
 
     function currentDebt() external view returns (uint debt, bool anyRateIsInvalid) {

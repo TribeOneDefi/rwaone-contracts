@@ -242,7 +242,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
             rwarUSD().issue(address(wrapperFactory()), excessAmountUsd);
         }
 
-        // in the case of a negative fee extra rwas will be issued, billed to the snx stakers
+        // in the case of a negative fee extra rwas will be issued, billed to the rwax stakers
         _setTargetRwaIssued(reserves);
     }
 
@@ -264,7 +264,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
             rwarUSD().issue(address(wrapperFactory()), excessAmountUsd);
         }
 
-        // in the case of a negative fee fewer rwas will be burned, billed to the snx stakers
+        // in the case of a negative fee fewer rwas will be burned, billed to the rwax stakers
         _setTargetRwaIssued(reserves);
     }
 

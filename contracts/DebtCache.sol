@@ -30,18 +30,18 @@ contract DebtCache is BaseDebtCache {
         (uint[] memory values, uint futuresDebt, uint excludedDebt, bool isInvalid) = _currentRwaDebts(currencyKeys);
 
         // The total wRWAX-backed debt is the debt of futures markets plus the debt of circulating rwas.
-        uint snxCollateralDebt = futuresDebt;
+        uint rwaxCollateralDebt = futuresDebt;
         _cachedRwaDebt[FUTURES_DEBT_KEY] = futuresDebt;
         uint numValues = values.length;
         for (uint i; i < numValues; i++) {
             uint value = values[i];
-            snxCollateralDebt = snxCollateralDebt.add(value);
+            rwaxCollateralDebt = rwaxCollateralDebt.add(value);
             _cachedRwaDebt[currencyKeys[i]] = value;
         }
 
         // Subtract out the excluded non-wRWAX backed debt from our total
         _cachedRwaDebt[EXCLUDED_DEBT_KEY] = excludedDebt;
-        uint newDebt = snxCollateralDebt.floorsub(excludedDebt);
+        uint newDebt = rwaxCollateralDebt.floorsub(excludedDebt);
         _cachedDebt = newDebt;
         _cacheTimestamp = block.timestamp;
         emit DebtCacheUpdated(newDebt);

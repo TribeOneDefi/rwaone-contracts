@@ -205,26 +205,26 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
             );
 
             // Determine rUSD value of exchange
-            uint sourceSusdValue;
+            uint sourceRusdValue;
             if (sourceCurrencyKey == rUSD) {
                 // Use after-settled amount as this is amount converted (not sourceAmount)
-                sourceSusdValue = sourceAmountAfterSettlement;
+                sourceRusdValue = sourceAmountAfterSettlement;
             } else if (destinationCurrencyKey == rUSD) {
                 // In this case the systemConvertedAmount would be the fee-free rUSD value of the source rwa
-                sourceSusdValue = systemConvertedAmount;
+                sourceRusdValue = systemConvertedAmount;
             } else {
                 // Otherwise, convert source to rUSD value
-                (uint amountReceivedInUSD, uint sUsdFee, , , , ) = _getAmountsForAtomicExchangeMinusFees(
+                (uint amountReceivedInUSD, uint rUsdFee, , , , ) = _getAmountsForAtomicExchangeMinusFees(
                     sourceAmountAfterSettlement,
                     sourceSettings,
                     usdSettings,
                     usdSettings
                 );
-                sourceSusdValue = amountReceivedInUSD.add(sUsdFee);
+                sourceRusdValue = amountReceivedInUSD.add(rUsdFee);
             }
 
             // Check and update atomic volume limit
-            _checkAndUpdateAtomicVolume(sourceSettings, sourceSusdValue);
+            _checkAndUpdateAtomicVolume(sourceSettings, sourceRusdValue);
         }
 
         // Note: We don't need to check their balance as the _convert() below will do a safe subtraction which requires
@@ -291,11 +291,11 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
 
     function _checkAndUpdateAtomicVolume(
         IDirectIntegrationManager.ParameterIntegrationSettings memory settings,
-        uint sourceSusdValue
+        uint sourceRusdValue
     ) internal {
         uint currentVolume = uint(lastAtomicVolume.time) == block.timestamp
-            ? uint(lastAtomicVolume.volume).add(sourceSusdValue)
-            : sourceSusdValue;
+            ? uint(lastAtomicVolume.volume).add(sourceRusdValue)
+            : sourceRusdValue;
         require(currentVolume <= settings.atomicMaxVolumePerBlock, "Surpassed volume limit");
         lastAtomicVolume.time = uint64(block.timestamp);
         lastAtomicVolume.volume = uint192(currentVolume); // Protected by volume limit check above

@@ -5,7 +5,7 @@ const { artifacts } = require('hardhat');
 const { toBN } = web3.utils;
 
 contract('RwaoneBridgeEscrow (spec tests) @ovm-skip', accounts => {
-	const [, owner, snxBridgeToOptimism, user] = accounts;
+	const [, owner, rwaxBridgeToOptimism, user] = accounts;
 
 	let rwaone, rwaoneProxy, rwaoneBridgeEscrow;
 
@@ -38,7 +38,7 @@ contract('RwaoneBridgeEscrow (spec tests) @ovm-skip', accounts => {
 					it(' should fail', async () => {
 						await assert.revert(
 							rwaone.transferFrom(rwaoneBridgeEscrow.address, user, amount, {
-								from: snxBridgeToOptimism,
+								from: rwaxBridgeToOptimism,
 							}),
 							'SafeMath: subtraction overflow'
 						);
@@ -49,7 +49,7 @@ contract('RwaoneBridgeEscrow (spec tests) @ovm-skip', accounts => {
 					beforeEach(async () => {
 						await rwaoneBridgeEscrow.approveBridge(
 							rwaone.address,
-							snxBridgeToOptimism,
+							rwaxBridgeToOptimism,
 							amount,
 							{
 								from: owner,
@@ -60,7 +60,7 @@ contract('RwaoneBridgeEscrow (spec tests) @ovm-skip', accounts => {
 					describe('when the bridge invokes transferFrom()', () => {
 						beforeEach(async () => {
 							await rwaone.transferFrom(rwaoneBridgeEscrow.address, user, amount, {
-								from: snxBridgeToOptimism,
+								from: rwaxBridgeToOptimism,
 							});
 						});
 

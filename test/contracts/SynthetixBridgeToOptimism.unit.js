@@ -14,7 +14,7 @@ contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 		user1,
 		smockedMessenger,
 		rewardsDistribution,
-		snxBridgeToBase,
+		rwaxBridgeToBase,
 		RwaoneBridgeEscrow,
 		FeePool,
 		randomAddress,
@@ -94,7 +94,7 @@ contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 					systemStatus.address,
 					FeePool,
 					rewardsDistribution,
-					snxBridgeToBase,
+					rwaxBridgeToBase,
 					rewardEscrow.address,
 					RwaoneBridgeEscrow,
 				],
@@ -108,7 +108,7 @@ contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 			rwaone.balanceOf.returns(() => web3.utils.toWei('1'));
 			rwaone.transfer.returns(() => true);
 			messenger.sendMessage.returns(() => { });
-			messenger.xDomainMessageSender.returns(() => snxBridgeToBase);
+			messenger.xDomainMessageSender.returns(() => rwaxBridgeToBase);
 			issuer.debtBalanceOf.returns(() => '0');
 			rewardEscrow.burnForMigration.returns(() => [escrowAmount, emptyArray]);
 			flexibleStorage.getUIntValue.returns(() => '3000000');
@@ -156,7 +156,7 @@ contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 
 					it('only one message is sent', async () => {
 						expect(messenger.sendMessage).to.have.length(0);
-						messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
+						messenger.sendMessage.returnsAtCall(0, rwaxBridgeToBase);
 						const expectedData = getDataOfEncodedFncCall({
 							contract: 'RwaoneBridgeToBase',
 							fnc: 'finalizeDeposit',
@@ -199,7 +199,7 @@ contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 					it('only one message is sent', async () => {
 						expect(messenger.sendMessage).to.have.length(0);
 
-						messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
+						messenger.sendMessage.returnsAtCall(0, rwaxBridgeToBase);
 						const expectedData = getDataOfEncodedFncCall({
 							contract: 'RwaoneBridgeToBase',
 							fnc: 'finalizeDeposit',
@@ -292,7 +292,7 @@ contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 						it('three messages are relayed from L1 to L2: finalizeEscrowMigration & finalizeDeposit', async () => {
 							expect(messenger.sendMessage).to.have.length(0);
 
-							messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
+							messenger.sendMessage.returnsAtCall(0, rwaxBridgeToBase);
 							let expectedData = getDataOfEncodedFncCall({
 								contract: 'IRwaoneBridgeToBase',
 								fnc: 'finalizeEscrowMigration',
@@ -301,7 +301,7 @@ contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 							messenger.sendMessage.returnsAtCall(1, expectedData);
 							messenger.sendMessage.returnsAtCall(2, (3e6).toString());
 
-							messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
+							messenger.sendMessage.returnsAtCall(0, rwaxBridgeToBase);
 							expectedData = getDataOfEncodedFncCall({
 								contract: 'IRwaoneBridgeToBase',
 								fnc: 'finalizeEscrowMigration',
@@ -310,7 +310,7 @@ contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 							messenger.sendMessage.returnsAtCall(1, expectedData);
 							messenger.sendMessage.returnsAtCall(2, (3e6).toString());
 
-							messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
+							messenger.sendMessage.returnsAtCall(0, rwaxBridgeToBase);
 							expectedData = getDataOfEncodedFncCall({
 								contract: 'RwaoneBridgeToBase',
 								fnc: 'finalizeDeposit',
@@ -350,7 +350,7 @@ contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 
 						it('one message is relayed: finalizeDeposit', async () => {
 							expect(messenger.sendMessage).to.have.length(0);
-							messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
+							messenger.sendMessage.returnsAtCall(0, rwaxBridgeToBase);
 							const expectedData = getDataOfEncodedFncCall({
 								contract: 'RwaoneBridgeToBase',
 								fnc: 'finalizeDeposit',
@@ -381,7 +381,7 @@ contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 
 						it('two messages are relayed: finalizeEscrowMigration', async () => {
 							expect(messenger.sendMessage).to.have.length(0);
-							messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
+							messenger.sendMessage.returnsAtCall(0, rwaxBridgeToBase);
 							let expectedData = getDataOfEncodedFncCall({
 								contract: 'IRwaoneBridgeToBase',
 								fnc: 'finalizeEscrowMigration',
@@ -390,7 +390,7 @@ contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 							messenger.sendMessage.returnsAtCall(1, expectedData);
 							messenger.sendMessage.returnsAtCall(2, (3e6).toString());
 
-							messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
+							messenger.sendMessage.returnsAtCall(0, rwaxBridgeToBase);
 							expectedData = getDataOfEncodedFncCall({
 								contract: 'IRwaoneBridgeToBase',
 								fnc: 'finalizeEscrowMigration',
@@ -441,7 +441,7 @@ contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 
 					it('and the message is relayed', async () => {
 						expect(messenger.sendMessage).to.have.length(0);
-						messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
+						messenger.sendMessage.returnsAtCall(0, rwaxBridgeToBase);
 						const expectedData = getDataOfEncodedFncCall({
 							contract: 'RwaoneBridgeToBase',
 							fnc: 'finalizeRewardDeposit',
@@ -484,7 +484,7 @@ contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 
 					it('relays the message', async () => {
 						expect(messenger.sendMessage).to.have.length(0);
-						messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
+						messenger.sendMessage.returnsAtCall(0, rwaxBridgeToBase);
 						const expectedData = getDataOfEncodedFncCall({
 							contract: 'RwaoneBridgeToBase',
 							fnc: 'finalizeFeePeriodClose',
@@ -522,7 +522,7 @@ contract('RwaoneBridgeToOptimism (unit tests)', accounts => {
 
 					it('then the message is relayed', async () => {
 						expect(messenger.sendMessage).to.have.length(0);
-						messenger.sendMessage.returnsAtCall(0, snxBridgeToBase);
+						messenger.sendMessage.returnsAtCall(0, rwaxBridgeToBase);
 
 						const expectedData = getDataOfEncodedFncCall({
 							contract: 'RwaoneBridgeToBase',

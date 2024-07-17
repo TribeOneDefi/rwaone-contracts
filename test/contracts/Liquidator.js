@@ -132,7 +132,7 @@ contract('Liquidator', accounts => {
 	const setLiquidRWAXBalance = async (account, amount) => {
 		// burn debt
 		await rwaone.burnRwas(await rwarUSD.balanceOf(account), { from: account });
-		// remove all snx
+		// remove all rwax
 		await rwaone.transfer(owner, await rwaone.balanceOf(account), {
 			from: account,
 		});
@@ -572,7 +572,7 @@ contract('Liquidator', accounts => {
 								'AccountLiquidated',
 								{
 									account: alice,
-									snxRedeemed: await rwaone.balanceOf(liquidatorRewards.address),
+									rwaxRedeemed: await rwaone.balanceOf(liquidatorRewards.address),
 								}
 							);
 
@@ -597,24 +597,24 @@ contract('Liquidator', accounts => {
 						assert.bnEqual(await rewardEscrowV2.balanceOf(alice), escrowBalance);
 					});
 					it('escrow balance is not used for self-liquidation', async () => {
-						const snxBalanceBefore = await rwaone.balanceOf(alice);
+						const rwaxBalanceBefore = await rwaone.balanceOf(alice);
 						const debtBefore = await rwaone.debtBalanceOf(alice, rUSD);
 						const totalDebt = await rwaone.totalIssuedRwas(rUSD);
 						// just above the liquidation ratio
 						await updateRWAXPrice('1');
 						await rwaone.liquidateSelf({ from: alice });
-						// liquid snx is reduced
-						const snxBalanceAfter = await rwaone.balanceOf(alice);
-						assert.bnLt(snxBalanceAfter, snxBalanceBefore);
+						// liquid rwax is reduced
+						const rwaxBalanceAfter = await rwaone.balanceOf(alice);
+						assert.bnLt(rwaxBalanceAfter, rwaxBalanceBefore);
 						// escrow untouched
 						assert.bnEqual(await rewardEscrowV2.balanceOf(alice), escrowBalance);
 						// system debt is the same
 						assert.bnEqual(await rwaone.totalIssuedRwas(rUSD), totalDebt);
 						// debt shares forgiven matching the liquidated wRWAX
-						// redeemed = (liquidatedSnx * RWAXPrice / (1 + penalty))
+						// redeemed = (liquidatedRwax * RWAXPrice / (1 + penalty))
 						// debt is fewer shares (but of higher debt per share), by (total - redeemed / total) more debt per share
-						const liquidatedSnx = snxBalanceBefore.sub(snxBalanceAfter);
-						const redeemed = divideDecimal(liquidatedSnx, toUnit('1.2'));
+						const liquidatedRwax = rwaxBalanceBefore.sub(rwaxBalanceAfter);
+						const redeemed = divideDecimal(liquidatedRwax, toUnit('1.2'));
 						const shareMultiplier = divideDecimal(totalDebt, totalDebt.sub(redeemed));
 						assert.bnClose(
 							await rwaone.debtBalanceOf(alice, rUSD),
@@ -636,11 +636,11 @@ contract('Liquidator', accounts => {
 					});
 					it('should revert with cannot self liquidate', async () => {
 						// should have no liquida wRWAX balance, only in escrow
-						const snxBalance = await rwaone.balanceOf(alice);
+						const rwaxBalance = await rwaone.balanceOf(alice);
 						const collateralBalance = await rwaone.collateral(alice);
 						const escrowBalanceAfter = await rewardEscrowV2.balanceOf(alice);
 
-						assert.bnEqual(snxBalance, toUnit('0'));
+						assert.bnEqual(rwaxBalance, toUnit('0'));
 						assert.bnEqual(collateralBalance, escrowBalanceBefore);
 						assert.bnEqual(escrowBalanceAfter, escrowBalanceBefore);
 
@@ -1065,7 +1065,7 @@ contract('Liquidator', accounts => {
 									let aliceDebtShareBefore;
 									let aliceDebtValueBefore;
 									let aliceCollateralBefore;
-									let bobSnxBalanceBefore;
+									let bobRwaxBalanceBefore;
 									let amountToFixRatio;
 									beforeEach(async () => {
 										// Given issuance ratio is 800%
@@ -1073,7 +1073,7 @@ contract('Liquidator', accounts => {
 
 										// And liquidation penalty is 30%
 										penalty = toUnit('0.3');
-										await systemSettings.setSnxLiquidationPenalty(penalty, { from: owner });
+										await systemSettings.setRwaxLiquidationPenalty(penalty, { from: owner });
 
 										// And liquidation penalty is 20%. (This is used only for Collateral, included here to demonstrate it has no effect on wRWAX liquidations.)
 										await systemSettings.setLiquidationPenalty(toUnit('0.2'), {
@@ -1086,7 +1086,7 @@ contract('Liquidator', accounts => {
 										aliceDebtValueBefore = await rwaone.debtBalanceOf(alice, rUSD);
 
 										// Record Bobs state
-										bobSnxBalanceBefore = await rwaone.balanceOf(bob);
+										bobRwaxBalanceBefore = await rwaone.balanceOf(bob);
 
 										// Should be able to liquidate and fix c-ratio
 										txn = await rwaone.liquidateDelinquentAccount(alice, {
@@ -1149,7 +1149,7 @@ contract('Liquidator', accounts => {
 
 										assert.bnEqual(
 											await rwaone.balanceOf(caller),
-											bobSnxBalanceBefore.add(flagReward).add(liquidateReward)
+											bobRwaxBalanceBefore.add(flagReward).add(liquidateReward)
 										);
 									});
 								});
@@ -1166,7 +1166,7 @@ contract('Liquidator', accounts => {
 									flagReward = await liquidator.flagReward();
 									liquidateReward = await liquidator.liquidateReward();
 									sumOfRewards = flagReward.add(liquidateReward);
-									assert.bnEqual(await systemSettings.snxLiquidationPenalty(), toUnit('0.3')); // 30% penalty
+									assert.bnEqual(await systemSettings.rwaxLiquidationPenalty(), toUnit('0.3')); // 30% penalty
 									assert.bnEqual(
 										await systemSettings.liquidationRatio(),
 										toUnit('0.666666666666666666')

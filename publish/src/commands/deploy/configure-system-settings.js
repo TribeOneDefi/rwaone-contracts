@@ -214,15 +214,15 @@ module.exports = async ({
 		comment: 'Set the penalty amount a liquidator receives from a liquidated Collateral loan',
 	});
 
-	const snxLiquidationPenalty = await getDeployParameter('RWAX_LIQUIDATION_PENALTY');
+	const rwaxLiquidationPenalty = await getDeployParameter('RWAX_LIQUIDATION_PENALTY');
 	await runStep({
 		contract: 'SystemSettings',
 		target: SystemSettings,
-		read: 'snxLiquidationPenalty',
+		read: 'rwaxLiquidationPenalty',
 		readTarget: previousSystemSettings,
-		expected: allowZeroOrUpdateIfNonZero(snxLiquidationPenalty),
-		write: 'setSnxLiquidationPenalty',
-		writeArg: snxLiquidationPenalty,
+		expected: allowZeroOrUpdateIfNonZero(rwaxLiquidationPenalty),
+		write: 'setRwaxLiquidationPenalty',
+		writeArg: rwaxLiquidationPenalty,
 		comment: 'Set the penalty amount of wRWAX from a liquidated account',
 	});
 
